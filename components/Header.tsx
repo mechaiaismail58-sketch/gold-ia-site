@@ -202,7 +202,7 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
           {/* Mobile right side */}
           <div className="flex md:hidden items-center gap-2 shrink-0">
             {userEmail ? (
-              <Link href="/profile" className="rounded-full border border-white/10">
+              <Link href="/profile" className="flex items-center justify-center rounded-full border border-white/10 min-h-[44px] min-w-[44px]">
                 <Avatar src={avatarUrl} size={32} />
               </Link>
             ) : (

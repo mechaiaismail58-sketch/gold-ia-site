@@ -217,10 +217,6 @@ Completeness: ${vc.completeness} | Source: ${vc.source_consistency} | Timestamp:
   return lines.filter(Boolean).join("\n");
 }
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 type Mode =
   | "analysis"
   | "trade_request"
@@ -370,6 +366,12 @@ async function fileToDataUrl(file: File): Promise<string> {
 
 export async function POST(req: Request) {
   try {
+    // Initialise inside the handler so OPENAI_API_KEY is read at request time,
+    // not at cold-start module initialisation where env vars may not be injected yet.
+    const client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -422,7 +424,7 @@ export async function POST(req: Request) {
     const dbClient = admin ?? supabase;
     const { data: userProfile } = await (dbClient as typeof supabase)
       .from("users")
-      .select("trading_horizon, account_size, experience_level")
+      .select("trading_horizon, trading_style, account_size, experience_level, risk_profile")
       .eq("id", user.id)
       .single();
 
@@ -572,6 +574,24 @@ INSTRUCTIONS:
       } catch { /* non-critical */ }
     }
 
+    // Build the user profile injection block — only include non-null values.
+    // If no values are available, userProfileBlock stays empty and nothing is injected.
+    let userProfileBlock = "";
+    if (userProfile) {
+      const profileLines: string[] = [];
+      if (userProfile.trading_style)   profileLines.push(`- Trading style: ${userProfile.trading_style}`);
+      if (userProfile.experience_level) profileLines.push(`- Experience level: ${userProfile.experience_level}`);
+      if (userProfile.account_size)    profileLines.push(`- Account size: ${userProfile.account_size}`);
+      if (userProfile.risk_profile)    profileLines.push(`- Risk profile: ${userProfile.risk_profile}`);
+
+      if (profileLines.length > 0) {
+        userProfileBlock = `User profile:
+${profileLines.join("\n")}
+
+Adapt every response to this profile. Trading style → adapt timeframes and signal type. Experience level → beginner means clear explanations, professional means straight to execution details. Account size → adapt position sizing recommendations proportionally. Risk profile → conservative means strict SL and warnings, aggressive means maximum opportunity focus.`;
+      }
+    }
+
     const finalUserInput = `
 CONTEXTE PRODUIT
 
@@ -603,11 +623,7 @@ ${researchContext.upcoming_events.summary}
 ` : ""}${tradeMemory && tradeMemory.signals.length > 0 ? `PREVIOUS TRADE SIGNALS
 ${tradeMemory.summary}
 ` : ""}
-${userProfile ? `USER_PROFILE
-Trading Horizon: ${userProfile.trading_horizon ?? "daytrade"}
-Account Size: ${userProfile.account_size ?? "not specified"}
-Experience Level: ${userProfile.experience_level ?? "not specified"}
-` : ""}
+${userProfileBlock ? `${userProfileBlock}\n` : ""}
 ${modeInstruction}
 
 ${horizonInstruction}
@@ -666,38 +682,61 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       });
     }
 
-    const response = await client.responses.create({
-      model: "gpt-4o",
-      previous_response_id,
-      store: true,
-      max_output_tokens: 3500,
-      tools: [
-        {
-          type: "web_search_preview",
-        },
-      ],
-      input: [
-        {
-          role: "system",
-          content: SYSTEM_PROMPT,
-        },
-        {
-          role: "user",
-          content: userContent as any,
-        },
-      ],
-    });
+    console.log(`[chat] mode=${mode} analysis_mode=${analysis_mode} horizon=${tradeHorizon} has_image=${Boolean(chartImageDataUrl)} has_prev_response=${Boolean(previous_response_id)}`);
+
+    let response;
+    try {
+      response = await client.responses.create({
+        model: "gpt-4o",
+        previous_response_id,
+        store: true,
+        max_output_tokens: 3500,
+        tools: [
+          {
+            type: "web_search_preview",
+          },
+        ],
+        input: [
+          {
+            role: "system",
+            content: SYSTEM_PROMPT,
+          },
+          {
+            role: "user",
+            content: userContent as any,
+          },
+        ],
+      });
+    } catch (openaiError: unknown) {
+      // Log the full OpenAI error with all available fields for diagnosis
+      console.error("[chat] OpenAI API error:", {
+        message:    openaiError instanceof Error ? openaiError.message : String(openaiError),
+        status:     (openaiError as any)?.status,
+        code:       (openaiError as any)?.code,
+        type:       (openaiError as any)?.type,
+        param:      (openaiError as any)?.param,
+        error:      (openaiError as any)?.error,
+        headers:    (openaiError as any)?.headers,
+        raw:        openaiError,
+      });
+      throw openaiError; // re-throw so the outer catch returns the 500
+    }
+
+    const outputText = response.output_text;
+    if (!outputText) {
+      console.warn("[chat] OpenAI returned empty output_text. Full response:", JSON.stringify(response, null, 2));
+    }
 
     return Response.json({
       ok: true,
-      text: response.output_text || "Donnée non trouvée",
+      text: outputText || "Donnée non trouvée",
       response_id: response.id,
       mode,
       trade_horizon: tradeHorizon,
       image_attached: Boolean(chartImageDataUrl),
     });
   } catch (error) {
-    console.error("FULL ERROR:", error);
+    console.error("[chat] Handler error:", error instanceof Error ? error.message : String(error));
 
     return Response.json(
       {

@@ -39,6 +39,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   min-height: 100dvh;
+  overflow-x: hidden;
 }
 
 /* Prevent iOS zoom on input focus (font-size must be >= 16px or use this) */
@@ -239,6 +240,16 @@ button:not(:disabled):active {
 a:not(.no-scale):active {
   transform: scale(0.98);
   transition-duration: 80ms;
+}
+
+/* ===== No-scrollbar utility ===== */
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* ===== Accessible motion — respect system preference ===== */

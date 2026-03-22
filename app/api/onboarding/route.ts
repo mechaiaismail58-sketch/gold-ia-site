@@ -36,6 +36,7 @@ export async function POST(req: Request) {
       .from("users")
       .update({
         trading_horizon,
+        trading_style:  trading_horizon, // mirror — trading_style is the AI-facing alias
         account_size,
         experience_level,
         onboarding_completed: true,
