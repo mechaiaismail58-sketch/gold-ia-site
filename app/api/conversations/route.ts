@@ -39,6 +39,45 @@ export async function POST(req: Request) {
   }
 }
 
+// ── DELETE — remove one session or all sessions for the current user ──────────
+export async function DELETE(req: Request) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
+    const { searchParams } = new URL(req.url);
+    const sessionId = searchParams.get("session");
+    const deleteAll = searchParams.get("all") === "true";
+
+    const db = createAdminClient() ?? supabase;
+
+    if (deleteAll) {
+      const { error } = await (db as typeof supabase)
+        .from("conversations")
+        .delete()
+        .eq("user_id", user.id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ ok: true });
+    }
+
+    if (sessionId) {
+      const { error } = await (db as typeof supabase)
+        .from("conversations")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("session_id", sessionId);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ ok: true });
+    }
+
+    return NextResponse.json({ error: "Missing session or all param." }, { status: 400 });
+  } catch (err) {
+    console.error("conversations DELETE error:", err);
+    return NextResponse.json({ error: "Internal server error." }, { status: 500 });
+  }
+}
+
 // ── GET — list sessions OR get messages for a session ─────────────────────────
 export async function GET(req: Request) {
   try {

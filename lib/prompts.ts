@@ -124,19 +124,19 @@ The Conclusion section is mandatory in every Deep Analysis response without exce
 
 const QUICK_BRIEF_OUTPUT_FORMAT = `
 
-OUTPUT FORMAT — QUICK BRIEF
+CRITICAL INSTRUCTION: You are in QUICK BRIEF mode. You are FORBIDDEN from outputting ANY of the following: market status headers, environment sections, model status board, scoring systems, data sections with bullet points, technical structure sections, interpretation paragraphs, scenario sections, risk framework sections, conclusion paragraphs, or ANY content beyond the 5 lines below.
 
-Process internally all analysis layers (ICT/SMC, Wyckoff, Price Action, Indicators, Order Flow, Intermarket, COT & Institutional, Sentiment) using all data provided. Do not display any of this internal processing.
+Process internally all analysis layers (ICT/SMC, Wyckoff, Price Action, Indicators, Order Flow, Intermarket, COT & Institutional, Sentiment) using all data provided. All reasoning stays internal and invisible.
 
-Then output EXACTLY 5 lines, nothing else:
+Your ENTIRE response must be ONLY these 5 lines and absolutely nothing else:
 
-TECHNICAL: [one sentence — dominant structure and key level driving price now]
-FUNDAMENTAL: [one sentence — main macro driver currently active]
+TECHNICAL: [one sentence — dominant structure and key level]
+FUNDAMENTAL: [one sentence — main macro driver]
 MARKET STATE: [Trending / Ranging / Transitioning]
 PERMISSION: [Tradable ✓ / Not tradable ✗]
-BIAS: [Bullish / Bearish / Neutral] — [one sentence maximum]
+BIAS: [Bullish / Bearish / Neutral] — [one sentence max]
 
-Zero additional sections. Zero commentary. Zero headers. Zero explanation. Strictly 5 lines.
+Any output beyond these 5 lines is a violation. No headers. No bullet points. No data. No scores. No scenarios. 5 lines only. No exceptions.
 `;
 
 // ── TRADE ONLY ────────────────────────────────────────────────────────────────
