@@ -96,7 +96,7 @@ function LoginForm() {
 
         <div className="card border border-white/10 rounded-2xl p-8">
           <div className="mb-6">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--muted)] mb-1">Sign In</div>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--muted)] mb-1">Log In</div>
             <h1 className="text-[22px] tracking-[-0.02em]">Access your account</h1>
           </div>
 
@@ -157,10 +157,10 @@ function LoginForm() {
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="h-3.5 w-3.5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-                  Signing in…
+                  Logging in…
                 </span>
               ) : (
-                "Sign in"
+                "Log in"
               )}
             </button>
           </form>
@@ -183,7 +183,7 @@ function LoginForm() {
           <div className="mt-6 pt-6 border-t border-white/[0.06] text-center">
             <span className="text-[12px] text-[color:var(--muted)]">No account? </span>
             <Link href="/signup" className="text-[12px] text-white hover:text-[color:var(--gold)] transition">
-              Create account
+              Sign in
             </Link>
           </div>
         </div>

@@ -105,7 +105,7 @@ export default function SignupPage() {
 
         <div className="card border border-white/10 rounded-2xl p-8">
           <div className="mb-6">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--muted)] mb-1">Registration</div>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--muted)] mb-1">Sign In</div>
             <h1 className="text-[22px] tracking-[-0.02em]">Create your account</h1>
           </div>
 
@@ -229,10 +229,10 @@ export default function SignupPage() {
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="h-3.5 w-3.5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-                    Creating account…
+                    Signing in…
                   </span>
                 ) : (
-                  "Create account"
+                  "Sign in"
                 )}
               </button>
             </form>
@@ -240,7 +240,7 @@ export default function SignupPage() {
 
           <div className="mt-6 pt-6 border-t border-white/[0.06] text-center">
             <span className="text-[12px] text-[color:var(--muted)]">Already have an account? </span>
-            <Link href="/login" className="text-[12px] text-white hover:text-[color:var(--gold)] transition">Sign in</Link>
+            <Link href="/login" className="text-[12px] text-white hover:text-[color:var(--gold)] transition">Log in</Link>
           </div>
         </div>
       </div>
