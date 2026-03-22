@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -42,7 +43,15 @@ export default function SignupPage() {
         setSuccess("Account created. Check your email to confirm, then sign in.");
         return;
       }
-      router.push("/");
+      // Auto-login: sign in with the browser client so session cookies are set
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        // Session set failed — fall back to login page
+        router.push("/login");
+        return;
+      }
+      router.push("/upgrade");
       router.refresh();
     } catch {
       setError("Network error.");

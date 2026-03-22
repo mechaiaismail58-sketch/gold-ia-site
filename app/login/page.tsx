@@ -23,20 +23,23 @@ function LoginForm() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      // Use browser client directly so onAuthStateChange fires → Header updates immediately
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Authentication error.");
+      if (signInError) {
+        let msg = "Invalid email or password.";
+        if (signInError.message.toLowerCase().includes("email not confirmed")) {
+          msg = "Email not confirmed. Check your inbox.";
+        } else if (signInError.message) {
+          msg = signInError.message;
+        }
+        setError(msg);
         return;
       }
 
-      router.push(from);
+      // Redirect to destination — middleware will enforce paywall (/upgrade if has_paid=false)
+      router.push(from === "/login" ? "/" : from);
       router.refresh();
     } catch {
       setError("Network error.");

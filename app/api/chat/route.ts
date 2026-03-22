@@ -376,34 +376,6 @@ export async function POST(req: Request) {
       return Response.json({ ok: false, error: "Unauthorized." }, { status: 401 });
     }
 
-    // ── Paywall check ────────────────────────────────────────────────────────
-    if (process.env.PAYWALL_ENABLED === "true") {
-      const adminForPaywall = createAdminClient();
-      const dbForPaywall = adminForPaywall ?? supabase;
-      const { data: payProfile } = await (dbForPaywall as typeof supabase)
-        .from("users")
-        .select("has_paid, free_analyses_used")
-        .eq("id", user.id)
-        .single();
-
-      const hasPaid = payProfile?.has_paid ?? false;
-      const freeUsed = payProfile?.free_analyses_used ?? 0;
-
-      if (!hasPaid) {
-        if (freeUsed >= 30) {
-          return Response.json({ ok: false, error: "upgrade_required" }, { status: 403 });
-        }
-        // Increment free analyses counter (fire-and-forget — non-blocking)
-        void Promise.resolve(
-          (dbForPaywall as typeof supabase)
-            .from("users")
-            .update({ free_analyses_used: freeUsed + 1 })
-            .eq("id", user.id)
-        ).catch(() => {});
-      }
-    }
-    // ────────────────────────────────────────────────────────────────────────
-
     let userMessage = "";
     let previous_response_id: string | undefined;
     let chartImageDataUrl: string | null = null;

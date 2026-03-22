@@ -187,10 +187,6 @@ export default function Page() {
       });
 
       const data = await r.json();
-      if (r.status === 403 && data?.error === "upgrade_required") {
-        window.location.href = "/upgrade?reason=exhausted";
-        return;
-      }
       if (!r.ok) throw new Error(data?.error || "Request failed");
 
       setMessages((m) => [
