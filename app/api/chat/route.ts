@@ -390,7 +390,7 @@ export async function POST(req: Request) {
       const freeUsed = payProfile?.free_analyses_used ?? 0;
 
       if (!hasPaid) {
-        if (freeUsed >= 2) {
+        if (freeUsed >= 30) {
           return Response.json({ ok: false, error: "upgrade_required" }, { status: 403 });
         }
         // Increment free analyses counter (fire-and-forget — non-blocking)

@@ -70,7 +70,7 @@ export async function middleware(request: NextRequest) {
       const hasPaid = profile?.has_paid ?? false;
       const freeUsed = profile?.free_analyses_used ?? 0;
 
-      if (!hasPaid && freeUsed >= 2) {
+      if (!hasPaid && freeUsed >= 30) {
         const url = request.nextUrl.clone();
         url.pathname = "/upgrade";
         return NextResponse.redirect(url);
