@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Avatar from "@/components/Avatar";
+import { createClient } from "@/lib/supabase/client";
 
 type Props = {
   email: string;
@@ -22,6 +23,7 @@ export default function ProfileClient({ email, tradingHorizon, avatarUrl }: Prop
   const [savingHorizon, setSavingHorizon] = useState(false);
   const [horizonSaved, setHorizonSaved] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [scalpAlerts, setScalpAlerts] = useState<boolean | null>(null);
   const [swingAlerts, setSwingAlerts] = useState<boolean | null>(null);
   const [alertsSaved, setAlertsSaved] = useState(false);
@@ -98,16 +100,19 @@ export default function ProfileClient({ email, tradingHorizon, avatarUrl }: Prop
   }
 
   async function handleDeleteAccount() {
-    if (!confirm("Permanently delete your account? This action cannot be undone.")) return;
     setDeletingAccount(true);
     try {
       const res = await fetch("/api/auth/delete-account", { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) {
         alert(data.error || "Account deletion failed.");
+        setConfirmDelete(false);
         return;
       }
-      router.push("/signup");
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/login");
+      router.refresh();
     } finally {
       setDeletingAccount(false);
     }
@@ -168,13 +173,6 @@ export default function ProfileClient({ email, tradingHorizon, avatarUrl }: Prop
                 className="rounded-xl border border-white/10 px-4 min-h-[44px] text-xs uppercase tracking-[0.10em] text-[color:var(--muted)] hover:border-red-500/30 hover:text-red-400 transition"
               >
                 Sign out
-              </button>
-              <button
-                onClick={handleDeleteAccount}
-                disabled={deletingAccount}
-                className="rounded-xl border border-red-500/20 px-4 min-h-[44px] text-xs uppercase tracking-[0.10em] text-red-500/60 hover:border-red-500/50 hover:text-red-400 transition disabled:opacity-40"
-              >
-                {deletingAccount ? "Deleting…" : "Delete account"}
               </button>
             </div>
           </div>
@@ -239,6 +237,46 @@ export default function ProfileClient({ email, tradingHorizon, avatarUrl }: Prop
         <p className="mt-3 text-[11px] text-white/30">
           Receive a push notification when the AI detects a valid signal.
         </p>
+      </section>
+
+      {/* ── Danger Zone ── */}
+      <section className="card rounded-3xl border border-red-500/20 p-8">
+        <div className="text-[11px] uppercase tracking-[0.18em] text-red-500/60 mb-1">Danger Zone</div>
+        <h2 className="text-[20px] tracking-[-0.02em] mb-2">Delete my account</h2>
+        <p className="text-[13px] text-white/40 mb-6">
+          Permanently deletes your account and all associated data. This action is irreversible.
+        </p>
+
+        {!confirmDelete ? (
+          <button
+            onClick={() => setConfirmDelete(true)}
+            className="rounded-xl border border-red-500/30 px-5 min-h-[44px] text-xs uppercase tracking-[0.10em] text-red-400/80 hover:border-red-500/60 hover:text-red-400 transition"
+          >
+            Delete my account
+          </button>
+        ) : (
+          <div className="rounded-2xl border border-red-500/30 bg-red-500/[0.04] px-5 py-4 space-y-4">
+            <p className="text-[13px] text-red-400">
+              Are you sure? This action is irreversible.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deletingAccount}
+                className="rounded-xl border border-red-500/60 bg-red-500/10 px-5 min-h-[44px] text-xs uppercase tracking-[0.10em] text-red-400 hover:bg-red-500/20 transition disabled:opacity-40"
+              >
+                {deletingAccount ? "Deleting…" : "Confirm"}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                disabled={deletingAccount}
+                className="rounded-xl border border-white/10 px-5 min-h-[44px] text-xs uppercase tracking-[0.10em] text-white/50 hover:border-white/20 hover:text-white/70 transition disabled:opacity-40"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
     </main>
