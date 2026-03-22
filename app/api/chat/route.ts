@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { SYSTEM_PROMPT } from "@/lib/systemPrompt";
+import { DEEP_ANALYSIS_PROMPT, QUICK_BRIEF_PROMPT, TRADE_ONLY_PROMPT } from "@/lib/prompts";
 import { GOLDEN_EXAMPLES } from "@/lib/goldenExamples";
 import { STYLE_MEMORY } from "@/lib/styleMemory";
 import { buildResearchContext } from "@/lib/research/buildResearchContext";
@@ -476,83 +476,15 @@ Rules:
 `,
     };
 
-    const modeInstructionMap = {
-      identity: `
-MODE: IDENTITY
-
-INSTRUCTIONS:
-- If the user asks about identity, answer exactly:
-Bullion Desk — XAUUSD Macro-Technical Analysis Engine.
-- No extra sentence.
-`,
-      analysis: `
-MODE: ANALYSIS
-
-INSTRUCTIONS:
-- Use the full Bullion Desk framework
-- Start with Market Status
-- Then follow the exact section order required by the system prompt
-- Do not collapse the response into a shorter market note
-- Fundamental analysis must be highly developed
-- Technical analysis must be highly developed
-- Technical structure is mandatory even if partial
-- If technical data is partial, state the limitation but still derive the available structure
-- If a chart screenshot is attached, use it as a visual confirmation layer, not as a replacement for technical_context
-- Use web search only to enrich the live macro/fundamental layer:
-  news, event risk, Fed/inflation/yields context, weekend/opening context if relevant
-- Do not use web search as a substitute for technical_context
-`,
-      trade_request: `
-MODE: TRADE_REQUEST
-
-INSTRUCTIONS:
-- Use the full Bullion Desk framework
-- Start with Market Status
-- Keep the existing institutional structure
-- A trade is allowed only if Permission = YES (full) or YES (réduit)
-- If Permission = YES (réduit), state the restrictions clearly
-- Technical structure is mandatory in the reasoning
-- A trade plan must be anchored to technical_context, not macro only
-- If a chart screenshot is attached, use it to refine technical interpretation and execution quality
-- Use web search only to enrich live fundamental context, event risk, and opening conditions
-- Never force a trade
-- Prefer Stand Aside over a low-quality setup
-- But do not refuse mechanically if the setup is degraded yet still technically exploitable
-- Respect the requested trade horizon explicitly
-`,
-      market_question: `
-MODE: MARKET_QUESTION
-
-INSTRUCTIONS:
-- Answer directly
-- Keep the existing structure for market questions
-- Focus on real drivers:
-  1. USD
-  2. Yields / Real yields
-  3. Fed expectations
-  4. Liquidity / positioning
-  5. Current technical structure
-- Technical context must still appear in the answer
-- Include a short technical snapshot when data is available
-- If a chart screenshot is attached, integrate visible structure from the screenshot into the analysis
-- Use web search to enrich current macro/news/event context when useful
-- Do not let web search replace technical_context
-`,
-      education: `
-MODE: EDUCATION
-
-INSTRUCTIONS:
-- Explain clearly
-- Institutional tone
-- No markdown
-- Link the concept to gold market behavior
-- If useful, mention how the concept interacts with current technical structure
-- Use web search only if current macro context materially improves the explanation
-`,
-    } as const;
-
-    const modeInstruction = modeInstructionMap[mode];
     const horizonInstruction = horizonInstructionMap[tradeHorizon];
+
+    // Select system prompt based on UI analysis_mode toggle
+    let selectedPrompt: string;
+    switch (analysis_mode) {
+      case "quick":      selectedPrompt = QUICK_BRIEF_PROMPT;   break;
+      case "trade_only": selectedPrompt = TRADE_ONLY_PROMPT;    break;
+      default:           selectedPrompt = DEEP_ANALYSIS_PROMPT;
+    }
 
     // Fetch last 3 exchanges from this session for continuity context
     let conversationHistory = "";
@@ -620,11 +552,7 @@ ${researchContext.upcoming_events.summary}
 ` : ""}${tradeMemory && tradeMemory.signals.length > 0 ? `PREVIOUS TRADE SIGNALS
 ${tradeMemory.summary}
 ` : ""}
-${modeInstruction}
-
 ${horizonInstruction}
-
-ANALYSIS_MODE: ${analysis_mode.toUpperCase()}
 
 TASK
 
@@ -695,7 +623,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
         input: [
           {
             role: "system",
-            content: SYSTEM_PROMPT + systemPromptSuffix,
+            content: selectedPrompt + systemPromptSuffix,
           },
           {
             role: "user",
