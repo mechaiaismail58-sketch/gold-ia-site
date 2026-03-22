@@ -52,6 +52,7 @@ interface HeaderProps {
 export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   // Initialise avec les valeurs serveur → zéro flash
   const [userEmail, setUserEmail] = useState<string | null>(initialEmail);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl);
@@ -98,14 +99,17 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
     setDropdownOpen(false);
   }, [pathname]);
 
-  async function handleLogout() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+  async function handleSignOut() {
+    setSigningOut(true);
+    setDropdownOpen(false);
+    // Clear local state immediately — no waiting for navigation
     setUserEmail(null);
     setAvatarUrl(null);
-    setDropdownOpen(false);
+    const supabase = createClient();
+    await supabase.auth.signOut();
     router.push("/login");
-    router.refresh(); // flush Next.js cache so middleware re-evaluates
+    router.refresh();
+    setSigningOut(false);
   }
 
   const navLinkClass = (href: string) =>
@@ -168,10 +172,11 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
                     </Link>
                     <div className="h-px bg-white/[0.06]" />
                     <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center px-4 py-3 text-xs uppercase tracking-[0.10em] text-white/60 hover:bg-white/[0.04] hover:text-red-400 transition text-left"
+                      onClick={handleSignOut}
+                      disabled={signingOut}
+                      className="w-full flex items-center px-4 py-3 text-xs uppercase tracking-[0.10em] text-white/60 hover:bg-white/[0.04] hover:text-red-400 transition text-left disabled:opacity-40"
                     >
-                      Sign out
+                      {signingOut ? "Signing out…" : "Sign out"}
                     </button>
                   </div>
                 )}
@@ -247,10 +252,11 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
                   Profile
                 </Link>
                 <button
-                  onClick={handleLogout}
-                  className="rounded-xl px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-white/50 border border-white/10 hover:border-red-500/30 hover:text-red-400 transition text-left"
+                  onClick={handleSignOut}
+                  disabled={signingOut}
+                  className="rounded-xl px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-white/50 border border-white/10 hover:border-red-500/30 hover:text-red-400 transition text-left disabled:opacity-40"
                 >
-                  Sign out
+                  {signingOut ? "Signing out…" : "Sign out"}
                 </button>
               </>
             )}
