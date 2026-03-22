@@ -16,7 +16,7 @@ async function getTwelvePrice(symbol: string): Promise<number | null> {
 
   const res = await fetch(url.toString(), {
     method: "GET",
-    next: { revalidate: 15 },
+    cache: "no-store",
   });
 
   if (!res.ok) {
@@ -62,5 +62,6 @@ export async function getPriceContext() {
     divergence_pct,
     source_1: "Twelve Data",
     source_2: "Twelve Data",
+    fetched_at_utc: new Date().toISOString(),
   };
 }

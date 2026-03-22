@@ -479,11 +479,17 @@ Rules:
     const horizonInstruction = horizonInstructionMap[tradeHorizon];
 
     // Select system prompt based on UI analysis_mode toggle
+    console.log(`[chat] analysis_mode received="${analysis_mode}"`);
     let selectedPrompt: string;
     switch (analysis_mode) {
       case "quick":      selectedPrompt = QUICK_BRIEF_PROMPT;   break;
       case "trade_only": selectedPrompt = TRADE_ONLY_PROMPT;    break;
       default:           selectedPrompt = DEEP_ANALYSIS_PROMPT;
+    }
+    // Safeguard: if a prompt resolved to undefined/empty (e.g. broken import), fall back to deep
+    if (!selectedPrompt) {
+      console.error(`[chat] selectedPrompt is empty for mode="${analysis_mode}" — falling back to DEEP_ANALYSIS_PROMPT`);
+      selectedPrompt = DEEP_ANALYSIS_PROMPT;
     }
 
     // Fetch last 3 exchanges from this session for continuity context

@@ -26,12 +26,20 @@ import type { FedWatchContext } from "./getFedWatchContext";
 import type { CentralBankContext } from "./getCentralBankContext";
 import type { ResearchContext } from "./types";
 
-// ── Shared OHLCV fetcher with 5-minute cache ──────────────────────────────────
+// ── Timeout wrapper — resolves to null after ms, never throws ─────────────────
+
+function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
+  const timer = new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms));
+  return Promise.race([p.catch(() => fallback), timer]);
+}
+
+// ── Shared OHLCV fetcher — revalidate configurable per timeframe ──────────────
 
 async function fetchOHLCVBars(
   symbol: string,
   interval: string,
-  outputsize: number
+  outputsize: number,
+  revalidate = 300
 ): Promise<ParsedBar[]> {
   const apiKey = process.env.TWELVE_DATA_API_KEY;
   if (!apiKey) {
@@ -48,7 +56,7 @@ async function fetchOHLCVBars(
   url.searchParams.set("format", "JSON");
 
   try {
-    const res = await fetch(url.toString(), { next: { revalidate: 300 } });
+    const res = await fetch(url.toString(), { next: { revalidate } });
     if (!res.ok) {
       console.error(`fetchOHLCVBars ${symbol} ${interval}: HTTP ${res.status}`);
       return [];
@@ -432,23 +440,23 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     targetUpper,
     effectiveRate,
   ] = await Promise.all([
-    getPriceContext(),
-    fetchOHLCVBars(symbol, "1h", 140),
-    fetchOHLCVBars(symbol, "30min", 80),
-    fetchOHLCVBars(symbol, "4h", 250),
-    fetchOHLCVBars(symbol, "1day", 220),
-    getFredLatestTwo("DGS10"),
-    getFredLatestTwo("DFII10"),
-    getLatestFredValue("DGS2"),
-    getLatestFredValue("T10YIE"),
-    getLatestFredValue("SLVPRUSD"),
-    getFredLatestTwo("SP500"),
-    getCOTContext(),
-    getUpcomingEvents(),
-    getPolygonOrderFlow(),
-    getSentimentContext(),
-    getAlphaVantageContext(),
-    getETFFlowsContext(),
+    withTimeout(getPriceContext(), 3000, { xauusd: null, gc_f: null, gld: null, dxy: null, validated: false, divergence_pct: null, source_1: "Twelve Data", source_2: "Twelve Data", fetched_at_utc: new Date().toISOString() }),
+    withTimeout(fetchOHLCVBars(symbol, "1h", 140, 300), 3000, []),
+    withTimeout(fetchOHLCVBars(symbol, "30min", 80, 300), 3000, []),
+    withTimeout(fetchOHLCVBars(symbol, "4h", 250, 900), 3000, []),
+    withTimeout(fetchOHLCVBars(symbol, "1day", 220, 900), 3000, []),
+    withTimeout(getFredLatestTwo("DGS10"), 3000, { current: null, previous: null, direction: "Data not found" as const }),
+    withTimeout(getFredLatestTwo("DFII10"), 3000, { current: null, previous: null, direction: "Data not found" as const }),
+    withTimeout(getLatestFredValue("DGS2"), 3000, null),
+    withTimeout(getLatestFredValue("T10YIE"), 3000, null),
+    withTimeout(getLatestFredValue("SLVPRUSD"), 3000, null),
+    withTimeout(getFredLatestTwo("SP500"), 3000, { current: null, previous: null, direction: "Data not found" as const }),
+    withTimeout(getCOTContext(), 3000, null),
+    withTimeout(getUpcomingEvents(), 3000, null),
+    withTimeout(getPolygonOrderFlow(), 3000, null),
+    withTimeout(getSentimentContext(), 3000, null),
+    withTimeout(getAlphaVantageContext(), 3000, null),
+    withTimeout(getETFFlowsContext(), 3000, null),
     getCentralBankContext(),
     getLatestFredValue("SOFR"),
     getLatestFredValue("WTREGEN"),

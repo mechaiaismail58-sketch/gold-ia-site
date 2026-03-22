@@ -29,9 +29,17 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<Msg[]>([INITIAL_MSG]);
-  const [analysisMode, setAnalysisMode] = useState<"deep" | "quick" | "trade_only">("deep");
+  const [analysisMode, setAnalysisModeRaw] = useState<"deep" | "quick" | "trade_only">("deep");
   const [previousResponseId, setPreviousResponseId] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string>(() => crypto.randomUUID());
+
+  // Reset the OpenAI conversation thread whenever the mode changes.
+  // The Responses API ties previous_response_id to a specific system prompt —
+  // sending a different prompt against an existing thread causes a 500.
+  const setAnalysisMode = useCallback((mode: "deep" | "quick" | "trade_only") => {
+    setAnalysisModeRaw(mode);
+    setPreviousResponseId(null);
+  }, []);
 
   const startNewChat = useCallback(() => {
     setMessages([INITIAL_MSG]);

@@ -23,7 +23,7 @@ async function fetchAVSeries(
   url.searchParams.set("apikey", apiKey);
 
   try {
-    const res = await fetch(url.toString(), { next: { revalidate: 21600 } }); // 6h cache
+    const res = await fetch(url.toString(), { next: { revalidate: 3600 } }); // 1h cache
     if (!res.ok) {
       console.warn(`Alpha Vantage ${params["function"]} HTTP ${res.status}`);
       return null;

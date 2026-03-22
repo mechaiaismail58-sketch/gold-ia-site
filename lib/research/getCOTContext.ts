@@ -135,7 +135,7 @@ async function fetchLegacyCOT(): Promise<CFTCLegacyRecord[]> {
     try {
       const res = await fetch(url, {
         headers: { Accept: "application/json" },
-        next: { revalidate: 3600 },
+        next: { revalidate: 86400 }, // 24h — COT is weekly data
       });
       if (!res.ok) continue;
       const data: CFTCLegacyRecord[] = await res.json();
@@ -153,7 +153,7 @@ async function fetchDisaggCOT(): Promise<CFTCDisaggRecord[]> {
   try {
     const res = await fetch(url, {
       headers: { Accept: "application/json" },
-      next: { revalidate: 3600 },
+      next: { revalidate: 86400 }, // 24h — COT is weekly data
     });
     if (!res.ok) return [];
     const data: CFTCDisaggRecord[] = await res.json();
