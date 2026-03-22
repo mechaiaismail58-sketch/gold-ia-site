@@ -104,6 +104,11 @@ textarea.text-xs {
 
 /* ===== Animations ===== */
 
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -171,6 +176,10 @@ textarea.text-xs {
 
 .animate-slide-up {
   animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Shimmer skeleton */

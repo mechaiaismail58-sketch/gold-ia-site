@@ -108,12 +108,8 @@ export default function HistoryPanel({ open, onClose }: Props) {
         />
       )}
 
-      {/* Slide-in panel */}
-      <div
-        className={`fixed top-0 left-0 z-50 h-full w-[320px] max-w-[90vw] bg-[#0c0a14] border-r border-white/10 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
-          open ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
+      {/* Panel — only mounted when open, no layout space when closed */}
+      {open && <div className="fixed top-0 left-0 z-50 h-full w-[320px] max-w-[90vw] bg-[#0c0a14] border-r border-white/10 shadow-2xl flex flex-col animate-slide-in-left">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] shrink-0">
           <div>
@@ -171,7 +167,7 @@ export default function HistoryPanel({ open, onClose }: Props) {
             ))
           )}
         </div>
-      </div>
+      </div>}
     </>
   );
 }
