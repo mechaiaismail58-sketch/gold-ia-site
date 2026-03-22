@@ -1,62 +1,101 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 
-type Phase = "polling" | "countdown" | "redirecting";
+type Phase = "verifying" | "countdown" | "redirecting" | "timeout";
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const router = useRouter();
-  const [phase, setPhase] = useState<Phase>("polling");
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session_id");
+
+  const [phase, setPhase] = useState<Phase>("verifying");
   const [countdown, setCountdown] = useState(3);
-  const [pollFailed, setPollFailed] = useState(false);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [statusMsg, setStatusMsg] = useState("Verifying your payment with Stripe…");
+
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef  = useRef<ReturnType<typeof setTimeout>  | null>(null);
 
   const startCountdown = useCallback(() => {
     setPhase("countdown");
   }, []);
 
+  // ── Main: call verify-payment, fall back to polling has_paid ─────────────
   useEffect(() => {
-    const supabase = createClient();
-    let attempts = 0;
+    let cancelled = false;
 
-    async function beginPolling() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+    async function run() {
+      // ── Path A: we have a session_id → use verify-payment (reliable) ──
+      if (sessionId) {
+        setStatusMsg("Confirming payment with Stripe…");
 
-      const userId = session?.user?.id;
-      if (!userId) {
-        router.push("/login");
-        return;
+        try {
+          const res  = await fetch(`/api/stripe/verify-payment?session_id=${sessionId}`);
+          const data = await res.json();
+
+          if (cancelled) return;
+
+          if (data.has_paid === true) {
+            setStatusMsg("Payment confirmed.");
+            startCountdown();
+            return;
+          }
+
+          console.warn("[payment-success] verify-payment returned:", data);
+          // Fall through to polling if verify-payment says not paid yet
+        } catch (err) {
+          console.error("[payment-success] verify-payment fetch failed:", err);
+        }
       }
 
-      pollRef.current = setInterval(async () => {
-        attempts++;
-        const { data } = await supabase
-          .from("users")
-          .select("has_paid")
-          .eq("id", userId)
-          .single();
+      // ── Path B: no session_id or verify-payment inconclusive → poll DB ──
+      setStatusMsg("Syncing your account…");
 
-        if (data?.has_paid || attempts >= 10) {
-          clearInterval(pollRef.current!);
-          if (!data?.has_paid) setPollFailed(true);
-          startCountdown();
+      let attempts = 0;
+      intervalRef.current = setInterval(async () => {
+        if (cancelled) return;
+        attempts++;
+
+        try {
+          const res  = await fetch("/api/auth/payment-status");
+          const data = await res.json();
+
+          if (data.has_paid === true) {
+            clearInterval(intervalRef.current!);
+            setStatusMsg("Access confirmed.");
+            startCountdown();
+          } else if (attempts >= 15) {
+            clearInterval(intervalRef.current!);
+            setPhase("timeout");
+          }
+        } catch {
+          if (attempts >= 15) {
+            clearInterval(intervalRef.current!);
+            setPhase("timeout");
+          }
         }
       }, 1000);
     }
 
-    beginPolling();
+    run();
+
+    // Hard 15 s safety net — show escape button regardless
+    timeoutRef.current = setTimeout(() => {
+      if (cancelled) return;
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      setPhase((p) => (p === "verifying" ? "timeout" : p));
+    }, 15_000);
 
     return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
+      cancelled = true;
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (timeoutRef.current)  clearTimeout(timeoutRef.current);
     };
-  }, [router, startCountdown]);
+  }, [sessionId, startCountdown]);
 
-  // 3 → 2 → 1 countdown then redirect
+  // ── Countdown 3 → 2 → 1 → redirect ─────────────────────────────────────
   useEffect(() => {
     if (phase !== "countdown") return;
 
@@ -74,6 +113,8 @@ export default function PaymentSuccessPage() {
 
     return () => clearInterval(interval);
   }, [phase, router]);
+
+  const confirmed = phase === "countdown" || phase === "redirecting";
 
   return (
     <div className="min-h-screen bg-[#07060b] flex items-center justify-center px-4 animate-fade-in">
@@ -99,48 +140,61 @@ export default function PaymentSuccessPage() {
           <div className="p-8 sm:p-10">
             {/* Icon */}
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(212,175,55,0.30)] bg-[rgba(212,175,55,0.06)]">
-              {phase === "polling" ? (
-                <span className="h-7 w-7 rounded-full border-2 border-[#D4AF37]/20 border-t-[#D4AF37] animate-spin" />
-              ) : (
+              {phase === "timeout" ? (
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                  <path d="M14 8v8M14 20v.5" stroke="#D4AF37" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+              ) : confirmed ? (
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
                   <path d="M5 14l7 7L23 7" stroke="#D4AF37" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
+              ) : (
+                <span className="h-7 w-7 rounded-full border-2 border-[#D4AF37]/20 border-t-[#D4AF37] animate-spin" />
               )}
             </div>
 
             <h1 className="text-[26px] sm:text-[30px] leading-[1.2] tracking-[-0.02em] mb-3">
-              {phase === "polling" ? "Confirming your payment…" : "Welcome to Bullion Desk Beta"}
+              {phase === "timeout"
+                ? "Taking longer than expected"
+                : confirmed
+                ? "Welcome to Bullion Desk Beta"
+                : "Confirming your payment…"}
             </h1>
+
             <p className="text-[color:var(--muted)] text-[14px] leading-relaxed mb-8">
-              {phase === "polling"
-                ? "Processing your payment confirmation. This takes just a moment."
-                : "Your access is now active. The full institutional gold analysis engine is unlocked."}
+              {phase === "timeout"
+                ? "Your payment was received. Access activation may take a few more seconds."
+                : confirmed
+                ? "Your access is now active. The full institutional gold analysis engine is unlocked."
+                : "Processing your payment confirmation. This takes just a moment."}
             </p>
 
             <div className="rounded-2xl border border-[rgba(212,175,55,0.20)] bg-[rgba(212,175,55,0.04)] px-5 py-4 mb-7">
               <p className="text-[13px] text-[rgba(212,175,55,0.85)]">
-                {phase === "polling"
-                  ? "Syncing your account access…"
-                  : "Full access granted — no restrictions, no recurring charges."}
+                {phase === "timeout"
+                  ? "Click below to access your account — your payment is confirmed by Stripe."
+                  : confirmed
+                  ? "Full access granted — no restrictions, no recurring charges."
+                  : statusMsg}
               </p>
             </div>
 
-            {phase !== "polling" && (
-              <Link
-                href="/"
+            {/* CTA — shown when confirmed or timeout */}
+            {(confirmed || phase === "timeout") && (
+              <button
+                onClick={() => { router.push("/"); router.refresh(); }}
                 className="block w-full rounded-2xl py-4 text-[14px] font-medium tracking-[0.06em] border border-[rgba(212,175,55,0.65)] bg-[rgba(212,175,55,0.10)] text-[#D4AF37] transition hover:bg-[rgba(212,175,55,0.18)] hover:border-[rgba(212,175,55,0.95)] text-center"
               >
-                Go to Dashboard
-              </Link>
+                {phase === "timeout" ? "Access my account →" : "Go to Dashboard"}
+              </button>
             )}
 
             {/* Status footer */}
             <div className="mt-5 flex items-center justify-center gap-3 min-h-[20px]">
-              {phase === "polling" ? (
-                <span className="text-[11px] text-white/25 animate-pulse">
-                  Verifying with Stripe…
-                </span>
-              ) : phase === "countdown" || phase === "redirecting" ? (
+              {phase === "verifying" && (
+                <span className="text-[11px] text-white/25 animate-pulse">{statusMsg}</span>
+              )}
+              {(phase === "countdown" || phase === "redirecting") && (
                 <>
                   <span className="text-[11px] text-white/25">Redirecting in</span>
                   <div className="flex items-center gap-1.5">
@@ -160,17 +214,19 @@ export default function PaymentSuccessPage() {
                     ))}
                   </div>
                 </>
-              ) : null}
+              )}
             </div>
-
-            {pollFailed && phase !== "polling" && (
-              <p className="mt-3 text-[11px] text-white/20">
-                Access may take a few seconds to activate — refresh if needed.
-              </p>
-            )}
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }

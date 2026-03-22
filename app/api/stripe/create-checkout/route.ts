@@ -44,7 +44,8 @@ export async function POST() {
       mode: "payment",
       line_items: [{ price: priceId, quantity: 1 }],
       // Hardcoded — avoids any env var misconfiguration
-      success_url: "https://gold-ia-site.vercel.app/payment-success",
+      // {CHECKOUT_SESSION_ID} is replaced by Stripe with the real session ID
+      success_url: "https://gold-ia-site.vercel.app/payment-success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url:  "https://gold-ia-site.vercel.app/upgrade",
       // CRITICAL: user_id in metadata so the webhook knows who to update
       metadata: { user_id: session.user.id },
