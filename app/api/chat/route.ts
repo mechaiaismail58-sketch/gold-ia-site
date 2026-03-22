@@ -366,6 +366,11 @@ async function fileToDataUrl(file: File): Promise<string> {
 
 export async function POST(req: Request) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("[chat] OPENAI_API_KEY is missing");
+      return Response.json({ ok: false, error: "AI not configured" }, { status: 500 });
+    }
+
     // Initialise inside the handler so OPENAI_API_KEY is read at request time,
     // not at cold-start module initialisation where env vars may not be injected yet.
     const client = new OpenAI({
@@ -527,8 +532,37 @@ Rules:
       }
     }
 
-    const finalUserInput = `
-CONTEXTE PRODUIT
+    // ── Build user input — mode-specific ────────────────────────────────────────
+    // Quick Brief and Trade Only use a lean input:
+    // — No GOLDEN_EXAMPLES (old deep-analysis format examples confuse strict output)
+    // — No STYLE_MEMORY (can override strict 5-line / 9-line constraints)
+    // — No verbose 15-point TASK section (contradicts strict format requirements)
+    // Deep Analysis gets the full input with style guidance and golden examples.
+
+    const researchBlock = `RESEARCH CONTEXT
+${buildCleanContextText(researchContext)}
+${researchContext.indicator_context ? `\nINDICATOR DATA\n${researchContext.indicator_context.summary}` : ""}
+${researchContext.indicator_context?.order_flow ? `\nORDER FLOW DATA\n${researchContext.indicator_context.order_flow.summary}` : ""}
+${researchContext.cot_context ? `\nCOT DATA\n${researchContext.cot_context.summary}` : ""}
+${researchContext.intermarket_context?.summary && researchContext.intermarket_context.summary !== "Intermarket data unavailable" ? `\nINTERMARKET DATA\n${researchContext.intermarket_context.summary}` : ""}
+${researchContext.indicator_context?.market_regime ? `\nMARKET REGIME\n${researchContext.indicator_context.market_regime.summary}\nApproach: ${researchContext.indicator_context.market_regime.approach}` : ""}
+${researchContext.upcoming_events && researchContext.upcoming_events.events.length > 0 ? `\nUPCOMING HIGH-IMPACT EVENTS\n${researchContext.upcoming_events.summary}` : ""}
+${tradeMemory && tradeMemory.signals.length > 0 ? `\nPREVIOUS TRADE SIGNALS\n${tradeMemory.summary}` : ""}`.trim();
+
+    let finalUserInput: string;
+
+    if (analysis_mode === "quick" || analysis_mode === "trade_only") {
+      // Lean input — research data only, no format examples, no verbose instructions
+      finalUserInput = `${researchBlock}
+
+${horizonInstruction}
+
+${conversationHistory}USER REQUEST
+${userMessage || (analysis_mode === "quick" ? "Current XAUUSD brief." : "Current XAUUSD trade setup.")}`.trim();
+
+    } else {
+      // Full input for Deep Analysis — includes style guidance and golden examples
+      finalUserInput = `CONTEXTE PRODUIT
 
 Bullion Desk est un decision engine institutionnel dédié à l'or.
 Le rôle du modèle est d'appliquer le framework avec discipline, pas de chatter.
@@ -539,31 +573,14 @@ ${STYLE_MEMORY}
 GOLDEN EXAMPLES
 ${GOLDEN_EXAMPLES}
 
-RESEARCH CONTEXT
-${buildCleanContextText(researchContext)}
+${researchBlock}
 
-${researchContext.indicator_context ? `INDICATOR DATA
-${researchContext.indicator_context.summary}
-` : ""}${researchContext.indicator_context?.order_flow ? `ORDER FLOW DATA
-${researchContext.indicator_context.order_flow.summary}
-` : ""}${researchContext.cot_context ? `COT DATA
-${researchContext.cot_context.summary}
-` : ""}${researchContext.intermarket_context?.summary && researchContext.intermarket_context.summary !== "Intermarket data unavailable" ? `INTERMARKET DATA
-${researchContext.intermarket_context.summary}
-` : ""}${researchContext.indicator_context?.market_regime ? `MARKET REGIME
-${researchContext.indicator_context.market_regime.summary}
-Approach: ${researchContext.indicator_context.market_regime.approach}
-` : ""}${researchContext.upcoming_events && researchContext.upcoming_events.events.length > 0 ? `UPCOMING HIGH-IMPACT EVENTS
-${researchContext.upcoming_events.summary}
-` : ""}${tradeMemory && tradeMemory.signals.length > 0 ? `PREVIOUS TRADE SIGNALS
-${tradeMemory.summary}
-` : ""}
 ${horizonInstruction}
 
 TASK
 
 1. Utilise les données structurées comme source primaire.
-2. Si une donnée n'est pas trouvée, écris exactement : "Donnée non trouvée".
+2. Si une donnée est indisponible, ne l'écris pas — omets-la entièrement.
 3. Sépare strictement DATA / INTERPRÉTATIONS.
 4. La technique doit être omniprésente dans tous les modes sauf IDENTITY.
 5. Utilise explicitement technical_context partout où c'est pertinent.
@@ -591,8 +608,8 @@ TASK
 15. L'image jointe est une couche visuelle complémentaire, pas une source primaire qui remplace les données marché.
 
 ${conversationHistory}DEMANDE UTILISATEUR
-${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
-`.trim();
+${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}`.trim();
+    }
 
     const userContent: Array<
       | { type: "input_text"; text: string }
@@ -616,16 +633,12 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
 
     let response;
     try {
-      response = await client.responses.create({
+      const openaiCall = client.responses.create({
         model: "gpt-4o",
         previous_response_id,
         store: true,
         max_output_tokens: 3500,
-        tools: [
-          {
-            type: "web_search_preview",
-          },
-        ],
+        tools: [{ type: "web_search_preview" }],
         input: [
           {
             role: "system",
@@ -637,18 +650,16 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
           },
         ],
       });
+
+      // 30-second hard timeout — prevents cold-start hangs from silently failing
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("OpenAI request timed out after 30s")), 30_000)
+      );
+
+      response = await Promise.race([openaiCall, timeoutPromise]);
     } catch (openaiError: unknown) {
-      // Log the full OpenAI error with all available fields for diagnosis
-      console.error("[chat] OpenAI API error:", {
-        message:    openaiError instanceof Error ? openaiError.message : String(openaiError),
-        status:     (openaiError as any)?.status,
-        code:       (openaiError as any)?.code,
-        type:       (openaiError as any)?.type,
-        param:      (openaiError as any)?.param,
-        error:      (openaiError as any)?.error,
-        headers:    (openaiError as any)?.headers,
-        raw:        openaiError,
-      });
+      const err = openaiError as any;
+      console.error("[chat] OpenAI error:", err?.status, err?.message, err?.code, err?.type);
       throw openaiError; // re-throw so the outer catch returns the 500
     }
 
@@ -659,7 +670,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
 
     return Response.json({
       ok: true,
-      text: outputText || "Donnée non trouvée",
+      text: outputText || "No response generated — please retry.",
       response_id: response.id,
       mode,
       trade_horizon: tradeHorizon,
@@ -668,11 +679,14 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
   } catch (error) {
     console.error("[chat] Handler error:", error instanceof Error ? error.message : String(error));
 
+    // Return a clean user-facing message — don't expose internal error details
+    const isTimeout = error instanceof Error && error.message.includes("timed out");
+    const userMessage_err = isTimeout
+      ? "Analysis timed out — market data is loading, please retry in a few seconds."
+      : "System error — please retry. If the issue persists, check your API configuration.";
+
     return Response.json(
-      {
-        ok: false,
-        error: error instanceof Error ? error.message : String(error),
-      },
+      { ok: false, error: userMessage_err },
       { status: 500 }
     );
   }

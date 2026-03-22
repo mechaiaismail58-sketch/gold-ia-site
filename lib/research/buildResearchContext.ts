@@ -598,7 +598,7 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     technical_context: technicalContext,
     market_context: marketContext,
     event_context: {
-      note: "Use web search to identify the highest-importance macro events in the next 24 hours. If none are found, say 'Donnée non trouvée'.",
+      note: "Use web search to identify the highest-importance macro events in the next 24 hours. If none are found, omit this section entirely.",
     },
     news_context: {
       note: "Use web search to collect 5-10 recent headlines strictly about gold, USD, Treasury yields, Fed, or inflation. Keep facts separate from interpretation.",
