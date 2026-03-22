@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Suspense } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 const FEATURES = [
   {
@@ -46,21 +48,18 @@ function UpgradeContent() {
   const searchParams = useSearchParams();
   const reason = searchParams.get("reason");
   const exhausted = reason === "exhausted";
+  const router = useRouter();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [spotsRemaining, setSpotsRemaining] = useState<number | null>(null);
-  const [isFull, setIsFull] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/stripe/beta-spots")
-      .then((r) => r.json())
-      .then((data) => {
-        setSpotsRemaining(data.spots_remaining ?? null);
-        setIsFull(data.is_full ?? false);
-      })
-      .catch(() => {});
-  }, []);
+  async function handleLogout() {
+    setLoggingOut(true);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
 
   async function handleCheckout() {
     setLoading(true);
@@ -82,6 +81,17 @@ function UpgradeContent() {
 
   return (
     <div className="min-h-screen bg-[#07060b] flex items-center justify-center px-4 py-16 animate-fade-in">
+      {/* Logout button */}
+      <div className="fixed top-4 right-4 z-50">
+        <button
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="text-[11px] text-white/25 hover:text-white/50 transition disabled:opacity-40"
+        >
+          {loggingOut ? "Logging out…" : "Log out"}
+        </button>
+      </div>
+
       {/* Background blobs */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute -top-24 left-[-140px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.18)] blur-[110px]" />
@@ -106,35 +116,20 @@ function UpgradeContent() {
           <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.50)] to-transparent" />
 
           <div className="p-8 sm:p-10">
-            {/* Badge + spots counter row */}
-            <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
+            {/* Badge */}
+            <div className="flex items-center gap-3 mb-5 flex-wrap">
               <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.30)] bg-[rgba(212,175,55,0.06)] px-3 py-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
                 <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-[rgba(212,175,55,0.8)]">Beta Access</span>
               </div>
-
-              {/* Spots counter */}
               <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-white/20 shrink-0" />
-                <span className="text-[10px] font-mono tracking-[0.12em] text-white/35">
-                  {isFull
-                    ? "Beta is full"
-                    : spotsRemaining === null
-                    ? "Limited to 100 users"
-                    : `${spotsRemaining} of 100 spots left`}
-                </span>
+                <span className="text-[10px] font-mono tracking-[0.12em] text-white/35">Less than 100 spots available</span>
               </div>
             </div>
 
-            {/* Full banner */}
-            {isFull && (
-              <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-[13px] text-white/50">
-                Beta is full — waitlist coming soon.
-              </div>
-            )}
-
             {/* Exhausted notice */}
-            {exhausted && !isFull && (
+            {exhausted && (
               <div className="mb-6 rounded-xl border border-[rgba(212,175,55,0.20)] bg-[rgba(212,175,55,0.05)] px-4 py-3 text-[13px] text-[rgba(212,175,55,0.85)]">
                 You&apos;ve used your 30 analyses included in beta access — upgrade to continue.
               </div>
@@ -175,26 +170,20 @@ function UpgradeContent() {
             )}
 
             {/* CTA button */}
-            {isFull ? (
-              <div className="w-full rounded-2xl py-4 text-[14px] font-medium tracking-[0.06em] border border-white/10 bg-white/[0.03] text-white/30 text-center cursor-not-allowed select-none">
-                Beta is full — waitlist coming soon
-              </div>
-            ) : (
-              <button
-                onClick={handleCheckout}
-                disabled={loading}
-                className="w-full rounded-2xl py-4 text-[14px] font-medium tracking-[0.06em] border border-[rgba(212,175,55,0.65)] bg-[rgba(212,175,55,0.10)] text-[#D4AF37] transition hover:bg-[rgba(212,175,55,0.18)] hover:border-[rgba(212,175,55,0.95)] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="h-3.5 w-3.5 rounded-full border-2 border-[#D4AF37]/30 border-t-[#D4AF37] animate-spin" />
-                    Redirecting to checkout…
-                  </span>
-                ) : (
-                  "Get Access — $10"
-                )}
-              </button>
-            )}
+            <button
+              onClick={handleCheckout}
+              disabled={loading}
+              className="w-full rounded-2xl py-4 text-[14px] font-medium tracking-[0.06em] border border-[rgba(212,175,55,0.65)] bg-[rgba(212,175,55,0.10)] text-[#D4AF37] transition hover:bg-[rgba(212,175,55,0.18)] hover:border-[rgba(212,175,55,0.95)] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="h-3.5 w-3.5 rounded-full border-2 border-[#D4AF37]/30 border-t-[#D4AF37] animate-spin" />
+                  Redirecting to checkout…
+                </span>
+              ) : (
+                "Get Access — $10"
+              )}
+            </button>
 
             <p className="mt-4 text-[11px] text-white/20 text-center">
               Secure checkout via Stripe. Not investment advice.

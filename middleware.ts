@@ -28,6 +28,17 @@ async function getHasPaid(userId: string): Promise<boolean> {
   return data?.has_paid ?? false;
 }
 
+// Copy refreshed session cookies onto any response we return.
+// CRITICAL: if setAll() ran during getUser() (token refresh), the new cookies
+// must travel on EVERY response — including redirects — or the next request
+// will look unauthenticated and trigger an infinite /login loop.
+function withCookies(redirect: NextResponse, base: NextResponse): NextResponse {
+  base.cookies.getAll().forEach(({ name, value, ...opts }) => {
+    redirect.cookies.set(name, value, opts as Parameters<typeof redirect.cookies.set>[2]);
+  });
+  return redirect;
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -64,11 +75,11 @@ export async function middleware(request: NextRequest) {
 
   // /login and /signup: redirect authenticated users to the right destination
   if (pathname === "/login" || pathname === "/signup") {
-    if (!user) return NextResponse.next(); // Not logged in — show page
+    if (!user) return response; // Not logged in — show page (carry any refreshed cookies)
     const hasPaid = await getHasPaid(user.id);
     const url = request.nextUrl.clone();
     url.pathname = hasPaid ? "/" : "/upgrade";
-    return NextResponse.redirect(url);
+    return withCookies(NextResponse.redirect(url), response);
   }
 
   // All protected paths — require authentication
@@ -76,7 +87,7 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("from", pathname === "/upgrade" ? "/" : pathname);
-    return NextResponse.redirect(url);
+    return withCookies(NextResponse.redirect(url), response);
   }
 
   // Authenticated — check has_paid
@@ -86,14 +97,14 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/upgrade" && hasPaid) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
-    return NextResponse.redirect(url);
+    return withCookies(NextResponse.redirect(url), response);
   }
 
   // Not paid + not on /upgrade → redirect to /upgrade
   if (!hasPaid && pathname !== "/upgrade") {
     const url = request.nextUrl.clone();
     url.pathname = "/upgrade";
-    return NextResponse.redirect(url);
+    return withCookies(NextResponse.redirect(url), response);
   }
 
   return response;

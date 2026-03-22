@@ -27,7 +27,16 @@ function LoginForm() {
 
     try {
       const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+      // 10 s hard timeout — prevents infinite "Signing in…" state
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("timeout")), 10_000)
+      );
+
+      const { error: signInError } = await Promise.race([
+        supabase.auth.signInWithPassword({ email, password }),
+        timeoutPromise,
+      ]);
 
       if (signInError) {
         const msg = signInError.message.toLowerCase();
@@ -44,8 +53,9 @@ function LoginForm() {
       // onAuthStateChange fires → Header updates immediately
       router.push(from === "/login" ? "/" : from);
       router.refresh();
-    } catch {
-      setError({ message: "Network error — please try again." });
+    } catch (err) {
+      const isTimeout = err instanceof Error && err.message === "timeout";
+      setError({ message: isTimeout ? "Request timed out — please try again." : "Network error — please try again." });
     } finally {
       setLoading(false);
     }

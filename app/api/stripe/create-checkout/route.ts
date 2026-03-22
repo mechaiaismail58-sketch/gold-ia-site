@@ -38,13 +38,18 @@ export async function POST() {
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ??
       "https://gold-ia-site.vercel.app";
 
+    const successUrl = `${siteUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${siteUrl}/upgrade`;
+
     console.log("[stripe/create-checkout] Creating session for user:", user.id, "price:", priceId);
+    console.log("[stripe/create-checkout] siteUrl:", siteUrl);
+    console.log("[stripe/create-checkout] success_url:", successUrl);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${siteUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${siteUrl}/upgrade`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata: { user_id: user.id },
       customer_email: user.email,
     });
