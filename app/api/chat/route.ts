@@ -574,21 +574,18 @@ INSTRUCTIONS:
       } catch { /* non-critical */ }
     }
 
-    // Build the user profile injection block — only include non-null values.
-    // If no values are available, userProfileBlock stays empty and nothing is injected.
-    let userProfileBlock = "";
+    // Build the system prompt suffix — subtle adaptation appended to SYSTEM_PROMPT.
+    // Only constructed when at least one profile value is non-null/non-empty.
+    let systemPromptSuffix = "";
     if (userProfile) {
-      const profileLines: string[] = [];
-      if (userProfile.trading_style)   profileLines.push(`- Trading style: ${userProfile.trading_style}`);
-      if (userProfile.experience_level) profileLines.push(`- Experience level: ${userProfile.experience_level}`);
-      if (userProfile.account_size)    profileLines.push(`- Account size: ${userProfile.account_size}`);
-      if (userProfile.risk_profile)    profileLines.push(`- Risk profile: ${userProfile.risk_profile}`);
+      const parts: string[] = [];
+      if (userProfile.trading_style)    parts.push(`trading style: ${userProfile.trading_style}`);
+      if (userProfile.experience_level) parts.push(`experience: ${userProfile.experience_level}`);
+      if (userProfile.account_size)     parts.push(`account size: ${userProfile.account_size}`);
+      if (userProfile.risk_profile)     parts.push(`risk profile: ${userProfile.risk_profile}`);
 
-      if (profileLines.length > 0) {
-        userProfileBlock = `User profile:
-${profileLines.join("\n")}
-
-Adapt every response to this profile. Trading style → adapt timeframes and signal type. Experience level → beginner means clear explanations, professional means straight to execution details. Account size → adapt position sizing recommendations proportionally. Risk profile → conservative means strict SL and warnings, aggressive means maximum opportunity focus.`;
+      if (parts.length > 0) {
+        systemPromptSuffix = `\n\nSubtle profile adaptation — do not change your response structure or format. Only adjust: vocabulary complexity based on experience level, position sizing examples based on account size, timeframe focus based on trading style, and risk emphasis based on risk profile. Keep the same sections, same depth, same layout as always.\n\nCurrent user — ${parts.join(", ")}.`;
       }
     }
 
@@ -623,7 +620,6 @@ ${researchContext.upcoming_events.summary}
 ` : ""}${tradeMemory && tradeMemory.signals.length > 0 ? `PREVIOUS TRADE SIGNALS
 ${tradeMemory.summary}
 ` : ""}
-${userProfileBlock ? `${userProfileBlock}\n` : ""}
 ${modeInstruction}
 
 ${horizonInstruction}
@@ -699,7 +695,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
         input: [
           {
             role: "system",
-            content: SYSTEM_PROMPT,
+            content: SYSTEM_PROMPT + systemPromptSuffix,
           },
           {
             role: "user",
