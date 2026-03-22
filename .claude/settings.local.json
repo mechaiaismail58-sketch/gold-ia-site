@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(curl -s \"https://www.kitco.com/rss/news_gold.xml\" -A \"Mozilla/5.0\" --max-time 5 -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s \"https://finance.yahoo.com/rss/headline?s=GC%3DF\" --max-time 5 -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s \"https://feeds.content.dowjones.io/public/rss/mw_realtimeheadlines\" --max-time 5 -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s \"https://www.investing.com/rss/news_14.rss\" --max-time 5 -A \"Mozilla/5.0\" -o /dev/null -w \"%{http_code}\")",
+      "Bash(npm install:*)",
+      "Bash(grep -E \"\\\\.ts$|\\\\.tsx$|\\\\.js$|\\\\.json$|^/c\")"
+    ]
+  }
+}

@@ -1,0 +1,221 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Root Design Tokens ===== */
+
+:root {
+  --gold: #D4AF37;
+  --muted: rgba(255, 255, 255, 0.55);
+  --border: rgba(255, 255, 255, 0.10);
+  --bg: #07060b;
+}
+
+/* ===== Base Reset ===== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Prevent iOS font zoom on input focus */
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+  background: #07060b;
+  color: white;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  font-feature-settings: "rlig" 1, "calt" 1, "kern" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  min-height: 100dvh;
+}
+
+/* Prevent iOS zoom on input focus (font-size must be >= 16px or use this) */
+input, textarea, select {
+  font-size: max(16px, 1em);
+}
+
+/* But keep our custom sizes for styled inputs by overriding back */
+input.text-sm,
+input.text-xs,
+textarea.text-sm,
+textarea.text-xs {
+  font-size: inherit;
+}
+
+/* ===== Selection ===== */
+
+::selection {
+  background: rgba(109, 40, 217, 0.35);
+  color: #fff;
+}
+
+/* ===== Focus ring — accessible & premium ===== */
+
+:focus-visible {
+  outline: 2px solid rgba(139, 92, 246, 0.7);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ===== Card Glass Effect ===== */
+
+.card {
+  background: rgba(10, 8, 18, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow:
+    inset 0 0 0 1px rgba(212, 175, 55, 0.10),
+    0 8px 40px rgba(0, 0, 0, 0.40),
+    0 0 80px rgba(212, 175, 55, 0.03);
+}
+
+/* ===== Scrollbar Premium ===== */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(109, 40, 217, 0.35);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(109, 40, 217, 0.6);
+}
+
+/* ===== Animations ===== */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-fast {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+@keyframes typing-dot {
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+  30%           { opacity: 1;    transform: translateY(-3px); }
+}
+
+@keyframes progress-indeterminate {
+  0%   { left: -35%; width: 35%; }
+  60%  { left: 100%; width: 35%; }
+  100% { left: 100%; width: 35%; }
+}
+
+@keyframes nav-progress-enter {
+  0%   { width: 0%; }
+  30%  { width: 35%; }
+  65%  { width: 65%; }
+  100% { width: 80%; }
+}
+
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-25%); }
+}
+
+/* ===== Animation Utilities ===== */
+
+.animate-fade-in {
+  animation: fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in-fast {
+  animation: fade-in-fast 0.18s ease both;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Shimmer skeleton */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 600px 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 8px;
+}
+
+/* Typing dots */
+.typing-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  animation: typing-dot 1.2s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* Nav progress bar */
+.nav-progress-bar {
+  animation: nav-progress-enter 2.5s cubic-bezier(0.1, 0.4, 0.2, 1) forwards;
+}
+
+/* ===== Transitions ===== */
+
+/* Smooth button/interactive transitions */
+button,
+a {
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-duration: 140ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===== Premium page entrance ===== */
+
+.page-enter {
+  animation: fade-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
