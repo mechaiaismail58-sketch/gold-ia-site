@@ -24,7 +24,6 @@ export default function PaymentSuccessPage() {
 
   return (
     <div className="min-h-screen bg-[#07060b] flex items-center justify-center px-4 animate-fade-in">
-      {/* Background blobs */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute -top-24 left-[-140px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.18)] blur-[110px]" />
         <div className="absolute bottom-[-120px] left-[20%] h-[400px] w-[400px] rounded-full bg-[rgba(200,162,74,0.08)] blur-[120px]" />
@@ -41,21 +40,14 @@ export default function PaymentSuccessPage() {
           </p>
         </div>
 
-        {/* Card */}
         <div className="card border border-white/10 rounded-3xl overflow-hidden">
           <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.50)] to-transparent" />
 
           <div className="p-8 sm:p-10">
-            {/* Checkmark icon */}
+            {/* Checkmark */}
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(212,175,55,0.30)] bg-[rgba(212,175,55,0.06)]">
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                <path
-                  d="M5 14l7 7L23 7"
-                  stroke="#D4AF37"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                <path d="M5 14l7 7L23 7" stroke="#D4AF37" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
 
@@ -79,9 +71,26 @@ export default function PaymentSuccessPage() {
               Go to Dashboard
             </Link>
 
-            <p className="mt-4 text-[11px] text-white/20">
-              Redirecting automatically in {countdown}s…
-            </p>
+            {/* Countdown */}
+            <div className="mt-5 flex items-center justify-center gap-3">
+              <span className="text-[11px] text-white/25">Redirecting in</span>
+              <div className="flex items-center gap-1.5">
+                {[3, 2, 1].map((n) => (
+                  <span
+                    key={n}
+                    className={`text-[11px] font-mono transition-all duration-300 ${
+                      countdown === n
+                        ? "text-[#D4AF37] scale-110"
+                        : countdown < n
+                        ? "text-white/10 line-through"
+                        : "text-white/25"
+                    }`}
+                  >
+                    {n}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

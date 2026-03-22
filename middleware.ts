@@ -3,25 +3,41 @@ import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Always public — no auth or paywall check at all
-const ALWAYS_PUBLIC = [
-  "/login",
-  "/signup",
-  "/reset-password",
-  "/auth/callback",
+// Completely bypass — no auth check, no paywall
+const SKIP_PATHS = [
   "/api/auth",
-  "/payment-success",
   "/api/stripe",
+  "/auth/callback",
+  "/payment-success",
+  "/reset-password",
 ];
+
+async function getHasPaid(userId: string): Promise<boolean> {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) return false;
+  const admin = createSupabaseAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    serviceKey,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+  const { data } = await admin
+    .from("users")
+    .select("has_paid")
+    .eq("id", userId)
+    .single();
+  return data?.has_paid ?? false;
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (
-    ALWAYS_PUBLIC.some((p) => pathname.startsWith(p)) ||
-    pathname.startsWith("/_next") ||
-    pathname.includes(".")
-  ) {
+  // Static assets — skip immediately
+  if (pathname.startsWith("/_next") || pathname.includes(".")) {
+    return NextResponse.next();
+  }
+
+  // Completely bypass paths (no session needed)
+  if (SKIP_PATHS.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
 
@@ -46,8 +62,16 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Not authenticated → /login
-  // If trying to reach /upgrade without auth, send to / after login (middleware will re-route)
+  // /login and /signup: redirect authenticated users to the right destination
+  if (pathname === "/login" || pathname === "/signup") {
+    if (!user) return NextResponse.next(); // Not logged in — show page
+    const hasPaid = await getHasPaid(user.id);
+    const url = request.nextUrl.clone();
+    url.pathname = hasPaid ? "/" : "/upgrade";
+    return NextResponse.redirect(url);
+  }
+
+  // All protected paths — require authentication
   if (!user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
@@ -55,31 +79,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Authenticated — check has_paid using service role key (bypasses RLS)
-  let hasPaid = false;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (serviceKey) {
-    const admin = createSupabaseAdmin(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      serviceKey,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
-    const { data: profile } = await admin
-      .from("users")
-      .select("has_paid")
-      .eq("id", user.id)
-      .single();
-    hasPaid = profile?.has_paid ?? false;
-  }
+  // Authenticated — check has_paid
+  const hasPaid = await getHasPaid(user.id);
 
-  // Authenticated + paid → redirect away from /upgrade to /
+  // Paid + on /upgrade → redirect to /
   if (pathname === "/upgrade" && hasPaid) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
   }
 
-  // Authenticated + not paid + not on /upgrade → redirect to /upgrade
+  // Not paid + not on /upgrade → redirect to /upgrade
   if (!hasPaid && pathname !== "/upgrade") {
     const url = request.nextUrl.clone();
     url.pathname = "/upgrade";

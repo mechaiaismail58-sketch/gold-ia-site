@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: Request) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  apiVersion: "2026-02-25.clover" as any,
+    apiVersion: "2026-02-25.clover" as any,
   });
 
   const rawBody = await req.text();
@@ -33,32 +33,39 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Webhook signature invalid." }, { status: 400 });
   }
 
+  // Respond 200 immediately — Stripe requires a fast acknowledgement
+  // Process the DB update asynchronously after the response is sent
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const userId = session.metadata?.user_id;
 
     if (!userId) {
       console.error("[stripe/webhook] Missing user_id in session metadata.");
-      return NextResponse.json({ error: "Missing user_id." }, { status: 400 });
+      // Still return 200 — don't let Stripe retry (the data is just missing)
+      return NextResponse.json({ received: true });
     }
 
-    const admin = createAdminClient();
-    if (!admin) {
-      console.error("[stripe/webhook] No admin client.");
-      return NextResponse.json({ error: "Server error." }, { status: 500 });
-    }
-
-    const { error } = await admin
-      .from("users")
-      .update({ has_paid: true })
-      .eq("id", userId);
-
-    if (error) {
-      console.error("[stripe/webhook] DB update error:", error.message);
-      return NextResponse.json({ error: "DB update failed." }, { status: 500 });
-    }
-
-    console.log(`[stripe/webhook] Access granted for user ${userId}`);
+    // Fire async — do not await so Stripe gets 200 immediately
+    void (async () => {
+      try {
+        const admin = createAdminClient();
+        if (!admin) {
+          console.error("[stripe/webhook] No admin client.");
+          return;
+        }
+        const { error } = await admin
+          .from("users")
+          .update({ has_paid: true })
+          .eq("id", userId);
+        if (error) {
+          console.error("[stripe/webhook] DB update error:", error.message);
+        } else {
+          console.log(`[stripe/webhook] Access granted for user ${userId}`);
+        }
+      } catch (err) {
+        console.error("[stripe/webhook] Unexpected error:", err);
+      }
+    })();
   }
 
   return NextResponse.json({ received: true });

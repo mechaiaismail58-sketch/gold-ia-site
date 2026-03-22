@@ -33,7 +33,10 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gold-ia-site.vercel.app";
+    const siteUrl =
+      process.env.NEXT_PUBLIC_APP_URL ??
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ??
+      "https://gold-ia-site.vercel.app";
 
     console.log("[stripe/create-checkout] Creating session for user:", user.id, "price:", priceId);
 

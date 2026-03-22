@@ -32,12 +32,20 @@ export default function GlobalError({
         An unexpected error occurred. Your data is intact.
       </p>
 
-      <button
-        onClick={reset}
-        className="rounded-xl border border-[rgba(109,40,217,0.55)] px-6 py-2.5 text-xs uppercase tracking-[0.12em] text-white transition hover:border-[rgba(109,40,217,0.9)] hover:bg-[rgba(109,40,217,0.10)]"
-      >
-        Try again
-      </button>
+      <div className="flex items-center justify-center gap-3 flex-wrap">
+        <button
+          onClick={reset}
+          className="rounded-xl border border-[rgba(109,40,217,0.55)] px-6 py-3 text-xs uppercase tracking-[0.12em] text-white transition hover:border-[rgba(109,40,217,0.9)] hover:bg-[rgba(109,40,217,0.10)] min-h-[44px]"
+        >
+          Try again
+        </button>
+        <a
+          href="/"
+          className="rounded-xl border border-white/10 px-6 py-3 text-xs uppercase tracking-[0.12em] text-white/50 transition hover:border-white/20 hover:text-white/70 min-h-[44px] flex items-center"
+        >
+          ← Back to home
+        </a>
+      </div>
     </div>
   );
 }

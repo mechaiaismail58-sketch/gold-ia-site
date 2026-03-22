@@ -94,10 +94,13 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
   }, [pathname]);
 
   async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    // Use browser client so onAuthStateChange fires and Header updates immediately
+    const supabase = createClient();
+    await supabase.auth.signOut();
     setUserEmail(null);
+    setAvatarUrl(null);
+    setDropdownOpen(false);
     router.push("/login");
-    router.refresh();
   }
 
   const navLinkClass = (href: string) =>
