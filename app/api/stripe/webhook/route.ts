@@ -7,11 +7,11 @@ export const runtime = "nodejs";
 // IMPORTANT: raw body needed for signature validation — do NOT parse as JSON
 export const dynamic = "force-dynamic";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-});
-
 export async function POST(req: Request) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-02-25.clover",
+  });
+
   const rawBody = await req.text();
   const sig = req.headers.get("stripe-signature");
 

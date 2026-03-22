@@ -4,11 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-});
-
 export async function POST() {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-02-25.clover",
+  });
+
   try {
     const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
