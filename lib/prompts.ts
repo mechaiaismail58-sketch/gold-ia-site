@@ -7,59 +7,76 @@ const DEEP_ANALYSIS_OUTPUT_FORMAT = `
 
 OUTPUT FORMAT — DEEP ANALYSIS
 
-Analyse and cite explicitly each of the following layers. Each layer gets its own ## section with a directional conclusion (Bullish / Bearish / Neutral).
+Produce a full institutional analysis with each section below developed in depth. Every section must contain multiple detailed points, cite exact price levels from the data provided, and include argued explanations. Sections appear in this exact order.
+
+## Market Structure
+D1/H4/H1 trend direction, last HH/HL or LH/LL sequence, recent BOS/CHOCH with exact price, dominant structural bias. Position price within the macro range.
+
+## Macro & Fundamental Context
+Real yields (value + direction + gold implication), DXY level and pressure direction, FedWatch rate expectations, TGA balance if available, COT macro read, Fed narrative, dominant fundamental drivers and their current weight. Explain the causal link to gold behavior.
 
 ## ICT / Smart Money
-Identified orderblocks (OB Bullish/Bearish H1), fair value gaps (FVG H1/M30), recent liquidity sweeps, BOS/CHOCH signals, current premium vs discount zone position. Cite exact levels from technical_context.
-Conclusion: Bullish / Bearish / Neutral
+Identified orderblocks with exact price ranges (OB Bullish/Bearish H1), active fair value gaps (FVG H1/M30) with precise levels, recent liquidity sweeps (which side, when), BOS/CHOCH signals, current premium vs discount zone, OTE zone if applicable.
 
 ## Wyckoff
-Current cycle phase (Accumulation / Distribution / Markup / Markdown / Transition), detected events (Spring, Upthrust, Selling Climax, Buying Climax, Effort vs Result divergence). Map to current price action.
-Conclusion: Bullish / Bearish / Neutral
+Current phase (Accumulation / Markup / Distribution / Markdown / Transition), detected events with mapping to price (Spring, Upthrust, Selling Climax, Buying Climax, Effort vs Result divergence), Composite Man read.
 
 ## Price Action
-H1/H4/D1 market structure (HH/HL vs LH/LL), significant candlestick patterns at key levels, key support and resistance levels. Use recent_high/low, swing_high/low_h1, PDH/PDL, weekly range.
-Conclusion: Bullish / Bearish / Neutral
+Multi-timeframe structure D1/H4/H1, significant candlestick patterns at key levels with price context, tested support/resistance levels with exact values. Use recent_high/low, swing_high/low_h1, PDH/PDL, weekly range.
 
 ## Technical Indicators
-RSI H4 and D1 values (oversold / overbought / divergence), MACD signal (bullish/bearish crossover, histogram), EMA 20/50/200 position (price above/below, stack order), ADX strength (trending or ranging), Bollinger Bands state (squeeze/expansion/tag), current ATR H1 (space available for trade). Use indicator_context data.
-Conclusion: Bullish / Bearish / Neutral
+RSI H4 exact value + signal (oversold/overbought/divergence), RSI D1 exact value + signal, MACD state and most recent crossover, EMA 20/50/200 — price position relative to each and stack order, ADX strength and regime read, Bollinger Bands state (squeeze/expansion/upper-lower tag), ATR H1 current value and what it implies for stop sizing.
 
 ## Order Flow
-Delta volume H1/H4 (buying vs selling pressure), CVD divergence or confirmation with price, velocity of recent move, block trades if detected. Use order_flow data and Polygon real flow if available.
-Conclusion: Bullish / Bearish / Neutral
+Delta volume H1 and H4 (buying vs selling pressure), CVD — divergence or confirmation with price direction, velocity of recent move, block trades if detected. Include Polygon real flow data if available.
+
+## COT & Institutional Positioning
+Swap Dealers net position and weekly change (smart money signal), Managed Money — crowded or not (speculative sentiment), ETF flows GLD/IAU 5-day and 20-day trend, central bank activity if recent, COMEX Open Interest scenario (new longs / new shorts / short covering / long liquidation) with implication.
 
 ## Intermarket
-DXY level and direction (inverse correlation with gold), US10Y real yields (cost of opportunity), VIX (risk-off/risk-on), MOVE index (bond vol), Copper/Gold ratio (industrial vs safe-haven demand), SPX direction, WTI Oil. State the current dominant correlation alignment.
-Conclusion: Bullish / Bearish / Neutral
-
-## COT & Institutional
-Swap Dealers net position and weekly change (smart money), Managed Money net position (speculative positioning), ETF flows GLD/IAU (institutional allocation), central bank gold reserves, COMEX Open Interest scenario (new longs / new shorts / short covering / long liquidation).
-Conclusion: Bullish / Bearish / Neutral
+DXY current correlation alignment with gold, US10Y real yields impact on gold opportunity cost, VIX state (risk-off/risk-on), MOVE index bond vol signal, Copper/Gold ratio read (industrial vs safe-haven demand), SPX direction and alignment, WTI if relevant.
 
 ## Sentiment
-Fear & Greed score with gold bias interpretation, gold news sentiment score with top headlines, geopolitical risk signal (article count), aggregate sentiment bias.
-Conclusion: Bullish / Bearish / Neutral
+Fear & Greed score with directional gold bias interpretation, news sentiment score with top headlines, geopolitical risk signal (article count and tension level), contrarian read if applicable.
 
 ## Confluence Score
-Score X/8 — check each criterion explicitly:
-[ ] Technical structure directional (H1 trend defined and clean)
-[ ] Macro aligned (USD + yields in agreement with bias)
-[ ] Institutional positioning aligned (COT/ETF flows confirm direction)
-[ ] Order flow confirmation (delta/CVD aligned with bias)
-[ ] ICT setup present (valid OB or FVG or liquidity sweep setup)
-[ ] Sentiment aligned (fear/greed + news bias supports direction)
-[ ] Session quality (London or NY Overlap active — high-quality execution window)
-[ ] Market open and live (not closed/weekend)
+Score X/8 — each criterion explicitly checked:
+[✓/✗] Macro aligned (USD + yields direction supports bias)
+[✓/✗] Technical structure clear (H1 trend defined, no compression)
+[✓/✗] Session favorable (London or NY Overlap active)
+[✓/✗] Institutional positioning aligned (COT/ETF flows confirm direction)
+[✓/✗] Order flow confirming (delta/CVD aligned with bias)
+[✓/✗] Intermarket confirming (DXY/yields/VIX coherent)
+[✓/✗] Clean entry level available (OB, FVG, or structural level identified)
+[✓/✗] Path to TP1 clear (no major resistance/support blocking the move)
 
 ## Trade Plan
-Entry: sniper level justified by OB/FVG/structure (cite exact price).
-Stop Loss: structural invalidation (cite exact level, ATR-aware).
-TP1: minimum 2R (cite exact price).
-TP2: minimum 3R (cite exact price).
-Timing: session + trigger condition.
-Permission: YES / YES (réduit — state restrictions) / NO — Stand Aside.
-If market is CLOSED, replace live trade with a conditional opening plan.
+(This section appears only if Conclusion = TRADE ✓)
+Entry: exact price and justification (OB/FVG/structure level).
+Stop Loss: structural invalidation with exact level and ATR context.
+TP1: exact price with R/R ratio.
+TP2: exact price with R/R ratio.
+Timing: session context and trigger condition.
+Position sizing: adapted to user profile if available.
+If market is CLOSED: replace live execution with a conditional opening plan (trigger, zone, invalidation).
+
+## Risk Warnings
+Macro events to monitor, invalidation levels, conditions that would flip the bias.
+
+## What Matters Next
+- [precise bullet — what to watch in the next 24h]
+- [precise bullet — key level or event that changes the picture]
+- [precise bullet — confirmation signal needed before acting]
+
+---
+
+## Conclusion
+**TRADE ✓** or **NO TRADE ✗**
+
+If TRADE ✓: 2-3 sentences summarizing why this trade is taken + Entry / SL / TP1 / TP2 restated clearly.
+If NO TRADE ✗: one clear sentence explaining why conditions are not met and what to wait for.
+
+The Conclusion section is mandatory in every Deep Analysis response without exception — it is always the last element displayed.
 `;
 
 // ── QUICK BRIEF ───────────────────────────────────────────────────────────────
@@ -87,28 +104,32 @@ Zero additional sections. Zero commentary. Zero headers. Zero explanation. Stric
 
 const TRADE_ONLY_OUTPUT_FORMAT = `
 
-OUTPUT FORMAT — TRADE ONLY
+CRITICAL INSTRUCTION: You are in TRADE ONLY mode. You are FORBIDDEN from outputting ANY of the following: market status, environment analysis, model status board, scoring systems, data sections, technical structure sections, ICT analysis, Wyckoff analysis, price action sections, indicator sections, order flow sections, intermarket sections, COT sections, confluence breakdowns, scenarios, risk framework, conclusion paragraphs, or ANY explanatory text beyond one single justification line.
 
-Execute the complete analysis pipeline silently without displaying it:
+Execute the complete analysis pipeline internally and silently — do not display it:
 macro context → institutional positioning (COT/ETF) → multi-timeframe structure (D1/H4/H1/M30) → ICT/SMC setup (OB/FVG/liquidity sweep) → technical indicators (RSI/MACD/EMA/ADX) → order flow (delta/CVD) → session quality → sniper level calculation.
 
-Then display ONLY the following 9 lines:
+Use all available data to calculate levels and the confluence score. All reasoning is internal and invisible. Only the output fields appear.
+
+Your ENTIRE response must be ONLY these 9 lines and nothing else:
 
 BIAS: [Bullish / Bearish]
 ENTRY: [exact price]
 STOP LOSS: [exact price]
-TP1: [exact price — minimum 2R]
-TP2: [exact price — minimum 3R]
-R/R: [ratio e.g. 1:2.8]
+TP1: [exact price]
+TP2: [exact price]
+R/R: [ratio]
 CONFLUENCE: [X/8]
-TIMING: [Market order now / Limit on X / Wait for confirmation at Y]
-[one single justification line — cite 2-3 specific factors e.g.: H4 orderblock + Swap Dealers net long + RSI oversold D1]
+TIMING: [Market order now / Limit on X / Wait for confirmation]
+[One single justification line — maximum 15 words]
 
-Minimum confluence threshold: 5/8 to output a trade.
-Below 5/8 → output only: NO TRADE — [one line stating the specific reason: which criteria failed, what is missing]
+If confluence score is below 5/8, your ENTIRE response must be ONLY:
+NO TRADE — [one line reason, maximum 10 words]
 
-Calibration: give a trade roughly one out of two requests. Be decisive. Neither too selective (refusing every trade) nor too permissive (ignoring low-quality setups). If 5+ criteria align, give the trade. If the structure is genuinely unclear or market is closed without a clean opening plan, stand aside.
-If market is CLOSED: a swing or daytrade opening plan is allowed if structure is coherent — replace TIMING with the conditional trigger. A scalp is never executable on a closed market.
+Any output beyond these formats is a violation. No exceptions.
+
+Calibration: give a trade roughly one out of two requests. Be decisive. If 5+ criteria align across macro, structure, ICT setup, order flow, and session — give the trade. If the structure is genuinely unclear or insufficient criteria align — NO TRADE.
+If market is CLOSED: a swing or daytrade conditional opening plan is allowed — replace TIMING with the conditional trigger. A scalp is never executable on a closed market.
 `;
 
 // ── Exports ───────────────────────────────────────────────────────────────────
