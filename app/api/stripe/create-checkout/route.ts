@@ -1,71 +1,84 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 
 export const runtime = "nodejs";
 
-export async function POST() {
-  // Diagnose env vars at runtime
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  const priceId = process.env.STRIPE_PRICE_ID;
-
-  console.log("[stripe/create-checkout] STRIPE_SECRET_KEY defined:", Boolean(secretKey));
-  console.log("[stripe/create-checkout] STRIPE_SECRET_KEY prefix:", secretKey?.slice(0, 7));
-  console.log("[stripe/create-checkout] STRIPE_PRICE_ID:", priceId);
-
-  if (!secretKey) {
-    console.error("[stripe/create-checkout] Missing STRIPE_SECRET_KEY");
-    return NextResponse.json({ error: "Stripe not configured." }, { status: 500 });
-  }
-  if (!priceId) {
-    console.error("[stripe/create-checkout] Missing STRIPE_PRICE_ID");
-    return NextResponse.json({ error: "Price not configured." }, { status: 500 });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const stripe = new Stripe(secretKey, { apiVersion: "2026-02-25.clover" as any });
+export async function POST(req: Request) {
+  console.log("[create-checkout] POST called");
 
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Step 1 — get session from request cookies
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name) {
+            return req.headers
+              .get("cookie")
+              ?.split("; ")
+              .find((c) => c.startsWith(`${name}=`))
+              ?.split("=")
+              .slice(1)
+              .join("=");
+          },
+          set() {},
+          remove() {},
+        },
+      }
+    );
 
-    if (userError || !user) {
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    console.log("[create-checkout] session present:", Boolean(session), "error:", sessionError?.message);
+
+    if (sessionError || !session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const siteUrl =
-      process.env.NEXT_PUBLIC_APP_URL ??
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ??
-      "https://gold-ia-site.vercel.app";
+    console.log("[create-checkout] user:", session.user.id);
 
-    const successUrl = `${siteUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${siteUrl}/upgrade`;
+    // Step 2 — init Stripe inside handler (never at module level)
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    const priceId = process.env.STRIPE_PRICE_ID;
 
-    console.log("[stripe/create-checkout] Creating session for user:", user.id, "price:", priceId);
-    console.log("[stripe/create-checkout] siteUrl:", siteUrl);
-    console.log("[stripe/create-checkout] success_url:", successUrl);
+    console.log("[create-checkout] STRIPE_SECRET_KEY defined:", Boolean(secretKey));
+    console.log("[create-checkout] STRIPE_PRICE_ID:", priceId);
 
-    const session = await stripe.checkout.sessions.create({
+    if (!secretKey) {
+      return NextResponse.json({ error: "Stripe secret key not configured." }, { status: 500 });
+    }
+    if (!priceId) {
+      return NextResponse.json({ error: "Stripe price ID not configured." }, { status: 500 });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const stripe = new Stripe(secretKey, { apiVersion: "2026-02-25.clover" as any });
+
+    // Step 3 — create checkout session
+    const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      metadata: { user_id: user.id },
-      customer_email: user.email,
+      success_url: "https://gold-ia-site.vercel.app/payment-success",
+      cancel_url: "https://gold-ia-site.vercel.app/upgrade",
+      metadata: { user_id: session.user.id },
+      customer_email: session.user.email,
     });
 
-    console.log("[stripe/create-checkout] Session created:", session.id, "url:", session.url?.slice(0, 60));
+    console.log("[create-checkout] session created:", checkoutSession.id, "url:", checkoutSession.url?.slice(0, 60));
 
-    if (!session.url) {
+    if (!checkoutSession.url) {
       return NextResponse.json({ error: "Stripe did not return a checkout URL." }, { status: 500 });
     }
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {
-    console.error("[stripe/create-checkout] Stripe error:", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Checkout failed." },
-      { status: 500 }
-    );
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[create-checkout] ERROR:", message, err);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
