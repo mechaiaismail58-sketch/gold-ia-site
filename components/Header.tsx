@@ -59,9 +59,14 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Écoute les changements d'auth en temps réel (login/logout)
+  // Initialise depuis le client + écoute les changements d'auth en temps réel
   useEffect(() => {
     const supabase = createClient();
+
+    // Sync initial state from browser session (covers page reload)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserEmail(session?.user?.email ?? null);
+    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUserEmail(session?.user?.email ?? null);
@@ -94,13 +99,13 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
   }, [pathname]);
 
   async function handleLogout() {
-    // Use browser client so onAuthStateChange fires and Header updates immediately
     const supabase = createClient();
     await supabase.auth.signOut();
     setUserEmail(null);
     setAvatarUrl(null);
     setDropdownOpen(false);
     router.push("/login");
+    router.refresh(); // flush Next.js cache so middleware re-evaluates
   }
 
   const navLinkClass = (href: string) =>

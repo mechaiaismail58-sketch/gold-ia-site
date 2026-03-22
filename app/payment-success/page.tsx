@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 type Phase = "polling" | "countdown" | "redirecting";
 
@@ -12,40 +13,50 @@ export default function PaymentSuccessPage() {
   const [countdown, setCountdown] = useState(3);
   const [pollFailed, setPollFailed] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const pollCount = useRef(0);
+
+  const startCountdown = useCallback(() => {
+    setPhase("countdown");
+  }, []);
 
   useEffect(() => {
-    // Poll /api/auth/payment-status every 1s, up to 10 attempts
-    pollRef.current = setInterval(async () => {
-      pollCount.current += 1;
+    const supabase = createClient();
+    let attempts = 0;
 
-      try {
-        const res = await fetch("/api/auth/payment-status");
-        const data = await res.json();
+    async function beginPolling() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-        if (data.has_paid === true) {
-          clearInterval(pollRef.current!);
-          setPhase("countdown");
-        } else if (pollCount.current >= 10) {
-          // 10s timeout — webhook may be delayed; show countdown anyway
-          clearInterval(pollRef.current!);
-          setPollFailed(true);
-          setPhase("countdown");
-        }
-      } catch {
-        if (pollCount.current >= 10) {
-          clearInterval(pollRef.current!);
-          setPhase("countdown");
-        }
+      const userId = session?.user?.id;
+      if (!userId) {
+        router.push("/login");
+        return;
       }
-    }, 1000);
+
+      pollRef.current = setInterval(async () => {
+        attempts++;
+        const { data } = await supabase
+          .from("users")
+          .select("has_paid")
+          .eq("id", userId)
+          .single();
+
+        if (data?.has_paid || attempts >= 10) {
+          clearInterval(pollRef.current!);
+          if (!data?.has_paid) setPollFailed(true);
+          startCountdown();
+        }
+      }, 1000);
+    }
+
+    beginPolling();
 
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, []);
+  }, [router, startCountdown]);
 
-  // Start the 3→2→1 countdown once has_paid is confirmed
+  // 3 → 2 → 1 countdown then redirect
   useEffect(() => {
     if (phase !== "countdown") return;
 
@@ -86,7 +97,7 @@ export default function PaymentSuccessPage() {
           <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.50)] to-transparent" />
 
           <div className="p-8 sm:p-10">
-            {/* Icon — spinner while polling, checkmark when confirmed */}
+            {/* Icon */}
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(212,175,55,0.30)] bg-[rgba(212,175,55,0.06)]">
               {phase === "polling" ? (
                 <span className="h-7 w-7 rounded-full border-2 border-[#D4AF37]/20 border-t-[#D4AF37] animate-spin" />
