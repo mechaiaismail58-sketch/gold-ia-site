@@ -8,153 +8,224 @@ function isValidEmail(v: string) {
 
 const FEATURES = [
   {
-    title: "Deep Analysis",
-    desc: "Macro-technical confluence across COT, ETF flows, DXY, yields and key S/R levels.",
+    title: "Institutional Analysis",
+    desc: "Full macro-technical confluence: COT positioning, ETF flows, yields, DXY and smart money reads.",
   },
   {
-    title: "Real-time signals",
-    desc: "Live XAUUSD data with AI-generated entry, stop-loss and target levels on demand.",
+    title: "Sniper Entries",
+    desc: "OB/FVG-based entry levels with structural SL and minimum 1.5R TP — never a guess.",
   },
   {
-    title: "Institutional framework",
-    desc: "8-criterion scoring system built on the same logic used by institutional desks.",
+    title: "Real-time Data",
+    desc: "Live XAUUSD price, intermarket context, and AI-driven confluence scoring updated on demand.",
   },
 ];
 
 export default function WaitlistLanding() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail]     = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
+  const [status, setStatus]   = useState<"idle" | "success" | "already" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!isValidEmail(email)) {
-      setError("Please enter a valid email address.");
+      setStatus("error");
+      setErrorMsg("Please enter a valid email address.");
       return;
     }
-    setError("");
+    setStatus("idle");
+    setErrorMsg("");
     setLoading(true);
     try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
+      const res  = await fetch("/api/waitlist", {
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body:    JSON.stringify({ email }),
       });
       const data = await res.json();
+      if (res.status === 409) { setStatus("already"); return; }
       if (!res.ok) {
-        setError(data.error || "Something went wrong. Please try again.");
+        setStatus("error");
+        setErrorMsg(data.error || "Something went wrong. Please try again.");
         return;
       }
-      setSuccess(true);
+      setStatus("success");
     } catch {
-      setError("Network error — please try again.");
+      setStatus("error");
+      setErrorMsg("Network error — please try again.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#07060b] flex flex-col items-center justify-center px-4 py-16 animate-fade-in">
-      {/* Background blobs */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute -top-24 left-[-140px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.20)] blur-[110px]" />
-        <div className="absolute top-[-120px] right-[-180px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.12)] blur-[120px]" />
-        <div className="absolute bottom-[-120px] left-[20%] h-[400px] w-[400px] rounded-full bg-[rgba(200,162,74,0.07)] blur-[120px]" />
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#0a0a0a",
+        color: "#f5f0e8",
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "48px 16px",
+      }}
+    >
+      {/* Background glow */}
+      <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: -200, left: -200, width: 600, height: 600, borderRadius: "50%", background: "rgba(212,175,55,0.06)", filter: "blur(120px)" }} />
+        <div style={{ position: "absolute", bottom: -200, right: -200, width: 500, height: 500, borderRadius: "50%", background: "rgba(212,175,55,0.04)", filter: "blur(100px)" }} />
       </div>
 
-      <div className="w-full max-w-lg">
+      <div style={{ width: "100%", maxWidth: 560, position: "relative", zIndex: 1 }}>
+
         {/* ── Logo ── */}
-        <div className="text-center mb-12">
-          <div className="text-[17px] tracking-[0.22em] uppercase text-white">
-            Bullion <span className="text-[color:var(--gold)]">Desk</span>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{ fontSize: 15, letterSpacing: "0.22em", textTransform: "uppercase", color: "#f5f0e8" }}>
+            BULLION <span style={{ color: "#D4AF37" }}>DESK</span>
           </div>
-          <p className="mt-2 text-xs text-[color:var(--muted)] tracking-[0.14em] uppercase">
+          <p style={{ marginTop: 8, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(245,240,232,0.35)" }}>
             Institutional Gold Intelligence
           </p>
         </div>
 
-        {/* ── Hero ── */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.28)] bg-[rgba(212,175,55,0.05)] px-3.5 py-1.5 mb-6">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF37] animate-pulse shrink-0" />
-            <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-[rgba(212,175,55,0.75)]">
-              Coming Soon
+        {/* ── Badge ── */}
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            border: "1px solid rgba(212,175,55,0.30)",
+            background: "rgba(212,175,55,0.05)",
+            borderRadius: 999, padding: "6px 14px",
+          }}>
+            <span style={{
+              width: 7, height: 7, borderRadius: "50%", background: "#D4AF37",
+              animation: "pulse 1.5s ease-in-out infinite",
+              display: "inline-block", flexShrink: 0,
+            }} />
+            <span style={{ fontSize: 10, fontFamily: "monospace", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(212,175,55,0.80)" }}>
+              COMING SOON
             </span>
-          </div>
+          </span>
+        </div>
 
-          <h1 className="text-[32px] sm:text-[42px] leading-[1.12] tracking-[-0.025em] mb-4">
-            Institutional-grade gold intelligence.{" "}
-            <span className="text-[color:var(--gold)]">Coming soon.</span>
+        {/* ── Hero ── */}
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <h1 style={{
+            fontSize: "clamp(26px, 5vw, 40px)", lineHeight: 1.12,
+            letterSpacing: "-0.025em", fontWeight: 600,
+            color: "#f5f0e8", margin: "0 0 16px",
+          }}>
+            Precision gold intelligence.<br />
+            <span style={{ color: "#D4AF37" }}>Built for traders who think institutionally.</span>
           </h1>
-
-          <p className="text-[15px] sm:text-[16px] text-[color:var(--muted)] leading-[1.7] max-w-[42ch] mx-auto">
-            Be the first to access precision XAUUSD trade signals powered by AI.
+          <p style={{ fontSize: 15, color: "rgba(245,240,232,0.50)", lineHeight: 1.7, maxWidth: "44ch", margin: "0 auto" }}>
+            AI-powered XAUUSD analysis combining macro, smart money, and technical confluence. Beta access opening soon.
           </p>
         </div>
 
         {/* ── Form card ── */}
-        <div className="card border border-white/10 rounded-3xl overflow-hidden mb-8">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.45)] to-transparent" />
-
-          <div className="p-6 sm:p-8">
-            {success ? (
-              <div className="text-center py-4">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/[0.08]">
-                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                    <path d="M4 11l5 5L18 6" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <div style={{
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: 20, overflow: "hidden", marginBottom: 24,
+        }}>
+          <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.50), transparent)" }} />
+          <div style={{ padding: "28px 28px 24px" }}>
+            {status === "success" ? (
+              <div style={{ textAlign: "center", padding: "16px 0" }}>
+                {/* Animated checkmark circle */}
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                  <svg width="56" height="56" viewBox="0 0 56 56">
+                    <circle
+                      cx="28" cy="28" r="24"
+                      fill="none" stroke="rgba(212,175,55,0.25)" strokeWidth="2"
+                    />
+                    <circle
+                      cx="28" cy="28" r="24"
+                      fill="none" stroke="#D4AF37" strokeWidth="2"
+                      strokeDasharray="150" strokeDashoffset="0"
+                      strokeLinecap="round"
+                      style={{ animation: "drawCircle 0.7s ease-out forwards" }}
+                    />
+                    <path
+                      d="M17 28l8 8L39 20"
+                      fill="none" stroke="#D4AF37" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                      style={{ animation: "drawCheck 0.4s 0.5s ease-out both" }}
+                    />
                   </svg>
                 </div>
-                <p className="text-[15px] text-white/85 leading-relaxed">
+                <p style={{ fontSize: 22, fontWeight: 600, color: "#f5f0e8", margin: "0 0 8px" }}>
                   You&apos;re on the list.
                 </p>
-                <p className="mt-1 text-[13px] text-[color:var(--muted)]">
-                  We&apos;ll notify you when early access opens.
+                <p style={{ fontSize: 13, color: "rgba(245,240,232,0.45)" }}>
+                  We&apos;ll notify you when beta access opens.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} noValidate>
-                <label
-                  htmlFor="waitlist-email"
-                  className="block text-[11px] uppercase tracking-[0.14em] text-[color:var(--muted)] mb-2"
-                >
+                <label style={{ display: "block", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(245,240,232,0.35)", marginBottom: 8 }}>
                   Email address
                 </label>
-                <div className="flex flex-col sm:flex-row gap-2.5">
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <input
-                    id="waitlist-email"
                     type="email"
                     autoComplete="email"
                     required
                     value={email}
-                    onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                    onChange={(e) => { setEmail(e.target.value); setStatus("idle"); setErrorMsg(""); }}
                     placeholder="your@email.com"
-                    className="flex-1 rounded-xl px-4 py-3 bg-transparent border border-[color:var(--border)] text-white text-[16px] focus:outline-none focus:border-[rgba(212,175,55,0.55)] transition placeholder:text-white/25 min-h-[48px]"
+                    style={{
+                      flex: 1, minWidth: 180,
+                      background: "transparent",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      borderRadius: 12, padding: "12px 16px",
+                      color: "#f5f0e8", fontSize: 15,
+                      outline: "none", minHeight: 48,
+                    }}
+                    onFocus={e => (e.target.style.borderColor = "rgba(212,175,55,0.55)")}
+                    onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
                   />
                   <button
                     type="submit"
                     disabled={loading}
-                    className="rounded-xl border border-[rgba(212,175,55,0.60)] bg-[rgba(212,175,55,0.09)] px-6 py-3 text-[13px] font-medium tracking-[0.06em] text-[#D4AF37] transition hover:bg-[rgba(212,175,55,0.18)] hover:border-[rgba(212,175,55,0.95)] disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] shrink-0"
+                    style={{
+                      background: "rgba(212,175,55,0.10)",
+                      border: "1px solid rgba(212,175,55,0.55)",
+                      borderRadius: 12, padding: "12px 24px",
+                      color: "#D4AF37", fontSize: 13,
+                      fontWeight: 500, letterSpacing: "0.06em",
+                      cursor: loading ? "not-allowed" : "pointer",
+                      opacity: loading ? 0.55 : 1,
+                      minHeight: 48, whiteSpace: "nowrap",
+                      transition: "background 0.2s, border-color 0.2s",
+                    }}
+                    onMouseEnter={e => { if (!loading) { (e.target as HTMLButtonElement).style.background = "rgba(212,175,55,0.20)"; (e.target as HTMLButtonElement).style.borderColor = "rgba(212,175,55,0.90)"; }}}
+                    onMouseLeave={e => { (e.target as HTMLButtonElement).style.background = "rgba(212,175,55,0.10)"; (e.target as HTMLButtonElement).style.borderColor = "rgba(212,175,55,0.55)"; }}
                   >
                     {loading ? (
-                      <span className="flex items-center gap-2 justify-center">
-                        <span className="h-3.5 w-3.5 rounded-full border-2 border-[#D4AF37]/30 border-t-[#D4AF37] animate-spin" />
+                      <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ width: 13, height: 13, borderRadius: "50%", border: "2px solid rgba(212,175,55,0.30)", borderTopColor: "#D4AF37", animation: "spin 0.7s linear infinite", display: "inline-block" }} />
                         Joining…
                       </span>
-                    ) : (
-                      "Join the waitlist"
-                    )}
+                    ) : "Join the waitlist"}
                   </button>
                 </div>
 
-                {error && (
-                  <p className="mt-2.5 text-[12px] text-red-400 border border-red-500/20 bg-red-500/[0.05] rounded-lg px-3 py-2">
-                    {error}
+                {status === "error" && errorMsg && (
+                  <p style={{ marginTop: 10, fontSize: 12, color: "#f87171", background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.18)", borderRadius: 8, padding: "8px 12px" }}>
+                    {errorMsg}
+                  </p>
+                )}
+                {status === "already" && (
+                  <p style={{ marginTop: 10, fontSize: 12, color: "rgba(245,240,232,0.45)", textAlign: "center" }}>
+                    This email is already on the list.
                   </p>
                 )}
 
-                <p className="mt-3 text-center text-[12px] text-white/25">
-                  Less than 100 spots available. One-time beta access — $10.
+                <p style={{ marginTop: 12, textAlign: "center", fontSize: 12, color: "rgba(245,240,232,0.22)" }}>
+                  Less than 100 spots available · One-time beta access · $10
                 </p>
               </form>
             )}
@@ -162,25 +233,50 @@ export default function WaitlistLanding() {
         </div>
 
         {/* ── Feature cards ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-12">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(155px, 1fr))", gap: 12, marginBottom: 40 }}>
           {FEATURES.map((f) => (
             <div
               key={f.title}
-              className="card rounded-2xl border border-white/[0.07] p-4"
+              style={{
+                background: "rgba(255,255,255,0.025)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 14, padding: 16,
+              }}
             >
-              <div className="text-[11px] font-mono uppercase tracking-[0.16em] text-[rgba(212,175,55,0.70)] mb-2">
+              <div style={{ fontSize: 10, fontFamily: "monospace", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(212,175,55,0.70)", marginBottom: 8 }}>
                 {f.title}
               </div>
-              <p className="text-[12px] text-white/45 leading-[1.65]">{f.desc}</p>
+              <p style={{ fontSize: 12, color: "rgba(245,240,232,0.40)", lineHeight: 1.65, margin: 0 }}>
+                {f.desc}
+              </p>
             </div>
           ))}
         </div>
 
         {/* ── Footer ── */}
-        <p className="text-center text-[11px] text-white/20">
-          Bullion Desk © {new Date().getFullYear()}
+        <p style={{ textAlign: "center", fontSize: 11, color: "rgba(245,240,232,0.18)" }}>
+          Bullion Desk © 2026 · Institutional Gold Intelligence
         </p>
       </div>
+
+      {/* Keyframe animations */}
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(0.85); }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        @keyframes drawCircle {
+          from { stroke-dashoffset: 150; }
+          to { stroke-dashoffset: 0; }
+        }
+        @keyframes drawCheck {
+          from { stroke-dasharray: 0 40; }
+          to { stroke-dasharray: 40 0; }
+        }
+      `}</style>
     </div>
   );
 }
