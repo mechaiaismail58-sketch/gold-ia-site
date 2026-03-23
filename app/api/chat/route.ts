@@ -677,23 +677,13 @@ ${conversationHistory}DEMANDE UTILISATEUR
 ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}`.trim();
     }
 
-    const userContent: Array<
-      | { type: "input_text"; text: string }
-      | { type: "input_image"; image_url: string; detail: "high" }
-    > = [
-      {
-        type: "input_text",
-        text: finalUserInput,
-      },
-    ];
-
-    if (chartImageDataUrl) {
-      userContent.push({
-        type: "input_image",
-        image_url: chartImageDataUrl,
-        detail: "high",
-      });
-    }
+    // Build user message content for Chat Completions API
+    const userMsgContent = chartImageDataUrl
+      ? [
+          { type: "text" as const, text: finalUserInput },
+          { type: "image_url" as const, image_url: { url: chartImageDataUrl, detail: "high" as const } },
+        ]
+      : finalUserInput;
 
     console.log(`[chat] mode=${mode} analysis_mode=${analysis_mode} horizon=${tradeHorizon} has_image=${Boolean(chartImageDataUrl)} has_prev_response=${Boolean(previous_response_id)}`);
 
@@ -701,9 +691,8 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
     const promptChars = selectedPrompt.length;
     const promptTokensEst = Math.round(promptChars / 4);
     const userInputTokensEst = Math.round(finalUserInput.length / 4);
-    // 2800 for deep: 14 sections × ~200 tok/section ≈ 28s at 100 tok/s — fits in 60s maxDuration.
-    // 8192 was impossible in 30s (81s needed), causing systematic truncation before sections 10-12.
-    const maxOut = analysis_mode === "deep" ? 2800 : 1400;
+    // 6000 for deep: 15 sections fully developed — fits in 60s maxDuration with chat.completions.
+    const maxOut = analysis_mode === "deep" ? 6000 : 1400;
     console.log(`[chat] system_prompt_chars=${promptChars} (~${promptTokensEst} tokens) | user_input_chars=${finalUserInput.length} (~${userInputTokensEst} tokens) | total_input_est=${promptTokensEst + userInputTokensEst} | max_output_tokens=${maxOut}`);
     if (analysis_mode === "deep") {
       const hasMacro = selectedPrompt.includes("Macro & Fundamental Data");
@@ -722,15 +711,13 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
 
     let response;
     try {
-      const openaiCall = client.responses.create({
+      const chatCall = client.chat.completions.create({
         model: "gpt-4o",
-        previous_response_id,
-        store: true,
-        max_output_tokens: maxOut,
-        tools: [{ type: "web_search_preview" }],
-        input: [
+        max_tokens: maxOut,
+        temperature: 0.3,
+        messages: [
           { role: "system", content: selectedPrompt + imageSilentInstruction },
-          { role: "user", content: userContent as any },
+          { role: "user", content: userMsgContent as any },
         ],
       });
 
@@ -740,16 +727,16 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
         setTimeout(() => reject(new Error("OpenAI request timed out after 55s")), timeoutMs)
       );
 
-      response = await Promise.race([openaiCall, timeoutPromise]);
+      response = await Promise.race([chatCall, timeoutPromise]);
     } catch (openaiError: unknown) {
       const err = openaiError as any;
       console.error("[chat] OpenAI error:", err?.status, err?.message, err?.code, err?.type);
       throw openaiError;
     }
 
-    const outputText = response.output_text;
+    const outputText = response.choices[0].message.content ?? "";
     if (!outputText) {
-      console.warn("[chat] OpenAI returned empty output_text. Full response:", JSON.stringify(response, null, 2));
+      console.warn("[chat] OpenAI returned empty content. Full response:", JSON.stringify(response, null, 2));
     }
     // DIAGNOSTIC — log output structure for deep mode
     if (analysis_mode === "deep" && outputText) {
