@@ -55,11 +55,18 @@ async function fetchSharesOutstanding(ticker: string): Promise<number | null> {
   for (const url of urls) {
     try {
       const res = await fetch(url, { headers: YF_HEADERS, next: { revalidate: 86400 } });
-      if (!res.ok) continue;
+      if (!res.ok) {
+        console.error(`fetchSharesOutstanding(${ticker}): HTTP ${res.status} from ${url}`);
+        continue;
+      }
       const data = await res.json() as QuoteSummaryResponse;
       const shares = data?.quoteSummary?.result?.[0]?.defaultKeyStatistics?.sharesOutstanding?.raw;
       if (shares != null && Number.isFinite(shares)) return shares;
-    } catch { continue; }
+      console.warn(`fetchSharesOutstanding(${ticker}): sharesOutstanding missing in response from ${url}`);
+    } catch (err) {
+      console.error(`fetchSharesOutstanding(${ticker}): fetch failed for ${url}:`, err);
+      continue;
+    }
   }
   return null;
 }
@@ -72,14 +79,24 @@ async function fetchGLDHistory(): Promise<{ closes: number[]; volumes: number[] 
   for (const url of urls) {
     try {
       const res = await fetch(url, { headers: YF_HEADERS, next: { revalidate: 3600 } }); // 1h cache
-      if (!res.ok) continue;
+      if (!res.ok) {
+        console.error(`fetchGLDHistory: HTTP ${res.status} from ${url}`);
+        continue;
+      }
       const data = await res.json() as YFChartResponse;
       const quote = data?.chart?.result?.[0]?.indicators?.quote?.[0];
-      if (!quote) continue;
+      if (!quote) {
+        console.warn(`fetchGLDHistory: no quote data in response from ${url}`);
+        continue;
+      }
       const closes  = (quote.close  ?? []).filter((v): v is number => v != null && Number.isFinite(v));
       const volumes = (quote.volume ?? []).filter((v): v is number => v != null && Number.isFinite(v));
       if (closes.length >= 10 && volumes.length >= 10) return { closes, volumes };
-    } catch { continue; }
+      console.warn(`fetchGLDHistory: insufficient data — ${closes.length} closes, ${volumes.length} volumes from ${url}`);
+    } catch (err) {
+      console.error(`fetchGLDHistory: fetch failed for ${url}:`, err);
+      continue;
+    }
   }
   return null;
 }

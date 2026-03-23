@@ -476,18 +476,27 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     withTimeout(getLatestFredValue("T10YIE"), 3000, null),
     withTimeout(getLatestFredValue("SLVPRUSD"), 3000, null),
     withTimeout(fetchYahooSpx(), 3000, { current: null, direction: "Data not found" }),
-    withTimeout(getCOTContext(), 3000, null),
+    withTimeout(getCOTContext(), 8000, null),  // CFTC API is slow — needs 8s
     withTimeout(getUpcomingEvents(), 3000, null),
     withTimeout(getPolygonOrderFlow(), 3000, null),
     withTimeout(getSentimentContext(), 3000, null),
     withTimeout(getAlphaVantageContext(), 3000, null),
-    withTimeout(getETFFlowsContext(), 3000, null),
+    withTimeout(getETFFlowsContext(), 6000, null),  // Yahoo Finance quoteSummary can be slow
     getCentralBankContext(),
     getLatestFredValue("SOFR"),
     getLatestFredValue("WTREGEN"),
     getLatestFredValue("DFEDTARU"),
     getLatestFredValue("FEDFUNDS"),
   ]);
+
+  // ── Institutional data diagnostics ────────────────────────────────────────
+  console.log(`[research] cotContext=${cotContext ? "OK" : "NULL"} | etfFlows=${etfFlows ? "OK" : "NULL"}`);
+  if (cotContext) {
+    console.log(`[research][cot] managed_money_net=${cotContext.managed_money_net} | swap_dealer_net=${cotContext.swap_dealer_net} | open_interest=${cotContext.open_interest}`);
+  }
+  if (etfFlows) {
+    console.log(`[research][etf] gld_tonnes=${etfFlows.gld_tonnes?.toFixed(0)} | iau_tonnes=${etfFlows.iau_tonnes?.toFixed(0)} | signal=${etfFlows.institutional_signal}`);
+  }
 
   const marketContext = getMarketContext();
 

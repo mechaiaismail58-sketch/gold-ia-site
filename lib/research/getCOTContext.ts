@@ -137,10 +137,17 @@ async function fetchLegacyCOT(): Promise<CFTCLegacyRecord[]> {
         headers: { Accept: "application/json" },
         next: { revalidate: 86400 }, // 24h — COT is weekly data
       });
-      if (!res.ok) continue;
+      if (!res.ok) {
+        console.error(`fetchLegacyCOT: HTTP ${res.status} for ${url}`);
+        continue;
+      }
       const data: CFTCLegacyRecord[] = await res.json();
       if (data.length > 0) return data;
-    } catch { continue; }
+      console.warn(`fetchLegacyCOT: empty response from ${url}`);
+    } catch (err) {
+      console.error(`fetchLegacyCOT: fetch failed for ${url}:`, err);
+      continue;
+    }
   }
   return [];
 }
@@ -155,10 +162,15 @@ async function fetchDisaggCOT(): Promise<CFTCDisaggRecord[]> {
       headers: { Accept: "application/json" },
       next: { revalidate: 86400 }, // 24h — COT is weekly data
     });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.error(`fetchDisaggCOT: HTTP ${res.status} for ${url}`);
+      return [];
+    }
     const data: CFTCDisaggRecord[] = await res.json();
+    if (!data.length) console.warn(`fetchDisaggCOT: empty response`);
     return data;
-  } catch {
+  } catch (err) {
+    console.error(`fetchDisaggCOT: fetch failed:`, err);
     return [];
   }
 }
