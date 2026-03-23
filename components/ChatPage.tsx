@@ -50,6 +50,8 @@ export default function ChatPage() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
 
+  const [respondedTradeIds, setRespondedTradeIds] = useState<Set<string>>(new Set());
+
   const placeholders = [
     "Ask for a gold trade signal...",
     "Is XAUUSD ready to break higher?",
@@ -115,6 +117,24 @@ export default function ChatPage() {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [setAnalysisMode]);
+
+  // Clipboard paste — detect image and attach it automatically
+  useEffect(() => {
+    function handlePaste(e: ClipboardEvent) {
+      if (!e.clipboardData) return;
+      for (const item of Array.from(e.clipboardData.items)) {
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (!file) continue;
+          e.preventDefault();
+          setSelectedImage(file);
+          return;
+        }
+      }
+    }
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, []);
 
   useEffect(() => {
     if (!selectedImage) {
@@ -189,9 +209,10 @@ export default function ChatPage() {
       const data = await r.json();
       if (!r.ok) throw new Error(data?.error || "Request failed");
 
+      const tradeId = data.trade_id ?? data.pending_trade_id ?? null;
       setMessages((m) => [
         ...m,
-        { role: "assistant", content: data.text ?? "…" },
+        { role: "assistant", content: data.text ?? "…", trade_id: tradeId },
       ]);
 
       if (data.response_id) {
@@ -214,6 +235,31 @@ export default function ChatPage() {
       ]);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function submitResult(tradeId: string, result: string) {
+    setRespondedTradeIds((prev) => new Set([...prev, tradeId]));
+    try {
+      const r = await fetch("/api/trades/result", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trade_id: tradeId, result }),
+      });
+      const data = await r.json();
+      const labels: Record<string, string> = {
+        tp1_hit: "TP1 Hit",
+        tp2_hit: "TP2 Hit",
+        sl_hit: "SL Hit",
+        breakeven: "Breakeven",
+      };
+      const labelStr = labels[result] ?? result;
+      const confirmation = data.lesson_learned
+        ? `Trade result recorded: **${labelStr}**\n\n${data.lesson_learned}`
+        : `Trade result recorded: **${labelStr}**`;
+      setMessages((m) => [...m, { role: "assistant", content: confirmation }]);
+    } catch {
+      setMessages((m) => [...m, { role: "assistant", content: "Failed to record trade result — please retry." }]);
     }
   }
 
@@ -329,6 +375,25 @@ export default function ChatPage() {
                     <div className="pl-3">
                       <ShareSignalButton text={m.content} />
                     </div>
+                    {m.trade_id && !respondedTradeIds.has(m.trade_id) && (
+                      <div className="pl-3 flex flex-wrap gap-2 mt-1">
+                        {[
+                          { result: "tp1_hit", label: "✅ TP1 Hit" },
+                          { result: "tp2_hit", label: "🎯 TP2 Hit" },
+                          { result: "sl_hit",  label: "❌ SL Hit" },
+                          { result: "breakeven", label: "➡️ Breakeven" },
+                        ].map(({ result, label }) => (
+                          <button
+                            key={result}
+                            type="button"
+                            onClick={() => submitResult(m.trade_id!, result)}
+                            className="rounded-xl border border-white/10 px-3 py-1.5 text-[11px] text-white/50 hover:border-[rgba(109,40,217,0.5)] hover:text-white/80 transition"
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -403,26 +468,33 @@ export default function ChatPage() {
             </div>
 
             {selectedImagePreview ? (
-              <div className="mb-3 flex items-center gap-3 rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-3">
+              <div className="mb-3 flex items-center gap-3 rounded-2xl border border-[rgba(109,40,217,0.25)] bg-[rgba(109,40,217,0.05)] p-3">
                 <img
                   src={selectedImagePreview}
                   alt="Selected chart preview"
                   className="h-16 w-24 rounded-lg object-cover border border-white/10"
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm text-white truncate">
-                    {selectedImage?.name ?? "Chart image"}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-white/80 truncate">
+                      {selectedImage?.name && selectedImage.name !== "image.png" ? selectedImage.name : "Chart attached"}
+                    </span>
+                    {(!selectedImage?.name || selectedImage.name === "image.png") && (
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-[rgba(109,40,217,0.8)] border border-[rgba(109,40,217,0.3)] rounded-md px-1.5 py-0.5 shrink-0">
+                        Pasted
+                      </span>
+                    )}
                   </div>
-                  <div className="text-xs text-[color:var(--muted)]">
-                    Screenshot ready to send
+                  <div className="text-xs text-[color:var(--muted)] mt-0.5">
+                    Chart ready to send
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={clearSelectedImage}
-                  className="rounded-xl border border-white/10 px-3 py-2 text-xs text-[color:var(--muted)] hover:border-white/20"
+                  className="rounded-xl border border-white/10 px-3 py-2 text-xs text-[color:var(--muted)] hover:border-white/20 shrink-0"
                 >
-                  Remove
+                  ✕
                 </button>
               </div>
             ) : null}

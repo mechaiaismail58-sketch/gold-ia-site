@@ -6,6 +6,7 @@ export type Msg = {
   role: "user" | "assistant";
   content: string;
   imagePreview?: string | null;
+  trade_id?: string | null;
 };
 
 type ChatContextValue = {

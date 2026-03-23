@@ -4,6 +4,7 @@ import { GOLDEN_EXAMPLES } from "@/lib/goldenExamples";
 import { STYLE_MEMORY } from "@/lib/styleMemory";
 import { buildResearchContext } from "@/lib/research/buildResearchContext";
 import { getTradeMemory } from "@/lib/research/getTradeMemory";
+import { getPendingTradesContext, getPerformanceMemory } from "@/lib/research/getTradesContext";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 // ── Clean context text builder — strips nulls, outputs readable text ──────────
@@ -357,6 +358,65 @@ function detectTradeHorizon(message: string): TradeHorizon {
   return "unspecified";
 }
 
+// ── Trade parser — extracts structured fields from AI text responses ──────────
+// Handles both Trade Only format (BIAS:/ENTRY:/STOP LOSS:) and
+// Deep Analysis format (Entry: / SL: inside ## Trade Setup).
+
+type ParsedTrade = {
+  bias: string;
+  entry: number;
+  stop_loss: number;
+  tp1: number | null;
+  tp2: number | null;
+  rr: number | null;
+  confluence: number | null;
+  justification: string | null;
+};
+
+function parseTrade(text: string): ParsedTrade | null {
+  if (!text) return null;
+
+  // Must have at minimum BIAS + ENTRY + STOP LOSS to be a valid trade
+  const biasMatch = text.match(/BIAS\s*:\s*(Bullish|Bearish)/i)
+    ?? text.match(/\*\*BIAS[:\s]+\**(Bullish|Bearish)/i);
+  const entryMatch = text.match(/ENTRY\s*:\s*([\d,]+(?:\.\d+)?)/i);
+  const slMatch = text.match(/STOP\s*LOSS\s*:\s*([\d,]+(?:\.\d+)?)/i)
+    ?? text.match(/\bSL\s*:\s*([\d,]+(?:\.\d+)?)/i);
+
+  if (!biasMatch || !entryMatch || !slMatch) return null;
+
+  const tp1Match = text.match(/TP1\s*:\s*([\d,]+(?:\.\d+)?)/i);
+  const tp2Match = text.match(/TP2\s*:\s*([\d,]+(?:\.\d+)?)/i);
+  const rrMatch = text.match(/R\s*\/\s*R\s*:\s*(?:1:)?([\d.]+)/i);
+  const confluenceMatch = text.match(/CONFLUENCE\s*:\s*(\d+)\s*\/\s*8/i);
+
+  // Extract single-sentence justification — last non-label line
+  const lines = text.trim().split("\n").map((l) => l.trim()).filter(Boolean);
+  const lastLine = lines[lines.length - 1] ?? null;
+  const isLabel = lastLine
+    ? /^(BIAS|ENTRY|STOP\s*LOSS|TP1|TP2|R\/R|CONFLUENCE|TIMING|NO\s*TRADE)\s*:/i.test(lastLine)
+    : true;
+  const justification = !isLabel && lastLine && lastLine.length < 300 ? lastLine : null;
+
+  const toNum = (m: RegExpMatchArray | null) =>
+    m ? parseFloat(m[1].replace(/,/g, "")) : null;
+
+  const entry = toNum(entryMatch);
+  const stop_loss = toNum(slMatch);
+  if (!entry || !stop_loss) return null;
+
+  return {
+    bias: biasMatch[1].charAt(0).toUpperCase() + biasMatch[1].slice(1).toLowerCase(),
+    entry,
+    stop_loss,
+    tp1: toNum(tp1Match),
+    tp2: toNum(tp2Match),
+    rr: rrMatch ? parseFloat(rrMatch[1]) : null,
+    confluence: confluenceMatch ? parseInt(confluenceMatch[1]) : null,
+    justification,
+  };
+}
+
 async function fileToDataUrl(file: File): Promise<string> {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
@@ -433,9 +493,11 @@ export async function POST(req: Request) {
       .eq("id", user.id)
       .single();
 
-    const [researchContext, tradeMemory] = await Promise.all([
+    const [researchContext, tradeMemory, pendingTrades, performanceMemory] = await Promise.all([
       buildResearchContext(),
       getTradeMemory(user.id, dbClient as typeof supabase),
+      getPendingTradesContext(user.id, dbClient as typeof supabase),
+      getPerformanceMemory(user.id, dbClient as typeof supabase),
     ]);
 
     const horizonInstructionMap: Record<TradeHorizon, string> = {
@@ -547,7 +609,7 @@ ${researchContext.cot_context ? `\nCOT DATA\n${researchContext.cot_context.summa
 ${researchContext.intermarket_context?.summary && researchContext.intermarket_context.summary !== "Intermarket data unavailable" ? `\nINTERMARKET DATA\n${researchContext.intermarket_context.summary}` : ""}
 ${researchContext.indicator_context?.market_regime ? `\nMARKET REGIME\n${researchContext.indicator_context.market_regime.summary}\nApproach: ${researchContext.indicator_context.market_regime.approach}` : ""}
 ${researchContext.upcoming_events && researchContext.upcoming_events.events.length > 0 ? `\nUPCOMING HIGH-IMPACT EVENTS\n${researchContext.upcoming_events.summary}` : ""}
-${tradeMemory && tradeMemory.signals.length > 0 ? `\nPREVIOUS TRADE SIGNALS\n${tradeMemory.summary}` : ""}${userProfileBlock}`.trim();
+${tradeMemory && tradeMemory.signals.length > 0 ? `\nPREVIOUS TRADE SIGNALS\n${tradeMemory.summary}` : ""}${performanceMemory ? `\n\n${performanceMemory.summary}` : ""}${pendingTrades ? `\n\n${pendingTrades.prompt}` : ""}${userProfileBlock}`.trim();
 
     let finalUserInput: string;
 
@@ -631,6 +693,12 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
 
     console.log(`[chat] mode=${mode} analysis_mode=${analysis_mode} horizon=${tradeHorizon} has_image=${Boolean(chartImageDataUrl)} has_prev_response=${Boolean(previous_response_id)}`);
 
+    // When a chart image is attached, append a silent visual analysis instruction
+    // so the AI integrates chart observations without explicitly referencing the image.
+    const imageSilentInstruction = chartImageDataUrl
+      ? `\n\nIf an image is provided, analyze it carefully and silently — identify the visible structure, key levels, patterns, trend, orderblocks, FVGs, and any relevant technical information on the chart. Integrate this visual information naturally into your analysis as if it were part of your regular data. Never say 'I can see in the image', 'based on the chart you provided', 'the attached image shows', or any phrase that explicitly references the image. Just use what you see to enrich your analysis and improve the precision of your levels. The image is an invisible layer of context.`
+      : "";
+
     let response;
     try {
       const openaiCall = client.responses.create({
@@ -642,7 +710,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
         input: [
           {
             role: "system",
-            content: selectedPrompt,
+            content: selectedPrompt + imageSilentInstruction,
           },
           {
             role: "user",
@@ -668,6 +736,48 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       console.warn("[chat] OpenAI returned empty output_text. Full response:", JSON.stringify(response, null, 2));
     }
 
+    // ── Parse + save trade if response contains a valid setup ────────────────
+    let savedTradeId: string | null = null;
+    if (outputText) {
+      const parsed = parseTrade(outputText);
+      if (parsed) {
+        try {
+          // Build a brief context summary for performance memory
+          const tc = researchContext.technical_context;
+          const ms = researchContext.macro_state;
+          const contextParts = [
+            tc?.current_price != null ? `XAU: ${tc.current_price.toFixed(2)}` : null,
+            tc?.h1_trend ? `H1: ${tc.h1_trend}` : null,
+            ms?.gold_pressure && ms.gold_pressure !== "Data not found" ? ms.gold_pressure : null,
+          ].filter(Boolean);
+          const contextSummaryText = contextParts.join(" | ").slice(0, 200) || null;
+
+          const { data: inserted } = await (dbClient as typeof supabase)
+            .from("trades")
+            .insert({
+              user_id: user.id,
+              mode: analysis_mode,
+              bias: parsed.bias,
+              entry: parsed.entry,
+              stop_loss: parsed.stop_loss,
+              tp1: parsed.tp1,
+              tp2: parsed.tp2,
+              rr: parsed.rr,
+              confluence: parsed.confluence,
+              justification: parsed.justification,
+              context_summary: contextSummaryText,
+              result: "pending",
+            })
+            .select("id")
+            .single();
+          savedTradeId = inserted?.id ?? null;
+          if (savedTradeId) console.log(`[chat] trade saved id=${savedTradeId}`);
+        } catch (saveErr) {
+          console.error("[chat] trade save error:", saveErr);
+        }
+      }
+    }
+
     return Response.json({
       ok: true,
       text: outputText || "No response generated — please retry.",
@@ -675,6 +785,8 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       mode,
       trade_horizon: tradeHorizon,
       image_attached: Boolean(chartImageDataUrl),
+      trade_id: savedTradeId,
+      pending_trade_id: pendingTrades?.first_id ?? null,
     });
   } catch (error) {
     console.error("[chat] Handler error:", error instanceof Error ? error.message : String(error));
