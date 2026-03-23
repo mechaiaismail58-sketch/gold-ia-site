@@ -693,6 +693,19 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
 
     console.log(`[chat] mode=${mode} analysis_mode=${analysis_mode} horizon=${tradeHorizon} has_image=${Boolean(chartImageDataUrl)} has_prev_response=${Boolean(previous_response_id)}`);
 
+    // DIAGNOSTIC — log prompt size and structure for deep mode
+    const promptChars = selectedPrompt.length;
+    const promptTokensEst = Math.round(promptChars / 4);
+    const userInputTokensEst = Math.round(finalUserInput.length / 4);
+    const maxOut = analysis_mode === "deep" ? 8192 : 3500;
+    console.log(`[chat] system_prompt_chars=${promptChars} (~${promptTokensEst} tokens) | user_input_chars=${finalUserInput.length} (~${userInputTokensEst} tokens) | total_input_est=${promptTokensEst + userInputTokensEst} | max_output_tokens=${maxOut}`);
+    if (analysis_mode === "deep") {
+      const hasMacro = selectedPrompt.includes("Macro & Fundamental Data");
+      const hasInstitutional = selectedPrompt.includes("Institutional & COT Data");
+      const hasInterpretation = selectedPrompt.includes("Interpretation");
+      console.log(`[chat][deep] prompt_has_Macro=${hasMacro} prompt_has_Institutional=${hasInstitutional} prompt_has_Interpretation=${hasInterpretation}`);
+    }
+
     // When a chart image is attached, append a silent visual analysis instruction
     // so the AI integrates chart observations without explicitly referencing the image.
     const imageSilentInstruction = chartImageDataUrl
@@ -705,7 +718,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
         model: "gpt-4o",
         previous_response_id,
         store: true,
-        max_output_tokens: analysis_mode === "deep" ? 6000 : 3500,
+        max_output_tokens: maxOut,
         tools: [{ type: "web_search_preview" }],
         input: [
           {
@@ -734,6 +747,15 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
     const outputText = response.output_text;
     if (!outputText) {
       console.warn("[chat] OpenAI returned empty output_text. Full response:", JSON.stringify(response, null, 2));
+    }
+    // DIAGNOSTIC — log output structure for deep mode
+    if (analysis_mode === "deep" && outputText) {
+      const outTokensEst = Math.round(outputText.length / 4);
+      const outHasMacro = outputText.includes("Macro & Fundamental Data");
+      const outHasInstitutional = outputText.includes("Institutional & COT Data");
+      const outHasInterpretation = outputText.includes("Interpretation");
+      console.log(`[chat][deep] output_chars=${outputText.length} (~${outTokensEst} tokens) | has_Macro=${outHasMacro} | has_Institutional=${outHasInstitutional} | has_Interpretation=${outHasInterpretation}`);
+      console.log(`[chat][deep] output_tail_200chars="${outputText.slice(-200).replace(/\n/g, "\\n")}"`);
     }
 
     // ── Parse + save trade if response contains a valid setup ────────────────
