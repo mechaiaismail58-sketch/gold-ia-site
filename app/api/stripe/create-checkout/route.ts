@@ -43,10 +43,9 @@ export async function POST() {
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [{ price: priceId, quantity: 1 }],
-      // Hardcoded — avoids any env var misconfiguration
       // {CHECKOUT_SESSION_ID} is replaced by Stripe with the real session ID
-      success_url: "https://gold-ia-site.vercel.app/payment-success?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url:  "https://gold-ia-site.vercel.app/upgrade",
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://bulliondesk.pro"}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://bulliondesk.pro"}/upgrade`,
       // CRITICAL: user_id in metadata so the webhook knows who to update
       metadata: { user_id: session.user.id },
       customer_email: session.user.email,
