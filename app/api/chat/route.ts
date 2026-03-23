@@ -677,13 +677,15 @@ ${conversationHistory}DEMANDE UTILISATEUR
 ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}`.trim();
     }
 
-    // Build user message content for Chat Completions API
-    const userMsgContent = chartImageDataUrl
-      ? [
-          { type: "text" as const, text: finalUserInput },
-          { type: "image_url" as const, image_url: { url: chartImageDataUrl, detail: "high" as const } },
-        ]
-      : finalUserInput;
+    // Build user input content for Responses API
+    const userInputContent: Array<
+      | { type: "input_text"; text: string }
+      | { type: "input_image"; image_url: string; detail: "high" }
+    > = [{ type: "input_text", text: finalUserInput }];
+
+    if (chartImageDataUrl) {
+      userInputContent.push({ type: "input_image", image_url: chartImageDataUrl, detail: "high" });
+    }
 
     console.log(`[chat] mode=${mode} analysis_mode=${analysis_mode} horizon=${tradeHorizon} has_image=${Boolean(chartImageDataUrl)} has_prev_response=${Boolean(previous_response_id)}`);
 
@@ -711,13 +713,13 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
 
     let response;
     try {
-      const chatCall = client.chat.completions.create({
+      const chatCall = client.responses.create({
         model: "gpt-4o",
-        max_tokens: maxOut,
-        temperature: 0.3,
-        messages: [
+        max_output_tokens: maxOut,
+        tools: [{ type: "web_search_preview" }],
+        input: [
           { role: "system", content: selectedPrompt + imageSilentInstruction },
-          { role: "user", content: userMsgContent as any },
+          { role: "user", content: userInputContent as any },
         ],
       });
 
@@ -734,9 +736,9 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       throw openaiError;
     }
 
-    const outputText = response.choices[0].message.content ?? "";
+    const outputText = response.output_text ?? "";
     if (!outputText) {
-      console.warn("[chat] OpenAI returned empty content. Full response:", JSON.stringify(response, null, 2));
+      console.warn("[chat] OpenAI returned empty output_text. Full response:", JSON.stringify(response, null, 2));
     }
     // DIAGNOSTIC — log output structure for deep mode
     if (analysis_mode === "deep" && outputText) {
