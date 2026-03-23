@@ -476,12 +476,12 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     withTimeout(getLatestFredValue("T10YIE"), 5000, null),
     withTimeout(getLatestFredValue("SLVPRUSD"), 5000, null),
     withTimeout(fetchYahooSpx(), 4000, { current: null, direction: "Data not found" }),
-    withTimeout(getCOTContext(), 8000, null),        // CFTC API is slow — needs 8s
+    withTimeout(getCOTContext(), 14000, null),       // CFTC API can take 10-13s — give full budget
     withTimeout(getUpcomingEvents(), 4000, null),
     withTimeout(getPolygonOrderFlow(), 4000, null),
     withTimeout(getSentimentContext(), 4000, null),
     withTimeout(getAlphaVantageContext(), 4000, null),
-    withTimeout(getETFFlowsContext(), 6000, null),  // Yahoo Finance quoteSummary can be slow
+    withTimeout(getETFFlowsContext(), 10000, null), // Yahoo Finance chart API — 10s budget
     withTimeout(getCentralBankContext(), 4000, null),  // was unwrapped — could block indefinitely
     withTimeout(getLatestFredValue("SOFR"), 5000, null),
     withTimeout(getLatestFredValue("WTREGEN"), 5000, null),

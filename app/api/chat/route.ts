@@ -1,6 +1,5 @@
-// Extend Vercel function timeout to 60s — deep analysis with gpt-4o generates
-// ~2800 tokens at ~100 tok/s = ~28s generation + overhead. Default 10s kills it.
-export const maxDuration = 60;
+// 90s Vercel timeout: up to 14s research (CFTC COT) + up to 70s OpenAI generation.
+export const maxDuration = 90;
 
 import OpenAI from "openai";
 import { DEEP_ANALYSIS_PROMPT, QUICK_BRIEF_PROMPT, TRADE_ONLY_PROMPT } from "@/lib/prompts";
@@ -742,10 +741,10 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
         ],
       });
 
-      // 55-second hard timeout (maxDuration = 60s, leaving 5s buffer for request overhead)
-      const timeoutMs = 55_000;
+      // 72-second hard timeout (maxDuration=90s — 14s research budget leaves 76s for AI, -4s buffer)
+      const timeoutMs = 72_000;
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("OpenAI request timed out after 55s")), timeoutMs)
+        setTimeout(() => reject(new Error("OpenAI request timed out after 72s")), timeoutMs)
       );
 
       response = await Promise.race([chatCall, timeoutPromise]);
