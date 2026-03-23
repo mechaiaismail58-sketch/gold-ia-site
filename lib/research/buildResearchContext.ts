@@ -33,6 +33,31 @@ function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
   return Promise.race([p.catch(() => fallback), timer]);
 }
 
+// ── Yahoo Finance SPX fetcher — daily data (replaces FRED SP500 which is monthly) ─
+
+async function fetchYahooSpx(): Promise<{ current: number | null; direction: string }> {
+  const YF_HEADERS = { "User-Agent": "Mozilla/5.0 (compatible; GoldDesk/1.0)", "Accept": "application/json" };
+  const urls = [
+    "https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?range=5d&interval=1d",
+    "https://query2.finance.yahoo.com/v8/finance/chart/%5EGSPC?range=5d&interval=1d",
+  ];
+  type YFChart = { chart?: { result?: Array<{ indicators?: { quote?: Array<{ close?: (number | null)[] }> } }> } };
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { headers: YF_HEADERS, next: { revalidate: 900 } });
+      if (!res.ok) continue;
+      const data = await res.json() as YFChart;
+      const closes = (data?.chart?.result?.[0]?.indicators?.quote?.[0]?.close ?? []).filter((v): v is number => v != null && Number.isFinite(v));
+      if (closes.length < 1) continue;
+      const current = closes[closes.length - 1];
+      const prev = closes.length >= 2 ? closes[closes.length - 2] : null;
+      const direction = prev == null ? "stable" : current > prev * 1.001 ? "rising" : current < prev * 0.999 ? "falling" : "stable";
+      return { current, direction };
+    } catch { continue; }
+  }
+  return { current: null, direction: "Data not found" };
+}
+
 // ── Shared OHLCV fetcher — revalidate configurable per timeframe ──────────────
 
 async function fetchOHLCVBars(
@@ -301,7 +326,7 @@ function deriveMacroState(params: {
   }
 
   let gold_pressure: "bearish" | "bullish" | "mixed" | "Data not found" = "Data not found";
-  let dominant_driver = "Donnée non trouvée";
+  let dominant_driver = "";
 
   const hasDollar = dxy != null;
   const hasYields = us10y != null || realYield != null;
@@ -355,7 +380,7 @@ function deriveTechnicalBias(params: {
   const { h1Trend, rangePositionPct, m30Structure } = params;
 
   let bias: "bullish" | "bearish" | "neutral" | "Data not found" = "Data not found";
-  let condition = "Donnée non trouvée";
+  let condition = "";
 
   if (h1Trend === "bullish") {
     bias = "bullish";
@@ -450,7 +475,7 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     withTimeout(getLatestFredValue("DGS2"), 3000, null),
     withTimeout(getLatestFredValue("T10YIE"), 3000, null),
     withTimeout(getLatestFredValue("SLVPRUSD"), 3000, null),
-    withTimeout(getFredLatestTwo("SP500"), 3000, { current: null, previous: null, direction: "Data not found" as const }),
+    withTimeout(fetchYahooSpx(), 3000, { current: null, direction: "Data not found" }),
     withTimeout(getCOTContext(), 3000, null),
     withTimeout(getUpcomingEvents(), 3000, null),
     withTimeout(getPolygonOrderFlow(), 3000, null),
