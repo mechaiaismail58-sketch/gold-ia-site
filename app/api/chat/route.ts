@@ -705,7 +705,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
         model: "gpt-4o",
         previous_response_id,
         store: true,
-        max_output_tokens: 3500,
+        max_output_tokens: analysis_mode === "deep" ? 6000 : 3500,
         tools: [{ type: "web_search_preview" }],
         input: [
           {
