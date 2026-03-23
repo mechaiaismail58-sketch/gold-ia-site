@@ -22,12 +22,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Waitlist mode — minimal layout, no header, no nav, no providers
+  // Waitlist mode — minimal layout, no header, no nav.
+  // ChatProvider is kept so pages that call useChatContext can still prerender.
   if (process.env.WAITLIST_MODE?.trim() === "true") {
     return (
       <html lang="en">
         <body style={{ margin: 0, padding: 0, background: "#0a0a0a" }}>
-          {children}
+          <ChatProvider>{children}</ChatProvider>
         </body>
       </html>
     );
