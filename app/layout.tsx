@@ -23,7 +23,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   // Waitlist mode — minimal layout, no header, no nav, no providers
-  if (process.env.WAITLIST_MODE === "true") {
+  if (process.env.WAITLIST_MODE?.trim() === "true") {
     return (
       <html lang="en">
         <body style={{ margin: 0, padding: 0, background: "#0a0a0a" }}>

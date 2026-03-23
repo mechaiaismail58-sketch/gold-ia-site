@@ -36,15 +36,19 @@ function isNormalPublic(pathname: string): boolean {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // Diagnostic — visible in Vercel Function Logs
+  const waitlistRaw = process.env.WAITLIST_MODE;
+  console.log(`[middleware] WAITLIST_MODE="${waitlistRaw}" pathname="${pathname}"`);
+
   // Static files — always pass (both modes)
   if (pathname.includes(".") || pathname.startsWith("/_next")) {
     return NextResponse.next();
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // WAITLIST MODE
+  // WAITLIST MODE — trim() guards against trailing newlines from CLI input
   // ══════════════════════════════════════════════════════════════════════════
-  if (process.env.WAITLIST_MODE === "true") {
+  if (waitlistRaw?.trim() === "true") {
     const adminSecret = process.env.ADMIN_SECRET;
 
     // ── Admin bypass cookie → full access ───────────────────────────────────
