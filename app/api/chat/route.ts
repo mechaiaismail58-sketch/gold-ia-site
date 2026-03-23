@@ -712,36 +712,64 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       ? `\n\nIf an image is provided, analyze it carefully and silently — identify the visible structure, key levels, patterns, trend, orderblocks, FVGs, and any relevant technical information on the chart. Integrate this visual information naturally into your analysis as if it were part of your regular data. Never say 'I can see in the image', 'based on the chart you provided', 'the attached image shows', or any phrase that explicitly references the image. Just use what you see to enrich your analysis and improve the precision of your levels. The image is an invisible layer of context.`
       : "";
 
+    // Model selection: o3 for Deep Analysis (superior reasoning), gpt-4o for Quick Brief / Trade Only.
+    // o3 does NOT support web_search_preview — only gpt-4o does.
+    const selectedModel = analysis_mode === "deep" ? "o3" : "gpt-4o";
+    const supportsWebSearch = selectedModel === "gpt-4o";
+    // o3 reasoning can take significantly longer than gpt-4o
+    const timeoutMs = selectedModel === "o3" ? 90_000 : 30_000;
+
+    console.log(`[chat] using model=${selectedModel} web_search=${supportsWebSearch} timeout=${timeoutMs / 1000}s`);
+
+    const buildCallOptions = (model: string, webSearch: boolean) => ({
+      model,
+      previous_response_id,
+      store: true,
+      max_output_tokens: maxOut,
+      ...(webSearch ? { tools: [{ type: "web_search_preview" as const }] } : {}),
+      input: [
+        { role: "system" as const, content: selectedPrompt + imageSilentInstruction },
+        { role: "user" as const, content: userContent as any },
+      ],
+    });
+
     let response;
     try {
-      const openaiCall = client.responses.create({
-        model: "gpt-4o",
-        previous_response_id,
-        store: true,
-        max_output_tokens: maxOut,
-        tools: [{ type: "web_search_preview" }],
-        input: [
-          {
-            role: "system",
-            content: selectedPrompt + imageSilentInstruction,
-          },
-          {
-            role: "user",
-            content: userContent as any,
-          },
-        ],
-      });
+      const openaiCall = client.responses.create(buildCallOptions(selectedModel, supportsWebSearch));
 
-      // 30-second hard timeout — prevents cold-start hangs from silently failing
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("OpenAI request timed out after 30s")), 30_000)
+        setTimeout(() => reject(new Error(`OpenAI request timed out after ${timeoutMs / 1000}s`)), timeoutMs)
       );
 
       response = await Promise.race([openaiCall, timeoutPromise]);
     } catch (openaiError: unknown) {
       const err = openaiError as any;
-      console.error("[chat] OpenAI error:", err?.status, err?.message, err?.code, err?.type);
-      throw openaiError; // re-throw so the outer catch returns the 500
+
+      // If o3 is not accessible on this API key, fall back to gpt-4o with web search
+      const isModelAccessError =
+        selectedModel === "o3" &&
+        (err?.status === 404 ||
+          err?.code === "model_not_found" ||
+          err?.code === "model_access_denied" ||
+          String(err?.message ?? "").toLowerCase().includes("model"));
+
+      if (isModelAccessError) {
+        console.error(`[chat] o3 not accessible (status=${err?.status} code=${err?.code} msg=${err?.message}) — falling back to gpt-4o`);
+        try {
+          const fallbackCall = client.responses.create(buildCallOptions("gpt-4o", true));
+          const fallbackTimeout = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("OpenAI fallback request timed out after 30s")), 30_000)
+          );
+          response = await Promise.race([fallbackCall, fallbackTimeout]);
+        } catch (fallbackError: unknown) {
+          const ferr = fallbackError as any;
+          console.error("[chat] gpt-4o fallback error:", ferr?.status, ferr?.message, ferr?.code);
+          throw fallbackError;
+        }
+      } else {
+        console.error("[chat] OpenAI error:", err?.status, err?.message, err?.code, err?.type);
+        throw openaiError;
+      }
     }
 
     const outputText = response.output_text;
