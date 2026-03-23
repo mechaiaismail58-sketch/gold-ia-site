@@ -18,6 +18,17 @@ export async function GET(req: Request) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
+  // ?to=you@example.com → test send to a single address without touching the waitlist
+  const testTo = searchParams.get('to')
+  if (testTo) {
+    try {
+      await resend.emails.send(betaLaunchTemplate(testTo))
+      return Response.json({ sent: 1, total: 1, test: true })
+    } catch (e) {
+      return Response.json({ error: String(e) }, { status: 500 })
+    }
+  }
+
   const { data: waitlist, error } = await supabase
     .from('waitlist')
     .select('email')
