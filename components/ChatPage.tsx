@@ -52,13 +52,7 @@ export default function ChatPage() {
 
   const [respondedTradeIds, setRespondedTradeIds] = useState<Set<string>>(new Set());
 
-  const placeholders = [
-    "Ask for a gold trade signal...",
-    "Is XAUUSD ready to break higher?",
-    "Give me a daytrade setup on gold",
-  ];
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
-  const [placeholderVisible, setPlaceholderVisible] = useState(true);
+  const PLACEHOLDER_TEXT = "Analyse XAUUSD";
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const chatInputRef = useRef<HTMLInputElement | null>(null);
@@ -78,19 +72,6 @@ export default function ChatPage() {
       })
       .catch(() => {});
   }, []);
-
-  useEffect(() => {
-    if (input.length > 0) return;
-    const interval = setInterval(() => {
-      setPlaceholderVisible(false);
-      setTimeout(() => {
-        setPlaceholderIndex((i) => (i + 1) % placeholders.length);
-        setPlaceholderVisible(true);
-      }, 300);
-    }, 3000);
-    return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -503,10 +484,9 @@ export default function ChatPage() {
               <div className="relative flex-1">
                 {!input && (
                   <span
-                    className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-[color:var(--muted)] text-[13px] transition-opacity duration-300 whitespace-nowrap overflow-hidden"
-                    style={{ opacity: placeholderVisible ? 1 : 0 }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-[color:var(--muted)] text-[13px] whitespace-nowrap overflow-hidden"
                   >
-                    {placeholders[placeholderIndex]}
+                    {PLACEHOLDER_TEXT}
                   </span>
                 )}
                 <input
