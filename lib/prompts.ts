@@ -30,6 +30,66 @@ Sections appear in this exact order:
 - TGA balance: cite the value if available. Explain the liquidity implication — TGA drawdown injects dollar liquidity (gold supportive); TGA rebuild absorbs liquidity (gold headwind).
 - Driver hierarchy: identify which driver is currently dominant, which are secondary, and whether any two drivers are contradicting each other. State explicitly which one is winning and why.
 
+## Macro & Fundamental Data
+This section is the highest-priority section in the entire analysis — it must be the most developed of all sections without exception. It is the foundation of every institutional analysis. Never write "data not found" for any item — if a data point is absent from the context, simply omit that bullet. Minimum 10 items with exact values and argued impact for each.
+
+- US10Y: cite exact value and direction. Impact: above 4.5% = headwind for gold; below 3.5% = tailwind. State current implication (bullish / bearish / neutral) with the argument.
+- Real Yield 10Y: cite exact value. Threshold logic — below 0% = structurally bullish gold (zero opportunity cost); 0–1% = neutral; above 1.5% = genuine headwind; above 2% = strong headwind. State clearly which zone we are in and what it means for gold right now.
+- US2Y: cite exact value. What is the yield curve shape (2Y vs 10Y spread)? Does the inversion or steepening signal a risk-off or risk-on environment? Argue the implication for gold.
+- Breakeven 10Y: cite exact value. Rising breakevens = inflation expectations rising = gold supportive (inflation hedge bid). Falling breakevens = inflation premium fading = gold headwind. State the current trend and implication.
+- DXY: cite exact level and H4 momentum direction. Explain the inverse correlation intensity — is DXY the primary driver for gold right now or is it being overridden by another factor (safe-haven demand, geopolitical risk, yield divergence)?
+- VIX: cite exact value. Below 15 = low fear / risk-on = safe-haven demand muted. 15–25 = moderate caution. Above 25 = risk-off = gold supportive. Above 35 = crisis-level fear = gold strongly supported. Argue the current level's implication.
+- SPX: cite trend direction. Is the SPX/gold correlation currently positive (both rising = risk appetite mode) or inverse (gold rising while SPX falls = safe-haven rotation)? State which correlation regime is active and why it is active.
+- Copper/Gold ratio: cite exact value. Rising ratio = risk-on (industrial demand > safe-haven = gold headwind). Falling ratio = risk-off (safe-haven > industrial = gold supportive). Argue the current signal.
+- WTI Oil: cite exact value. Rising oil = inflation expectations rising = supports gold's inflation hedge premium. Falling oil = deflationary signal = reduces inflation premium. State the direct implication.
+- FedWatch probabilities: cite exact current cut/hike probabilities and next FOMC meeting date. Has the market priced in more or less easing vs 4 weeks ago? What does this monetary policy path imply for gold?
+- TGA Balance: cite the level if available. TGA drawdown = dollar liquidity injection = gold supportive. TGA rebuild = liquidity absorption = dollar headwind for gold. State current direction if known.
+- Dominant macro driver: which single macro factor is most influencing gold right now? Why does it dominate over the others? Name the driver and make the argument in one sentence.
+- Gold macro pressure conclusion: Bullish / Bearish / Mixed — then 2–3 sentences synthesizing all of the above into a directional macro verdict with full justification. This verdict is the anchor for the entire analysis that follows.
+
+## Technical Data
+This section displays all exact technical numerical values from the context — structured data presentation, no narrative interpretation. Every available value must appear here. If a value is absent, omit that line.
+
+- Current price | Session | Liquidity state | Market status (OPEN / CLOSED)
+- Intraday range: high / low | Current position in range (%)
+- 24h range: recent_high / recent_low
+- Weekly range: weekly_high / weekly_low | PDH / PDL
+- ATR H1: exact value in pts → SL min = 0.8× ATR (cite calculated value) | SL max = 2× ATR (cite calculated value) — these are the hard bounds for any stop in this analysis
+- RSI H1: exact value | RSI H4: exact value | RSI D1: exact value
+- MACD H4: histogram value | direction (expanding / contracting) | last crossover direction
+- EMA 20: exact level | EMA 50: exact level | EMA 200: exact level | Stack order (bullish / bearish / mixed) | Price position relative to each EMA
+- ADX: exact value | Regime: trending (>25) / transitioning (20–25) / ranging (<20)
+- Bollinger Bands: state (squeeze / expansion / normal) | Price position (upper band / lower band / mid-band)
+- H1 Trend: [value from context] | M30 Structure: [value from context]
+- Swing High H1: exact level | Swing Low H1: exact level
+- FVG Bullish H1: exact zone low–high | FVG Bearish H1: exact zone low–high
+- FVG Bullish M30: exact zone (if available) | FVG Bearish M30: exact zone (if available)
+- OB Bullish H1: exact zone low–high | OB Bearish H1: exact zone low–high
+- Liquidity above: exact level | Liquidity below: exact level
+
+## Institutional & COT Data
+This section displays all available institutional and positioning data with exact values — structured data presentation, no narrative interpretation. Every available data point must appear. If a value is absent, omit that line.
+
+- Swap Dealers (banks — smart money): exact net position in contracts | WoW change (e.g. net −42,300 | WoW +3,800) | Signal (net long / net short / adding / reducing)
+- Managed Money (hedge funds — speculative): exact net position in contracts | WoW change | Crowded positioning status (above 75th pct = crowded long; below 25th pct = crowded short)
+- Producers/Merchants (commercials): exact net position | Hedging signal
+- COMEX Open Interest: total OI in contracts | Change vs prior week | Scenario (new longs / new shorts / short covering / long liquidation)
+- ETF GLD: 5d flow signal | 20d flow signal | GLD price alignment (rising price + inflows = institutional conviction; rising price + outflows = distribution; falling price + inflows = accumulation)
+- ETF IAU: flow signal | Confirmation or divergence vs GLD
+- Central banks: last known activity | Long-term trend (net buyer / net seller / neutral)
+- Block trades (Polygon): if available — net delta %, bar count, institutional signal
+- Smart Money direction summary: net conclusion — accumulating / distributing / neutral | Which specific data points support this conclusion
+
+## Interpretation
+This section synthesizes all data from the three preceding sections (Macro & Fundamental Data, Technical Data, Institutional & COT Data) into a coherent directional argument. This is not a data list — it is structured analytical reasoning.
+
+- Data interaction: how do the macro, technical, and institutional signals interact? Do they confirm each other or create contradictions? Name the specific data points involved.
+- Dominant contradiction: if two signals conflict (example: DXY falling = bullish gold, but real yields rising = bearish gold), state both signals with their exact values and argue which one currently takes precedence and why. Never leave a contradiction unresolved.
+- Directional reasoning chain: connect macro regime → technical structure → institutional positioning → order flow into a coherent narrative that explains WHY price is likely to move in a specific direction. Each link in the chain must be supported by data cited in the previous sections.
+- Market phase identification: state the current phase (accumulation / distribution / trending / ranging) based on the confluence of Wyckoff structure, price action pattern, and institutional flow. Cite the specific evidence from the data sections.
+- Composite Man read: what are institutions doing relative to retail? Absorbing retail selling at discount (bullish setup), distributing into retail buying at premium (bearish setup), or in a neutral phase? Reference the COT and order flow data.
+- Directional conclusion: 3–4 substantive sentences stating the dominant bias with full justification. This is the definitive directional verdict that drives the trade decision in the Conclusion section.
+
 ## ICT / Smart Money
 - Bullish OB H1: cite the exact price zone (e.g. 3485–3492). Is price currently inside, below (approaching), or above (mitigated) this zone? What does the current position imply for the next directional move?
 - Bearish OB H1: cite the exact price zone. Is it acting as active resistance or has it been mitigated?
