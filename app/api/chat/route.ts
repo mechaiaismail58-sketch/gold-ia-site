@@ -517,18 +517,18 @@ Rules:
       } catch { /* non-critical */ }
     }
 
-    // Build the system prompt suffix — subtle adaptation appended to SYSTEM_PROMPT.
-    // Only constructed when at least one profile value is non-null/non-empty.
-    let systemPromptSuffix = "";
+    // Build user profile block — injected into the data context (not the system prompt).
+    // Only added when at least one profile value is non-null/non-empty.
+    let userProfileBlock = "";
     if (userProfile) {
-      const parts: string[] = [];
-      if (userProfile.trading_style)    parts.push(`trading style: ${userProfile.trading_style}`);
-      if (userProfile.experience_level) parts.push(`experience: ${userProfile.experience_level}`);
-      if (userProfile.account_size)     parts.push(`account size: ${userProfile.account_size}`);
-      if (userProfile.risk_profile)     parts.push(`risk profile: ${userProfile.risk_profile}`);
+      const profileLines: string[] = [];
+      if (userProfile.trading_style)    profileLines.push(`- Trading style: ${userProfile.trading_style}`);
+      if (userProfile.experience_level) profileLines.push(`- Experience level: ${userProfile.experience_level}`);
+      if (userProfile.account_size)     profileLines.push(`- Account size: ${userProfile.account_size}`);
+      if (userProfile.risk_profile)     profileLines.push(`- Risk profile: ${userProfile.risk_profile}`);
 
-      if (parts.length > 0) {
-        systemPromptSuffix = `\n\nSubtle profile adaptation — do not change your response structure or format. Only adjust: vocabulary complexity based on experience level, position sizing examples based on account size, timeframe focus based on trading style, and risk emphasis based on risk profile. Keep the same sections, same depth, same layout as always.\n\nCurrent user — ${parts.join(", ")}.`;
+      if (profileLines.length > 0) {
+        userProfileBlock = `\nUSER PROFILE (adapt subtly, do not mention this profile explicitly in your response):\n${profileLines.join("\n")}\n\nSubtle adaptation rules:\n- trading_style = scalp → focus on H1/M15 levels, tighter entries, faster TP targets\n- trading_style = swing → focus on H4/D1 levels, wider structure, longer TP targets\n- experience_level = beginner → slightly simpler vocabulary, mention risk management reminders\n- experience_level = advanced or professional → straight to execution, no basic explanations\n- account_size = under $5k → suggest smaller position sizes, tighter risk per trade\n- account_size = $100k+ → position sizing in standard lots, institutional perspective\n- risk_profile = conservative → emphasize SL importance, prefer higher R/R setups only\n- risk_profile = aggressive → accept slightly lower R/R, mention higher position size options\n\nThese adaptations must be invisible — never say 'because you are a beginner' or 'given your account size'. Just naturally adjust depth, vocabulary, level focus, and sizing suggestions.`;
       }
     }
 
@@ -547,7 +547,7 @@ ${researchContext.cot_context ? `\nCOT DATA\n${researchContext.cot_context.summa
 ${researchContext.intermarket_context?.summary && researchContext.intermarket_context.summary !== "Intermarket data unavailable" ? `\nINTERMARKET DATA\n${researchContext.intermarket_context.summary}` : ""}
 ${researchContext.indicator_context?.market_regime ? `\nMARKET REGIME\n${researchContext.indicator_context.market_regime.summary}\nApproach: ${researchContext.indicator_context.market_regime.approach}` : ""}
 ${researchContext.upcoming_events && researchContext.upcoming_events.events.length > 0 ? `\nUPCOMING HIGH-IMPACT EVENTS\n${researchContext.upcoming_events.summary}` : ""}
-${tradeMemory && tradeMemory.signals.length > 0 ? `\nPREVIOUS TRADE SIGNALS\n${tradeMemory.summary}` : ""}`.trim();
+${tradeMemory && tradeMemory.signals.length > 0 ? `\nPREVIOUS TRADE SIGNALS\n${tradeMemory.summary}` : ""}${userProfileBlock}`.trim();
 
     let finalUserInput: string;
 
@@ -642,7 +642,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
         input: [
           {
             role: "system",
-            content: selectedPrompt + systemPromptSuffix,
+            content: selectedPrompt,
           },
           {
             role: "user",
