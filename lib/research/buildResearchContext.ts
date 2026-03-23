@@ -465,28 +465,28 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     targetUpper,
     effectiveRate,
   ] = await Promise.all([
-    withTimeout(getPriceContext(), 3000, { xauusd: null, gc_f: null, gld: null, dxy: null, validated: false, divergence_pct: null, source_1: "Twelve Data", source_2: "Twelve Data", fetched_at_utc: new Date().toISOString() }),
-    withTimeout(fetchOHLCVBars(symbol, "1h", 140, 300), 3000, []),
-    withTimeout(fetchOHLCVBars(symbol, "30min", 80, 300), 3000, []),
-    withTimeout(fetchOHLCVBars(symbol, "4h", 250, 900), 3000, []),
-    withTimeout(fetchOHLCVBars(symbol, "1day", 220, 900), 3000, []),
-    withTimeout(getFredLatestTwo("DGS10"), 3000, { current: null, previous: null, direction: "Data not found" as const }),
-    withTimeout(getFredLatestTwo("DFII10"), 3000, { current: null, previous: null, direction: "Data not found" as const }),
-    withTimeout(getLatestFredValue("DGS2"), 3000, null),
-    withTimeout(getLatestFredValue("T10YIE"), 3000, null),
-    withTimeout(getLatestFredValue("SLVPRUSD"), 3000, null),
-    withTimeout(fetchYahooSpx(), 3000, { current: null, direction: "Data not found" }),
-    withTimeout(getCOTContext(), 8000, null),  // CFTC API is slow — needs 8s
-    withTimeout(getUpcomingEvents(), 3000, null),
-    withTimeout(getPolygonOrderFlow(), 3000, null),
-    withTimeout(getSentimentContext(), 3000, null),
-    withTimeout(getAlphaVantageContext(), 3000, null),
+    withTimeout(getPriceContext(), 5000, { xauusd: null, gc_f: null, gld: null, dxy: null, validated: false, divergence_pct: null, source_1: "Twelve Data", source_2: "Twelve Data", fetched_at_utc: new Date().toISOString() }),
+    withTimeout(fetchOHLCVBars(symbol, "1h", 140, 300), 6000, []),    // Twelve Data can be 4-5s
+    withTimeout(fetchOHLCVBars(symbol, "30min", 80, 300), 6000, []),
+    withTimeout(fetchOHLCVBars(symbol, "4h", 250, 900), 6000, []),
+    withTimeout(fetchOHLCVBars(symbol, "1day", 220, 900), 6000, []),
+    withTimeout(getFredLatestTwo("DGS10"), 5000, { current: null, previous: null, direction: "Data not found" as const }),
+    withTimeout(getFredLatestTwo("DFII10"), 5000, { current: null, previous: null, direction: "Data not found" as const }),
+    withTimeout(getLatestFredValue("DGS2"), 5000, null),
+    withTimeout(getLatestFredValue("T10YIE"), 5000, null),
+    withTimeout(getLatestFredValue("SLVPRUSD"), 5000, null),
+    withTimeout(fetchYahooSpx(), 4000, { current: null, direction: "Data not found" }),
+    withTimeout(getCOTContext(), 8000, null),        // CFTC API is slow — needs 8s
+    withTimeout(getUpcomingEvents(), 4000, null),
+    withTimeout(getPolygonOrderFlow(), 4000, null),
+    withTimeout(getSentimentContext(), 4000, null),
+    withTimeout(getAlphaVantageContext(), 4000, null),
     withTimeout(getETFFlowsContext(), 6000, null),  // Yahoo Finance quoteSummary can be slow
-    getCentralBankContext(),
-    getLatestFredValue("SOFR"),
-    getLatestFredValue("WTREGEN"),
-    getLatestFredValue("DFEDTARU"),
-    getLatestFredValue("FEDFUNDS"),
+    withTimeout(getCentralBankContext(), 4000, null),  // was unwrapped — could block indefinitely
+    withTimeout(getLatestFredValue("SOFR"), 5000, null),
+    withTimeout(getLatestFredValue("WTREGEN"), 5000, null),
+    withTimeout(getLatestFredValue("DFEDTARU"), 5000, null),
+    withTimeout(getLatestFredValue("FEDFUNDS"), 5000, null),
   ]);
 
   // ── Institutional data diagnostics ────────────────────────────────────────
