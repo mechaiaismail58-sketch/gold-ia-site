@@ -114,7 +114,12 @@ Geopolitical: article count + premium embedded? (>5 safe-haven articles = elevat
 **Score: X/8**
 
 ## Trade Plan
-(Only if Score ≥ 5/8 — otherwise skip and go to Conclusion)
+CONFLUENCE SCORE RULE — absolute, cannot be overridden:
+- Score 6/8 or above → TRADE ✓ always — give full sniper levels (entry precise, SL structural, TP1 min 1.5R, TP2 min 2.5R)
+- Score 5/8 → TRADE ✓ possible — mark as 'Moderate confluence — manage risk carefully'
+- Score 4/8 or below → NO TRADE ✗ always — skip Trade Plan, go directly to Conclusion
+
+(Only generate entry/SL/TP if Score ≥ 5/8)
 Entry: [exact price] — [structural justification: OB/FVG/EMA/structure in one sentence]
 SL: [exact price] = [X.x]× ATR H1 of [value] pts — beyond structural invalidation
 TP1: [exact price] | R/R: [X.X] (min 1.5) — first real obstacle
@@ -123,7 +128,8 @@ Timing: [session] | [market order / limit at X / wait for H1 close above/below X
 If market CLOSED: conditional opening plan — trigger condition + entry zone + invalidation level.
 
 ## Conclusion
-**TRADE ✓** or **NO TRADE ✗**
+**TRADE ✓** or **NO TRADE ✗** — must always match the Confluence Score above.
+Never give a trade with Score ≤ 4. Never Stand Aside with Score ≥ 6.
 If TRADE: Entry / SL / TP1 / TP2 on one line + 2 sentences on core aligned factors.
 If NO TRADE: one sentence — exact condition missing + level or event to wait for.
 `;

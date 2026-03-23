@@ -12,6 +12,8 @@ export type ETFFlowsContext = {
   gld_price_5d_pct: number | null;
   gld_price_20d_pct: number | null;
   flow_trend_summary: string;
+  gc_open_interest: number | null;   // COMEX GC futures OI from Yahoo Finance
+  gc_oi_change: number | null;       // OI change vs previous session
   summary: string;
 };
 
@@ -101,6 +103,32 @@ async function fetchGLDHistory(): Promise<{ closes: number[]; volumes: number[] 
   return null;
 }
 
+// ── GC=F Open Interest from Yahoo Finance futures chart ───────────────────────
+async function fetchGCOpenInterest(): Promise<{ oi: number | null; oi_prev: number | null }> {
+  const urls = [
+    "https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1d&range=5d",
+    "https://query2.finance.yahoo.com/v8/finance/chart/GC=F?interval=1d&range=5d",
+  ];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type GCChart = { chart?: { result?: Array<{ meta?: any; indicators?: { quote?: Array<{ volume?: (number | null)[] }> } }> } };
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { headers: YF_HEADERS, next: { revalidate: 3600 } });
+      if (!res.ok) { console.error(`fetchGCOpenInterest: HTTP ${res.status} from ${url}`); continue; }
+      const data = await res.json() as GCChart;
+      const meta = data?.chart?.result?.[0]?.meta;
+      if (!meta) { console.warn(`fetchGCOpenInterest: no meta in response`); continue; }
+      // Yahoo Finance stores OI in meta.openInterest for futures
+      const oi = meta.openInterest != null && Number.isFinite(meta.openInterest) ? meta.openInterest as number : null;
+      if (oi != null) return { oi, oi_prev: null };
+      console.warn(`fetchGCOpenInterest: openInterest absent from meta — keys: ${Object.keys(meta).join(", ")}`);
+    } catch (err) {
+      console.error(`fetchGCOpenInterest: fetch failed for ${url}:`, err);
+    }
+  }
+  return { oi: null, oi_prev: null };
+}
+
 type FlowSignal = "strong_inflow" | "inflow" | "neutral" | "outflow" | "strong_outflow";
 
 function computeFlowSignal(volumeRatio: number, priceChangePct: number): FlowSignal {
@@ -120,13 +148,18 @@ function computeFlowSignal(volumeRatio: number, priceChangePct: number): FlowSig
 }
 
 export async function getETFFlowsContext(): Promise<ETFFlowsContext | null> {
-  const [gldShares, iauShares, history] = await Promise.all([
+  const [gldShares, iauShares, history, gcOI] = await Promise.all([
     fetchSharesOutstanding("GLD"),
     fetchSharesOutstanding("IAU"),
     fetchGLDHistory(),
+    fetchGCOpenInterest(),
   ]);
 
-  if (gldShares == null && iauShares == null) return null;
+  // Return null only if we have absolutely no data at all
+  if (gldShares == null && iauShares == null && !history) {
+    console.error("getETFFlowsContext: all sources returned null — no data available");
+    return null;
+  }
 
   const gld_tonnes = gldShares != null ? (gldShares * GLD_OZ_PER_SHARE) / TROY_OZ_PER_TONNE : null;
   const iau_tonnes = iauShares != null ? (iauShares * IAU_OZ_PER_SHARE) / TROY_OZ_PER_TONNE : null;
@@ -215,6 +248,7 @@ export async function getETFFlowsContext(): Promise<ETFFlowsContext | null> {
     summaryParts.push(`Combined: ~${combined_tonnes.toFixed(0)}t — ${note}`);
   }
   if (flow_trend_summary) summaryParts.push(`Flow: ${flow_trend_summary}`);
+  if (gcOI.oi != null) summaryParts.push(`GC=F OI: ${Math.round(gcOI.oi / 1000)}k contracts`);
 
   return {
     gld_tonnes,
@@ -227,6 +261,8 @@ export async function getETFFlowsContext(): Promise<ETFFlowsContext | null> {
     gld_price_5d_pct,
     gld_price_20d_pct,
     flow_trend_summary,
+    gc_open_interest: gcOI.oi,
+    gc_oi_change: gcOI.oi_prev != null && gcOI.oi != null ? gcOI.oi - gcOI.oi_prev : null,
     summary: summaryParts.join(" | "),
   };
 }

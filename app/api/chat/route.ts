@@ -173,6 +173,7 @@ ${mc.next_open_note}`);
 
   // Disaggregated COT — banks and hedge funds
   const cot = ctx.cot_context;
+  const etfForProxy = ctx.etf_flows;
   if (cot) {
     const cotLines: string[] = [];
     if (cot.disagg_summary) cotLines.push(cot.disagg_summary);
@@ -190,12 +191,30 @@ ${mc.next_open_note}`);
       cotLines.push(`Producers/Merchants: net ${Math.round(cot.producer_merchant_net / 1000)}k contracts`);
     }
     if (cotLines.length > 0) lines.push(`\nDISAGGREGATED COT (INSTITUTIONAL POSITIONING)\n${cotLines.join("\n")}`);
+  } else if (etfForProxy) {
+    // COT unavailable — inject proxy institutional read from ETF flow + GC=F OI
+    const proxyLines: string[] = ["[CFTC COT data unavailable — institutional read estimated from ETF flows and futures momentum]"];
+    if (etfForProxy.gld_5d_flow_signal) {
+      const dir = etfForProxy.gld_5d_flow_signal.replace(/_/g, " ");
+      const pct = etfForProxy.gld_price_5d_pct != null ? ` (GLD ${etfForProxy.gld_price_5d_pct > 0 ? "+" : ""}${etfForProxy.gld_price_5d_pct.toFixed(1)}% 5d)` : "";
+      const volR = etfForProxy.gld_5d_volume_ratio != null ? ` vol ratio ${etfForProxy.gld_5d_volume_ratio.toFixed(2)}×` : "";
+      proxyLines.push(`GLD ETF flow proxy: ${dir}${pct}${volR} — ${etfForProxy.gld_5d_flow_signal.includes("inflow") ? "institutional demand present" : etfForProxy.gld_5d_flow_signal.includes("outflow") ? "institutional redemptions detected" : "neutral activity"}`);
+    }
+    if (etfForProxy.gld_20d_flow_signal) {
+      proxyLines.push(`GLD 20d trend: ${etfForProxy.gld_20d_flow_signal.replace(/_/g, " ")}${etfForProxy.gld_price_20d_pct != null ? ` (GLD ${etfForProxy.gld_price_20d_pct > 0 ? "+" : ""}${etfForProxy.gld_price_20d_pct.toFixed(1)}% 20d)` : ""}`);
+    }
+    if (etfForProxy.gc_open_interest != null) {
+      proxyLines.push(`GC=F Open Interest: ${Math.round(etfForProxy.gc_open_interest / 1000)}k contracts`);
+    }
+    if (proxyLines.length > 1) lines.push(`\nINSTITUTIONAL PROXY (COT unavailable)\n${proxyLines.join("\n")}`);
   }
 
   // COMEX Open Interest signal
   const ois = ctx.oi_signal;
   if (ois?.note) {
     lines.push(`\nCOMEX OPEN INTEREST\nOI: ${ois.oi != null ? Math.round(ois.oi / 1000) + "k contracts" : "n/a"} | Scenario: ${ois.scenario.replace(/_/g, " ")} — ${ois.note}`);
+  } else if (ctx.etf_flows?.gc_open_interest != null) {
+    lines.push(`\nCOMEX OPEN INTEREST (via Yahoo Finance GC=F)\nOI: ${Math.round(ctx.etf_flows.gc_open_interest / 1000)}k contracts`);
   }
 
   // Central bank gold reserves

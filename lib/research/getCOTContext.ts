@@ -62,8 +62,9 @@ export type COTContext = {
 
 // ─────────────────── Helpers ─────────────────
 
-const LEGACY_BASE = "https://publicreporting.cftc.gov/resource/jun7-nznf.json";
-const DISAGG_BASE = "https://publicreporting.cftc.gov/resource/72hh-3qpy.json";
+const LEGACY_BASE  = "https://publicreporting.cftc.gov/resource/jun7-nznf.json";
+const LEGACY_ALT   = "https://publicreporting.cftc.gov/resource/6dca-aqww.json";  // alt dataset
+const DISAGG_BASE  = "https://publicreporting.cftc.gov/resource/72hh-3qpy.json";
 
 function toNum(s: string | undefined): number | null {
   if (!s) return null;
@@ -129,6 +130,7 @@ async function fetchLegacyCOT(): Promise<CFTCLegacyRecord[]> {
     `${LEGACY_BASE}?$where=${encodeURIComponent("market_and_exchange_names like '%GOLD - COMMODITY EXCHANGE%'")}&$order=${encodeURIComponent("report_date_as_yyyy_mm_dd DESC")}&$limit=4`,
     `${LEGACY_BASE}?$where=${encodeURIComponent("market_and_exchange_names like '%GOLD%' AND cftc_commodity_code='088691'")}&$order=${encodeURIComponent("report_date_as_yyyy_mm_dd DESC")}&$limit=4`,
     `${LEGACY_BASE}?$where=${encodeURIComponent("cftc_commodity_code='088691'")}&$order=${encodeURIComponent("report_date_as_yyyy_mm_dd DESC")}&$limit=4`,
+    `${LEGACY_ALT}?$where=${encodeURIComponent("cftc_commodity_code='088691'")}&$order=${encodeURIComponent("report_date_as_yyyy_mm_dd DESC")}&$limit=4`,
   ];
 
   for (const url of ENDPOINTS) {
