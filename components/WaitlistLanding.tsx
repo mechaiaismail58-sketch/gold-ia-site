@@ -42,163 +42,336 @@ export default function WaitlistLanding() {
   }
 
   return (
-    <div className="min-h-screen bg-[#07060b] text-white flex flex-col items-center justify-center px-4 py-16 animate-fade-in">
+    <>
+      <style>{`
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-      {/* Background — same purple globs as the main site layout */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute -top-24 left-[-140px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.22)] blur-[110px]" />
-        <div className="absolute top-[-120px] right-[-180px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.14)] blur-[120px]" />
-        <div className="absolute bottom-[-220px] left-[20%] h-[520px] w-[520px] rounded-full bg-[rgba(200,162,74,0.08)] blur-[130px]" />
-      </div>
+        .wl-root {
+          min-height: 100vh;
+          background: #0a0a0a;
+          background-image: radial-gradient(ellipse at 50% 30%, rgba(212,175,55,0.04) 0%, transparent 70%);
+          color: #fff;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          -webkit-font-smoothing: antialiased;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 64px 20px;
+        }
 
-      <div className="w-full max-w-lg">
+        .wl-inner {
+          width: 100%;
+          max-width: 600px;
+        }
 
-        {/* ── Logo ── */}
-        <div className="text-center mb-12">
-          <div className="text-[17px] tracking-[0.22em] uppercase text-white">
-            BULLION <span className="text-[color:var(--gold)]">DESK</span>
+        /* Logo */
+        .wl-logo {
+          text-align: center;
+          margin-bottom: 48px;
+        }
+        .wl-logo-text {
+          font-size: 14px;
+          font-weight: 300;
+          letter-spacing: 0.30em;
+          text-transform: uppercase;
+          color: #fff;
+        }
+        .wl-logo-gold { color: #D4AF37; }
+        .wl-logo-tagline {
+          margin-top: 10px;
+          font-size: 9px;
+          font-weight: 400;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          color: #4b5563;
+        }
+
+        /* Badge */
+        .wl-badge-wrap { text-align: center; margin-bottom: 28px; }
+        .wl-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          border: 1px solid rgba(212,175,55,0.40);
+          background: transparent;
+          border-radius: 999px;
+          padding: 6px 16px;
+        }
+        .wl-badge-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #D4AF37;
+          flex-shrink: 0;
+          animation: wlPulse 1.8s ease-in-out infinite;
+        }
+        .wl-badge-text {
+          font-size: 9px;
+          font-weight: 500;
+          letter-spacing: 0.20em;
+          text-transform: uppercase;
+          color: #D4AF37;
+        }
+
+        /* Hero */
+        .wl-hero { text-align: center; margin-bottom: 44px; }
+        .wl-h1 {
+          font-size: clamp(38px, 6vw, 68px);
+          font-weight: 300;
+          line-height: 1.08;
+          letter-spacing: -0.02em;
+          color: #fff;
+          margin-bottom: 20px;
+        }
+        .wl-h1-coming {
+          font-style: italic;
+          color: #D4AF37;
+        }
+        .wl-sub {
+          font-size: 16px;
+          color: #9ca3af;
+          line-height: 1.7;
+          max-width: 520px;
+          margin: 0 auto;
+        }
+
+        /* Form container */
+        .wl-form-wrap {
+          background: #111111;
+          border: 1px solid rgba(212,175,55,0.20);
+          border-radius: 12px;
+          padding: 28px 28px 24px;
+          margin-bottom: 24px;
+        }
+        .wl-label {
+          display: block;
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: #6b7280;
+          margin-bottom: 10px;
+        }
+        .wl-fields { display: flex; gap: 10px; }
+        .wl-input {
+          flex: 1;
+          min-width: 0;
+          background: transparent;
+          border: 1px solid rgba(255,255,255,0.10);
+          border-radius: 8px;
+          padding: 12px 14px;
+          color: #fff;
+          font-size: 15px;
+          outline: none;
+          min-height: 46px;
+          transition: border-color 0.15s;
+        }
+        .wl-input::placeholder { color: #374151; }
+        .wl-input:focus { border-color: rgba(212,175,55,0.50); }
+        .wl-btn {
+          background: #D4AF37;
+          border: none;
+          border-radius: 8px;
+          padding: 12px 22px;
+          color: #000;
+          font-size: 13px;
+          font-weight: 500;
+          letter-spacing: 0.03em;
+          cursor: pointer;
+          min-height: 46px;
+          white-space: nowrap;
+          flex-shrink: 0;
+          transition: background 0.15s, opacity 0.15s;
+        }
+        .wl-btn:hover:not(:disabled) { background: #debb55; }
+        .wl-btn:disabled { opacity: 0.50; cursor: not-allowed; }
+        .wl-btn-inner { display: flex; align-items: center; gap: 8px; justify-content: center; }
+        .wl-spin {
+          width: 13px; height: 13px;
+          border-radius: 50%;
+          border: 2px solid rgba(0,0,0,0.20);
+          border-top-color: #000;
+          animation: wlSpin 0.7s linear infinite;
+          display: inline-block;
+        }
+        .wl-caption {
+          margin-top: 14px;
+          text-align: center;
+          font-size: 11px;
+          color: #374151;
+        }
+        .wl-error {
+          margin-top: 10px;
+          font-size: 12px;
+          color: #f87171;
+          background: rgba(248,113,113,0.05);
+          border: 1px solid rgba(248,113,113,0.15);
+          border-radius: 6px;
+          padding: 8px 12px;
+        }
+        .wl-already {
+          margin-top: 10px;
+          font-size: 12px;
+          color: #6b7280;
+          text-align: center;
+        }
+
+        /* Success */
+        .wl-success { text-align: center; padding: 12px 0; }
+        .wl-success-title { font-size: 20px; font-weight: 400; color: #fff; margin-bottom: 6px; }
+        .wl-success-sub   { font-size: 13px; color: #6b7280; }
+
+        /* Feature cards */
+        .wl-cards {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
+          margin-bottom: 40px;
+        }
+        .wl-card {
+          background: #0f0f0f;
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 10px;
+          padding: 24px;
+          transition: border-color 0.2s;
+        }
+        .wl-card:hover { border-color: rgba(212,175,55,0.15); }
+        .wl-card-title {
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: #D4AF37;
+          margin-bottom: 10px;
+        }
+        .wl-card-desc {
+          font-size: 13px;
+          color: #6b7280;
+          line-height: 1.6;
+        }
+
+        /* Footer */
+        .wl-footer {
+          text-align: center;
+          font-size: 11px;
+          color: #4b5563;
+        }
+
+        /* Animations */
+        @keyframes wlPulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50%       { opacity: 0.35; transform: scale(0.75); }
+        }
+        @keyframes wlSpin { to { transform: rotate(360deg); } }
+        @keyframes wlDrawCircle {
+          from { stroke-dashoffset: 150; }
+          to   { stroke-dashoffset: 0; }
+        }
+        @keyframes wlDrawCheck {
+          from { stroke-dasharray: 0 40; }
+          to   { stroke-dasharray: 40 0; }
+        }
+
+        /* Mobile */
+        @media (max-width: 580px) {
+          .wl-fields { flex-direction: column; }
+          .wl-input, .wl-btn { width: 100%; }
+          .wl-cards { grid-template-columns: 1fr; }
+          .wl-form-wrap { padding: 22px 18px 20px; }
+        }
+      `}</style>
+
+      <div className="wl-root">
+        <div className="wl-inner">
+
+          {/* Logo */}
+          <div className="wl-logo">
+            <div className="wl-logo-text">
+              Bullion <span className="wl-logo-gold">Desk</span>
+            </div>
+            <div className="wl-logo-tagline">Institutional Gold Intelligence</div>
           </div>
-          {/* gold rule */}
-          <div className="mx-auto mt-2.5 mb-0 w-8 h-px bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.50)] to-transparent" />
-          <p className="mt-2.5 text-xs text-[color:var(--muted)] tracking-[0.14em] uppercase">
-            Institutional Gold Intelligence
-          </p>
-        </div>
 
-        {/* ── Badge — violet bg, gold pulsing dot, gold border ── */}
-        <div className="text-center mb-6">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.25)] bg-[rgba(109,40,217,0.14)] px-4 py-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--gold)] animate-pulse shrink-0 shadow-[0_0_6px_rgba(212,175,55,0.70)]" />
-            <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-[rgba(196,181,253,0.90)]">
-              COMING SOON
+          {/* Badge */}
+          <div className="wl-badge-wrap">
+            <span className="wl-badge">
+              <span className="wl-badge-dot" />
+              <span className="wl-badge-text">Coming Soon</span>
             </span>
-          </span>
-        </div>
+          </div>
 
-        {/* ── Hero ── */}
-        <div className="text-center mb-10">
-          <h1 className="text-[32px] sm:text-[42px] leading-[1.12] tracking-[-0.025em] font-semibold mb-4">
-            Precision gold intelligence.<br />
-            <span className="bg-gradient-to-br from-[#c4b5fd] via-[#8b5cf6] to-[#6d28d9] bg-clip-text text-transparent">
-              Built for traders who think institutionally.
-            </span>
-          </h1>
-          <p className="text-[15px] text-[color:var(--muted)] leading-[1.75] max-w-[44ch] mx-auto">
-            AI-powered XAUUSD analysis combining macro, smart money, and technical confluence. Beta access opening soon.
-          </p>
-        </div>
+          {/* Hero */}
+          <div className="wl-hero">
+            <h1 className="wl-h1">
+              Institutional-grade<br />gold intelligence.<br />
+              <span className="wl-h1-coming">Coming soon.</span>
+            </h1>
+            <p className="wl-sub">
+              AI-powered XAUUSD analysis combining macro, smart money, and technical confluence. Beta access opening soon.
+            </p>
+          </div>
 
-        {/* ── Form card — .card glass with gold top shimmer ── */}
-        <div className="card rounded-3xl overflow-hidden mb-6">
-          {/* gold shimmer top line */}
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.55)] to-transparent" />
-
-          <div className="p-6 sm:p-8">
+          {/* Form */}
+          <div className="wl-form-wrap">
             {status === "success" ? (
-              <div className="text-center py-4">
-                <div className="flex justify-center mb-4">
-                  <svg width="56" height="56" viewBox="0 0 56 56">
-                    <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(139,92,246,0.20)" strokeWidth="2" />
-                    <circle cx="28" cy="28" r="24" fill="none" stroke="#8B5CF6" strokeWidth="2"
-                      strokeDasharray="150" strokeDashoffset="0" strokeLinecap="round"
-                      style={{ animation: "drawCircle 0.7s ease-out forwards" }} />
-                    <path d="M17 28l8 8L39 20" fill="none" stroke="#D4AF37" strokeWidth="2.5"
+              <div className="wl-success">
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                  <svg width="52" height="52" viewBox="0 0 52 52">
+                    <circle cx="26" cy="26" r="22" fill="none" stroke="rgba(212,175,55,0.15)" strokeWidth="1.5" />
+                    <circle cx="26" cy="26" r="22" fill="none" stroke="#D4AF37" strokeWidth="1.5"
+                      strokeDasharray="138" strokeLinecap="round"
+                      style={{ animation: "wlDrawCircle 0.8s ease-out forwards" }} />
+                    <path d="M15 26l8 8 14-15" fill="none" stroke="#D4AF37" strokeWidth="2"
                       strokeLinecap="round" strokeLinejoin="round"
-                      style={{ animation: "drawCheck 0.4s 0.5s ease-out both" }} />
+                      style={{ animation: "wlDrawCheck 0.35s 0.65s ease-out both" }} />
                   </svg>
                 </div>
-                <p className="text-xl font-semibold text-white mb-1">You&apos;re on the list.</p>
-                <p className="text-sm text-[color:var(--muted)]">We&apos;ll notify you when beta access opens.</p>
+                <p className="wl-success-title">You&apos;re on the list.</p>
+                <p className="wl-success-sub">We&apos;ll notify you when beta access opens.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} noValidate>
-                <label className="block text-[11px] uppercase tracking-[0.14em] text-[color:var(--muted)] mb-2">
-                  Email address
-                </label>
-                <div className="flex flex-col sm:flex-row gap-2.5">
+                <label className="wl-label">Email address</label>
+                <div className="wl-fields">
                   <input
                     type="email" autoComplete="email" required
+                    className="wl-input"
                     value={email}
                     onChange={(e) => { setEmail(e.target.value); setStatus("idle"); setErrorMsg(""); }}
                     placeholder="your@email.com"
-                    className="flex-1 rounded-xl px-4 py-3 bg-transparent border border-[color:var(--border)] text-white text-base focus:outline-none focus:border-[rgba(212,175,55,0.45)] transition placeholder:text-white/20 min-h-[48px]"
                   />
-                  {/* CTA — violet gradient + gold border detail */}
-                  <button
-                    type="submit" disabled={loading}
-                    className="rounded-xl px-6 py-3 text-[13px] font-medium tracking-[0.05em] text-[#e8e0fa] min-h-[48px] shrink-0 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
-                    style={{
-                      background: "linear-gradient(135deg, rgba(109,40,217,0.80) 0%, rgba(91,33,182,0.90) 100%)",
-                      border: "1px solid rgba(212,175,55,0.30)",
-                      boxShadow: "inset 0 1px 0 rgba(212,175,55,0.15), 0 4px 16px rgba(109,40,217,0.40)",
-                    }}
-                    onMouseEnter={e => { if (!loading) { e.currentTarget.style.borderColor = "rgba(212,175,55,0.55)"; e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(212,175,55,0.22), 0 6px 22px rgba(109,40,217,0.55)"; }}}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(212,175,55,0.30)"; e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(212,175,55,0.15), 0 4px 16px rgba(109,40,217,0.40)"; }}
-                  >
+                  <button type="submit" disabled={loading} className="wl-btn">
                     {loading ? (
-                      <span className="flex items-center gap-2 justify-center">
-                        <span className="h-3.5 w-3.5 rounded-full border-2 border-[rgba(196,181,253,0.30)] border-t-[#a78bfa] animate-spin" />
+                      <span className="wl-btn-inner">
+                        <span className="wl-spin" />
                         Joining…
                       </span>
                     ) : "Join the waitlist"}
                   </button>
                 </div>
-
-                {status === "error" && errorMsg && (
-                  <p className="mt-2.5 text-xs text-red-400 border border-red-500/20 bg-red-500/[0.05] rounded-lg px-3 py-2">
-                    {errorMsg}
-                  </p>
-                )}
-                {status === "already" && (
-                  <p className="mt-2.5 text-xs text-center text-[color:var(--muted)]">
-                    This email is already on the list.
-                  </p>
-                )}
-
-                <p className="mt-3 text-center text-xs text-[color:var(--gold)] opacity-40">
-                  Less than 100 spots available · One-time beta access · $10
-                </p>
+                {status === "error" && errorMsg && <p className="wl-error">{errorMsg}</p>}
+                {status === "already" && <p className="wl-already">This email is already on the list.</p>}
+                <p className="wl-caption">Less than 100 spots available · One-time beta access · $10</p>
               </form>
             )}
           </div>
-        </div>
 
-        {/* ── Feature cards — .card glass, gold top shimmer on each ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="card rounded-2xl overflow-hidden">
-              <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.30)] to-transparent" />
-              <div className="p-4">
-                <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-[rgba(167,139,250,0.80)] mb-2">
-                  {f.title}
-                </div>
-                <p className="text-xs text-white/35 leading-[1.65]">{f.desc}</p>
+          {/* Feature cards */}
+          <div className="wl-cards">
+            {FEATURES.map((f) => (
+              <div key={f.title} className="wl-card">
+                <div className="wl-card-title">{f.title}</div>
+                <p className="wl-card-desc">{f.desc}</p>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {/* Footer */}
+          <p className="wl-footer">Bullion Desk © 2026 · Institutional Gold Intelligence</p>
+
         </div>
-
-        {/* ── Divider gold shimmer ── */}
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.20)] to-transparent mb-5" />
-
-        {/* ── Footer ── */}
-        <p className="text-center text-[11px] text-white/20">
-          Bullion Desk{" "}
-          <span className="text-[color:var(--gold)] opacity-40 text-[9px]">◆</span>
-          {" "}© 2026 · Institutional Gold Intelligence
-        </p>
       </div>
-
-      <style>{`
-        @keyframes drawCircle {
-          from { stroke-dashoffset: 150; }
-          to   { stroke-dashoffset: 0; }
-        }
-        @keyframes drawCheck {
-          from { stroke-dasharray: 0 40; }
-          to   { stroke-dasharray: 40 0; }
-        }
-      `}</style>
-    </div>
+    </>
   );
 }
