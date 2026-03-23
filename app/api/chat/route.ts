@@ -1,3 +1,7 @@
+// Extend Vercel function timeout to 60s — deep analysis with gpt-4o generates
+// ~2800 tokens at ~100 tok/s = ~28s generation + overhead. Default 10s kills it.
+export const maxDuration = 60;
+
 import OpenAI from "openai";
 import { DEEP_ANALYSIS_PROMPT, QUICK_BRIEF_PROMPT, TRADE_ONLY_PROMPT } from "@/lib/prompts";
 import { GOLDEN_EXAMPLES } from "@/lib/goldenExamples";
@@ -697,7 +701,9 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
     const promptChars = selectedPrompt.length;
     const promptTokensEst = Math.round(promptChars / 4);
     const userInputTokensEst = Math.round(finalUserInput.length / 4);
-    const maxOut = analysis_mode === "deep" ? 8192 : 3500;
+    // 2800 for deep: 14 sections × ~200 tok/section ≈ 28s at 100 tok/s — fits in 60s maxDuration.
+    // 8192 was impossible in 30s (81s needed), causing systematic truncation before sections 10-12.
+    const maxOut = analysis_mode === "deep" ? 2800 : 1400;
     console.log(`[chat] system_prompt_chars=${promptChars} (~${promptTokensEst} tokens) | user_input_chars=${finalUserInput.length} (~${userInputTokensEst} tokens) | total_input_est=${promptTokensEst + userInputTokensEst} | max_output_tokens=${maxOut}`);
     if (analysis_mode === "deep") {
       const hasMacro = selectedPrompt.includes("Macro & Fundamental Data");
@@ -728,9 +734,10 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
         ],
       });
 
-      // 30-second hard timeout — prevents cold-start hangs from silently failing
+      // 55-second hard timeout (maxDuration = 60s, leaving 5s buffer for request overhead)
+      const timeoutMs = 55_000;
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("OpenAI request timed out after 30s")), 30_000)
+        setTimeout(() => reject(new Error("OpenAI request timed out after 55s")), timeoutMs)
       );
 
       response = await Promise.race([openaiCall, timeoutPromise]);
