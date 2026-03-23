@@ -85,6 +85,11 @@ export async function middleware(req: NextRequest) {
       return NextResponse.next();
     }
 
+    // ── Admin API routes — always accessible ────────────────────────────────
+    if (pathname.startsWith("/api/emails/") || pathname.startsWith("/api/stripe/")) {
+      return NextResponse.next();
+    }
+
     // ── Landing page itself ──────────────────────────────────────────────────
     if (pathname === "/") {
       return NextResponse.next();
