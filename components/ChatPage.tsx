@@ -47,15 +47,21 @@ export default function ChatPage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  // Base64 dataURL — used both as preview and as payload sent to the API
+  const [selectedImageBase64, setSelectedImageBase64] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const [respondedTradeIds, setRespondedTradeIds] = useState<Set<string>>(new Set());
 
   function attachImageFile(file: File) {
     if (!file.type.startsWith("image/")) return;
-    setSelectedImage(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      console.log("[chat] image attached via FileReader, size:", result.length, "type:", file.type);
+      setSelectedImageBase64(result);
+    };
+    reader.readAsDataURL(file);
   }
 
   const PLACEHOLDER_TEXT = "Analyse XAUUSD";
@@ -105,11 +111,13 @@ export default function ChatPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [setAnalysisMode]);
 
-  // Clipboard paste — detect image and attach it automatically (document-level fallback)
+  // Clipboard paste — document-level listener catches paste anywhere on the page
   useEffect(() => {
     function handlePaste(e: ClipboardEvent) {
+      console.log("[chat] paste event fired, items:", e.clipboardData?.items?.length ?? 0);
       if (!e.clipboardData) return;
       for (const item of Array.from(e.clipboardData.items)) {
+        console.log("[chat] clipboard item type:", item.type);
         if (item.type.startsWith("image/")) {
           const file = item.getAsFile();
           if (!file) continue;
@@ -124,7 +132,9 @@ export default function ChatPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Also on the input element directly so the event is caught even if React intercepts it first
   function handleInputPaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    console.log("[chat] input onPaste fired, items:", e.clipboardData?.items?.length ?? 0);
     if (!e.clipboardData) return;
     for (const item of Array.from(e.clipboardData.items)) {
       if (item.type.startsWith("image/")) {
@@ -157,19 +167,9 @@ export default function ChatPage() {
     if (file) attachImageFile(file);
   }
 
-  useEffect(() => {
-    if (!selectedImage) {
-      setSelectedImagePreview(null);
-      return;
-    }
-    const objectUrl = URL.createObjectURL(selectedImage);
-    setSelectedImagePreview(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [selectedImage]);
-
   const canSend = useMemo(() => {
-    return (!loading && input.trim().length > 0) || (!loading && !!selectedImage);
-  }, [input, loading, selectedImage]);
+    return (!loading && input.trim().length > 0) || (!loading && !!selectedImageBase64);
+  }, [input, loading, selectedImageBase64]);
 
   function openFilePicker() {
     fileInputRef.current?.click();
@@ -178,12 +178,11 @@ export default function ChatPage() {
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
     if (!file || !file.type.startsWith("image/")) return;
-    setSelectedImage(file);
+    attachImageFile(file);
   }
 
   function clearSelectedImage() {
-    setSelectedImage(null);
-    setSelectedImagePreview(null);
+    setSelectedImageBase64(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -191,12 +190,10 @@ export default function ChatPage() {
     if (!canSend) return;
 
     const userText = input.trim();
-    const imageToSend = selectedImage;
-    const imagePreviewToSend = selectedImagePreview;
+    const imageBase64ToSend = selectedImageBase64;
 
     setInput("");
-    setSelectedImage(null);
-    setSelectedImagePreview(null);
+    setSelectedImageBase64(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
 
     setLoading(true);
@@ -206,25 +203,23 @@ export default function ChatPage() {
       {
         role: "user",
         content: userText || "[Chart image attached]",
-        imagePreview: imagePreviewToSend,
+        imagePreview: imageBase64ToSend ?? undefined,
       },
     ]);
 
     try {
-      const formData = new FormData();
-      formData.append("userMessage", userText);
-      formData.append("analysis_mode", analysisMode);
-      formData.append("session_id", sessionId);
-      if (previousResponseId) {
-        formData.append("previous_response_id", previousResponseId);
-      }
-      if (imageToSend) {
-        formData.append("chartImage", imageToSend);
-      }
+      const body: Record<string, unknown> = {
+        userMessage: userText,
+        analysis_mode: analysisMode,
+        session_id: sessionId,
+      };
+      if (previousResponseId) body.previous_response_id = previousResponseId;
+      if (imageBase64ToSend) body.chartImageBase64 = imageBase64ToSend;
 
       const r = await fetch("/api/chat", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
 
       const data = await r.json();
@@ -246,7 +241,7 @@ export default function ChatPage() {
           mode: analysisMode,
           message_user: userText || "[Chart image attached]",
           message_ia: data.text,
-          image_attached: Boolean(imageToSend),
+          image_attached: Boolean(imageBase64ToSend),
         }).catch(() => {});
       }
     } catch {
@@ -496,23 +491,19 @@ export default function ChatPage() {
               </div>
             </div>
 
-            {selectedImagePreview ? (
+            {selectedImageBase64 ? (
               <div className="mb-3 flex items-center gap-3 rounded-2xl border border-[rgba(109,40,217,0.25)] bg-[rgba(109,40,217,0.05)] p-3">
                 <img
-                  src={selectedImagePreview}
+                  src={selectedImageBase64}
                   alt="Selected chart preview"
                   className="h-16 w-24 rounded-lg object-cover border border-white/10"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-white/80 truncate">
-                      {selectedImage?.name && selectedImage.name !== "image.png" ? selectedImage.name : "Chart attached"}
-                    </span>
-                    {(!selectedImage?.name || selectedImage.name === "image.png") && (
-                      <span className="text-[10px] font-mono uppercase tracking-widest text-[rgba(109,40,217,0.8)] border border-[rgba(109,40,217,0.3)] rounded-md px-1.5 py-0.5 shrink-0">
-                        Pasted
+                    <span className="text-sm text-white/80 truncate">Chart attached</span>
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-[rgba(109,40,217,0.8)] border border-[rgba(109,40,217,0.3)] rounded-md px-1.5 py-0.5 shrink-0">
+                        Ready
                       </span>
-                    )}
                   </div>
                   <div className="text-xs text-[color:var(--muted)] mt-0.5">
                     Chart ready to send

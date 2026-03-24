@@ -749,6 +749,10 @@ export async function POST(req: Request) {
       previous_response_id = body.previous_response_id || undefined;
       if (body.analysis_mode === "quick") analysis_mode = "quick";
       else if (body.analysis_mode === "trade_only") analysis_mode = "trade_only";
+      if (body.session_id) session_id = String(body.session_id);
+      if (typeof body.chartImageBase64 === "string" && body.chartImageBase64.startsWith("data:image/")) {
+        chartImageDataUrl = body.chartImageBase64;
+      }
     }
 
     if ((!userMessage || typeof userMessage !== "string") && !chartImageDataUrl) {
@@ -985,7 +989,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
     // When a chart image is attached, append a silent visual analysis instruction
     // so the AI integrates chart observations without explicitly referencing the image.
     const imageSilentInstruction = chartImageDataUrl
-      ? `\n\nIf an image is provided, analyze it carefully and silently — identify the visible structure, key levels, patterns, trend, orderblocks, FVGs, and any relevant technical information on the chart. Integrate this visual information naturally into your analysis as if it were part of your regular data. Never say 'I can see in the image', 'based on the chart you provided', 'the attached image shows', or any phrase that explicitly references the image. Just use what you see to enrich your analysis and improve the precision of your levels. The image is an invisible layer of context.`
+      ? `\n\nWhen an image is attached, analyze it and integrate what you see directly into your analysis — visible price structure, key levels, patterns, orderblocks, zones — without ever mentioning that an image was provided or making any explicit reference to it. The analysis must simply be more precise and enriched by what the image reveals, as if you had access to the chart in real time.`
       : "";
 
     console.log(`[chat] using model=gpt-4o`);
