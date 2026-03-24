@@ -49,8 +49,14 @@ export default function ChatPage() {
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [respondedTradeIds, setRespondedTradeIds] = useState<Set<string>>(new Set());
+
+  function attachImageFile(file: File) {
+    if (!file.type.startsWith("image/")) return;
+    setSelectedImage(file);
+  }
 
   const PLACEHOLDER_TEXT = "Analyse XAUUSD";
 
@@ -99,7 +105,7 @@ export default function ChatPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [setAnalysisMode]);
 
-  // Clipboard paste — detect image and attach it automatically
+  // Clipboard paste — detect image and attach it automatically (document-level fallback)
   useEffect(() => {
     function handlePaste(e: ClipboardEvent) {
       if (!e.clipboardData) return;
@@ -108,14 +114,48 @@ export default function ChatPage() {
           const file = item.getAsFile();
           if (!file) continue;
           e.preventDefault();
-          setSelectedImage(file);
+          attachImageFile(file);
           return;
         }
       }
     }
     document.addEventListener("paste", handlePaste);
     return () => document.removeEventListener("paste", handlePaste);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function handleInputPaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    if (!e.clipboardData) return;
+    for (const item of Array.from(e.clipboardData.items)) {
+      if (item.type.startsWith("image/")) {
+        const file = item.getAsFile();
+        if (!file) continue;
+        e.preventDefault();
+        attachImageFile(file);
+        return;
+      }
+    }
+  }
+
+  function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.types.includes("Files")) setIsDragging(true);
+  }
+
+  function handleDragLeave(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }
+
+  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) attachImageFile(file);
+  }
 
   useEffect(() => {
     if (!selectedImage) {
@@ -399,7 +439,15 @@ export default function ChatPage() {
             <div ref={bottomRef} />
           </div>
 
-          <div className="px-4 sm:px-6 py-4 border-t border-[color:var(--border)]">
+          <div
+            className={cn(
+              "px-4 sm:px-6 py-4 border-t border-[color:var(--border)] transition",
+              isDragging && "bg-[rgba(109,40,217,0.06)] border-t-[rgba(109,40,217,0.4)]"
+            )}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             <div className="flex gap-2 mb-3 items-center overflow-x-auto no-scrollbar">
               {(["deep", "quick", "trade_only"] as const).map((mode) => (
                 <button
@@ -495,6 +543,7 @@ export default function ChatPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") send(); }}
+                  onPaste={handleInputPaste}
                 />
 
                 <button
