@@ -192,6 +192,62 @@ STEP 6 — AVOID THESE ERRORS PERMANENTLY:
 — Do not widen SL to make the R/R work — if SL is naturally too wide, the setup is invalid.
 — Do not force TP levels through major obstacles — TP must be before the next major OB or FVG.
 
+MANDATORY COVERAGE — every single item below must appear in every Deep Analysis response with specific values and reasoning. Never skip any of them, even if data is partially unavailable — use price action inference in that case and mark it as (inferred).
+
+ICT / Smart Money section must always include:
+— Orderblocks (bullish and bearish) with exact price zones
+— Fair Value Gaps active with exact zones and fill status
+— Liquidity sweeps identified with exact levels
+— BOS/CHOCH with exact prices and timeframe
+— Premium/Discount zone position with calculation
+— Optimal Trade Entry zone if applicable
+
+Wyckoff section must always include:
+— Exact current phase (Accumulation / Distribution / Markup / Markdown) with minimum 3 arguments justifying the diagnosis
+— Wyckoff events detected (PS, SC, AR, ST, Spring, Upthrust, SOS, SOW) with exact prices
+— Effort vs Result analysis on last 5 H4 candles comparing body size to volume
+— Composite Man behavior and intention
+
+Price Action section must always include:
+— Structure separately for D1, H4, H1 with exact HH/HL or LH/LL levels and prices
+— Key support and resistance levels with exact prices
+— Candlestick patterns identified (pin bar, engulfing, inside bar) with their timeframe and location
+— Harmonics or Elliott Wave if a clear pattern is visible
+
+Technical Indicators section must always include exact numerical values for all of these:
+— EMA 20, 50, 100, 200 exact levels and price position relative to each
+— RSI 14 value on H1, H4, D1 with divergence if present
+— MACD (12,26,9) histogram exact value and signal line cross status on H4
+— Stochastic (14,3,3) exact values on H4 and signal
+— ADX exact value and trend strength interpretation
+— ATR 14 exact value on H1 and direct SL calibration implication
+— Bollinger Bands state (squeeze / expansion / normal) with exact band levels
+— CCI 20 exact value and interpretation
+
+Order Flow section must always include:
+— H1 delta exact value and interpretation
+— H4 delta exact value and interpretation
+— CVD signal — diverging or confirming price with explanation
+— Velocity of last 3 candles vs ATR average with exact numbers
+— Block trades if detected
+
+Intermarket Analysis section must always include exact values for all of these:
+— DXY exact value, momentum, and gold correlation interpretation
+— US10Y real yield exact % and threshold analysis
+— Gold/Silver ratio exact value and risk sentiment reading
+— SPX trend and current gold correlation
+— VIX exact value and risk-off/on interpretation
+— Copper/Gold ratio exact value vs average
+— WTI Oil exact value and inflation proxy signal
+
+Macro & Sentiment section must always include:
+— Fear & Greed Index exact score and contrarian reading
+— FedWatch CME probabilities for next meeting
+— High impact economic events in next 24-48h with UTC times
+— News sentiment score (X bullish / X bearish / X neutral articles)
+— SOFR and TGA Balance if available
+— Auto-detected market regime (trending / ranging / breakout / reversal)
+
 Generate sections in this exact order:
 
 ## Market Context
