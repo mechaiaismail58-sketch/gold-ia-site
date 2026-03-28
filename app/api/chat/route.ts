@@ -1,7 +1,7 @@
-// 90s Vercel timeout: up to 14s research (CFTC COT) + up to 70s OpenAI generation.
-export const maxDuration = 90;
+// 60s Vercel timeout: up to 20s research (CFTC COT) + up to 40s Anthropic generation.
+export const maxDuration = 60;
 
-import OpenAI from "openai";
+import { anthropic } from "@/lib/anthropic";
 import { DEEP_ANALYSIS_PROMPT, QUICK_BRIEF_PROMPT, TRADE_ONLY_PROMPT } from "@/lib/prompts";
 import { GOLDEN_EXAMPLES } from "@/lib/goldenExamples";
 import { STYLE_MEMORY } from "@/lib/styleMemory";
@@ -703,16 +703,10 @@ async function fileToDataUrl(file: File): Promise<string> {
 
 export async function POST(req: Request) {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      console.error("[chat] OPENAI_API_KEY is missing");
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error("[chat] ANTHROPIC_API_KEY is missing");
       return Response.json({ ok: false, error: "AI not configured" }, { status: 500 });
     }
-
-    // Initialise inside the handler so OPENAI_API_KEY is read at request time,
-    // not at cold-start module initialisation where env vars may not be injected yet.
-    const client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -960,14 +954,18 @@ ${conversationHistory}DEMANDE UTILISATEUR
 ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}`.trim();
     }
 
-    // Build user input content for Responses API
-    const userInputContent: Array<
-      | { type: "input_text"; text: string }
-      | { type: "input_image"; image_url: string; detail: "high" }
-    > = [{ type: "input_text", text: finalUserInput }];
+    // Build user message content for Anthropic API
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userContent: any[] = [{ type: "text", text: finalUserInput }];
 
     if (chartImageDataUrl) {
-      userInputContent.push({ type: "input_image", image_url: chartImageDataUrl, detail: "high" });
+      const [header, b64data] = chartImageDataUrl.split(",");
+      const mediaType = (header.split(":")[1]?.split(";")[0] ?? "image/jpeg") as
+        | "image/jpeg"
+        | "image/png"
+        | "image/gif"
+        | "image/webp";
+      userContent.push({ type: "image", source: { type: "base64", media_type: mediaType, data: b64data } });
     }
 
     console.log(`[chat] mode=${mode} analysis_mode=${analysis_mode} horizon=${tradeHorizon} has_image=${Boolean(chartImageDataUrl)} has_prev_response=${Boolean(previous_response_id)}`);
@@ -992,36 +990,62 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       ? `\n\nWhen an image is attached, analyze it and integrate what you see directly into your analysis — visible price structure, key levels, patterns, orderblocks, zones — without ever mentioning that an image was provided or making any explicit reference to it. The analysis must simply be more precise and enriched by what the image reveals, as if you had access to the chart in real time.`
       : "";
 
-    console.log(`[chat] using model=gpt-4o`);
+    const MODEL = "claude-opus-4-6";
+    console.log(`[chat] using model=${MODEL}`);
 
-    let response;
+    let outputText = "";
+    let responseId = "";
+
+    const systemBlocks = [
+      {
+        type: "text" as const,
+        text: selectedPrompt + imageSilentInstruction,
+        cache_control: { type: "ephemeral" as const },
+      },
+    ];
+
     try {
-      const chatCall = client.responses.create({
-        model: "gpt-4o",
-        max_output_tokens: maxOut,
-        tools: [{ type: "web_search_preview" }],
-        input: [
-          { role: "system", content: selectedPrompt + imageSilentInstruction },
-          { role: "user", content: userInputContent as any },
-        ],
+      // Stream to avoid Vercel HTTP timeout — collect full response via finalMessage()
+      const stream = anthropic.messages.stream({
+        model: MODEL,
+        max_tokens: maxOut,
+        system: systemBlocks,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        tools: [{ type: "web_search_20260209", name: "web_search" }] as any,
+        messages: [{ role: "user", content: userContent }],
       });
 
-      // 72-second hard timeout (maxDuration=90s — 14s research budget leaves 76s for AI, -4s buffer)
-      const timeoutMs = 72_000;
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("OpenAI request timed out after 72s")), timeoutMs)
-      );
+      const finalMessage = await stream.finalMessage();
+      responseId = finalMessage.id;
 
-      response = await Promise.race([chatCall, timeoutPromise]);
-    } catch (openaiError: unknown) {
-      const err = openaiError as any;
-      console.error("[chat] OpenAI error:", err?.status, err?.message, err?.code, err?.type);
-      throw openaiError;
-    }
+      // Handle pause_turn: server-side tool loop hit limit — continue once without tools
+      if (finalMessage.stop_reason === "pause_turn") {
+        console.warn("[chat] Anthropic pause_turn — continuing without tools");
+        const continuation = await anthropic.messages.create({
+          model: MODEL,
+          max_tokens: maxOut,
+          system: systemBlocks,
+          messages: [
+            { role: "user", content: userContent },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { role: "assistant", content: finalMessage.content as any },
+          ],
+        });
+        responseId = continuation.id;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        outputText = continuation.content.filter((b: any) => b.type === "text").map((b: any) => b.text as string).join("");
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        outputText = finalMessage.content.filter((b: any) => b.type === "text").map((b: any) => b.text as string).join("");
+      }
 
-    const outputText = response.output_text ?? "";
-    if (!outputText) {
-      console.warn("[chat] OpenAI returned empty output_text. Full response:", JSON.stringify(response, null, 2));
+      if (!outputText) {
+        console.warn("[chat] Anthropic returned empty text. stop_reason:", finalMessage.stop_reason);
+      }
+    } catch (anthropicError: unknown) {
+      const err = anthropicError as { status?: number; message?: string; error?: { type?: string } };
+      console.error("[chat] Anthropic error:", err?.status, err?.message, err?.error?.type);
+      throw anthropicError;
     }
     // DIAGNOSTIC — log output structure for deep mode
     if (analysis_mode === "deep" && outputText) {
@@ -1078,7 +1102,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
     return Response.json({
       ok: true,
       text: outputText || "No response generated — please retry.",
-      response_id: response.id,
+      response_id: responseId,
       mode,
       trade_horizon: tradeHorizon,
       image_attached: Boolean(chartImageDataUrl),

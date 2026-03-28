@@ -9,7 +9,6 @@ import { buildInstitutionalSynthesis } from "./getOrderFlowContext";
 import { getUpcomingEvents } from "./getUpcomingEvents";
 import { getPolygonOrderFlow } from "./getPolygonOrderFlow";
 import { getSentimentContext } from "./getSentimentContext";
-import { getAlphaVantageContext } from "./getAlphaVantageContext";
 import { getYahooFinanceContext } from "./getYahooFinanceContext";
 import { getETFFlowsContext } from "./getETFFlowsContext";
 import { buildFedWatchContext } from "./getFedWatchContext";
@@ -19,7 +18,6 @@ import type { COTContext } from "./getCOTContext";
 import type { UpcomingEventsContext } from "./getUpcomingEvents";
 import type { PolygonOrderFlow } from "./getPolygonOrderFlow";
 import type { SentimentContext } from "./getSentimentContext";
-import type { AlphaVantageContext } from "./getAlphaVantageContext";
 import type { YahooFinanceContext } from "./getYahooFinanceContext";
 import type { ETFFlowsContext } from "./getETFFlowsContext";
 import type { FedWatchContext } from "./getFedWatchContext";
@@ -422,7 +420,6 @@ export type EnrichedResearchContext = ResearchContext & {
   upcoming_events: UpcomingEventsContext | null;
   polygon_order_flow: PolygonOrderFlow | null;
   sentiment_context: SentimentContext | null;
-  av_context: AlphaVantageContext | null;
   yahoo_finance: YahooFinanceContext | null;
   etf_flows: ETFFlowsContext | null;
   fed_watch: FedWatchContext | null;
@@ -435,7 +432,114 @@ export type EnrichedResearchContext = ResearchContext & {
   } | null;
   sofr: number | null;
   tga_balance_bn: number | null;
+  fx_momentum: {
+    eurusd_h4: "bullish" | "bearish" | "neutral";
+    usdjpy_h4: "bullish" | "bearish" | "neutral";
+    summary: string;
+  } | null;
+  gld_iv: number | null;
+  futures_curve: FuturesCurveData | null;
 };
+
+// ── COT with one automatic retry ──────────────────────────────────────────────
+
+async function getCOTContextWithRetry() {
+  try {
+    const result = await getCOTContext();
+    if (result) return result;
+  } catch { /* first attempt failed, retry */ }
+  try { return await getCOTContext(); } catch { return null; }
+}
+
+// ── H4 momentum from last 3 candles ───────────────────────────────────────────
+
+function computeH4Momentum(bars: ParsedBar[]): "bullish" | "bearish" | "neutral" {
+  if (bars.length < 3) return "neutral";
+  const last3 = bars.slice(-3);
+  const ups = last3.filter(b => b.close > b.open).length;
+  const downs = last3.filter(b => b.close < b.open).length;
+  return ups >= 2 ? "bullish" : downs >= 2 ? "bearish" : "neutral";
+}
+
+// ── GLD implied volatility from Yahoo Finance options ─────────────────────────
+
+async function fetchGLDImpliedVol(): Promise<number | null> {
+  const YF_HEADERS = { "User-Agent": "Mozilla/5.0 (compatible; GoldDesk/1.0)", "Accept": "application/json" };
+  const urls = [
+    "https://query1.finance.yahoo.com/v7/finance/options/GLD",
+    "https://query2.finance.yahoo.com/v7/finance/options/GLD",
+  ];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type YFOptions = { optionChain?: { result?: Array<{ quote?: { regularMarketPrice?: number }; options?: Array<{ calls?: Array<{ strike: number; impliedVolatility?: number }> }> }> } };
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { headers: YF_HEADERS, next: { revalidate: 3600 } });
+      if (!res.ok) continue;
+      const data = await res.json() as YFOptions;
+      const result = data?.optionChain?.result?.[0];
+      const spot = result?.quote?.regularMarketPrice;
+      const calls = result?.options?.[0]?.calls ?? [];
+      if (!spot || !calls.length) continue;
+      const atm = calls.reduce((best, c) =>
+        !best || Math.abs(c.strike - spot) < Math.abs(best.strike - spot) ? c : best
+      , null as (typeof calls[0]) | null);
+      if (atm?.impliedVolatility != null) return parseFloat((atm.impliedVolatility * 100).toFixed(1));
+    } catch { continue; }
+  }
+  return null;
+}
+
+// ── COMEX futures curve (front vs next delivery month) ────────────────────────
+
+type FuturesCurveData = {
+  front_price: number | null;
+  next_price: number | null;
+  spread: number | null;
+  structure: "contango" | "backwardation" | "flat" | null;
+  note: string;
+};
+
+function getNextGoldFuturesSymbol(): string {
+  const now = new Date();
+  const month = now.getUTCMonth() + 1;
+  const deliveryMonths = [2, 4, 6, 8, 10, 12];
+  const monthCodes: Record<number, string> = { 2: "G", 4: "J", 6: "M", 8: "Q", 10: "V", 12: "Z" };
+  const nextDelivery = deliveryMonths.find(m => m > month) ?? deliveryMonths[0];
+  const yearOffset = nextDelivery <= month ? 1 : 0;
+  const yy = String(now.getUTCFullYear() + yearOffset).slice(-2);
+  return `GC${monthCodes[nextDelivery]}${yy}`;
+}
+
+async function fetchFuturesCurveData(): Promise<FuturesCurveData> {
+  const YF_HEADERS = { "User-Agent": "Mozilla/5.0 (compatible; GoldDesk/1.0)", "Accept": "application/json" };
+  const nextSymbol = getNextGoldFuturesSymbol();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type YFChart = { chart?: { result?: Array<{ meta?: { regularMarketPrice?: number } }> } };
+  const fetchPrice = async (sym: string): Promise<number | null> => {
+    for (const base of ["https://query1.finance.yahoo.com", "https://query2.finance.yahoo.com"]) {
+      try {
+        const res = await fetch(`${base}/v8/finance/chart/${encodeURIComponent(sym)}?range=1d&interval=1d`, { headers: YF_HEADERS, next: { revalidate: 300 } });
+        if (!res.ok) continue;
+        const d = await res.json() as YFChart;
+        const p = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
+        if (p != null && Number.isFinite(p)) return p;
+      } catch { continue; }
+    }
+    return null;
+  };
+  const [frontPrice, nextPrice] = await Promise.all([fetchPrice("GC=F"), fetchPrice(nextSymbol)]);
+  if (frontPrice == null || nextPrice == null) {
+    return { front_price: frontPrice, next_price: nextPrice, spread: null, structure: null, note: "Futures curve data unavailable" };
+  }
+  const spread = nextPrice - frontPrice;
+  const structure: "contango" | "backwardation" | "flat" = spread > 5 ? "contango" : spread < -5 ? "backwardation" : "flat";
+  const note = structure === "contango"
+    ? `GC=F ${frontPrice.toFixed(0)} < ${nextSymbol} ${nextPrice.toFixed(0)} — contango $${spread.toFixed(0)} (normal carry, neutral)`
+    : structure === "backwardation"
+    ? `GC=F ${frontPrice.toFixed(0)} > ${nextSymbol} ${nextPrice.toFixed(0)} — backwardation $${Math.abs(spread).toFixed(0)} (near-term stress, bullish signal)`
+    : `GC=F ${frontPrice.toFixed(0)} ≈ ${nextSymbol} ${nextPrice.toFixed(0)} — flat curve ($${spread.toFixed(0)})`;
+  return { front_price: frontPrice, next_price: nextPrice, spread, structure, note };
+}
 
 export async function buildResearchContext(): Promise<EnrichedResearchContext> {
   const symbol = process.env.XAUUSD_SYMBOL || "XAU/USD";
@@ -457,16 +561,19 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     upcomingEvents,
     polygonOrderFlow,
     sentimentContext,
-    avContext,
     etfFlows,
     centralBankContext,
     sofr,
     tgaRaw,
     targetUpper,
     effectiveRate,
+    eurusdBars,
+    usdjpyBars,
+    gldIV,
+    futuresCurve,
   ] = await Promise.all([
     withTimeout(getPriceContext(), 5000, { xauusd: null, gc_f: null, gld: null, dxy: null, validated: false, divergence_pct: null, source_1: "Twelve Data", source_2: "Twelve Data", fetched_at_utc: new Date().toISOString() }),
-    withTimeout(fetchOHLCVBars(symbol, "1h", 140, 300), 6000, []),    // Twelve Data can be 4-5s
+    withTimeout(fetchOHLCVBars(symbol, "1h", 140, 300), 6000, []),
     withTimeout(fetchOHLCVBars(symbol, "30min", 80, 300), 6000, []),
     withTimeout(fetchOHLCVBars(symbol, "4h", 250, 900), 6000, []),
     withTimeout(fetchOHLCVBars(symbol, "1day", 220, 900), 6000, []),
@@ -476,17 +583,20 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     withTimeout(getLatestFredValue("T10YIE"), 5000, null),
     withTimeout(getLatestFredValue("SLVPRUSD"), 5000, null),
     withTimeout(fetchYahooSpx(), 4000, { current: null, direction: "Data not found" }),
-    withTimeout(getCOTContext(), 14000, null),       // CFTC API can take 10-13s — give full budget
+    withTimeout(getCOTContextWithRetry(), 20000, null), // CFTC API can be slow — 20s + 1 retry
     withTimeout(getUpcomingEvents(), 4000, null),
     withTimeout(getPolygonOrderFlow(), 4000, null),
     withTimeout(getSentimentContext(), 4000, null),
-    withTimeout(getAlphaVantageContext(), 4000, null),
-    withTimeout(getETFFlowsContext(), 10000, null), // Yahoo Finance chart API — 10s budget
-    withTimeout(getCentralBankContext(), 4000, null),  // was unwrapped — could block indefinitely
+    withTimeout(getETFFlowsContext(), 10000, null),
+    withTimeout(getCentralBankContext(), 4000, null),
     withTimeout(getLatestFredValue("SOFR"), 5000, null),
     withTimeout(getLatestFredValue("WTREGEN"), 5000, null),
     withTimeout(getLatestFredValue("DFEDTARU"), 5000, null),
     withTimeout(getLatestFredValue("FEDFUNDS"), 5000, null),
+    withTimeout(fetchOHLCVBars("EUR/USD", "4h", 10, 900), 5000, []),
+    withTimeout(fetchOHLCVBars("USD/JPY", "4h", 10, 900), 5000, []),
+    withTimeout(fetchGLDImpliedVol(), 6000, null),
+    withTimeout(fetchFuturesCurveData(), 6000, { front_price: null, next_price: null, spread: null, structure: null, note: "Futures curve data unavailable" }),
   ]);
 
   // ── Institutional data diagnostics ────────────────────────────────────────
@@ -584,10 +694,26 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     }
   }
 
-  // Append Polygon real flow to order flow summary if available
-  if (indicatorContext?.order_flow && polygonOrderFlow) {
-    indicatorContext.order_flow.summary += ` | ${polygonOrderFlow.summary}`;
+  // Label order flow source; append Polygon if available
+  if (indicatorContext?.order_flow) {
+    if (polygonOrderFlow) {
+      indicatorContext.order_flow.summary += ` | ${polygonOrderFlow.summary}`;
+    } else {
+      indicatorContext.order_flow.summary += ` (local calculation)`;
+    }
   }
+
+  // ── FX momentum — EUR/USD and USD/JPY H4 last 3 candles ───────────────────
+  const eurusdDir = computeH4Momentum(eurusdBars);
+  const usdjpyDir = computeH4Momentum(usdjpyBars);
+  const fxMomentum = (eurusdBars.length >= 3 || usdjpyBars.length >= 3) ? {
+    eurusd_h4: eurusdDir,
+    usdjpy_h4: usdjpyDir,
+    summary: [
+      eurusdBars.length >= 3 ? `EUR/USD H4: ${eurusdDir}${eurusdDir === "bullish" ? " (USD weakening — gold tailwind)" : eurusdDir === "bearish" ? " (USD strengthening — gold headwind)" : " (neutral)"}` : null,
+      usdjpyBars.length >= 3 ? `USD/JPY H4: ${usdjpyDir}${usdjpyDir === "bullish" ? " (USD strengthening — gold headwind)" : usdjpyDir === "bearish" ? " (USD weakening — gold tailwind)" : " (neutral)"}` : null,
+    ].filter(Boolean).join(" | "),
+  } : null;
 
   // ── COMEX Open Interest signal (4-scenario OI × price analysis) ────────────
   type OIScenario = "new_longs" | "new_shorts" | "short_covering" | "long_liquidation" | "unknown";
@@ -650,7 +776,6 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     upcoming_events: upcomingEvents,
     polygon_order_flow: polygonOrderFlow,
     sentiment_context: sentimentContext,
-    av_context: avContext,
     yahoo_finance: yahooFinance,
     etf_flows: etfFlows,
     fed_watch: fedWatch.summary ? fedWatch : null,
@@ -658,5 +783,8 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     oi_signal,
     sofr,
     tga_balance_bn,
+    fx_momentum: fxMomentum,
+    gld_iv: gldIV,
+    futures_curve: futuresCurve.structure != null || futuresCurve.front_price != null ? futuresCurve : null,
   };
 }

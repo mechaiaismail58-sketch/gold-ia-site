@@ -6,9 +6,6 @@ import { SYSTEM_PROMPT } from "./systemPrompt";
 const SHARED_RULES = `LANGUAGE RULE:
 Always respond in English regardless of the language the user writes in. Understand requests in any language but always respond in English only.
 
-CONSISTENCY RULE:
-The trade decision, bias, entry, SL, TP1, TP2 and confluence score are pre-calculated and provided in the SHARED ANALYSIS block in the context. Use these exact values in your response. Never override or contradict them. The three modes always agree on the trade decision — they only differ in how much detail they show.
-
 CLEAN ENTRY LEVEL — ABSOLUTE RULE:
 The criterion 'Clean entry level available' is a hard gate for any trade.
 If there is no clean entry level → NO TRADE, regardless of the total confluence score.
