@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 import { SYSTEM_PROMPT } from "@/lib/systemPrompt";
 import { buildResearchContext } from "@/lib/research/buildResearchContext";
 import { sendPreMarketEmail } from "@/lib/email";
@@ -7,8 +7,6 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function GET(req: Request) {
   const auth = req.headers.get("authorization");
@@ -20,26 +18,32 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: false, error: "RESEND_API_KEY not configured" });
   }
 
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({ ok: false, error: "ANTHROPIC_API_KEY not configured" });
+  }
+
   try {
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const ctx = await buildResearchContext();
     const goldPrice = ctx.price_context?.xauusd ?? ctx.technical_context?.current_price ?? null;
     const bias = ctx.technical_state?.bias !== "Data not found" ? ctx.technical_state?.bias : null;
 
     const userMsg = `Generate a concise pre-market gold brief for ${new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" })} UTC. Keep it to 3-5 paragraphs: key levels for today, macro context, technical structure, and main watch points. Institutional tone. No emojis.`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const response = await client.messages.create({
+      model: "claude-opus-4-6",
+      max_tokens: 600,
+      system: SYSTEM_PROMPT,
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
         {
           role: "user",
           content: `${goldPrice ? `XAUUSD: ${goldPrice.toFixed(2)}\n` : ""}H1 Trend: ${ctx.technical_context?.h1_trend ?? "—"}\nM30: ${ctx.technical_context?.m30_structure ?? "—"}\nMacro: ${ctx.macro_state?.gold_pressure ?? "—"}\n\n${userMsg}`,
         },
       ],
-      max_tokens: 600,
     });
 
-    const brief = completion.choices[0]?.message?.content ?? "";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const brief = response.content.filter((b: any) => b.type === "text").map((b: any) => b.text as string).join("").trim();
     if (!brief) return NextResponse.json({ ok: false, error: "No brief generated" });
 
     // Fetch all users who have email

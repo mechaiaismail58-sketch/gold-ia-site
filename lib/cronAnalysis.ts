@@ -1,12 +1,10 @@
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 import { SYSTEM_PROMPT } from "@/lib/systemPrompt";
 import { buildResearchContext } from "@/lib/research/buildResearchContext";
 import type { EnrichedResearchContext } from "@/lib/research/buildResearchContext";
 import { sendPushNotification } from "@/lib/pushNotifications";
 import { sendTradeAlertEmail } from "@/lib/email";
 import { createAdminClient } from "@/lib/supabase/server";
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export type CronMode = "scalp" | "swing";
 
@@ -98,16 +96,16 @@ export async function runCronAnalysis(mode: CronMode) {
     ? `Run a full scalp trade analysis for XAUUSD right now. Use H1/M30 data, FVG, Order Blocks, current session liquidity. Give entry, TP1, TP2, invalidation if trade is valid.`
     : `Run a full swing trade analysis for XAUUSD. Use D1/H4 structure, macro context, weekly levels. Give entry, TP1, TP2, invalidation if trade is valid.`;
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: `${context}\n\n${userMessage}` },
-    ],
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const response = await client.messages.create({
+    model: "claude-opus-4-6",
     max_tokens: 800,
+    system: SYSTEM_PROMPT,
+    messages: [{ role: "user", content: `${context}\n\n${userMessage}` }],
   });
 
-  const responseText = completion.choices[0]?.message?.content ?? "";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const responseText = response.content.filter((b: any) => b.type === "text").map((b: any) => b.text as string).join("").trim();
   const { decision, entry, tp1, tp2, invalidation, score, direction } = extractTradeFields(responseText);
 
   // Only send push if it's a valid trade signal with levels

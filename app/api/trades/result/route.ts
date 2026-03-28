@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -40,11 +40,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Trade not found" }, { status: 404 });
     }
 
-    // Generate lesson via OpenAI (skip for still_open — no final result yet)
+    // Generate lesson via Anthropic (skip for still_open — no final result yet)
     let lesson_learned: string | null = null;
-    if (process.env.OPENAI_API_KEY && result !== "still_open") {
+    if (process.env.ANTHROPIC_API_KEY && result !== "still_open") {
       try {
-        const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
         const resultLabel: Record<string, string> = {
           tp1_hit: "TP1 hit (partial profit taken)",
           tp2_hit: "TP2 hit (full target reached)",
@@ -63,12 +63,13 @@ Trade:
 
 Write 2-3 sentences covering: (1) what was correctly identified, (2) what was missed or went wrong if applicable, (3) one specific improvement for next time. Be direct and actionable. No fluff, no generic advice.`;
 
-        const response = await client.responses.create({
-          model: "gpt-4o",
-          input: [{ role: "user", content: lessonPrompt }],
-          max_output_tokens: 120,
+        const response = await client.messages.create({
+          model: "claude-opus-4-6",
+          max_tokens: 120,
+          messages: [{ role: "user", content: lessonPrompt }],
         });
-        lesson_learned = response.output_text?.trim() || null;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        lesson_learned = response.content.filter((b: any) => b.type === "text").map((b: any) => b.text as string).join("").trim() || null;
       } catch (err) {
         console.error("[trades/result] lesson generation error:", err);
       }
