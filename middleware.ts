@@ -90,6 +90,11 @@ export async function middleware(req: NextRequest) {
       return NextResponse.next();
     }
 
+    // ── Auth routes — always accessible (admin needs to log in) ─────────────
+    if (pathname === "/login" || pathname === "/register" || pathname.startsWith("/api/auth/")) {
+      return NextResponse.next();
+    }
+
     // ── Landing page itself ──────────────────────────────────────────────────
     if (pathname === "/") {
       return NextResponse.next();
