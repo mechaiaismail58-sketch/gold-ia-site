@@ -1,7 +1,7 @@
 // 60s Vercel timeout: up to 20s research (CFTC COT) + up to 40s Anthropic generation.
 export const maxDuration = 60;
 
-import { anthropic } from "@/lib/anthropic";
+import Anthropic from "@anthropic-ai/sdk";
 import { DEEP_ANALYSIS_PROMPT, QUICK_BRIEF_PROMPT, TRADE_ONLY_PROMPT } from "@/lib/prompts";
 import { GOLDEN_EXAMPLES } from "@/lib/goldenExamples";
 import { STYLE_MEMORY } from "@/lib/styleMemory";
@@ -703,10 +703,13 @@ async function fileToDataUrl(file: File): Promise<string> {
 
 export async function POST(req: Request) {
   try {
+    // Instantiate inside the handler so the key is read at request time, not cold-start
+    console.log("[chat] ANTHROPIC_API_KEY present:", !!process.env.ANTHROPIC_API_KEY);
     if (!process.env.ANTHROPIC_API_KEY) {
       console.error("[chat] ANTHROPIC_API_KEY is missing");
       return Response.json({ ok: false, error: "AI not configured" }, { status: 500 });
     }
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -1006,7 +1009,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
 
     try {
       // Stream to avoid Vercel HTTP timeout — collect full response via finalMessage()
-      const stream = anthropic.messages.stream({
+      const stream = client.messages.stream({
         model: MODEL,
         max_tokens: maxOut,
         system: systemBlocks,
@@ -1021,7 +1024,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       // Handle pause_turn: server-side tool loop hit limit — continue once without tools
       if (finalMessage.stop_reason === "pause_turn") {
         console.warn("[chat] Anthropic pause_turn — continuing without tools");
-        const continuation = await anthropic.messages.create({
+        const continuation = await client.messages.create({
           model: MODEL,
           max_tokens: maxOut,
           system: systemBlocks,
@@ -1110,7 +1113,9 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       pending_trade_id: pendingTrades?.first_id ?? null,
     });
   } catch (error) {
-    console.error("[chat] Handler error:", error instanceof Error ? error.message : String(error));
+    // Log full error for Vercel diagnostics — status, type, and message
+    const e = error as { status?: number; message?: string; error?: { type?: string; message?: string } };
+    console.error("[chat] Handler error — status:", e?.status, "| type:", e?.error?.type, "| message:", e?.message ?? String(error));
 
     // Return a clean user-facing message — don't expose internal error details
     const isTimeout = error instanceof Error && error.message.includes("timed out");
