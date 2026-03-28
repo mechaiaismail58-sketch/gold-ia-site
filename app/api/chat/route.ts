@@ -1013,8 +1013,6 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
         model: MODEL,
         max_tokens: maxOut,
         system: systemBlocks,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        tools: [{ type: "web_search_20260209", name: "web_search" }] as any,
         messages: [{ role: "user", content: userContent }],
       });
 

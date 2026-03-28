@@ -244,7 +244,8 @@ export default function ChatPage() {
           image_attached: Boolean(imageBase64ToSend),
         }).catch(() => {});
       }
-    } catch {
+    } catch (err) {
+      console.error("[chat] fetch error:", err);
       setMessages((m) => [
         ...m,
         { role: "assistant", content: "System error: AI not connected." },
