@@ -80,13 +80,8 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // ── Waitlist API — always accessible ────────────────────────────────────
-    if (pathname === "/api/waitlist" || pathname.startsWith("/api/waitlist/")) {
-      return NextResponse.next();
-    }
-
-    // ── Admin API routes — always accessible ────────────────────────────────
-    if (pathname.startsWith("/api/emails/") || pathname.startsWith("/api/stripe/")) {
+    // ── Toutes les routes API passent — elles ont leur propre auth Supabase ───
+    if (pathname.startsWith("/api/")) {
       return NextResponse.next();
     }
 
@@ -94,8 +89,7 @@ export async function middleware(req: NextRequest) {
     if (
       pathname === "/login" ||
       pathname === "/register" ||
-      pathname.startsWith("/auth/") ||
-      pathname.startsWith("/api/auth/")
+      pathname.startsWith("/auth/")
     ) {
       return NextResponse.next();
     }
