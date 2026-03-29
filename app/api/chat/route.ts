@@ -711,8 +711,10 @@ export async function POST(req: Request) {
     }
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+    console.log("[chat][1] creating supabase client");
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
+    console.log("[chat][2] user:", user?.id ?? "null");
     if (!user) {
       return Response.json({ ok: false, error: "Unauthorized." }, { status: 401 });
     }
@@ -771,12 +773,15 @@ export async function POST(req: Request) {
       .eq("id", user.id)
       .single();
 
+    console.log("[chat][3] starting buildResearchContext + trade memory");
+    const t0 = Date.now();
     const [researchContext, tradeMemory, pendingTrades, performanceMemory] = await Promise.all([
       buildResearchContext(),
       getTradeMemory(user.id, dbClient as typeof supabase),
       getPendingTradesContext(user.id, dbClient as typeof supabase),
       getPerformanceMemory(user.id, dbClient as typeof supabase),
     ]);
+    console.log(`[chat][4] context ready in ${Date.now() - t0}ms`);
 
     const horizonInstructionMap: Record<TradeHorizon, string> = {
       scalp: `
@@ -1007,6 +1012,8 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       },
     ];
 
+    console.log(`[chat][5] calling Anthropic model=${MODEL} max_tokens=${maxOut}`);
+    const t1 = Date.now();
     try {
       // Stream to avoid Vercel HTTP timeout — collect full response via finalMessage()
       const stream = client.messages.stream({
@@ -1017,6 +1024,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       });
 
       const finalMessage = await stream.finalMessage();
+      console.log(`[chat][6] Anthropic done in ${Date.now() - t1}ms stop_reason=${finalMessage.stop_reason}`);
       responseId = finalMessage.id;
 
       // Handle pause_turn: server-side tool loop hit limit — continue once without tools
@@ -1040,6 +1048,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
         outputText = finalMessage.content.filter((b: any) => b.type === "text").map((b: any) => b.text as string).join("");
       }
 
+      console.log(`[chat][7] outputText length=${outputText.length}`);
       if (!outputText) {
         console.warn("[chat] Anthropic returned empty text. stop_reason:", finalMessage.stop_reason);
       }
@@ -1100,6 +1109,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       }
     }
 
+    console.log(`[chat][8] returning ok=true text_length=${outputText.length} trade_id=${savedTradeId}`);
     return Response.json({
       ok: true,
       text: outputText || "No response generated — please retry.",
