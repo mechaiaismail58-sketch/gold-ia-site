@@ -1,5 +1,5 @@
 // 60s Vercel timeout: up to 20s research (CFTC COT) + up to 40s Anthropic generation.
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 import Anthropic from "@anthropic-ai/sdk";
 import { DEEP_ANALYSIS_PROMPT, QUICK_BRIEF_PROMPT, TRADE_ONLY_PROMPT } from "@/lib/prompts";

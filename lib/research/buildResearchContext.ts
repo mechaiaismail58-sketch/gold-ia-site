@@ -572,31 +572,31 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     gldIV,
     futuresCurve,
   ] = await Promise.all([
-    withTimeout(getPriceContext(), 5000, { xauusd: null, gc_f: null, gld: null, dxy: null, validated: false, divergence_pct: null, source_1: "Twelve Data", source_2: "Twelve Data", fetched_at_utc: new Date().toISOString() }),
-    withTimeout(fetchOHLCVBars(symbol, "1h", 140, 300), 6000, []),
-    withTimeout(fetchOHLCVBars(symbol, "30min", 80, 300), 6000, []),
-    withTimeout(fetchOHLCVBars(symbol, "4h", 250, 900), 6000, []),
-    withTimeout(fetchOHLCVBars(symbol, "1day", 220, 900), 6000, []),
-    withTimeout(getFredLatestTwo("DGS10"), 5000, { current: null, previous: null, direction: "Data not found" as const }),
-    withTimeout(getFredLatestTwo("DFII10"), 5000, { current: null, previous: null, direction: "Data not found" as const }),
-    withTimeout(getLatestFredValue("DGS2"), 5000, null),
-    withTimeout(getLatestFredValue("T10YIE"), 5000, null),
-    withTimeout(getLatestFredValue("SLVPRUSD"), 5000, null),
-    withTimeout(fetchYahooSpx(), 4000, { current: null, direction: "Data not found" }),
-    withTimeout(getCOTContextWithRetry(), 8000, null), // CFTC API — capped at 8s to stay under Vercel 60s limit
-    withTimeout(getUpcomingEvents(), 4000, null),
-    withTimeout(getPolygonOrderFlow(), 4000, null),
-    withTimeout(getSentimentContext(), 4000, null),
-    withTimeout(getETFFlowsContext(), 5000, null),
-    withTimeout(getCentralBankContext(), 4000, null),
-    withTimeout(getLatestFredValue("SOFR"), 5000, null),
-    withTimeout(getLatestFredValue("WTREGEN"), 5000, null),
-    withTimeout(getLatestFredValue("DFEDTARU"), 5000, null),
-    withTimeout(getLatestFredValue("FEDFUNDS"), 5000, null),
-    withTimeout(fetchOHLCVBars("EUR/USD", "4h", 10, 900), 5000, []),
-    withTimeout(fetchOHLCVBars("USD/JPY", "4h", 10, 900), 5000, []),
-    withTimeout(fetchGLDImpliedVol(), 6000, null),
-    withTimeout(fetchFuturesCurveData(), 6000, { front_price: null, next_price: null, spread: null, structure: null, note: "Futures curve data unavailable" }),
+    withTimeout(getPriceContext(), 3000, { xauusd: null, gc_f: null, gld: null, dxy: null, validated: false, divergence_pct: null, source_1: "Twelve Data", source_2: "Twelve Data", fetched_at_utc: new Date().toISOString() }),
+    withTimeout(fetchOHLCVBars(symbol, "1h", 140, 300), 4000, []),
+    withTimeout(fetchOHLCVBars(symbol, "30min", 80, 300), 4000, []),
+    withTimeout(fetchOHLCVBars(symbol, "4h", 250, 900), 4000, []),
+    withTimeout(fetchOHLCVBars(symbol, "1day", 220, 900), 4000, []),
+    withTimeout(getFredLatestTwo("DGS10"), 3000, { current: null, previous: null, direction: "Data not found" as const }),
+    withTimeout(getFredLatestTwo("DFII10"), 3000, { current: null, previous: null, direction: "Data not found" as const }),
+    withTimeout(getLatestFredValue("DGS2"), 3000, null),
+    withTimeout(getLatestFredValue("T10YIE"), 3000, null),
+    withTimeout(getLatestFredValue("SLVPRUSD"), 3000, null),
+    withTimeout(fetchYahooSpx(), 3000, { current: null, direction: "Data not found" }),
+    withTimeout(getCOTContextWithRetry(), 4000, null),
+    withTimeout(getUpcomingEvents(), 3000, null),
+    withTimeout(getPolygonOrderFlow(), 3000, null),
+    withTimeout(getSentimentContext(), 3000, null),
+    withTimeout(getETFFlowsContext(), 3000, null),
+    withTimeout(getCentralBankContext(), 3000, null),
+    withTimeout(getLatestFredValue("SOFR"), 3000, null),
+    withTimeout(getLatestFredValue("WTREGEN"), 3000, null),
+    withTimeout(getLatestFredValue("DFEDTARU"), 3000, null),
+    withTimeout(getLatestFredValue("FEDFUNDS"), 3000, null),
+    withTimeout(fetchOHLCVBars("EUR/USD", "4h", 10, 900), 3000, []),
+    withTimeout(fetchOHLCVBars("USD/JPY", "4h", 10, 900), 3000, []),
+    withTimeout(fetchGLDImpliedVol(), 4000, null),
+    withTimeout(fetchFuturesCurveData(), 4000, { front_price: null, next_price: null, spread: null, structure: null, note: "Futures curve data unavailable" }),
   ]);
 
   // ── Institutional data diagnostics ────────────────────────────────────────
@@ -628,7 +628,7 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
   const goldPrice = priceContext.xauusd ?? technicalContext.current_price;
 
   const [yahooFinance] = await Promise.all([
-    getYahooFinanceContext(goldPrice),
+    withTimeout(getYahooFinanceContext(goldPrice), 4000, null),
   ]);
 
   // ── Fed Watch context (pure computation, no extra fetch) ───────────────────
