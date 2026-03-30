@@ -1003,53 +1003,35 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
     let outputText = "";
     let responseId = "";
 
-    const systemBlocks = [
-      {
-        type: "text" as const,
-        text: selectedPrompt + imageSilentInstruction,
-        cache_control: { type: "ephemeral" as const },
-      },
-    ];
-
     console.log(`[chat][5] calling Anthropic model=${MODEL} max_tokens=${maxOut}`);
     const t1 = Date.now();
     try {
-      // Stream to avoid Vercel HTTP timeout — collect full response via finalMessage()
-      const stream = client.messages.stream({
+      // Simple create() call — mirrors the old OpenAI pattern that worked.
+      // stream() + finalMessage() creates a persistent SSE connection that
+      // Vercel serverless can kill before completion.
+      const apiCall = client.messages.create({
         model: MODEL,
         max_tokens: maxOut,
-        system: systemBlocks,
+        system: selectedPrompt + imageSilentInstruction,
         messages: [{ role: "user", content: userContent }],
       });
 
-      const finalMessage = await stream.finalMessage();
-      console.log(`[chat][6] Anthropic done in ${Date.now() - t1}ms stop_reason=${finalMessage.stop_reason}`);
-      responseId = finalMessage.id;
+      // Hard timeout — same pattern as the old OpenAI code
+      const timeoutMs = 55_000;
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`Anthropic request timed out after ${timeoutMs / 1000}s`)), timeoutMs)
+      );
 
-      // Handle pause_turn: server-side tool loop hit limit — continue once without tools
-      if (finalMessage.stop_reason === "pause_turn") {
-        console.warn("[chat] Anthropic pause_turn — continuing without tools");
-        const continuation = await client.messages.create({
-          model: MODEL,
-          max_tokens: maxOut,
-          system: systemBlocks,
-          messages: [
-            { role: "user", content: userContent },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            { role: "assistant", content: finalMessage.content as any },
-          ],
-        });
-        responseId = continuation.id;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        outputText = continuation.content.filter((b: any) => b.type === "text").map((b: any) => b.text as string).join("");
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        outputText = finalMessage.content.filter((b: any) => b.type === "text").map((b: any) => b.text as string).join("");
-      }
+      const response = await Promise.race([apiCall, timeoutPromise]);
+      console.log(`[chat][6] Anthropic done in ${Date.now() - t1}ms stop_reason=${response.stop_reason}`);
+      responseId = response.id;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      outputText = response.content.filter((b: any) => b.type === "text").map((b: any) => b.text as string).join("");
 
       console.log(`[chat][7] outputText length=${outputText.length}`);
       if (!outputText) {
-        console.warn("[chat] Anthropic returned empty text. stop_reason:", finalMessage.stop_reason);
+        console.warn("[chat] Anthropic returned empty text. stop_reason:", response.stop_reason);
       }
     } catch (anthropicError: unknown) {
       const err = anthropicError as { status?: number; message?: string; error?: { type?: string } };
