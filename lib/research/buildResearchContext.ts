@@ -583,11 +583,11 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     withTimeout(getLatestFredValue("T10YIE"), 5000, null),
     withTimeout(getLatestFredValue("SLVPRUSD"), 5000, null),
     withTimeout(fetchYahooSpx(), 4000, { current: null, direction: "Data not found" }),
-    withTimeout(getCOTContextWithRetry(), 20000, null), // CFTC API can be slow — 20s + 1 retry
+    withTimeout(getCOTContextWithRetry(), 8000, null), // CFTC API — capped at 8s to stay under Vercel 60s limit
     withTimeout(getUpcomingEvents(), 4000, null),
     withTimeout(getPolygonOrderFlow(), 4000, null),
     withTimeout(getSentimentContext(), 4000, null),
-    withTimeout(getETFFlowsContext(), 10000, null),
+    withTimeout(getETFFlowsContext(), 5000, null),
     withTimeout(getCentralBankContext(), 4000, null),
     withTimeout(getLatestFredValue("SOFR"), 5000, null),
     withTimeout(getLatestFredValue("WTREGEN"), 5000, null),

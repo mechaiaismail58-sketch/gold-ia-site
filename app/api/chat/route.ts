@@ -982,7 +982,6 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
     const promptChars = selectedPrompt.length;
     const promptTokensEst = Math.round(promptChars / 4);
     const userInputTokensEst = Math.round(finalUserInput.length / 4);
-    // 6000 for deep: 15 sections fully developed — fits in 60s maxDuration with chat.completions.
     const maxOut = analysis_mode === "deep" ? 6000 : 1400;
     console.log(`[chat] system_prompt_chars=${promptChars} (~${promptTokensEst} tokens) | user_input_chars=${finalUserInput.length} (~${userInputTokensEst} tokens) | total_input_est=${promptTokensEst + userInputTokensEst} | max_output_tokens=${maxOut}`);
     if (analysis_mode === "deep") {
@@ -998,7 +997,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       ? `\n\nWhen an image is attached, analyze it and integrate what you see directly into your analysis — visible price structure, key levels, patterns, orderblocks, zones — without ever mentioning that an image was provided or making any explicit reference to it. The analysis must simply be more precise and enriched by what the image reveals, as if you had access to the chart in real time.`
       : "";
 
-    const MODEL = "claude-sonnet-4-5-20251001";
+    const MODEL = "claude-haiku-4-5";
     console.log(`[chat] using model=${MODEL}`);
 
     let outputText = "";
@@ -1110,6 +1109,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
     }
 
     console.log(`[chat][8] returning ok=true text_length=${outputText.length} trade_id=${savedTradeId}`);
+    console.log(`[chat][8] response_preview="${outputText.slice(0, 300).replace(/\n/g, "\\n")}"`);
     return Response.json({
       ok: true,
       text: outputText || "No response generated — please retry.",

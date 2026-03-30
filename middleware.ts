@@ -40,6 +40,12 @@ export async function middleware(req: NextRequest) {
   const waitlistRaw = process.env.WAITLIST_MODE;
   console.log(`[middleware] WAITLIST_MODE="${waitlistRaw}" pathname="${pathname}"`);
 
+  // ── API routes — ALWAYS pass through, they have their own auth ──────────
+  // This MUST be the very first check, before any other logic.
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
   // Static files — always pass (both modes)
   if (pathname.includes(".") || pathname.startsWith("/_next")) {
     return NextResponse.next();
@@ -78,11 +84,6 @@ export async function middleware(req: NextRequest) {
       url.pathname = "/";
       url.search = "";
       return NextResponse.redirect(url);
-    }
-
-    // ── Toutes les routes API passent — elles ont leur propre auth Supabase ───
-    if (pathname.startsWith("/api/")) {
-      return NextResponse.next();
     }
 
     // ── Auth routes — always accessible (admin needs to log in) ─────────────
