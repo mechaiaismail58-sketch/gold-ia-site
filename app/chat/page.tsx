@@ -208,10 +208,11 @@ export default function Page() {
           image_attached: Boolean(imageToSend),
         }).catch(() => {});
       }
-    } catch {
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : "Unknown error";
       setMessages((m) => [
         ...m,
-        { role: "assistant", content: "System error: AI not connected." },
+        { role: "assistant", content: `System error: ${errMsg}` },
       ]);
     } finally {
       setLoading(false);

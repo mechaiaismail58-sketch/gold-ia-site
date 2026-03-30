@@ -1125,11 +1125,12 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
     const e = error as { status?: number; message?: string; error?: { type?: string; message?: string } };
     console.error("[chat] Handler error — status:", e?.status, "| type:", e?.error?.type, "| message:", e?.message ?? String(error));
 
-    // Return a clean user-facing message — don't expose internal error details
+    // Expose the actual error so frontend + logs can see what's really failing
     const isTimeout = error instanceof Error && error.message.includes("timed out");
+    const errMsg = e?.message ?? String(error);
     const userMessage_err = isTimeout
       ? "Analysis timed out — market data is loading, please retry in a few seconds."
-      : "System error — please retry. If the issue persists, check your API configuration.";
+      : `API error (${e?.status ?? "unknown"}): ${errMsg.slice(0, 200)}`;
 
     return Response.json(
       { ok: false, error: userMessage_err },
