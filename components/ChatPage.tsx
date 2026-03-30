@@ -222,8 +222,12 @@ export default function ChatPage() {
         body: JSON.stringify(body),
       });
 
+      const contentType = r.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        throw new Error(`Server error ${r.status} (non-JSON response)`);
+      }
       const data = await r.json();
-      if (!r.ok) throw new Error(data?.error || "Request failed");
+      if (!r.ok) throw new Error(data?.error || `Request failed (${r.status})`);
 
       const tradeId = data.trade_id ?? data.pending_trade_id ?? null;
       setMessages((m) => [
