@@ -727,103 +727,119 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
 
     const MODEL = "claude-sonnet-4-6";
 
-    let outputText = "";
-    let responseId = "";
+    step(`[5] starting Anthropic stream model=${MODEL} max_tokens=${maxOut}`);
 
-    step(`[5] calling Anthropic model=${MODEL} max_tokens=${maxOut} system_chars=${selectedPrompt.length} user_chars=${finalUserInput.length}`);
-    try {
-      // Simple create() call — mirrors the old OpenAI pattern that worked.
-      // stream() + finalMessage() creates a persistent SSE connection that
-      // Vercel serverless can kill before completion.
-      const response = await client.messages.create({
-        model: MODEL,
-        max_tokens: maxOut,
-        system: selectedPrompt + imageSilentInstruction,
-        messages: [{ role: "user", content: userContent }],
-      });
-      step(`[6] Anthropic done stop_reason=${response.stop_reason}`);
-      responseId = response.id;
+    const anthropicStream = client.messages.stream({
+      model: MODEL,
+      max_tokens: maxOut,
+      system: selectedPrompt + imageSilentInstruction,
+      messages: [{ role: "user", content: userContent }],
+    });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      outputText = response.content.filter((b: any) => b.type === "text").map((b: any) => b.text as string).join("");
-
-      step(`[7] outputText length=${outputText.length}`);
-      if (!outputText) {
-        console.warn("[chat] Anthropic returned empty text. stop_reason:", response.stop_reason);
-      }
-    } catch (anthropicError: unknown) {
-      const err = anthropicError as { status?: number; message?: string; error?: { type?: string } };
-      step(`[ERROR-anthropic] status=${err?.status} type=${err?.error?.type} msg=${err?.message?.slice(0, 200)}`);
-      throw anthropicError;
-    }
-    // ── Parse + save trade if response contains a valid setup ────────────────
-    let savedTradeId: string | null = null;
-    if (outputText) {
-      const parsed = parseTrade(outputText);
-      if (parsed) {
+    const encoder = new TextEncoder();
+    const readable = new ReadableStream({
+      async start(controller) {
+        let outputText = "";
         try {
-          // Build a brief context summary for performance memory
-          const tc = researchContext.technical_context;
-          const ms = researchContext.macro_state;
-          const contextParts = [
-            tc?.current_price != null ? `XAU: ${tc.current_price.toFixed(2)}` : null,
-            tc?.h1_trend ? `H1: ${tc.h1_trend}` : null,
-            ms?.gold_pressure && ms.gold_pressure !== "Data not found" ? ms.gold_pressure : null,
-          ].filter(Boolean);
-          const contextSummaryText = contextParts.join(" | ").slice(0, 200) || null;
+          for await (const event of anthropicStream) {
+            if (
+              event.type === "content_block_delta" &&
+              event.delta.type === "text_delta"
+            ) {
+              outputText += event.delta.text;
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ type: "delta", text: event.delta.text })}\n\n`)
+              );
+            }
+          }
 
-          const { data: inserted } = await (dbClient as typeof supabase)
-            .from("trades")
-            .insert({
-              user_id: user.id,
-              mode: analysis_mode,
-              bias: parsed.bias,
-              entry: parsed.entry,
-              stop_loss: parsed.stop_loss,
-              tp1: parsed.tp1,
-              tp2: parsed.tp2,
-              rr: parsed.rr,
-              confluence: parsed.confluence,
-              justification: parsed.justification,
-              context_summary: contextSummaryText,
-              result: "pending",
-            })
-            .select("id")
-            .single();
-          savedTradeId = inserted?.id ?? null;
-          if (savedTradeId) console.log(`[chat] trade saved id=${savedTradeId}`);
-        } catch (saveErr) {
-          console.error("[chat] trade save error:", saveErr);
+          const finalMessage = await anthropicStream.finalMessage();
+          step(`[6] Anthropic done stop=${finalMessage.stop_reason} len=${outputText.length}`);
+
+          // ── Parse + save trade if response contains a valid setup ──────
+          let savedTradeId: string | null = null;
+          if (outputText) {
+            const parsed = parseTrade(outputText);
+            if (parsed) {
+              try {
+                const tc = researchContext.technical_context;
+                const ms = researchContext.macro_state;
+                const contextParts = [
+                  tc?.current_price != null ? `XAU: ${tc.current_price.toFixed(2)}` : null,
+                  tc?.h1_trend ? `H1: ${tc.h1_trend}` : null,
+                  ms?.gold_pressure && ms.gold_pressure !== "Data not found" ? ms.gold_pressure : null,
+                ].filter(Boolean);
+                const contextSummaryText = contextParts.join(" | ").slice(0, 200) || null;
+
+                const { data: inserted } = await (dbClient as typeof supabase)
+                  .from("trades")
+                  .insert({
+                    user_id: user.id,
+                    mode: analysis_mode,
+                    bias: parsed.bias,
+                    entry: parsed.entry,
+                    stop_loss: parsed.stop_loss,
+                    tp1: parsed.tp1,
+                    tp2: parsed.tp2,
+                    rr: parsed.rr,
+                    confluence: parsed.confluence,
+                    justification: parsed.justification,
+                    context_summary: contextSummaryText,
+                    result: "pending",
+                  })
+                  .select("id")
+                  .single();
+                savedTradeId = inserted?.id ?? null;
+                if (savedTradeId) console.log(`[chat] trade saved id=${savedTradeId}`);
+              } catch (saveErr) {
+                console.error("[chat] trade save error:", saveErr);
+              }
+            }
+          }
+
+          step(`[7] stream complete len=${outputText.length} trade_id=${savedTradeId}`);
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({
+              type: "done",
+              response_id: finalMessage.id,
+              mode,
+              trade_horizon: tradeHorizon,
+              image_attached: Boolean(chartImageDataUrl),
+              trade_id: savedTradeId,
+              pending_trade_id: pendingTrades?.first_id ?? null,
+              steps,
+            })}\n\n`)
+          );
+        } catch (streamErr: unknown) {
+          const e = streamErr as { status?: number; message?: string; error?: { type?: string } };
+          step(`[ERROR-stream] status=${e?.status} msg=${e?.message?.slice(0, 200)}`);
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({
+              type: "error",
+              error: e?.message ?? String(streamErr),
+              steps,
+            })}\n\n`)
+          );
+        } finally {
+          controller.close();
         }
-      }
-    }
+      },
+    });
 
-    step(`[8] returning ok=true text_length=${outputText.length} trade_id=${savedTradeId}`);
-    return Response.json({
-      ok: true,
-      text: outputText || "No response generated — please retry.",
-      response_id: responseId,
-      mode,
-      trade_horizon: tradeHorizon,
-      image_attached: Boolean(chartImageDataUrl),
-      trade_id: savedTradeId,
-      pending_trade_id: pendingTrades?.first_id ?? null,
-      steps,
+    return new Response(readable, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
     });
   } catch (error) {
-    // Log full error for Vercel diagnostics — status, type, and message
+    // Pre-stream errors (auth, research context build, etc.)
     const e = error as { status?: number; message?: string; error?: { type?: string; message?: string } };
     console.error("[chat] Handler error — status:", e?.status, "| type:", e?.error?.type, "| message:", e?.message ?? String(error));
-
-    // Expose the actual error so frontend + logs can see what's really failing
-    const isTimeout = error instanceof Error && error.message.includes("timed out");
     const errMsg = e?.message ?? String(error);
-    const userMessage_err = isTimeout
-      ? "Analysis timed out — market data is loading, please retry in a few seconds."
-      : `API error (${e?.status ?? "unknown"}): ${errMsg.slice(0, 200)}`;
-
     return Response.json(
-      { ok: false, error: userMessage_err, steps },
+      { ok: false, error: `API error (${e?.status ?? "unknown"}): ${errMsg.slice(0, 200)}`, steps },
       { status: 500 }
     );
   }

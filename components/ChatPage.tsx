@@ -222,32 +222,86 @@ export default function ChatPage() {
         body: JSON.stringify(body),
       });
 
-      const contentType = r.headers.get("content-type") || "";
-      if (!contentType.includes("application/json")) {
-        throw new Error(`Server error ${r.status} (non-JSON response)`);
-      }
-      const data = await r.json();
+      // Pre-stream error (JSON response)
       if (!r.ok) {
-        const stepsInfo = data?.steps?.length ? `\n\nTiming: ${data.steps.join(" → ")}` : "";
-        throw new Error((data?.error || `Request failed (${r.status})`) + stepsInfo);
+        const text = await r.text();
+        let errorMsg = `Request failed (${r.status})`;
+        try {
+          const data = JSON.parse(text);
+          const stepsInfo = data?.steps?.length ? `\n\nTiming: ${data.steps.join(" → ")}` : "";
+          errorMsg = (data?.error || errorMsg) + stepsInfo;
+        } catch { /* not JSON */ }
+        throw new Error(errorMsg);
       }
 
-      const tradeId = data.trade_id ?? data.pending_trade_id ?? null;
-      setMessages((m) => [
-        ...m,
-        { role: "assistant", content: data.text ?? "…", trade_id: tradeId },
-      ]);
+      if (!r.body) throw new Error("No response body");
 
-      if (data.response_id) {
-        setPreviousResponseId(data.response_id);
+      const reader = r.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+      let messageAdded = false;
+      let tradeId: string | null = null;
+      let streamResponseId: string | null = null;
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split("\n\n");
+        buffer = parts.pop() || "";
+
+        for (const part of parts) {
+          if (!part.startsWith("data: ")) continue;
+          try {
+            const event = JSON.parse(part.slice(6));
+            if (event.type === "delta") {
+              fullText += event.text;
+              if (!messageAdded) {
+                setMessages((m) => [...m, { role: "assistant", content: fullText }]);
+                messageAdded = true;
+              } else {
+                setMessages((m) => {
+                  const updated = [...m];
+                  updated[updated.length - 1] = { ...updated[updated.length - 1], content: fullText };
+                  return updated;
+                });
+              }
+            } else if (event.type === "done") {
+              tradeId = event.trade_id ?? event.pending_trade_id ?? null;
+              streamResponseId = event.response_id ?? null;
+            } else if (event.type === "error") {
+              throw new Error(event.error);
+            }
+          } catch (parseErr) {
+            if (parseErr instanceof SyntaxError) continue;
+            throw parseErr;
+          }
+        }
       }
 
-      if (data.text) {
+      // Update with trade_id metadata
+      if (tradeId && messageAdded) {
+        setMessages((m) => {
+          const updated = [...m];
+          updated[updated.length - 1] = { ...updated[updated.length - 1], trade_id: tradeId };
+          return updated;
+        });
+      }
+
+      if (!messageAdded) {
+        setMessages((m) => [...m, { role: "assistant", content: "No response generated — please retry." }]);
+      }
+
+      if (streamResponseId) setPreviousResponseId(streamResponseId);
+
+      if (fullText) {
         saveConversation({
           session_id: sessionId,
           mode: analysisMode,
           message_user: userText || "[Chart image attached]",
-          message_ia: data.text,
+          message_ia: fullText,
           image_attached: Boolean(imageBase64ToSend),
         }).catch(() => {});
       }
