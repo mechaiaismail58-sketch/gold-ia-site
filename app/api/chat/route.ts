@@ -457,7 +457,7 @@ export async function POST(req: Request) {
     if (!process.env.ANTHROPIC_API_KEY) {
       return Response.json({ ok: false, error: "AI not configured" }, { status: 500 });
     }
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 50_000 });
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 50_000, maxRetries: 3 });
     step("[1] anthropic client created");
 
     const supabase = await createClient();
@@ -725,7 +725,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       ? `\n\nWhen an image is attached, analyze it and integrate what you see directly into your analysis — visible price structure, key levels, patterns, orderblocks, zones — without ever mentioning that an image was provided or making any explicit reference to it. The analysis must simply be more precise and enriched by what the image reveals, as if you had access to the chart in real time.`
       : "";
 
-    const MODEL = "claude-sonnet-4-6";
+    const MODEL = "claude-sonnet-4-5";
 
     step(`[5] starting Anthropic stream model=${MODEL} max_tokens=${maxOut}`);
 
