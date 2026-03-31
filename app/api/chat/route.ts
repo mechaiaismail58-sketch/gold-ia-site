@@ -1,5 +1,5 @@
 // 60s Vercel timeout: up to 20s research (CFTC COT) + up to 40s Anthropic generation.
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 import Anthropic from "@anthropic-ai/sdk";
 import { DEEP_ANALYSIS_PROMPT, QUICK_BRIEF_PROMPT, TRADE_ONLY_PROMPT } from "@/lib/prompts";
@@ -439,261 +439,6 @@ function parseTrade(text: string): ParsedTrade | null {
   };
 }
 
-// ── Shared analysis — computed once, injected into all 3 modes ───────────────
-// This gives every mode the same deterministic bias, score, and levels so they
-// never contradict each other on the trade decision.
-
-type SharedAnalysis = {
-  bias: "bullish" | "bearish" | "neutral";
-  confluenceScore: number;
-  tradeDecision: "trade" | "no_trade";
-  entry: number | null;
-  sl: number | null;
-  tp1: number | null;
-  tp2: number | null;
-  rr: number | null;
-  timing: string;
-  justification: string;
-  session: string;
-  dominantDriver: string;
-  permission: "Tradable" | "Not tradable";
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function computeSharedAnalysis(ctx: any): SharedAnalysis {
-  const tc  = ctx.technical_context;
-  const mc  = ctx.macro_context;
-  const ms  = ctx.macro_state;
-  const mkt = ctx.market_context;
-  const cot = ctx.cot_context;
-  const etf = ctx.etf_flows;
-  const yf  = ctx.yahoo_finance;
-
-  const currentPrice = tc?.current_price ?? null;
-  const atrH1        = tc?.atr_h1 ?? null;
-
-  // ── Bias scoring ────────────────────────────────────────────────────────
-  let bullScore = 0;
-  let bearScore = 0;
-
-  if (tc?.h1_trend === "bullish")  bullScore += 2;
-  else if (tc?.h1_trend === "bearish") bearScore += 2;
-
-  if (mc?.real_yield_10y != null) {
-    if (mc.real_yield_10y < 0)   bullScore += 1;
-    else if (mc.real_yield_10y > 1.5) bearScore += 1;
-  }
-
-  if (ms?.usd_strength) {
-    const u = ms.usd_strength.toLowerCase();
-    if (u.includes("weak"))   bullScore += 1;
-    else if (u.includes("strong")) bearScore += 1;
-  }
-
-  if (cot?.managed_money_signal) {
-    const mms = cot.managed_money_signal;
-    if (mms.includes("long"))  bullScore += 1;
-    else if (mms.includes("short")) bearScore += 1;
-  }
-
-  if (etf?.gld_5d_flow_signal) {
-    if (etf.gld_5d_flow_signal.includes("inflow"))  bullScore += 1;
-    else if (etf.gld_5d_flow_signal.includes("outflow")) bearScore += 1;
-  }
-
-  if (ms?.gold_pressure) {
-    const gp = ms.gold_pressure.toLowerCase();
-    if (gp.includes("bull") || gp.includes("positive") || gp.includes("upward"))  bullScore += 1;
-    else if (gp.includes("bear") || gp.includes("negative") || gp.includes("downward")) bearScore += 1;
-  }
-
-  const bias: "bullish" | "bearish" | "neutral" =
-    bullScore > bearScore + 1 ? "bullish"
-    : bearScore > bullScore + 1 ? "bearish"
-    : "neutral";
-
-  // ── Confluence score (0-8) ──────────────────────────────────────────────
-  let confluenceScore = 0;
-
-  // 1. Macro aligned
-  if (mc?.real_yield_10y != null) {
-    if (bias === "bullish" && mc.real_yield_10y <= 1.5) confluenceScore++;
-    else if (bias === "bearish" && mc.real_yield_10y >= 0) confluenceScore++;
-    else if (bias === "neutral") confluenceScore++;
-  }
-
-  // 2. Technical structure clear (H1 trend confirmed, not ranging)
-  if (tc?.h1_trend && tc.h1_trend !== "Data not found" && tc.h1_trend !== "range") confluenceScore++;
-
-  // 3. Session favorable (market open, medium/high liquidity)
-  if (mkt?.market_status === "OPEN" && (mkt.session_liquidity === "High" || mkt.session_liquidity === "Medium")) confluenceScore++;
-
-  // 4. Institutional positioning aligned
-  if (cot?.managed_money_signal) {
-    const mms = cot.managed_money_signal;
-    if ((bias === "bullish" && mms.includes("long")) || (bias === "bearish" && mms.includes("short"))) confluenceScore++;
-  } else if (etf?.institutional_signal) {
-    if (
-      (bias === "bullish" && etf.institutional_signal === "accumulation") ||
-      (bias === "bearish" && etf.institutional_signal === "distribution")
-    ) confluenceScore++;
-  }
-
-  // 5. Order flow confirming
-  const ofBias = ctx.indicator_context?.order_flow?.bias ?? ctx.av_context?.order_flow?.bias;
-  if (ofBias) {
-    if ((bias === "bullish" && ofBias.toLowerCase().includes("buy")) || (bias === "bearish" && ofBias.toLowerCase().includes("sell"))) confluenceScore++;
-  } else if (ctx.polygon_order_flow?.net_delta != null) {
-    const nd = ctx.polygon_order_flow.net_delta;
-    if ((bias === "bullish" && nd > 0) || (bias === "bearish" && nd < 0)) confluenceScore++;
-  }
-
-  // 6. Intermarket confirming (DXY inverse / VIX / risk sentiment)
-  if (ms?.usd_strength) {
-    const u = ms.usd_strength.toLowerCase();
-    if ((bias === "bullish" && u.includes("weak")) || (bias === "bearish" && u.includes("strong"))) confluenceScore++;
-  } else if (yf?.risk_sentiment) {
-    const rs = yf.risk_sentiment.toLowerCase();
-    if ((bias === "bullish" && rs.includes("risk_off")) || (bias === "bearish" && rs.includes("risk_on"))) confluenceScore++;
-  }
-
-  // 7. Clean entry level available within 100 pts
-  if (currentPrice != null) {
-    const ob  = bias === "bullish" ? tc?.orderblock_bullish_h1  : tc?.orderblock_bearish_h1;
-    const fvg = bias === "bullish" ? tc?.fvg_bullish_h1         : tc?.fvg_bearish_h1;
-    const obMid  = ob  != null ? (ob.high  + ob.low)  / 2 : null;
-    const fvgMid = fvg != null ? (fvg.high + fvg.low) / 2 : null;
-    if ((obMid != null && Math.abs(obMid - currentPrice) <= 100) || (fvgMid != null && Math.abs(fvgMid - currentPrice) <= 100)) confluenceScore++;
-    else if (tc?.swing_high_h1 != null || tc?.swing_low_h1 != null) confluenceScore++;
-  }
-
-  // 8. Path to TP1 clear (no major unmitigated OB blocking direction)
-  if (currentPrice != null && atrH1 != null) {
-    const blocker = bias === "bullish" ? tc?.orderblock_bearish_h1 : tc?.orderblock_bullish_h1;
-    if (blocker == null) confluenceScore++;
-    else if (bias === "bullish" && blocker.low > currentPrice + atrH1 * 1.5) confluenceScore++;
-    else if (bias === "bearish" && blocker.high < currentPrice - atrH1 * 1.5) confluenceScore++;
-  }
-
-  confluenceScore = Math.min(confluenceScore, 8);
-
-  // ── Trade decision ──────────────────────────────────────────────────────
-  const tradeDecision: "trade" | "no_trade" = confluenceScore >= 5 ? "trade" : "no_trade";
-  const permission: "Tradable" | "Not tradable" = confluenceScore >= 5 ? "Tradable" : "Not tradable";
-
-  // ── Entry / SL / TP calculation ─────────────────────────────────────────
-  let entry: number | null = null;
-  let sl:    number | null = null;
-  let tp1:   number | null = null;
-  let tp2:   number | null = null;
-  let rr:    number | null = null;
-  let timing      = "Market order now";
-  let justification = "";
-
-  if (tradeDecision === "trade" && currentPrice != null && atrH1 != null && bias !== "neutral") {
-    const isBull = bias === "bullish";
-    const ob  = isBull ? tc?.orderblock_bullish_h1  : tc?.orderblock_bearish_h1;
-    const fvg = isBull ? tc?.fvg_bullish_h1         : tc?.fvg_bearish_h1;
-
-    // Entry: OB boundary > FVG midpoint > current price
-    if (ob != null && Math.abs(((ob.high + ob.low) / 2) - currentPrice) <= 100) {
-      entry = parseFloat((isBull ? ob.high : ob.low).toFixed(2));
-      justification = isBull ? "Bullish OB H1 top" : "Bearish OB H1 bottom";
-    } else if (fvg != null && Math.abs(((fvg.high + fvg.low) / 2) - currentPrice) <= 100) {
-      entry = parseFloat(((fvg.high + fvg.low) / 2).toFixed(2));
-      justification = isBull ? "FVG Bullish H1 midpoint" : "FVG Bearish H1 midpoint";
-    } else {
-      entry = parseFloat(currentPrice.toFixed(2));
-      justification = isBull ? "H1 bullish structure" : "H1 bearish structure";
-    }
-
-    if (Math.abs(entry - currentPrice) > 5) timing = `Limit order at ${entry.toFixed(2)}`;
-
-    // SL: structural invalidation, bounded to [0.8×, 2×] ATR H1
-    const slAtrMin = atrH1 * 0.8;
-    const slAtrMax = atrH1 * 2.0;
-
-    if (isBull) {
-      const structural = ob != null ? ob.low - 2 : (tc?.swing_low_h1 != null ? tc.swing_low_h1 - 2 : entry - slAtrMin);
-      const raw = Math.min(structural, entry - slAtrMin);
-      const dist = entry - raw;
-      if (dist > slAtrMax) { sl = null; }
-      else sl = parseFloat(Math.max(raw, entry - slAtrMax).toFixed(2));
-    } else {
-      const structural = ob != null ? ob.high + 2 : (tc?.swing_high_h1 != null ? tc.swing_high_h1 + 2 : entry + slAtrMin);
-      const raw = Math.max(structural, entry + slAtrMin);
-      const dist = raw - entry;
-      if (dist > slAtrMax) { sl = null; }
-      else sl = parseFloat(Math.min(raw, entry + slAtrMax).toFixed(2));
-    }
-
-    if (sl != null) {
-      const slDist = Math.abs(entry - sl);
-
-      // TP1: min 1.5R — snap to swing level when available
-      const tp1Min = isBull ? entry + slDist * 1.5 : entry - slDist * 1.5;
-      if (isBull) {
-        const snap = tc?.swing_high_h1 ?? tc?.recent_high;
-        tp1 = snap != null && snap > tp1Min ? parseFloat(snap.toFixed(2)) : parseFloat(tp1Min.toFixed(2));
-      } else {
-        const snap = tc?.swing_low_h1 ?? tc?.recent_low;
-        tp1 = snap != null && snap < tp1Min ? parseFloat(snap.toFixed(2)) : parseFloat(tp1Min.toFixed(2));
-      }
-
-      // TP2: min 2.5R — snap to liquidity or weekly level
-      const tp2Min = isBull ? entry + slDist * 2.5 : entry - slDist * 2.5;
-      if (isBull) {
-        const snap = tc?.liquidity_above ?? tc?.weekly_high;
-        tp2 = snap != null && snap > tp2Min ? parseFloat(snap.toFixed(2)) : parseFloat(tp2Min.toFixed(2));
-      } else {
-        const snap = tc?.liquidity_below ?? tc?.weekly_low;
-        tp2 = snap != null && snap < tp2Min ? parseFloat(snap.toFixed(2)) : parseFloat(tp2Min.toFixed(2));
-      }
-
-      rr = parseFloat((Math.abs(tp1 - entry) / slDist).toFixed(2));
-    }
-  }
-
-  // SL calculation failed (wider than 2×ATR) → downgrade
-  if (tradeDecision === "trade" && sl == null) {
-    return {
-      bias, confluenceScore,
-      tradeDecision: "no_trade", entry: null, sl: null, tp1: null, tp2: null, rr: null,
-      timing: "SL beyond 2×ATR — no valid setup",
-      justification: "SL structural tolerance exceeded",
-      session: mkt?.active_session ?? "Unknown",
-      dominantDriver: ms?.dominant_driver ?? "Macro data unavailable",
-      permission: "Not tradable",
-    };
-  }
-
-  return {
-    bias, confluenceScore, tradeDecision,
-    entry, sl, tp1, tp2, rr, timing, justification,
-    session: mkt?.active_session ?? "Unknown",
-    dominantDriver: ms?.dominant_driver ?? (mc?.real_yield_10y != null ? `Real Yield ${mc.real_yield_10y.toFixed(2)}%` : "Macro data unavailable"),
-    permission,
-  };
-}
-
-function formatSharedAnalysisBlock(sa: SharedAnalysis): string {
-  const fmt = (n: number | null) => n != null ? n.toFixed(2) : "n/a";
-  const biasUpper = sa.bias.charAt(0).toUpperCase() + sa.bias.slice(1);
-  const lines = [
-    `SHARED ANALYSIS (pre-calculated — all modes must use this as base, never recalculate independently)`,
-    `Bias: ${biasUpper} | Confluence: ${sa.confluenceScore}/8 | Decision: ${sa.tradeDecision === "trade" ? "TRADE ✓" : "NO TRADE ✗"} | Permission: ${sa.permission}`,
-    `Session: ${sa.session} | Dominant Driver: ${sa.dominantDriver}`,
-  ];
-  if (sa.tradeDecision === "trade" && sa.entry != null && sa.sl != null) {
-    lines.push(`Entry: ${fmt(sa.entry)} (${sa.justification}) | SL: ${fmt(sa.sl)} | TP1: ${fmt(sa.tp1)} | TP2: ${fmt(sa.tp2)} | R/R: ${fmt(sa.rr)}`);
-    lines.push(`Timing: ${sa.timing}`);
-  } else if (sa.tradeDecision === "no_trade") {
-    lines.push(`No trade — ${sa.justification || "confluence below threshold"}`);
-  }
-  lines.push(`CONSISTENCY RULE: The bias, confluence score, trade decision, and trade levels above are the non-negotiable base for your response. Use the provided entry/SL/TP as your starting levels (minor structural refinement ±5 pts allowed, never change direction). If Decision is NO TRADE, your response must output NO TRADE.`);
-  return lines.join("\n");
-}
-
 async function fileToDataUrl(file: File): Promise<string> {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
@@ -712,7 +457,7 @@ export async function POST(req: Request) {
     if (!process.env.ANTHROPIC_API_KEY) {
       return Response.json({ ok: false, error: "AI not configured" }, { status: 500 });
     }
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 50_000 });
     step("[1] anthropic client created");
 
     const supabase = await createClient();
@@ -885,13 +630,7 @@ Rules:
     // — No verbose 15-point TASK section (contradicts strict format requirements)
     // Deep Analysis gets the full input with style guidance and golden examples.
 
-    const sharedAnalysis = computeSharedAnalysis(researchContext);
-    const sharedAnalysisBlock = formatSharedAnalysisBlock(sharedAnalysis);
-    step(`[4b] sharedAnalysis bias=${sharedAnalysis.bias} score=${sharedAnalysis.confluenceScore}/8 decision=${sharedAnalysis.tradeDecision}`);
-
-    const researchBlock = `${sharedAnalysisBlock}
-
-RESEARCH CONTEXT
+    const researchBlock = `RESEARCH CONTEXT
 ${buildCleanContextText(researchContext)}
 ${researchContext.indicator_context ? `\nINDICATOR DATA\n${researchContext.indicator_context.summary}` : ""}
 ${researchContext.indicator_context?.order_flow ? `\nORDER FLOW DATA\n${researchContext.indicator_context.order_flow.summary}` : ""}
@@ -977,7 +716,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       userContent.push({ type: "image", source: { type: "base64", media_type: mediaType, data: b64data } });
     }
 
-    const maxOut = analysis_mode === "deep" ? 6000 : 1400;
+    const maxOut = analysis_mode === "deep" ? 4000 : 1400;
     step(`[4c] mode=${mode} analysis_mode=${analysis_mode} horizon=${tradeHorizon} system_chars=${selectedPrompt.length} user_chars=${finalUserInput.length} max_tokens=${maxOut}`);
 
     // When a chart image is attached, append a silent visual analysis instruction
@@ -986,7 +725,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       ? `\n\nWhen an image is attached, analyze it and integrate what you see directly into your analysis — visible price structure, key levels, patterns, orderblocks, zones — without ever mentioning that an image was provided or making any explicit reference to it. The analysis must simply be more precise and enriched by what the image reveals, as if you had access to the chart in real time.`
       : "";
 
-    const MODEL = "claude-haiku-4-5";
+    const MODEL = "claude-sonnet-4-5-20251001";
 
     let outputText = "";
     let responseId = "";
@@ -996,20 +735,12 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       // Simple create() call — mirrors the old OpenAI pattern that worked.
       // stream() + finalMessage() creates a persistent SSE connection that
       // Vercel serverless can kill before completion.
-      const apiCall = client.messages.create({
+      const response = await client.messages.create({
         model: MODEL,
         max_tokens: maxOut,
         system: selectedPrompt + imageSilentInstruction,
         messages: [{ role: "user", content: userContent }],
       });
-
-      // Hard timeout — same pattern as the old OpenAI code
-      const timeoutMs = 55_000;
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(`Anthropic request timed out after ${timeoutMs / 1000}s`)), timeoutMs)
-      );
-
-      const response = await Promise.race([apiCall, timeoutPromise]);
       step(`[6] Anthropic done stop_reason=${response.stop_reason}`);
       responseId = response.id;
 
