@@ -702,21 +702,24 @@ async function fileToDataUrl(file: File): Promise<string> {
 }
 
 export async function POST(req: Request) {
+  const handlerStart = Date.now();
+  const steps: string[] = [];
+  function step(msg: string) { steps.push(`${Date.now() - handlerStart}ms ${msg}`); console.log(`[chat] ${msg}`); }
+
   try {
+    step("[0] handler start");
     // Instantiate inside the handler so the key is read at request time, not cold-start
-    console.log("[chat] ANTHROPIC_API_KEY present:", !!process.env.ANTHROPIC_API_KEY);
     if (!process.env.ANTHROPIC_API_KEY) {
-      console.error("[chat] ANTHROPIC_API_KEY is missing");
       return Response.json({ ok: false, error: "AI not configured" }, { status: 500 });
     }
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    step("[1] anthropic client created");
 
-    console.log("[chat][1] creating supabase client");
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    console.log("[chat][2] user:", user?.id ?? "null");
+    step(`[2] user=${user?.id ?? "null"}`);
     if (!user) {
-      return Response.json({ ok: false, error: "Unauthorized." }, { status: 401 });
+      return Response.json({ ok: false, error: "Unauthorized.", steps }, { status: 401 });
     }
 
     let userMessage = "";
@@ -772,16 +775,15 @@ export async function POST(req: Request) {
       .select("trading_horizon, trading_style, account_size, experience_level, risk_profile")
       .eq("id", user.id)
       .single();
+    step("[3] user profile fetched");
 
-    console.log("[chat][3] starting buildResearchContext + trade memory");
-    const t0 = Date.now();
     const [researchContext, tradeMemory, pendingTrades, performanceMemory] = await Promise.all([
       buildResearchContext(),
       getTradeMemory(user.id, dbClient as typeof supabase),
       getPendingTradesContext(user.id, dbClient as typeof supabase),
       getPerformanceMemory(user.id, dbClient as typeof supabase),
     ]);
-    console.log(`[chat][4] context ready in ${Date.now() - t0}ms`);
+    step("[4] research context + trade memory ready");
 
     const horizonInstructionMap: Record<TradeHorizon, string> = {
       scalp: `
@@ -829,7 +831,6 @@ Rules:
     const horizonInstruction = horizonInstructionMap[tradeHorizon];
 
     // Select system prompt based on UI analysis_mode toggle
-    console.log(`[chat] analysis_mode received="${analysis_mode}"`);
     let selectedPrompt: string;
     switch (analysis_mode) {
       case "quick":      selectedPrompt = QUICK_BRIEF_PROMPT;   break;
@@ -886,7 +887,7 @@ Rules:
 
     const sharedAnalysis = computeSharedAnalysis(researchContext);
     const sharedAnalysisBlock = formatSharedAnalysisBlock(sharedAnalysis);
-    console.log(`[chat] sharedAnalysis bias=${sharedAnalysis.bias} score=${sharedAnalysis.confluenceScore}/8 decision=${sharedAnalysis.tradeDecision}`);
+    step(`[4b] sharedAnalysis bias=${sharedAnalysis.bias} score=${sharedAnalysis.confluenceScore}/8 decision=${sharedAnalysis.tradeDecision}`);
 
     const researchBlock = `${sharedAnalysisBlock}
 
@@ -976,20 +977,8 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       userContent.push({ type: "image", source: { type: "base64", media_type: mediaType, data: b64data } });
     }
 
-    console.log(`[chat] mode=${mode} analysis_mode=${analysis_mode} horizon=${tradeHorizon} has_image=${Boolean(chartImageDataUrl)} has_prev_response=${Boolean(previous_response_id)}`);
-
-    // DIAGNOSTIC — log prompt size and structure for deep mode
-    const promptChars = selectedPrompt.length;
-    const promptTokensEst = Math.round(promptChars / 4);
-    const userInputTokensEst = Math.round(finalUserInput.length / 4);
     const maxOut = analysis_mode === "deep" ? 6000 : 1400;
-    console.log(`[chat] system_prompt_chars=${promptChars} (~${promptTokensEst} tokens) | user_input_chars=${finalUserInput.length} (~${userInputTokensEst} tokens) | total_input_est=${promptTokensEst + userInputTokensEst} | max_output_tokens=${maxOut}`);
-    if (analysis_mode === "deep") {
-      const hasMacro = selectedPrompt.includes("Macro & Fundamental Data");
-      const hasInstitutional = selectedPrompt.includes("Institutional & COT Data");
-      const hasInterpretation = selectedPrompt.includes("Interpretation");
-      console.log(`[chat][deep] prompt_has_Macro=${hasMacro} prompt_has_Institutional=${hasInstitutional} prompt_has_Interpretation=${hasInterpretation}`);
-    }
+    step(`[4c] mode=${mode} analysis_mode=${analysis_mode} horizon=${tradeHorizon} system_chars=${selectedPrompt.length} user_chars=${finalUserInput.length} max_tokens=${maxOut}`);
 
     // When a chart image is attached, append a silent visual analysis instruction
     // so the AI integrates chart observations without explicitly referencing the image.
@@ -998,13 +987,11 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       : "";
 
     const MODEL = "claude-haiku-4-5";
-    console.log(`[chat] using model=${MODEL}`);
 
     let outputText = "";
     let responseId = "";
 
-    console.log(`[chat][5] calling Anthropic model=${MODEL} max_tokens=${maxOut}`);
-    const t1 = Date.now();
+    step(`[5] calling Anthropic model=${MODEL} max_tokens=${maxOut} system_chars=${selectedPrompt.length} user_chars=${finalUserInput.length}`);
     try {
       // Simple create() call — mirrors the old OpenAI pattern that worked.
       // stream() + finalMessage() creates a persistent SSE connection that
@@ -1023,31 +1010,21 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       );
 
       const response = await Promise.race([apiCall, timeoutPromise]);
-      console.log(`[chat][6] Anthropic done in ${Date.now() - t1}ms stop_reason=${response.stop_reason}`);
+      step(`[6] Anthropic done stop_reason=${response.stop_reason}`);
       responseId = response.id;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       outputText = response.content.filter((b: any) => b.type === "text").map((b: any) => b.text as string).join("");
 
-      console.log(`[chat][7] outputText length=${outputText.length}`);
+      step(`[7] outputText length=${outputText.length}`);
       if (!outputText) {
         console.warn("[chat] Anthropic returned empty text. stop_reason:", response.stop_reason);
       }
     } catch (anthropicError: unknown) {
       const err = anthropicError as { status?: number; message?: string; error?: { type?: string } };
-      console.error("[chat] Anthropic error:", err?.status, err?.message, err?.error?.type);
+      step(`[ERROR-anthropic] status=${err?.status} type=${err?.error?.type} msg=${err?.message?.slice(0, 200)}`);
       throw anthropicError;
     }
-    // DIAGNOSTIC — log output structure for deep mode
-    if (analysis_mode === "deep" && outputText) {
-      const outTokensEst = Math.round(outputText.length / 4);
-      const outHasMacro = outputText.includes("Macro & Fundamental Data");
-      const outHasInstitutional = outputText.includes("Institutional & COT Data");
-      const outHasInterpretation = outputText.includes("Interpretation");
-      console.log(`[chat][deep] output_chars=${outputText.length} (~${outTokensEst} tokens) | has_Macro=${outHasMacro} | has_Institutional=${outHasInstitutional} | has_Interpretation=${outHasInterpretation}`);
-      console.log(`[chat][deep] output_tail_200chars="${outputText.slice(-200).replace(/\n/g, "\\n")}"`);
-    }
-
     // ── Parse + save trade if response contains a valid setup ────────────────
     let savedTradeId: string | null = null;
     if (outputText) {
@@ -1090,8 +1067,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       }
     }
 
-    console.log(`[chat][8] returning ok=true text_length=${outputText.length} trade_id=${savedTradeId}`);
-    console.log(`[chat][8] response_preview="${outputText.slice(0, 300).replace(/\n/g, "\\n")}"`);
+    step(`[8] returning ok=true text_length=${outputText.length} trade_id=${savedTradeId}`);
     return Response.json({
       ok: true,
       text: outputText || "No response generated — please retry.",
@@ -1101,6 +1077,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       image_attached: Boolean(chartImageDataUrl),
       trade_id: savedTradeId,
       pending_trade_id: pendingTrades?.first_id ?? null,
+      steps,
     });
   } catch (error) {
     // Log full error for Vercel diagnostics — status, type, and message
@@ -1115,7 +1092,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       : `API error (${e?.status ?? "unknown"}): ${errMsg.slice(0, 200)}`;
 
     return Response.json(
-      { ok: false, error: userMessage_err },
+      { ok: false, error: userMessage_err, steps },
       { status: 500 }
     );
   }

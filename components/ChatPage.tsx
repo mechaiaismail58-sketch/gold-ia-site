@@ -227,7 +227,10 @@ export default function ChatPage() {
         throw new Error(`Server error ${r.status} (non-JSON response)`);
       }
       const data = await r.json();
-      if (!r.ok) throw new Error(data?.error || `Request failed (${r.status})`);
+      if (!r.ok) {
+        const stepsInfo = data?.steps?.length ? `\n\nTiming: ${data.steps.join(" → ")}` : "";
+        throw new Error((data?.error || `Request failed (${r.status})`) + stepsInfo);
+      }
 
       const tradeId = data.trade_id ?? data.pending_trade_id ?? null;
       setMessages((m) => [
