@@ -106,10 +106,7 @@ export default function Page() {
         return;
       }
 
-      if (e.key === "d" || e.key === "D") setAnalysisMode("deep");
-      else if (e.key === "q" || e.key === "Q") setAnalysisMode("quick");
-      else if (e.key === "t" || e.key === "T") setAnalysisMode("trade_only");
-      else if (e.key === "Enter") chatInputRef.current?.focus();
+      if (e.key === "Enter") chatInputRef.current?.focus();
     }
 
     document.addEventListener("keydown", handleKeyDown);
@@ -172,7 +169,7 @@ export default function Page() {
     try {
       const formData = new FormData();
       formData.append("userMessage", userText);
-      formData.append("analysis_mode", analysisMode);
+      formData.append("analysis_mode", "deep");
       formData.append("session_id", sessionId);
       if (previousResponseId) {
         formData.append("previous_response_id", previousResponseId);
@@ -415,55 +412,6 @@ export default function Page() {
           </div>
 
           <div className="px-4 sm:px-6 py-4 border-t border-[color:var(--border)]">
-            <div className="flex gap-2 mb-3 items-center overflow-x-auto no-scrollbar">
-              {(["deep", "quick", "trade_only"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setAnalysisMode(mode)}
-                  className={cn(
-                    "rounded-xl border px-3 py-1.5 text-[11px] uppercase tracking-[0.12em] transition shrink-0 min-h-[36px]",
-                    analysisMode === mode
-                      ? "border-[rgba(109,40,217,0.65)] bg-[rgba(109,40,217,0.14)] text-white"
-                      : "border-white/10 text-[color:var(--muted)] hover:border-white/20 hover:text-white/70"
-                  )}
-                >
-                  {mode === "deep" ? "Deep Analysis" : mode === "quick" ? "Quick Brief" : "Trade Only"}
-                </button>
-              ))}
-
-              {/* Keyboard shortcuts tooltip — desktop only */}
-              <div className="relative group ml-auto hidden sm:flex">
-                <div className="flex items-center gap-1 px-2 py-1 rounded-lg cursor-default text-white/20 hover:text-white/40 transition">
-                  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="0.5" y="2.5" width="13" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.1"/>
-                    <rect x="2" y="5" width="2" height="1.5" rx="0.4" fill="currentColor"/>
-                    <rect x="5" y="5" width="2" height="1.5" rx="0.4" fill="currentColor"/>
-                    <rect x="8" y="5" width="2" height="1.5" rx="0.4" fill="currentColor"/>
-                    <rect x="3.5" y="7.5" width="5" height="1.5" rx="0.4" fill="currentColor"/>
-                  </svg>
-                  <span className="text-[10px] font-mono tracking-wide">shortcuts</span>
-                </div>
-                <div className="absolute bottom-full right-0 mb-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
-                  <div className="rounded-xl border border-white/10 bg-[rgba(10,8,18,0.97)] shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-3 min-w-[180px]">
-                    <div className="text-[10px] font-mono text-white/25 uppercase tracking-widest mb-2">Keyboard Shortcuts</div>
-                    {[
-                      ["D", "Deep Analysis"],
-                      ["Q", "Quick Brief"],
-                      ["T", "Trade Only"],
-                      ["Enter", "Focus input"],
-                      ["Esc", "Clear input"],
-                    ].map(([key, label]) => (
-                      <div key={key} className="flex items-center justify-between gap-4 py-0.5">
-                        <span className="text-[11px] text-white/35">{label}</span>
-                        <kbd className="rounded-md border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-mono text-white/40">{key}</kbd>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {selectedImagePreview ? (
               <div className="mb-3 flex items-center gap-3 rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-3">
                 <img
