@@ -716,7 +716,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       userContent.push({ type: "image", source: { type: "base64", media_type: mediaType, data: b64data } });
     }
 
-    const maxOut = analysis_mode === "deep" ? 4000 : 1400;
+    const maxOut = analysis_mode === "deep" ? 16000 : analysis_mode === "trade_only" ? 2000 : 1400;
     step(`[4c] mode=${mode} analysis_mode=${analysis_mode} horizon=${tradeHorizon} system_chars=${selectedPrompt.length} user_chars=${finalUserInput.length} max_tokens=${maxOut}`);
 
     // When a chart image is attached, append a silent visual analysis instruction
