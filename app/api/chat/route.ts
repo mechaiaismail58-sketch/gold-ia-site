@@ -2,9 +2,7 @@
 export const maxDuration = 60;
 
 import Anthropic from "@anthropic-ai/sdk";
-import { DEEP_ANALYSIS_PROMPT, QUICK_BRIEF_PROMPT, TRADE_ONLY_PROMPT } from "@/lib/prompts";
-import { GOLDEN_EXAMPLES } from "@/lib/goldenExamples";
-import { STYLE_MEMORY } from "@/lib/styleMemory";
+import { BETA_PROMPT } from "@/lib/prompts";
 import { buildResearchContext } from "@/lib/research/buildResearchContext";
 import { getTradeMemory } from "@/lib/research/getTradeMemory";
 import { getPendingTradesContext, getPerformanceMemory } from "@/lib/research/getTradesContext";
@@ -575,18 +573,8 @@ Rules:
 
     const horizonInstruction = horizonInstructionMap[tradeHorizon];
 
-    // Select system prompt based on UI analysis_mode toggle
-    let selectedPrompt: string;
-    switch (analysis_mode) {
-      case "quick":      selectedPrompt = QUICK_BRIEF_PROMPT;   break;
-      case "trade_only": selectedPrompt = TRADE_ONLY_PROMPT;    break;
-      default:           selectedPrompt = DEEP_ANALYSIS_PROMPT;
-    }
-    // Safeguard: if a prompt resolved to undefined/empty (e.g. broken import), fall back to deep
-    if (!selectedPrompt) {
-      console.error(`[chat] selectedPrompt is empty for mode="${analysis_mode}" — falling back to DEEP_ANALYSIS_PROMPT`);
-      selectedPrompt = DEEP_ANALYSIS_PROMPT;
-    }
+    // Single unified prompt — the AI calibrates response depth from user intent
+    const selectedPrompt = BETA_PROMPT;
 
     // Fetch last 3 exchanges from this session for continuity context
     let conversationHistory = "";
@@ -623,12 +611,8 @@ Rules:
       }
     }
 
-    // ── Build user input — mode-specific ────────────────────────────────────────
-    // Quick Brief and Trade Only use a lean input:
-    // — No GOLDEN_EXAMPLES (old deep-analysis format examples confuse strict output)
-    // — No STYLE_MEMORY (can override strict 5-line / 9-line constraints)
-    // — No verbose 15-point TASK section (contradicts strict format requirements)
-    // Deep Analysis gets the full input with style guidance and golden examples.
+    // ── Build user input — unified for all modes ───────────────────────────────
+    // BETA_PROMPT handles response calibration from user intent automatically.
 
     const researchBlock = `RESEARCH CONTEXT
 ${buildCleanContextText(researchContext)}
@@ -640,67 +624,12 @@ ${researchContext.indicator_context?.market_regime ? `\nMARKET REGIME\n${researc
 ${researchContext.upcoming_events && researchContext.upcoming_events.events.length > 0 ? `\nUPCOMING HIGH-IMPACT EVENTS\n${researchContext.upcoming_events.summary}` : ""}
 ${tradeMemory && tradeMemory.signals.length > 0 ? `\nPREVIOUS TRADE SIGNALS\n${tradeMemory.summary}` : ""}${performanceMemory ? `\n\n${performanceMemory.summary}` : ""}${pendingTrades ? `\n\n${pendingTrades.prompt}` : ""}${userProfileBlock}`.trim();
 
-    let finalUserInput: string;
-
-    if (analysis_mode === "quick" || analysis_mode === "trade_only") {
-      // Lean input — research data only, no format examples, no verbose instructions
-      finalUserInput = `${researchBlock}
+    const finalUserInput = `${researchBlock}
 
 ${horizonInstruction}
 
 ${conversationHistory}USER REQUEST
-${userMessage || (analysis_mode === "quick" ? "Current XAUUSD brief." : "Current XAUUSD trade setup.")}`.trim();
-
-    } else {
-      // Full input for Deep Analysis — includes style guidance and golden examples
-      finalUserInput = `CONTEXTE PRODUIT
-
-Bullion Desk est un decision engine institutionnel dédié à l'or.
-Le rôle du modèle est d'appliquer le framework avec discipline, pas de chatter.
-
-STYLE MEMORY
-${STYLE_MEMORY}
-
-GOLDEN EXAMPLES
-${GOLDEN_EXAMPLES}
-
-${researchBlock}
-
-${horizonInstruction}
-
-TASK
-
-1. Utilise les données structurées comme source primaire.
-2. Si une donnée est indisponible, ne l'écris pas — omets-la entièrement.
-3. Sépare strictement DATA / INTERPRÉTATIONS.
-4. La technique doit être omniprésente dans tous les modes sauf IDENTITY.
-5. Utilise explicitement technical_context partout où c'est pertinent.
-6. Si USD et yields sont alignés, traite cela comme driver macro prioritaire.
-7. L'interprétation doit refléter une vraie lecture de marché, pas une simple reformulation des faits.
-8. Réponds dans la langue principale de l'utilisateur.
-9. Ne réponds jamais comme un assistant généraliste.
-10. Ne donne un trade que si l'environnement est réellement tradable et la structure techniquement exploitable.
-11. Quand le marché est fermé, indique-le explicitement et, si pertinent, fournis un plan d'ouverture conditionnel au lieu d'un trade live.
-12. Utilise le web search uniquement pour compléter la fondamentale vivante :
-    - headlines récentes sur gold / USD / yields / Fed / inflation
-    - event risk dans les prochaines 24 à 72 heures
-    - éléments expliquant le contexte macro actuel
-13. Ne pas utiliser le web search pour inventer ou remplacer :
-    - les prix live internes
-    - les niveaux techniques
-    - les highs/lows structuraux
-    - la structure H1/M30
-14. Si une image de graphique est jointe, utilise-la pour lire :
-    - structure visible
-    - sweeps
-    - compression
-    - cassure / rejet
-    - cohérence ou incohérence avec technical_context
-15. L'image jointe est une couche visuelle complémentaire, pas une source primaire qui remplace les données marché.
-
-${conversationHistory}DEMANDE UTILISATEUR
-${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}`.trim();
-    }
+${userMessage || "Analyse XAUUSD."}`.trim();
 
     // Build user message content for Anthropic API
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -716,7 +645,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       userContent.push({ type: "image", source: { type: "base64", media_type: mediaType, data: b64data } });
     }
 
-    const maxOut = analysis_mode === "deep" ? 16000 : analysis_mode === "trade_only" ? 2000 : 1400;
+    const maxOut = 16000;
     step(`[4c] mode=${mode} analysis_mode=${analysis_mode} horizon=${tradeHorizon} system_chars=${selectedPrompt.length} user_chars=${finalUserInput.length} max_tokens=${maxOut}`);
 
     // When a chart image is attached, append a silent visual analysis instruction
@@ -725,7 +654,7 @@ ${userMessage || "Analyse le graphique joint et donne la lecture Bullion Desk."}
       ? `\n\nWhen an image is attached, analyze it and integrate what you see directly into your analysis — visible price structure, key levels, patterns, orderblocks, zones — without ever mentioning that an image was provided or making any explicit reference to it. The analysis must simply be more precise and enriched by what the image reveals, as if you had access to the chart in real time.`
       : "";
 
-    const MODEL = "claude-sonnet-4-5";
+    const MODEL = "claude-opus-4-6";
 
     step(`[5] starting Anthropic stream model=${MODEL} max_tokens=${maxOut}`);
 
