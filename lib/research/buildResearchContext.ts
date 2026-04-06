@@ -451,6 +451,8 @@ export type EnrichedResearchContext = ResearchContext & {
     cot_available: boolean;
     cot_report_date: string | null;
   };
+  historical_levels_summary: string | null;
+  round_numbers_summary: string | null;
 };
 
 // ── COT with one automatic retry ──────────────────────────────────────────────
@@ -757,6 +759,51 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
   const monthlyD1High = d1Bars.length >= 22 ? Math.max(...d1Bars.slice(-22).map(b => b.high)) : null;
   const monthlyD1Low  = d1Bars.length >= 22 ? Math.min(...d1Bars.slice(-22).map(b => b.low))  : null;
 
+  // ── Historical levels — price levels touched 2+ times on D1 (tolerance 5pts) ─
+  const historicalLevelsSummary = (() => {
+    if (d1Bars.length < 10) return null;
+    const TOLERANCE = 5;
+    type LvlEntry = { price: number; touches: number; held: boolean };
+    const levels: LvlEntry[] = [];
+    // Collect all significant points (highs and lows of each D1 bar)
+    const pivots = d1Bars.flatMap(b => [b.high, b.low]);
+    for (const pivot of pivots) {
+      const existing = levels.find(l => Math.abs(l.price - pivot) <= TOLERANCE);
+      if (existing) {
+        existing.touches++;
+      } else {
+        levels.push({ price: pivot, touches: 1, held: false });
+      }
+    }
+    const significant = levels.filter(l => l.touches >= 2).sort((a, b) => a.price - b.price);
+    if (!significant.length) return null;
+    // Determine if each level held or was broken (check if price ever closed beyond it)
+    for (const lvl of significant) {
+      const closedBelow = d1Bars.some(b => b.close < lvl.price - TOLERANCE);
+      const closedAbove = d1Bars.some(b => b.close > lvl.price + TOLERANCE);
+      lvl.held = !(closedBelow && closedAbove); // broke if price closed on both sides
+    }
+    return significant.map(l =>
+      `${l.price.toFixed(2)} (${l.touches} touches, ${l.held ? "held" : "broken"})`
+    ).join(" | ");
+  })();
+
+  // ── Round numbers near current price ──────────────────────────────────────────
+  const roundNumbersSummary = (() => {
+    const price = goldPrice;
+    if (price == null) return null;
+    const above50  = Math.ceil(price / 50) * 50;
+    const above100 = Math.ceil(price / 100) * 100;
+    const below50  = Math.floor(price / 50) * 50;
+    const below100 = Math.floor(price / 100) * 100;
+    // Deduplicate and sort
+    const aboveLevels = [...new Set([above50, above100])].sort((a, b) => a - b);
+    const belowLevels = [...new Set([below50, below100])].sort((a, b) => b - a);
+    const above = aboveLevels.filter(l => l > price).slice(0, 2).map(l => `${l} (+${(l - price).toFixed(0)}pts)`).join(", ");
+    const below = belowLevels.filter(l => l < price).slice(0, 2).map(l => `${l} (-${(price - l).toFixed(0)}pts)`).join(", ");
+    return `Above: ${above || "none"} | Below: ${below || "none"}`;
+  })();
+
   // ── Data freshness ────────────────────────────────────────────────────────────
   const nowMs = Date.now();
   const priceAgeSeconds = priceContext.fetched_at_utc
@@ -818,6 +865,8 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     weekly_d1_low: weeklyD1Low,
     monthly_d1_high: monthlyD1High,
     monthly_d1_low: monthlyD1Low,
+    historical_levels_summary: historicalLevelsSummary,
+    round_numbers_summary: roundNumbersSummary,
     data_freshness: {
       price_age_seconds: priceAgeSeconds,
       cot_age_days: cotAgeDays,

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import LiveTicker from "@/components/LiveTicker";
+import TradeTracker from "@/components/TradeTracker";
 import OnboardingModal from "@/components/OnboardingModal";
 import ShareSignalButton from "@/components/ShareSignalButton";
 import HistoryPanel from "@/components/HistoryPanel";
@@ -382,6 +383,8 @@ export default function ChatPage() {
           </div>
         </div>
       </section>
+
+      <TradeTracker />
 
       <section className="mt-8">
         <div className="card rounded-2xl sm:rounded-3xl p-0 overflow-hidden border border-white/10 shadow-[0_18px_90px_rgba(109,40,217,0.14)]">

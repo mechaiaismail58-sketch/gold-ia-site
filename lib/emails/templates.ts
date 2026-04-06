@@ -1,3 +1,99 @@
+export const morningBriefTemplate = (email: string, briefingText: string, date: string) => ({
+  from: 'Bullion Desk <noreply@bulliondesk.pro>',
+  to: email,
+  subject: `XAUUSD Morning Brief — ${date}`,
+  html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:60px 20px;">
+    <tr>
+      <td align="center">
+        <table width="520" cellpadding="0" cellspacing="0" style="max-width:520px;width:100%;">
+
+          <!-- Logo -->
+          <tr>
+            <td align="center" style="padding-bottom:6px;">
+              <span style="color:#ffffff;font-size:17px;font-weight:300;letter-spacing:0.22em;text-transform:uppercase;">
+                Bullion <span style="color:#D4AF37;">Desk</span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding-bottom:32px;">
+              <span style="color:#6b7280;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;">Morning Brief · ${date}</span>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;">
+
+              <!-- Purple top accent bar -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="height:1px;background:linear-gradient(to right,transparent,rgba(139,92,246,0.55),transparent);font-size:0;line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="padding:36px 40px;">
+
+                <!-- Badge -->
+                <tr>
+                  <td style="padding-bottom:24px;">
+                    <span style="display:inline-block;border:1px solid rgba(212,175,55,0.35);background:rgba(212,175,55,0.07);border-radius:999px;padding:5px 16px;">
+                      <span style="color:#D4AF37;font-size:10px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;">XAUUSD · Daily Brief</span>
+                    </span>
+                  </td>
+                </tr>
+
+                <!-- Briefing text -->
+                <tr>
+                  <td style="padding-bottom:32px;">
+                    <p style="color:#f5f0e8;font-size:14px;line-height:1.9;margin:0;white-space:pre-wrap;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">${briefingText.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
+                  </td>
+                </tr>
+
+                <!-- Divider -->
+                <tr>
+                  <td style="padding-bottom:24px;">
+                    <div style="height:1px;background:rgba(255,255,255,0.06);font-size:0;line-height:0;">&nbsp;</div>
+                  </td>
+                </tr>
+
+                <!-- CTA -->
+                <tr>
+                  <td align="center">
+                    <a href="https://bulliondesk.pro" style="display:inline-block;border:1px solid rgba(212,175,55,0.6);background:rgba(212,175,55,0.1);color:#D4AF37;text-decoration:none;font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;padding:11px 28px;border-radius:10px;">
+                      Open Bullion Desk
+                    </a>
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding-top:32px;">
+              <span style="color:#374151;font-size:11px;letter-spacing:0.05em;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">Bullion Desk © 2026 · bulliondesk.pro · Not investment advice</span>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `
+})
+
 export const betaLaunchTemplate = (email: string) => ({
   from: 'Bullion Desk <noreply@bulliondesk.pro>',
   to: email,
