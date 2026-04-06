@@ -439,6 +439,18 @@ export type EnrichedResearchContext = ResearchContext & {
   } | null;
   gld_iv: number | null;
   futures_curve: FuturesCurveData | null;
+  // D1 structural levels — institutional reference points
+  weekly_d1_high: number | null;
+  weekly_d1_low: number | null;
+  monthly_d1_high: number | null;
+  monthly_d1_low: number | null;
+  // Data freshness — age of each source in human-readable form
+  data_freshness: {
+    price_age_seconds: number | null;
+    cot_age_days: number | null;
+    cot_available: boolean;
+    cot_report_date: string | null;
+  };
 };
 
 // ── COT with one automatic retry ──────────────────────────────────────────────
@@ -739,6 +751,22 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     oi_signal = { oi: cotContext.open_interest, oi_change: cotContext.oi_change, scenario, note };
   }
 
+  // ── D1 structural levels (weekly = last 5 candles, monthly = last 22) ────────
+  const weeklyD1High  = d1Bars.length >= 5  ? Math.max(...d1Bars.slice(-5).map(b => b.high))  : null;
+  const weeklyD1Low   = d1Bars.length >= 5  ? Math.min(...d1Bars.slice(-5).map(b => b.low))   : null;
+  const monthlyD1High = d1Bars.length >= 22 ? Math.max(...d1Bars.slice(-22).map(b => b.high)) : null;
+  const monthlyD1Low  = d1Bars.length >= 22 ? Math.min(...d1Bars.slice(-22).map(b => b.low))  : null;
+
+  // ── Data freshness ────────────────────────────────────────────────────────────
+  const nowMs = Date.now();
+  const priceAgeSeconds = priceContext.fetched_at_utc
+    ? Math.round((nowMs - new Date(priceContext.fetched_at_utc).getTime()) / 1000)
+    : null;
+  const cotReportDate = cotContext?.disagg_report_date ?? cotContext?.report_date ?? null;
+  const cotAgeDays = cotReportDate
+    ? Math.round((nowMs - new Date(cotReportDate).getTime()) / (1000 * 86400))
+    : null;
+
   return {
     price_context: priceContext,
     macro_context: {
@@ -786,5 +814,15 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     fx_momentum: fxMomentum,
     gld_iv: gldIV,
     futures_curve: futuresCurve.structure != null || futuresCurve.front_price != null ? futuresCurve : null,
+    weekly_d1_high: weeklyD1High,
+    weekly_d1_low: weeklyD1Low,
+    monthly_d1_high: monthlyD1High,
+    monthly_d1_low: monthlyD1Low,
+    data_freshness: {
+      price_age_seconds: priceAgeSeconds,
+      cot_age_days: cotAgeDays,
+      cot_available: cotContext != null,
+      cot_report_date: cotReportDate,
+    },
   };
 }

@@ -42,7 +42,7 @@ export default function WaitlistLanding() {
   }
 
   return (
-    <div className="min-h-screen bg-[#07060b] text-white flex flex-col items-center justify-center px-4 py-16 animate-fade-in">
+    <div className="bg-[#07060b] text-white flex flex-col items-center px-4 py-16 animate-fade-in">
 
       {/* Same purple blobs as main site layout */}
       <div className="pointer-events-none fixed inset-0 -z-10">

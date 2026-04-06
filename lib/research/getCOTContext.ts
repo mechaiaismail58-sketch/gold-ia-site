@@ -123,6 +123,68 @@ function classifySwapDealer(net: number): COTContext["swap_dealer_signal"] {
   return "extreme_short";                      // banks max hedged = bearish signal
 }
 
+// ─────────────────── Text-file fallback (CFTC deafut.txt) ───────────────────
+
+async function fetchCOTFromTextFile(): Promise<CFTCLegacyRecord[]> {
+  const TXT_URL = "https://www.cftc.gov/dea/newcot/deafut.txt";
+  try {
+    const res = await fetch(TXT_URL, { next: { revalidate: 86400 } });
+    if (!res.ok) {
+      console.error(`fetchCOTFromTextFile: HTTP ${res.status}`);
+      return [];
+    }
+    const text = await res.text();
+    const lines = text.split(/\r?\n/).filter(Boolean);
+    if (lines.length < 2) return [];
+
+    // Find Gold lines by CFTC commodity code 088691
+    const goldLines = lines.filter(l => l.includes("088691")).slice(0, 4);
+    if (!goldLines.length) {
+      console.warn("fetchCOTFromTextFile: no gold lines found in deafut.txt");
+      return [];
+    }
+
+    return goldLines.map(line => {
+      // CSV parser that respects quoted fields
+      const fields: string[] = [];
+      let inQuote = false;
+      let cur = "";
+      for (const ch of line) {
+        if (ch === '"') { inQuote = !inQuote; continue; }
+        if (ch === "," && !inQuote) { fields.push(cur.trim()); cur = ""; continue; }
+        cur += ch;
+      }
+      fields.push(cur.trim());
+
+      // Convert date from MM/DD/YYYY (field 2) to YYYY-MM-DD
+      let parsedDate: string | undefined;
+      const rawDate = fields[2];
+      if (rawDate) {
+        const p = rawDate.split("/");
+        if (p.length === 3) parsedDate = `${p[2]}-${p[0].padStart(2, "0")}-${p[1].padStart(2, "0")}`;
+      }
+
+      // Column positions (0-indexed) for deafut.txt legacy format:
+      // 0=market_name, 2=date_MM/DD/YYYY, 7=OI, 8=NonComm_Long, 9=NonComm_Short,
+      // 11=Comm_Long, 12=Comm_Short, 13=NonRept_Long, 14=NonRept_Short
+      return {
+        market_and_exchange_names:   fields[0],
+        report_date_as_yyyy_mm_dd:   parsedDate,
+        open_interest_all:           fields[7],
+        noncomm_positions_long_all:  fields[8],
+        noncomm_positions_short_all: fields[9],
+        comm_positions_long_all:     fields[11],
+        comm_positions_short_all:    fields[12],
+        nonrept_positions_long_all:  fields[13],
+        nonrept_positions_short_all: fields[14],
+      } satisfies CFTCLegacyRecord;
+    });
+  } catch (err) {
+    console.error("fetchCOTFromTextFile: failed:", err);
+    return [];
+  }
+}
+
 // ─────────────────── Legacy fetch ────────────────────────────────────────────
 
 async function fetchLegacyCOT(): Promise<CFTCLegacyRecord[]> {
@@ -151,7 +213,10 @@ async function fetchLegacyCOT(): Promise<CFTCLegacyRecord[]> {
       continue;
     }
   }
-  return [];
+
+  // All JSON API endpoints failed — try plain-text file as last resort
+  console.warn("fetchLegacyCOT: all JSON endpoints failed — trying deafut.txt fallback");
+  return fetchCOTFromTextFile();
 }
 
 // ─────────────────── Disaggregated fetch ─────────────────────────────────────

@@ -16,6 +16,33 @@ function buildCleanContextText(ctx: any): string {
   const fmt = (n: number | null | undefined, d = 2) =>
     n != null ? n.toFixed(d) : null;
 
+  // DATA FRESHNESS — age of each source so the AI can weight accordingly
+  const df = ctx.data_freshness;
+  const pc0 = ctx.price_context;
+  {
+    const freshnessLines: string[] = [];
+    if (df?.price_age_seconds != null) {
+      freshnessLines.push(`Price: live (${df.price_age_seconds}s ago)`);
+    } else if (pc0?.fetched_at_utc) {
+      freshnessLines.push(`Price: live`);
+    }
+    freshnessLines.push(`Indicators: calculated from OHLCV (real-time)`);
+    if (df?.cot_available === false) {
+      freshnessLines.push(`COT: unavailable — all endpoints failed. Last report date unknown. Weight: 0.`);
+    } else if (df?.cot_age_days != null) {
+      freshnessLines.push(`COT: last report ${df.cot_report_date ?? "unknown"} (${df.cot_age_days} day${df.cot_age_days !== 1 ? "s" : ""} ago — published every Friday)`);
+    } else {
+      freshnessLines.push(`COT: age unknown`);
+    }
+    if (ctx.etf_flows) freshnessLines.push(`ETF flows: recent (revalidate 1h)`);
+    freshnessLines.push(`FRED (yields, DXY): recent (revalidate 1h)`);
+    if (ctx.sentiment_context) freshnessLines.push(`Sentiment: recent (revalidate 15min)`);
+    freshnessLines.push(`Order flow: ${ctx.polygon_order_flow ? "real-time Polygon" : "local calculation from OHLCV"}`);
+    if (freshnessLines.length > 0) {
+      lines.push(`DATA FRESHNESS\n${freshnessLines.join("\n")}`);
+    }
+  }
+
   // Market Status
   const mc = ctx.market_context;
   if (mc) {
@@ -88,6 +115,10 @@ ${mc.next_open_note}`);
     if (tc.orderblock_bearish_h1 != null) techLines.push(`OB Bearish H1: ${fmt(tc.orderblock_bearish_h1.low)} – ${fmt(tc.orderblock_bearish_h1.high)}`);
     if (tc.liquidity_above != null) techLines.push(`Liquidity Above: ${fmt(tc.liquidity_above)}`);
     if (tc.liquidity_below != null) techLines.push(`Liquidity Below: ${fmt(tc.liquidity_below)}`);
+    if (ctx.weekly_d1_high != null) techLines.push(`Previous Week High (D1): ${fmt(ctx.weekly_d1_high)}`);
+    if (ctx.weekly_d1_low != null)  techLines.push(`Previous Week Low (D1): ${fmt(ctx.weekly_d1_low)}`);
+    if (ctx.monthly_d1_high != null) techLines.push(`Previous Month High (D1): ${fmt(ctx.monthly_d1_high)}`);
+    if (ctx.monthly_d1_low != null)  techLines.push(`Previous Month Low (D1): ${fmt(ctx.monthly_d1_low)}`);
     if (tc.momentum_5_bars_pct != null) techLines.push(`Momentum 5 bars: ${tc.momentum_5_bars_pct.toFixed(3)}%`);
     if (ts?.bias && ts.bias !== "Data not found") techLines.push(`Technical Bias: ${ts.bias} (${ts.condition})`);
     if (techLines.length > 0) {
