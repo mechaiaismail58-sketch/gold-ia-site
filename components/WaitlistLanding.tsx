@@ -42,7 +42,7 @@ export default function WaitlistLanding() {
   }
 
   return (
-    <div className="bg-[#07060b] text-white flex flex-col items-center px-4 py-16 animate-fade-in">
+    <div className="bg-[#07060b] text-white flex flex-col items-center px-4 pt-16 pb-8 animate-fade-in">
 
       {/* Same purple blobs as main site layout */}
       <div className="pointer-events-none fixed inset-0 -z-10">
@@ -152,7 +152,7 @@ export default function WaitlistLanding() {
         </div>
 
         {/* ── Feature cards — same style as site's pill tags / small cards ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
           {FEATURES.map((f) => (
             <div key={f.title} className="card rounded-2xl border border-white/10 overflow-hidden">
               <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(139,92,246,0.35)] to-transparent" />
