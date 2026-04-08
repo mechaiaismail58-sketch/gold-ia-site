@@ -56,8 +56,15 @@ export async function GET(req: Request) {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const briefing = response.content.filter((b: any) => b.type === "text").map((b: any) => b.text as string).join("").trim();
-    if (!briefing) return NextResponse.json({ ok: false, error: "No briefing generated" });
+    const rawBriefing = response.content.filter((b: any) => b.type === "text").map((b: any) => b.text as string).join("").trim();
+    if (!rawBriefing) return NextResponse.json({ ok: false, error: "No briefing generated" });
+
+    // Convert markdown to HTML for email rendering
+    const briefing = rawBriefing
+      .replace(/^#{1,3} (.+)$/gm, `<h3 style="color:#D4AF37;font-size:16px;margin:20px 0 8px 0;">$1</h3>`)
+      .replace(/\*\*(.+?)\*\*/g, `<strong>$1</strong>`)
+      .replace(/^---$/gm, `<hr style="border:none;height:1px;background:rgba(212,175,55,0.3);margin:20px 0;">`)
+      .replace(/\n/g, `<br>`);
 
     // Collect recipients: waitlist + paid users
     const admin = createAdminClient();
