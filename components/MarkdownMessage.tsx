@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
@@ -291,6 +291,19 @@ function highlightPrices(text: string): (string | React.ReactElement)[] {
   return parts.length > 0 ? parts : [text];
 }
 
+// ── processChildren: walk React children and highlight prices in strings ─────
+
+function processChildren(children: React.ReactNode): React.ReactNode {
+  return React.Children.map(children, (child) => {
+    if (typeof child === "string") {
+      const parts = highlightPrices(child);
+      if (parts.length === 1 && typeof parts[0] === "string") return child;
+      return <>{parts}</>;
+    }
+    return child;
+  });
+}
+
 // ── Markdown components ───────────────────────────────────────────────────────
 
 let headingCount = 0;
@@ -331,7 +344,7 @@ const components: Components = {
   p({ children }) {
     return (
       <p className="leading-[1.75] text-[13px] text-white/75 mb-2 last:mb-0 px-2 sm:px-0">
-        {children}
+        {processChildren(children)}
       </p>
     );
   },
@@ -342,7 +355,7 @@ const components: Components = {
     return <ol className="mb-2 space-y-0.5 pl-4 list-decimal marker:text-white/30 last:mb-0">{children}</ol>;
   },
   li({ children }) {
-    return <li className="text-[13px] text-white/75 leading-[1.7]">{children}</li>;
+    return <li className="text-[13px] text-white/75 leading-[1.7]">{processChildren(children)}</li>;
   },
   hr() {
     return <div className="my-3 h-px w-full bg-white/[0.07]" role="separator" />;
@@ -367,13 +380,6 @@ const components: Components = {
         {children}
       </blockquote>
     );
-  },
-  // text-level price highlighting
-  text({ children }) {
-    if (typeof children !== "string") return <>{children}</>;
-    const parts = highlightPrices(children);
-    if (parts.length === 1 && typeof parts[0] === "string") return <>{children}</>;
-    return <>{parts}</>;
   },
 };
 

@@ -385,7 +385,9 @@ export default function ChatPage() {
         </div>
       </section>
 
-      <MarketDashboard />
+      <div className="mt-3">
+        <MarketDashboard />
+      </div>
 
       <TradeTracker />
 
