@@ -262,7 +262,13 @@ function splitSegments(content: string): Segment[] {
 // ── Price highlighter ─────────────────────────────────────────────────────────
 
 // Indicator prefixes that mean the number is NOT a price
-const INDICATOR_PREFIXES = /\b(RSI|ADX|ATR|CCI|MACD|EMA|VIX|Stoch|volume|OI|contracts)\s*[-:=]?\s*$/i;
+// Note: the character class is split via RegExp constructor to prevent Tailwind
+// from scanning "[-:=]" as an arbitrary CSS class and generating invalid CSS.
+const _sepChars = "[-" + ":=]";
+const INDICATOR_PREFIXES = new RegExp(
+  `\\b(RSI|ADX|ATR|CCI|MACD|EMA|VIX|Stoch|volume|OI|contracts)\\s*${_sepChars}?\\s*$`,
+  "i"
+);
 const PRICE_RE = /\b(4[0-9]{3}|5[0-9]{3})(\.\d{1,2})?\b/g;
 
 function highlightPrices(text: string): (string | React.ReactElement)[] {
