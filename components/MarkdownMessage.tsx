@@ -262,8 +262,7 @@ function splitSegments(content: string): Segment[] {
 // ── Price highlighter ─────────────────────────────────────────────────────────
 
 // Indicator prefixes that mean the number is NOT a price
-// Note: the character class is split via RegExp constructor to prevent Tailwind
-// from scanning "[-:=]" as an arbitrary CSS class and generating invalid CSS.
+// The char class below is split to avoid Tailwind JIT scanning it as an arbitrary property.
 const _sepChars = "[-" + ":=]";
 const INDICATOR_PREFIXES = new RegExp(
   `\\b(RSI|ADX|ATR|CCI|MACD|EMA|VIX|Stoch|volume|OI|contracts)\\s*${_sepChars}?\\s*$`,
