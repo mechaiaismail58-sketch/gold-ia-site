@@ -199,18 +199,41 @@ textarea.text-xs {
   border-radius: 8px;
 }
 
-/* Typing dots */
-.typing-dot {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  animation: typing-dot 1.2s ease-in-out infinite;
+/* Thinking block — gold pulse */
+@keyframes goldPulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; box-shadow: 0 0 0 0 rgba(212,175,55,0.3); }
+  50%       { transform: scale(1.3); opacity: 1; box-shadow: 0 0 8px 3px rgba(212,175,55,0.15); }
 }
 
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+.thinking-pulse {
+  animation: goldPulse 1.2s ease-in-out infinite;
+}
+
+/* Thinking lines — fade in from below */
+@keyframes fadeInUp {
+  from { transform: translateY(4px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+.thinking-line {
+  animation: fadeInUp 200ms ease-out both;
+}
+
+/* Typing cursor */
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  background: #D4AF37;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 0.8s ease-in-out infinite;
+}
 
 /* Nav progress bar */
 .nav-progress-bar {

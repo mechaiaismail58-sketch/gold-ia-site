@@ -1,5 +1,5 @@
-// 60s Vercel timeout: up to 20s research (CFTC COT) + up to 40s Anthropic generation.
-export const maxDuration = 60;
+// 120s Vercel timeout: up to 20s research + up to 100s Anthropic generation (32k tokens).
+export const maxDuration = 120;
 
 import Anthropic from "@anthropic-ai/sdk";
 import { BETA_PROMPT } from "@/lib/prompts";
@@ -534,7 +534,7 @@ export async function POST(req: Request) {
     if (!process.env.ANTHROPIC_API_KEY) {
       return Response.json({ ok: false, error: "AI not configured" }, { status: 500 });
     }
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 50_000, maxRetries: 3 });
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 120_000, maxRetries: 3 });
     step("[1] anthropic client created");
 
     const supabase = await createClient();

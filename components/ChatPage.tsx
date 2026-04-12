@@ -8,6 +8,7 @@ import OnboardingModal from "@/components/OnboardingModal";
 import ShareSignalButton from "@/components/ShareSignalButton";
 import HistoryPanel from "@/components/HistoryPanel";
 import MarkdownMessage from "@/components/MarkdownMessage";
+import ThinkingBlock from "@/components/ThinkingBlock";
 import { useChatContext } from "@/context/ChatContext";
 
 function cn(...classes: (string | false | null | undefined)[]) {
@@ -55,6 +56,16 @@ export default function ChatPage() {
 
   const [respondedTradeIds, setRespondedTradeIds] = useState<Set<string>>(new Set());
 
+  // Thinking block state
+  const [thinkingLines, setThinkingLines] = useState<string[]>([]);
+  const [isThinking, setIsThinking] = useState(false);
+  const [thinkingComplete, setThinkingComplete] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+
+  // Smart scroll
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
+
   function attachImageFile(file: File) {
     if (!file.type.startsWith("image/")) return;
     const reader = new FileReader();
@@ -72,9 +83,33 @@ export default function ChatPage() {
   const chatInputRef = useRef<HTMLInputElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
+  // Smart scroll — only scroll if already near the bottom
+  function scrollToBottom(force = false) {
+    const c = chatContainerRef.current;
+    if (!c) return;
+    const distFromBottom = c.scrollHeight - c.scrollTop - c.clientHeight;
+    if (force || distFromBottom < 150) {
+      c.scrollTo({ top: c.scrollHeight, behavior: "smooth" });
+    }
+  }
+
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+    scrollToBottom();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]);
+
+  // Show scroll-to-bottom button when user scrolled up and streaming is active
+  useEffect(() => {
+    const c = chatContainerRef.current;
+    if (!c) return;
+    function onScroll() {
+      if (!c) return;
+      const distFromBottom = c.scrollHeight - c.scrollTop - c.clientHeight;
+      setShowScrollBtn(distFromBottom > 150 && isStreaming);
+    }
+    c.addEventListener("scroll", onScroll, { passive: true });
+    return () => c.removeEventListener("scroll", onScroll);
+  }, [isStreaming]);
 
   useEffect(() => {
     fetch("/api/profile")
@@ -243,6 +278,27 @@ export default function ChatPage() {
       let streamResponseId: string | null = null;
       let buffer = "";
 
+      // Thinking parsing state
+      let thinkingBuf = "";
+      let inThinking = false;
+      let thinkingDone = false;
+      let thinkingTimeoutId: ReturnType<typeof setTimeout> | null = null;
+      const seenThinkingLines = new Set<string>();
+
+      setThinkingLines([]);
+      setThinkingComplete(false);
+      setIsThinking(false);
+      setIsStreaming(true);
+
+      // Safety timeout for stuck thinking blocks
+      thinkingTimeoutId = setTimeout(() => {
+        if (inThinking && !thinkingDone) {
+          thinkingDone = true;
+          setThinkingComplete(true);
+          setTimeout(() => setIsThinking(false), 600);
+        }
+      }, 30_000);
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -256,16 +312,58 @@ export default function ChatPage() {
           try {
             const event = JSON.parse(part.slice(6));
             if (event.type === "delta") {
-              fullText += event.text;
-              if (!messageAdded) {
-                setMessages((m) => [...m, { role: "assistant", content: fullText }]);
-                messageAdded = true;
+              thinkingBuf += event.text;
+
+              if (!thinkingDone) {
+                // Check if thinking block is starting
+                if (!inThinking && thinkingBuf.trimStart().startsWith(":::thinking")) {
+                  inThinking = true;
+                  setIsThinking(true);
+                }
+
+                if (inThinking) {
+                  // Parse completed lines from thinkingBuf
+                  const lines = thinkingBuf.split("\n");
+                  for (const line of lines) {
+                    const trimmed = line.trim();
+                    // Closing marker
+                    if (trimmed === ":::" && inThinking) {
+                      thinkingDone = true;
+                      if (thinkingTimeoutId) clearTimeout(thinkingTimeoutId);
+                      setThinkingComplete(true);
+                      setTimeout(() => setIsThinking(false), 600);
+                      // Everything after ::: is the real response
+                      const closingIdx = thinkingBuf.indexOf("\n:::\n");
+                      const afterIdx = closingIdx >= 0 ? closingIdx + 5 : thinkingBuf.indexOf(":::thinking") >= 0 ? thinkingBuf.length : 0;
+                      fullText = thinkingBuf.slice(afterIdx);
+                      break;
+                    }
+                    // Thinking lines
+                    if (trimmed.startsWith("—") && !seenThinkingLines.has(trimmed)) {
+                      seenThinkingLines.add(trimmed);
+                      setThinkingLines((prev) => [...prev, trimmed]);
+                    }
+                  }
+                  // Don't add to message while in thinking
+                  if (!thinkingDone) continue;
+                }
               } else {
-                setMessages((m) => {
-                  const updated = [...m];
-                  updated[updated.length - 1] = { ...updated[updated.length - 1], content: fullText };
-                  return updated;
-                });
+                // Post-thinking: accumulate real response
+                fullText += event.text;
+              }
+
+              if (fullText) {
+                if (!messageAdded) {
+                  setMessages((m) => [...m, { role: "assistant", content: fullText }]);
+                  messageAdded = true;
+                } else {
+                  setMessages((m) => {
+                    const updated = [...m];
+                    updated[updated.length - 1] = { ...updated[updated.length - 1], content: fullText };
+                    return updated;
+                  });
+                }
+                scrollToBottom();
               }
             } else if (event.type === "done") {
               tradeId = event.trade_id ?? event.pending_trade_id ?? null;
@@ -279,6 +377,10 @@ export default function ChatPage() {
           }
         }
       }
+
+      if (thinkingTimeoutId) clearTimeout(thinkingTimeoutId);
+      setIsStreaming(false);
+      setShowScrollBtn(false);
 
       // Update with trade_id metadata
       if (tradeId && messageAdded) {
@@ -425,7 +527,10 @@ export default function ChatPage() {
             </div>
           </div>
 
-          <div className="px-4 sm:px-6 py-6 h-[calc(100svh-380px)] min-h-[320px] sm:h-[560px] overflow-y-auto flex flex-col gap-6">
+          <div
+            ref={chatContainerRef}
+            className="px-4 sm:px-6 py-6 h-[calc(100svh-380px)] min-h-[320px] sm:h-[560px] overflow-y-auto flex flex-col gap-6 relative"
+          >
             {messages.map((m, i) => (
               <div key={i} className="animate-fade-in-fast">
                 {m.role === "user" ? (
@@ -455,6 +560,9 @@ export default function ChatPage() {
                     </div>
                     <div className="pl-3 border-l border-white/[0.06]">
                       <MarkdownMessage content={m.content} />
+                      {isStreaming && i === messages.length - 1 && m.role === "assistant" && (
+                        <span className="typing-cursor" />
+                      )}
                     </div>
                     <div className="pl-3">
                       <ShareSignalButton text={m.content} />
@@ -483,7 +591,7 @@ export default function ChatPage() {
               </div>
             ))}
 
-            {loading && (
+            {loading && !isStreaming && (
               <div className="animate-fade-in-fast flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <span className="h-1 w-1 rounded-full bg-[rgba(200,162,74,0.5)] shrink-0" />
@@ -491,14 +599,37 @@ export default function ChatPage() {
                     Bullion Desk
                   </span>
                 </div>
-                <div className="pl-3 border-l border-white/[0.06] flex items-center gap-1.5 py-1">
-                  <span className="typing-dot" />
-                  <span className="typing-dot" />
-                  <span className="typing-dot" />
+                <div className="pl-3 border-l border-white/[0.06] py-1">
+                  <ThinkingBlock lines={[]} isComplete={false} />
+                </div>
+              </div>
+            )}
+            {loading && isThinking && (
+              <div className="animate-fade-in-fast flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="h-1 w-1 rounded-full bg-[rgba(200,162,74,0.5)] shrink-0" />
+                  <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/25">
+                    Bullion Desk
+                  </span>
+                </div>
+                <div className="pl-3 border-l border-white/[0.06]">
+                  <ThinkingBlock lines={thinkingLines} isComplete={thinkingComplete} />
                 </div>
               </div>
             )}
 
+            {showScrollBtn && (
+              <button
+                type="button"
+                onClick={() => scrollToBottom(true)}
+                className="sticky bottom-2 self-center rounded-full border border-[rgba(212,175,55,0.35)] bg-[rgba(7,6,11,0.85)] backdrop-blur-sm px-3 py-1.5 text-[11px] text-[rgba(212,175,55,0.8)] hover:border-[rgba(212,175,55,0.7)] hover:text-[rgba(212,175,55,1)] transition flex items-center gap-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
+              >
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Scroll to bottom
+              </button>
+            )}
             <div ref={bottomRef} />
           </div>
 

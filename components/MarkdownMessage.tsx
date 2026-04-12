@@ -381,6 +381,70 @@ const components: Components = {
       </blockquote>
     );
   },
+  table({ children }) {
+    return (
+      <div style={{ overflowX: "auto", margin: "12px 0" }}>
+        <table style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          borderRadius: "8px",
+          overflow: "hidden",
+          border: "1px solid rgba(255,255,255,0.06)",
+          fontSize: "13px",
+        }}>
+          {children}
+        </table>
+      </div>
+    );
+  },
+  thead({ children }) {
+    return (
+      <thead style={{
+        background: "rgba(212,175,55,0.06)",
+        borderBottom: "1px solid rgba(212,175,55,0.12)",
+      }}>
+        {children}
+      </thead>
+    );
+  },
+  tbody({ children }) {
+    return <tbody>{children}</tbody>;
+  },
+  tr({ children }) {
+    return (
+      <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+        {children}
+      </tr>
+    );
+  },
+  th({ children }) {
+    return (
+      <th style={{
+        padding: "8px 12px",
+        fontSize: "11px",
+        textTransform: "uppercase",
+        letterSpacing: "0.05em",
+        color: "rgba(212,175,55,0.6)",
+        fontWeight: 600,
+        textAlign: "left",
+        whiteSpace: "nowrap",
+      }}>
+        {children}
+      </th>
+    );
+  },
+  td({ children }) {
+    return (
+      <td style={{
+        padding: "8px 12px",
+        color: "rgba(255,255,255,0.8)",
+        verticalAlign: "top",
+        lineHeight: "1.5",
+      }}>
+        {processChildren(children)}
+      </td>
+    );
+  },
 };
 
 // ── MarkdownSegment: renders one markdown block with price highlights ──────────
