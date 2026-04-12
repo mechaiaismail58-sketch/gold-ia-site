@@ -453,6 +453,8 @@ export type EnrichedResearchContext = ResearchContext & {
   };
   historical_levels_summary: string | null;
   round_numbers_summary: string | null;
+  multi_day_context: string | null;
+  vwap_summary: string | null;
 };
 
 // ── COT with one automatic retry ──────────────────────────────────────────────
@@ -804,6 +806,110 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     return `Above: ${above || "none"} | Below: ${below || "none"}`;
   })();
 
+  // ── Multi-day context — consecutive direction, range compression ─────────────
+  const multiDayContextSummary = (() => {
+    if (d1Bars.length < 6) return null;
+    const recent = d1Bars.slice(-6); // last 6 D1 bars
+    // Count consecutive days in same direction (most recent first)
+    const last5 = recent.slice(-5);
+    let consecutiveBullish = 0;
+    let consecutiveBearish = 0;
+    for (let i = last5.length - 1; i >= 0; i--) {
+      const b = last5[i];
+      if (b.close > b.open) {
+        if (consecutiveBearish > 0) break;
+        consecutiveBullish++;
+      } else if (b.close < b.open) {
+        if (consecutiveBullish > 0) break;
+        consecutiveBearish++;
+      } else break;
+    }
+    const consecutiveDays = consecutiveBullish > 0 ? consecutiveBullish : consecutiveBearish;
+    const consecutiveDir = consecutiveBullish > 0 ? "bullish" : consecutiveBearish > 0 ? "bearish" : "mixed";
+
+    // Current week range (last 5 D1 bars)
+    const weekHigh = Math.max(...last5.map(b => b.high));
+    const weekLow  = Math.min(...last5.map(b => b.low));
+    const weekRange = weekHigh - weekLow;
+
+    // Week open vs prev week close (bar[-6] close vs bar[-5] open or just use bar[-5].open as week open)
+    const weekOpen = last5[0].open;
+    const prevWeekClose = recent[0].close; // bar before the 5 we used
+    const gapPts = weekOpen - prevWeekClose;
+    const gapLabel = gapPts > 5 ? `+${gapPts.toFixed(0)} gap up` : gapPts < -5 ? `${gapPts.toFixed(0)} gap down` : "no gap";
+
+    // Range compression: compare last 3 days range vs 5 days before
+    const last3Range = Math.max(...last5.slice(-3).map(b => b.high)) - Math.min(...last5.slice(-3).map(b => b.low));
+    const prev5Range = Math.max(...last5.slice(0, 5).map(b => b.high)) - Math.min(...last5.slice(0, 5).map(b => b.low));
+    const compressed = prev5Range > 0 && last3Range < prev5Range * 0.5;
+
+    const parts: string[] = [];
+    if (consecutiveDays >= 2) {
+      parts.push(`${consecutiveDays} consecutive ${consecutiveDir} days${consecutiveDays >= 3 ? " — move getting extended" : ""}`);
+    }
+    parts.push(`Current week range: ${weekLow.toFixed(2)}-${weekHigh.toFixed(2)} (${weekRange.toFixed(0)}pts) | Week opened at ${weekOpen.toFixed(2)} vs prev close ${prevWeekClose.toFixed(2)} (${gapLabel})`);
+    if (compressed) parts.push("Range compression detected — last 3 days < 50% of prior 5-day range — breakout probability elevated");
+
+    return parts.join(" | ");
+  })();
+
+  // ── VWAP calculation from H1 bars ─────────────────────────────────────────────
+  const vwapSummary = (() => {
+    if (h1Bars.length < 2) return null;
+    const currentPrice = goldPrice;
+    if (currentPrice == null) return null;
+
+    // Detect if volume data is real or needs proxy
+    const hasRealVolume = h1Bars.some(b => b.volume > 0);
+
+    const vwapCalc = (bars: typeof h1Bars): number | null => {
+      if (!bars.length) return null;
+      let sumPV = 0, sumV = 0;
+      for (const b of bars) {
+        const tp = (b.high + b.low + b.close) / 3;
+        const vol = hasRealVolume ? b.volume : (b.high - b.low); // range proxy
+        sumPV += tp * vol;
+        sumV += vol;
+      }
+      return sumV > 0 ? sumPV / sumV : null;
+    };
+
+    const volLabel = hasRealVolume ? "" : " (volume proxy)";
+
+    // Daily VWAP: bars from 00:00 UTC today
+    const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const dailyBars = h1Bars.filter(b => b.datetime.startsWith(todayStr));
+    const dailyVWAP = vwapCalc(dailyBars.length >= 1 ? dailyBars : h1Bars.slice(-24));
+
+    // Asia VWAP: bars between 22:00 UTC yesterday and 07:00 UTC today
+    const asiaBars = h1Bars.filter(b => {
+      const utcH = new Date(b.datetime).getUTCHours();
+      // 22:00-23:59 previous day OR 00:00-06:59 today
+      return (utcH >= 22) || (utcH < 7);
+    }).slice(-9); // max 9 bars
+    const asiaVWAP = vwapCalc(asiaBars);
+
+    // London VWAP: bars from 07:00 UTC today
+    const londonBars = h1Bars.filter(b => {
+      const d = new Date(b.datetime);
+      return d.toISOString().slice(0, 10) === todayStr && d.getUTCHours() >= 7 && d.getUTCHours() < 17;
+    });
+    const londonVWAP = vwapCalc(londonBars);
+
+    const posLabel = (vwap: number): string => {
+      const dist = currentPrice - vwap;
+      if (Math.abs(dist) <= 5) return `at VWAP (equilibrium, ${dist > 0 ? "+" : ""}${dist.toFixed(0)}pts)`;
+      return dist > 0 ? `above (+${dist.toFixed(0)}pts — buyers in control)` : `below (${dist.toFixed(0)}pts — sellers in control)`;
+    };
+
+    const lines: string[] = [];
+    if (dailyVWAP != null) lines.push(`Daily VWAP: ${dailyVWAP.toFixed(2)}${volLabel} — price ${posLabel(dailyVWAP)}`);
+    if (asiaVWAP != null) lines.push(`Asia Session VWAP: ${asiaVWAP.toFixed(2)}${volLabel} — price ${posLabel(asiaVWAP)}`);
+    if (londonVWAP != null) lines.push(`London Session VWAP: ${londonVWAP.toFixed(2)}${volLabel} — price ${posLabel(londonVWAP)}`);
+
+    return lines.length ? lines.join("\n") : null;
+  })();
+
   // ── Data freshness ────────────────────────────────────────────────────────────
   const nowMs = Date.now();
   const priceAgeSeconds = priceContext.fetched_at_utc
@@ -867,6 +973,8 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     monthly_d1_low: monthlyD1Low,
     historical_levels_summary: historicalLevelsSummary,
     round_numbers_summary: roundNumbersSummary,
+    multi_day_context: multiDayContextSummary,
+    vwap_summary: vwapSummary,
     data_freshness: {
       price_age_seconds: priceAgeSeconds,
       cot_age_days: cotAgeDays,
