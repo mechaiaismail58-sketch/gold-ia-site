@@ -50,3 +50,31 @@ create policy "analyses_update_own" on public.ai_analyses
 -- 4. Index for fast user lookup
 create index if not exists ai_analyses_user_id_idx
   on public.ai_analyses (user_id, created_at desc);
+
+-- ai_levels — persistent structural levels identified by the AI across sessions
+create table if not exists public.ai_levels (
+  id              uuid          default gen_random_uuid() primary key,
+  user_id         uuid          not null references auth.users(id) on delete cascade,
+  level_type      text          not null, -- 'ob_bullish', 'ob_bearish', 'fvg_bullish', 'fvg_bearish', 'resistance', 'support'
+  price_low       float         not null,
+  price_high      float         not null,
+  timeframe       text,                   -- 'H1', 'H4', 'D1'
+  identified_at   timestamptz   default now(),
+  mitigated       boolean       default false,
+  touch_count     int           default 0,
+  notes           text
+);
+
+alter table public.ai_levels enable row level security;
+
+create policy "ai_levels_select_own" on public.ai_levels
+  for select using (auth.uid() = user_id);
+
+create policy "ai_levels_insert_own" on public.ai_levels
+  for insert with check (auth.uid() = user_id);
+
+create policy "ai_levels_update_own" on public.ai_levels
+  for update using (auth.uid() = user_id);
+
+create index if not exists ai_levels_user_active_idx
+  on public.ai_levels (user_id, mitigated, identified_at desc);

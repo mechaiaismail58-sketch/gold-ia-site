@@ -133,6 +133,16 @@ ${mc.next_open_note}`);
     lines.push(`\nHISTORICAL LEVELS (D1, 2+ touches)\n${ctx.historical_levels_summary}`);
   }
 
+  // Multi-day context — consecutive direction, week range, compression
+  if (ctx.multi_day_context) {
+    lines.push(`\nMULTI-DAY CONTEXT\n${ctx.multi_day_context}`);
+  }
+
+  // VWAP levels
+  if (ctx.vwap_summary) {
+    lines.push(`\nVWAP LEVELS\n${ctx.vwap_summary}`);
+  }
+
   // GLD implied volatility
   if (ctx.gld_iv != null) {
     const atrH1 = ctx.technical_context?.atr_h1 ?? null;
@@ -290,6 +300,18 @@ Completeness: ${vc.completeness} | Source: ${vc.source_consistency} | Timestamp:
   }
   if (ctx.news_context?.note) {
     lines.push(`\nNEWS CONTEXT\n${ctx.news_context.note}`);
+  }
+
+  // Missing data transparency — only flag what is absent
+  {
+    const missing: string[] = [];
+    if (!ctx.cot_context) missing.push("COT CFTC data");
+    if (!ctx.polygon_order_flow?.summary) missing.push("Polygon real-time order flow");
+    if (!ctx.sentiment_context?.fear_greed_score) missing.push("Fear & Greed index");
+    if (!ctx.av_context?.summary && !ctx.indicator_context?.summary) missing.push("Some indicator data");
+    if (missing.length > 0) {
+      lines.push(`\nMISSING DATA SOURCES (impact conviction accordingly)\n${missing.join(", ")}`);
+    }
   }
 
   return lines.filter(Boolean).join("\n");
@@ -586,6 +608,39 @@ export async function POST(req: Request) {
     ]);
     step("[4] research context + trade memory ready");
 
+    // ── Fetch saved AI levels from last 7 days (non-mitigated) ───────────────
+    let savedLevelsBlock = "";
+    try {
+      const currentPrice = researchContext.technical_context?.current_price ?? researchContext.price_context?.xauusd ?? null;
+      // Auto-mitigate levels where price has crossed them
+      if (currentPrice != null) {
+        await (dbClient as typeof supabase)
+          .from("ai_levels")
+          .update({ mitigated: true })
+          .eq("user_id", user.id)
+          .eq("mitigated", false)
+          .or(`and(level_type.ilike.%bearish%,price_low.lt.${currentPrice - 5}),and(level_type.ilike.%bullish%,price_high.gt.${currentPrice + 5})`);
+      }
+      const { data: savedLevels } = await (dbClient as typeof supabase)
+        .from("ai_levels")
+        .select("level_type, price_low, price_high, timeframe, identified_at, touch_count, notes")
+        .eq("user_id", user.id)
+        .eq("mitigated", false)
+        .gte("identified_at", new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString())
+        .order("price_low", { ascending: false })
+        .limit(20);
+      if (savedLevels && savedLevels.length > 0) {
+        const lvlLines = savedLevels.map(l => {
+          const daysAgo = Math.round((Date.now() - new Date(l.identified_at).getTime()) / (1000 * 86400));
+          const ageLabel = daysAgo === 0 ? "today" : daysAgo === 1 ? "yesterday" : `${daysAgo} days ago`;
+          const touchLabel = l.touch_count > 0 ? `, tested ${l.touch_count} time${l.touch_count > 1 ? "s" : ""}, holding` : ", untested";
+          const noteStr = l.notes ? ` — ${l.notes}` : "";
+          return `— ${l.level_type} ${l.timeframe ?? ""}: ${Number(l.price_low).toFixed(2)}–${Number(l.price_high).toFixed(2)} (identified ${ageLabel}${touchLabel}${noteStr})`;
+        });
+        savedLevelsBlock = `\nSAVED LEVELS (from previous analyses, still active):\n${lvlLines.join("\n")}`;
+      }
+    } catch { /* non-critical */ }
+
     const horizonInstructionMap: Record<TradeHorizon, string> = {
       scalp: `
 TRADE HORIZON CONTEXT: SCALP
@@ -672,7 +727,34 @@ Rules:
     // ── Build user input — unified for all modes ───────────────────────────────
     // BETA_PROMPT handles response calibration from user intent automatically.
 
+    // UTC time + session phase — injected at top of context so AI knows exact timing
+    const _now = new Date();
+    const _utcTime = _now.toISOString().slice(0, 19) + " UTC";
+    const _hour = _now.getUTCHours();
+    const _minute = _now.getUTCMinutes();
+    let _sessionPhase: string;
+    if (_hour >= 7 && _hour < 12) {
+      const _mIn = (_hour - 7) * 60 + _minute;
+      if (_mIn < 30) _sessionPhase = "London session — first 30 minutes (high sweep probability, avoid market orders)";
+      else if (_mIn < 90) _sessionPhase = "London session — prime directional window (45-90min post-open)";
+      else _sessionPhase = "London session — established";
+    } else if (_hour >= 12 && _hour < 17) {
+      const _mIn = (_hour - 12) * 60 + _minute;
+      if (_hour < 14) _sessionPhase = "London-NY overlap — highest liquidity window";
+      else if (_mIn < 30) _sessionPhase = "NY session — first 30 minutes (sweep risk)";
+      else if (_mIn < 90) _sessionPhase = "NY session — prime directional window";
+      else _sessionPhase = "NY session — established";
+    } else if (_hour >= 17 && _hour < 22) {
+      _sessionPhase = "Late NY — fading liquidity, avoid new entries unless swing";
+    } else {
+      _sessionPhase = "Asia session — low liquidity, respect the range";
+    }
+    const _dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const _dayName = _dayNames[_now.getUTCDay()];
+    const _timeHeader = `CURRENT TIME: ${_utcTime} | DAY: ${_dayName} | SESSION PHASE: ${_sessionPhase}`;
+
     const researchBlock = `RESEARCH CONTEXT
+${_timeHeader}
 ${buildCleanContextText(researchContext)}
 ${researchContext.indicator_context ? `\nINDICATOR DATA\n${researchContext.indicator_context.summary}` : ""}
 ${researchContext.indicator_context?.order_flow ? `\nORDER FLOW DATA\n${researchContext.indicator_context.order_flow.summary}` : ""}
@@ -680,7 +762,7 @@ ${researchContext.cot_context ? `\nCOT DATA\n${researchContext.cot_context.summa
 ${researchContext.intermarket_context?.summary && researchContext.intermarket_context.summary !== "Intermarket data unavailable" ? `\nINTERMARKET DATA\n${researchContext.intermarket_context.summary}` : ""}
 ${researchContext.indicator_context?.market_regime ? `\nMARKET REGIME\n${researchContext.indicator_context.market_regime.summary}\nApproach: ${researchContext.indicator_context.market_regime.approach}` : ""}
 ${researchContext.upcoming_events && researchContext.upcoming_events.events.length > 0 ? `\nUPCOMING HIGH-IMPACT EVENTS\n${researchContext.upcoming_events.summary}` : ""}
-${tradeMemory && tradeMemory.signals.length > 0 ? `\nPREVIOUS TRADE SIGNALS\n${tradeMemory.summary}` : ""}${performanceMemory ? `\n\n${performanceMemory.summary}` : ""}${performancePattern ? `\n\n${performancePattern}` : ""}${pendingTrades ? `\n\n${pendingTrades.prompt}` : ""}${userProfileBlock}`.trim();
+${tradeMemory && tradeMemory.signals.length > 0 ? `\nPREVIOUS TRADE SIGNALS\n${tradeMemory.summary}` : ""}${performanceMemory ? `\n\n${performanceMemory.summary}` : ""}${performancePattern ? `\n\n${performancePattern}` : ""}${pendingTrades ? `\n\n${pendingTrades.prompt}` : ""}${savedLevelsBlock}${userProfileBlock}`.trim();
 
     const finalUserInput = `${researchBlock}
 
@@ -782,6 +864,53 @@ ${userMessage || "Analyse XAUUSD."}`.trim();
                 console.error("[chat] trade save error:", saveErr);
               }
             }
+          }
+
+          // ── Extract and save AI-identified levels to ai_levels table ──────
+          if (outputText) {
+            try {
+              const levelPatterns: RegExp[] = [
+                /OB\s+Bullish\s+(\w+)\s*:\s*([\d.]+)\s*[–\-]\s*([\d.]+)/gi,
+                /OB\s+Bearish\s+(\w+)\s*:\s*([\d.]+)\s*[–\-]\s*([\d.]+)/gi,
+                /Bullish\s+OB\s+(\w+)\s*:\s*([\d.]+)\s*[–\-]\s*([\d.]+)/gi,
+                /Bearish\s+OB\s+(\w+)\s*:\s*([\d.]+)\s*[–\-]\s*([\d.]+)/gi,
+                /FVG\s+Bullish\s+(\w+)\s*:\s*([\d.]+)\s*[–\-]\s*([\d.]+)/gi,
+                /FVG\s+Bearish\s+(\w+)\s*:\s*([\d.]+)\s*[–\-]\s*([\d.]+)/gi,
+                /Bullish\s+FVG\s+(\w+)\s*:\s*([\d.]+)\s*[–\-]\s*([\d.]+)/gi,
+                /Bearish\s+FVG\s+(\w+)\s*:\s*([\d.]+)\s*[–\-]\s*([\d.]+)/gi,
+              ];
+              const typeMap: Record<string, string> = {
+                "OB Bullish": "ob_bullish", "OB Bearish": "ob_bearish",
+                "Bullish OB": "ob_bullish", "Bearish OB": "ob_bearish",
+                "FVG Bullish": "fvg_bullish", "FVG Bearish": "fvg_bearish",
+                "Bullish FVG": "fvg_bullish", "Bearish FVG": "fvg_bearish",
+              };
+              const extractedLevels: Array<{ level_type: string; timeframe: string; price_low: number; price_high: number }> = [];
+              for (const re of levelPatterns) {
+                const typeKey = re.source.match(/^(\w+\s+\w+)/)?.[1] ?? "";
+                let m: RegExpExecArray | null;
+                while ((m = re.exec(outputText)) !== null) {
+                  const [, tf, a, b] = m;
+                  const lo = Math.min(parseFloat(a), parseFloat(b));
+                  const hi = Math.max(parseFloat(a), parseFloat(b));
+                  if (lo > 0 && hi > lo && hi - lo < 200) {
+                    extractedLevels.push({ level_type: typeMap[typeKey] ?? typeKey.toLowerCase().replace(" ", "_"), timeframe: tf.toUpperCase(), price_low: lo, price_high: hi });
+                  }
+                }
+              }
+              // Fetch existing levels to check for duplicates (5pt tolerance)
+              const { data: existing } = await (dbClient as typeof supabase)
+                .from("ai_levels").select("id, price_low, price_high").eq("user_id", user.id).eq("mitigated", false);
+              const existingArr = existing ?? [];
+              for (const lvl of extractedLevels) {
+                const dup = existingArr.find(e => Math.abs(e.price_low - lvl.price_low) <= 5 && Math.abs(e.price_high - lvl.price_high) <= 5);
+                if (dup) {
+                  await (dbClient as typeof supabase).from("ai_levels").update({ touch_count: (existingArr.find(e => e.id === dup.id) ? 1 : 0) + 1 }).eq("id", dup.id);
+                } else {
+                  await (dbClient as typeof supabase).from("ai_levels").insert({ user_id: user.id, ...lvl, mitigated: false, touch_count: 0 });
+                }
+              }
+            } catch { /* non-critical */ }
           }
 
           step(`[7] stream complete len=${outputText.length} trade_id=${savedTradeId}`);
