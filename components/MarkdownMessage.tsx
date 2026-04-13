@@ -5,6 +5,93 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
 
+// ── ThinkingInline — collapsed block displayed above the response ─────────────
+
+function ThinkingInline({ text, streaming }: { text: string; streaming?: boolean }) {
+  const [open, setOpen] = useState(false);
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return null;
+
+  // highlight prices in a thinking line
+  const THINKING_PRICE_RE = /\b(4[0-9]{3}|5[0-9]{3})(\.\d{1,2})?\b/g;
+  function highlightThinking(line: string) {
+    const parts: React.ReactNode[] = [];
+    let last = 0;
+    let m: RegExpExecArray | null;
+    THINKING_PRICE_RE.lastIndex = 0;
+    while ((m = THINKING_PRICE_RE.exec(line)) !== null) {
+      if (m.index > last) parts.push(line.slice(last, m.index));
+      parts.push(
+        <span key={m.index} style={{ color: "rgba(212,175,55,0.5)" }}>{m[0]}</span>
+      );
+      last = m.index + m[0].length;
+    }
+    if (last < line.length) parts.push(line.slice(last));
+    return parts.length ? parts : line;
+  }
+
+  const isExpanded = streaming || open;
+
+  return (
+    <div style={{
+      background: "rgba(212,175,55,0.03)",
+      borderLeft: "2px solid rgba(212,175,55,0.15)",
+      borderRadius: "0 6px 6px 0",
+      padding: "8px 12px",
+      marginBottom: "12px",
+    }}>
+      {/* Header */}
+      <div
+        style={{ display: "flex", alignItems: "center", gap: "6px", cursor: streaming ? "default" : "pointer", userSelect: "none" }}
+        onClick={() => { if (!streaming) setOpen(v => !v); }}
+      >
+        <span style={{
+          width: "5px", height: "5px", borderRadius: "50%", background: "#D4AF37", flexShrink: 0,
+          animation: streaming ? "thinkPulse 1.2s ease-in-out infinite" : "none",
+          opacity: streaming ? undefined : 0.4,
+        }} />
+        <span style={{
+          fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.15em",
+          color: "rgba(212,175,55,0.35)", fontFamily: "var(--font-mono, monospace)",
+        }}>
+          THINKING
+        </span>
+        {!streaming && (
+          <span style={{
+            marginLeft: "auto", fontSize: "10px", color: "rgba(255,255,255,0.2)",
+            transform: open ? "rotate(180deg)" : "none", transition: "transform 200ms",
+          }}>▾</span>
+        )}
+      </div>
+
+      {/* Content */}
+      {isExpanded && (
+        <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "2px" }}>
+          {lines.map((line, i) => (
+            <div key={i} style={{
+              fontSize: "11px", color: "rgba(255,255,255,0.25)",
+              fontFamily: "var(--font-mono, monospace)", lineHeight: 1.5,
+            }}>
+              {highlightThinking(line)}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── keyframes injected once ───────────────────────────────────────────────────
+
+const THINK_PULSE_INJECTED = { done: false };
+if (typeof window !== "undefined" && !THINK_PULSE_INJECTED.done) {
+  THINK_PULSE_INJECTED.done = true;
+  const style = document.createElement("style");
+  style.textContent = `@keyframes thinkPulse { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:1;transform:scale(1.2)} }`;
+  document.head.appendChild(style);
+}
+
 // ── Trade card types ──────────────────────────────────────────────────────────
 
 interface TradeData {
@@ -57,7 +144,6 @@ function TradeCard({ data }: { data: TradeData }) {
         }),
       });
       setLogState("done");
-      setTimeout(() => setLogState("idle"), 3000);
     } catch {
       setLogState("idle");
     }
@@ -130,7 +216,7 @@ function TradeCard({ data }: { data: TradeData }) {
 
       <div style={{ marginTop: "12px" }}>
         {logState === "done" ? (
-          <span style={{ color: "#22c55e", fontSize: "13px" }}>Trade logged ✓</span>
+          <span style={{ color: "rgba(34,197,94,0.7)", fontSize: "11px", fontFamily: "var(--font-mono, monospace)" }}>Trade logged ✓</span>
         ) : (
           <button
             onClick={logTrade}
@@ -223,12 +309,13 @@ function parseNoTradeBlock(block: string): NoTradeData {
 type Segment =
   | { type: "markdown"; content: string }
   | { type: "trade"; data: TradeData }
-  | { type: "notrade"; data: NoTradeData };
+  | { type: "notrade"; data: NoTradeData }
+  | { type: "thinking"; text: string };
 
 function splitSegments(content: string): Segment[] {
   const segments: Segment[] = [];
-  // Match :::trade ... ::: or :::notrade ... :::
-  const blockRe = /:::trade\b([\s\S]*?)^:::\s*$|:::notrade\b([\s\S]*?)^:::\s*$/gm;
+  // Match :::thinking ... ::: or :::trade ... ::: or :::notrade ... :::
+  const blockRe = /:::thinking\b([\s\S]*?)^:::\s*$|:::trade\b([\s\S]*?)^:::\s*$|:::notrade\b([\s\S]*?)^:::\s*$/gm;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -237,14 +324,17 @@ function splitSegments(content: string): Segment[] {
       segments.push({ type: "markdown", content: content.slice(lastIndex, match.index) });
     }
     if (match[1] != null) {
+      // :::thinking block
+      segments.push({ type: "thinking", text: match[1].trim() });
+    } else if (match[2] != null) {
       try {
-        segments.push({ type: "trade", data: parseTradeBlock(match[1]) });
+        segments.push({ type: "trade", data: parseTradeBlock(match[2]) });
       } catch {
         segments.push({ type: "markdown", content: match[0] });
       }
-    } else if (match[2] != null) {
+    } else if (match[3] != null) {
       try {
-        segments.push({ type: "notrade", data: parseNoTradeBlock(match[2]) });
+        segments.push({ type: "notrade", data: parseNoTradeBlock(match[3]) });
       } catch {
         segments.push({ type: "markdown", content: match[0] });
       }
@@ -460,14 +550,15 @@ function MarkdownSegment({ content }: { content: string }) {
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
-type Props = { content: string };
+type Props = { content: string; streaming?: boolean };
 
-export default function MarkdownMessage({ content }: Props) {
+export default function MarkdownMessage({ content, streaming }: Props) {
   const segments = splitSegments(content);
 
   return (
     <>
       {segments.map((seg, i) => {
+        if (seg.type === "thinking") return <ThinkingInline key={i} text={seg.text} streaming={streaming} />;
         if (seg.type === "trade") return <TradeCard key={i} data={seg.data} />;
         if (seg.type === "notrade") return <NoTradeCard key={i} data={seg.data} />;
         return <MarkdownSegment key={i} content={seg.content} />;

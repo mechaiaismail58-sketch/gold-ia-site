@@ -559,7 +559,7 @@ export default function ChatPage() {
                       </span>
                     </div>
                     <div className="pl-3 border-l border-white/[0.06]">
-                      <MarkdownMessage content={m.content} />
+                      <MarkdownMessage content={m.content} streaming={isStreaming && i === messages.length - 1 && m.role === "assistant"} />
                       {isStreaming && i === messages.length - 1 && m.role === "assistant" && (
                         <span className="typing-cursor" />
                       )}
