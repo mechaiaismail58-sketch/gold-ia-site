@@ -8,7 +8,6 @@ import OnboardingModal from "@/components/OnboardingModal";
 import ShareSignalButton from "@/components/ShareSignalButton";
 import HistoryPanel from "@/components/HistoryPanel";
 import MarkdownMessage from "@/components/MarkdownMessage";
-import ThinkingBlock from "@/components/ThinkingBlock";
 import { useChatContext } from "@/context/ChatContext";
 
 function cn(...classes: (string | false | null | undefined)[]) {
@@ -56,10 +55,6 @@ export default function ChatPage() {
 
   const [respondedTradeIds, setRespondedTradeIds] = useState<Set<string>>(new Set());
 
-  // Thinking block state
-  const [thinkingLines, setThinkingLines] = useState<string[]>([]);
-  const [isThinking, setIsThinking] = useState(false);
-  const [thinkingComplete, setThinkingComplete] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
 
   // Smart scroll
@@ -220,15 +215,35 @@ export default function ChatPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  async function send() {
-    if (!canSend) return;
+  function getSuggestions(content: string): string[] {
+    if (content.includes(":::notrade") || /\bNO[- ]TRADE\b/i.test(content)) {
+      return ["Check back later", "What-if scenario", "Quick update"];
+    }
+    if (content.includes(":::trade")) {
+      return ["Manage position", "Risk sizing", "What if it reverses?"];
+    }
+    if (content.length > 600) {
+      return ["Give me a trade", "Quick summary", "Key level to watch"];
+    }
+    return ["Full analysis", "Quick update", "Trade setup"];
+  }
 
-    const userText = input.trim();
-    const imageBase64ToSend = selectedImageBase64;
+  async function send(textOverride?: string) {
+    const isSuggestion = textOverride !== undefined;
+    const userText = isSuggestion ? textOverride.trim() : input.trim();
+    const imageBase64ToSend = isSuggestion ? null : selectedImageBase64;
 
-    setInput("");
-    setSelectedImageBase64(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (isSuggestion) {
+      if (!userText || loading) return;
+    } else {
+      if (!canSend) return;
+    }
+
+    if (!isSuggestion) {
+      setInput("");
+      setSelectedImageBase64(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
 
     setLoading(true);
 
@@ -278,26 +293,7 @@ export default function ChatPage() {
       let streamResponseId: string | null = null;
       let buffer = "";
 
-      // Thinking parsing state
-      let thinkingBuf = "";
-      let inThinking = false;
-      let thinkingDone = false;
-      let thinkingTimeoutId: ReturnType<typeof setTimeout> | null = null;
-      const seenThinkingLines = new Set<string>();
-
-      setThinkingLines([]);
-      setThinkingComplete(false);
-      setIsThinking(false);
       setIsStreaming(true);
-
-      // Safety timeout for stuck thinking blocks
-      thinkingTimeoutId = setTimeout(() => {
-        if (inThinking && !thinkingDone) {
-          thinkingDone = true;
-          setThinkingComplete(true);
-          setTimeout(() => setIsThinking(false), 600);
-        }
-      }, 30_000);
 
       while (true) {
         const { done, value } = await reader.read();
@@ -312,45 +308,7 @@ export default function ChatPage() {
           try {
             const event = JSON.parse(part.slice(6));
             if (event.type === "delta") {
-              thinkingBuf += event.text;
-
-              if (!thinkingDone) {
-                // Check if thinking block is starting
-                if (!inThinking && thinkingBuf.trimStart().startsWith(":::thinking")) {
-                  inThinking = true;
-                  setIsThinking(true);
-                }
-
-                if (inThinking) {
-                  // Parse completed lines from thinkingBuf
-                  const lines = thinkingBuf.split("\n");
-                  for (const line of lines) {
-                    const trimmed = line.trim();
-                    // Closing marker
-                    if (trimmed === ":::" && inThinking) {
-                      thinkingDone = true;
-                      if (thinkingTimeoutId) clearTimeout(thinkingTimeoutId);
-                      setThinkingComplete(true);
-                      setTimeout(() => setIsThinking(false), 600);
-                      // Everything after ::: is the real response
-                      const closingIdx = thinkingBuf.indexOf("\n:::\n");
-                      const afterIdx = closingIdx >= 0 ? closingIdx + 5 : thinkingBuf.indexOf(":::thinking") >= 0 ? thinkingBuf.length : 0;
-                      fullText = thinkingBuf.slice(afterIdx);
-                      break;
-                    }
-                    // Thinking lines
-                    if (trimmed.startsWith("—") && !seenThinkingLines.has(trimmed)) {
-                      seenThinkingLines.add(trimmed);
-                      setThinkingLines((prev) => [...prev, trimmed]);
-                    }
-                  }
-                  // Don't add to message while in thinking
-                  if (!thinkingDone) continue;
-                }
-              } else {
-                // Post-thinking: accumulate real response
-                fullText += event.text;
-              }
+              fullText += event.text;
 
               if (fullText) {
                 if (!messageAdded) {
@@ -378,7 +336,6 @@ export default function ChatPage() {
         }
       }
 
-      if (thinkingTimeoutId) clearTimeout(thinkingTimeoutId);
       setIsStreaming(false);
       setShowScrollBtn(false);
 
@@ -559,7 +516,7 @@ export default function ChatPage() {
                       </span>
                     </div>
                     <div className="pl-3 border-l border-white/[0.06]">
-                      <MarkdownMessage content={m.content} streaming={isStreaming && i === messages.length - 1 && m.role === "assistant"} />
+                      <MarkdownMessage content={m.content} />
                       {isStreaming && i === messages.length - 1 && m.role === "assistant" && (
                         <span className="typing-cursor" />
                       )}
@@ -567,6 +524,38 @@ export default function ChatPage() {
                     <div className="pl-3">
                       <ShareSignalButton text={m.content} />
                     </div>
+                    {!loading && !isStreaming && i === messages.length - 1 && (
+                      <div className="pl-3 flex flex-wrap gap-2 mt-1">
+                        {getSuggestions(m.content).map((suggestion) => (
+                          <button
+                            key={suggestion}
+                            type="button"
+                            onClick={() => send(suggestion)}
+                            style={{
+                              padding: "6px 14px",
+                              borderRadius: "16px",
+                              border: "0.5px solid rgba(212,175,55,0.12)",
+                              fontSize: "11px",
+                              fontFamily: "var(--font-mono, monospace)",
+                              color: "rgba(255,255,255,0.35)",
+                              background: "transparent",
+                              cursor: "pointer",
+                              transition: "border-color 0.15s, color 0.15s",
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = "rgba(212,175,55,0.4)";
+                              e.currentTarget.style.color = "rgba(212,175,55,0.8)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = "rgba(212,175,55,0.12)";
+                              e.currentTarget.style.color = "rgba(255,255,255,0.35)";
+                            }}
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     {m.trade_id && !respondedTradeIds.has(m.trade_id) && (
                       <div className="pl-3 flex flex-wrap gap-2 mt-1">
                         {[
@@ -599,21 +588,14 @@ export default function ChatPage() {
                     Bullion Desk
                   </span>
                 </div>
-                <div className="pl-3 border-l border-white/[0.06] py-1">
-                  <ThinkingBlock lines={[]} isComplete={false} />
-                </div>
-              </div>
-            )}
-            {loading && isThinking && (
-              <div className="animate-fade-in-fast flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="h-1 w-1 rounded-full bg-[rgba(200,162,74,0.5)] shrink-0" />
-                  <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/25">
-                    Bullion Desk
-                  </span>
-                </div>
-                <div className="pl-3 border-l border-white/[0.06]">
-                  <ThinkingBlock lines={thinkingLines} isComplete={thinkingComplete} />
+                <div className="pl-3 border-l border-white/[0.06] flex items-center gap-2 py-1">
+                  <span
+                    style={{
+                      width: "6px", height: "6px", borderRadius: "50%", background: "#D4AF37", flexShrink: 0,
+                      animation: "goldPulse 1.2s ease-in-out infinite",
+                    }}
+                  />
+                  <span className="text-[11px] font-mono tracking-wide text-white/25">Analyzing...</span>
                 </div>
               </div>
             )}
@@ -719,7 +701,7 @@ export default function ChatPage() {
                     ? "border-[rgba(109,40,217,0.55)] hover:border-[rgba(109,40,217,0.95)] hover:bg-[rgba(109,40,217,0.10)]"
                     : "border-white/10 opacity-50 cursor-not-allowed"
                 )}
-                onClick={send}
+                onClick={() => send()}
                 disabled={!canSend}
               >
                 Send
