@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
-import Header from "../components/Header";
+import ConditionalHeader from "../components/ConditionalHeader";
 import PushManager from "../components/PushManager";
 import NavigationProgress from "../components/NavigationProgress";
 import { ChatProvider } from "@/context/ChatContext";
@@ -63,7 +63,7 @@ export default async function RootLayout({
         <ChatProvider>
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <PushManager />
-            <Header initialEmail={initialEmail} initialAvatarUrl={initialAvatarUrl} />
+            <ConditionalHeader initialEmail={initialEmail} initialAvatarUrl={initialAvatarUrl} />
             <main className="pt-8 pb-10 animate-fade-in">{children}</main>
           </div>
         </ChatProvider>

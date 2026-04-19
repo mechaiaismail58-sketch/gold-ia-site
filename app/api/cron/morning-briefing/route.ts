@@ -51,7 +51,7 @@ export async function GET(req: Request) {
           dominant_driver: ctx.macro_state?.dominant_driver,
           session: ctx.market_context?.active_session,
           upcoming_events: ctx.upcoming_events?.summary,
-        }, null, 2)}\n\nMorning briefing. 5 lines max. Line 1: overnight price action. Line 2: Asia session recap. Line 3: key level today. Line 4: events today with UTC times. Line 5: bias + conviction. English only. Extremely concise.\nCRITICAL: Use ONLY the price data provided in the research context above. XAUUSD is currently trading in the 4000-5000 range. If the context says price is 4676, use 4676. ALL levels you mention (support, resistance, targets) must be coherent with the current price from the context. Never use prices from your training data. The context data is live and always correct.`,
+        }, null, 2)}\n\nDo NOT include any :::thinking block. Go straight to content. Morning briefing. 5 lines max. Line 1: overnight price action. Line 2: Asia session recap. Line 3: key level today. Line 4: events today with UTC times. Line 5: bias + conviction. English only. Extremely concise.\nCRITICAL: Use ONLY the price data provided in the research context above. XAUUSD is currently trading in the 4000-5000 range. If the context says price is 4676, use 4676. ALL levels you mention (support, resistance, targets) must be coherent with the current price from the context. Never use prices from your training data. The context data is live and always correct.`,
       }],
     });
 
