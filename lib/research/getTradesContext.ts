@@ -34,7 +34,7 @@ export async function getPendingTradesContext(
 ): Promise<PendingTradesContext | null> {
   try {
     const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
 
     const { data, error } = await db
       .from("trades")
@@ -42,7 +42,7 @@ export async function getPendingTradesContext(
       .eq("user_id", userId)
       .eq("result", "pending")
       .lt("created_at", fourHoursAgo)
-      .gte("created_at", sevenDaysAgo)
+      .gte("created_at", threeDaysAgo)
       .order("created_at", { ascending: false })
       .limit(3);
 
