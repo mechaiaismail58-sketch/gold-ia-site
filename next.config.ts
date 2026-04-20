@@ -1,3 +1,4 @@
+// Last deployment sync: 2026-04-15
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
