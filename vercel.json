@@ -3,18 +3,7 @@
     {
       "path": "/api/cron/morning-briefing?secret=kakashi",
       "schedule": "0 7 * * 1-5"
-    },
-    {
-      "path": "/api/cron/scalp",
-      "schedule": "0 7 * * *"
-    },
-    {
-      "path": "/api/cron/swing",
-      "schedule": "30 9 * * *"
-    },
-    {
-      "path": "/api/cron/scanner?secret=kakashi",
-      "schedule": "*/15 7-21 * * 1-5"
     }
+  
   ]
 }
