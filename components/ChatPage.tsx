@@ -588,14 +588,10 @@ export default function ChatPage() {
                     Bullion Desk
                   </span>
                 </div>
-                <div className="pl-3 border-l border-white/[0.06] flex items-center gap-2 py-1">
-                  <span
-                    style={{
-                      width: "6px", height: "6px", borderRadius: "50%", background: "#D4AF37", flexShrink: 0,
-                      animation: "goldPulse 1.2s ease-in-out infinite",
-                    }}
-                  />
-                  <span className="text-[11px] font-mono tracking-wide text-white/25">Analyzing...</span>
+                <div className="pl-3 border-l border-white/[0.06] flex items-center gap-1.5 py-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" style={{ animationDelay: "0s" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" style={{ animationDelay: "0.2s" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" style={{ animationDelay: "0.4s" }} />
                 </div>
               </div>
             )}

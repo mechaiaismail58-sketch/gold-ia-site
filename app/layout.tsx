@@ -22,19 +22,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Waitlist mode — minimal layout, no header, no nav.
-  // ChatProvider is kept so pages that call useChatContext can still prerender.
-  if (process.env.WAITLIST_MODE?.trim() === "true") {
-    return (
-      <html lang="en">
-        <body style={{ margin: 0, padding: 0, background: "#0a0a0a" }}>
-          <ChatProvider>{children}</ChatProvider>
-        </body>
-      </html>
-    );
-  }
-
-  // Read session server-side so Header never flashes "logged out" state
+  // Read session server-side so Header never flashes "logged out" state.
+  // Done before the WAITLIST_MODE check so admins get the header on all non-landing pages.
   let initialEmail: string | null = null;
   let initialAvatarUrl: string | null = null;
 
@@ -48,6 +37,23 @@ export default async function RootLayout({
     }
   } catch {
     // Not authenticated — fine, middleware handles redirect
+  }
+
+  // Waitlist mode — ConditionalHeader still included so admins can navigate non-landing pages.
+  if (process.env.WAITLIST_MODE?.trim() === "true") {
+    return (
+      <html lang="en">
+        <body className="min-h-screen bg-[#07060b] text-white">
+          <NavigationProgress />
+          <ChatProvider>
+            <div className="mx-auto max-w-7xl px-4 sm:px-6">
+              <ConditionalHeader initialEmail={initialEmail} initialAvatarUrl={initialAvatarUrl} />
+            </div>
+            {children}
+          </ChatProvider>
+        </body>
+      </html>
+    );
   }
 
   return (
