@@ -140,33 +140,47 @@ export default function ChatPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [setAnalysisMode]);
 
-  // Clipboard paste — document-level listener catches paste anywhere on the page
+  // Clipboard paste — document-level listener + async Clipboard API fallback
   useEffect(() => {
-    function handlePaste(e: ClipboardEvent) {
-      console.log("[chat] paste event fired, items:", e.clipboardData?.items?.length ?? 0);
-      if (!e.clipboardData) return;
-      for (const item of Array.from(e.clipboardData.items)) {
-        console.log("[chat] clipboard item type:", item.type);
-        if (item.type.startsWith("image/")) {
-          const file = item.getAsFile();
-          if (!file) continue;
-          e.preventDefault();
-          attachImageFile(file);
-          return;
+    async function handlePaste(e: ClipboardEvent) {
+      // Primary: synchronous clipboardData (works in most cases)
+      if (e.clipboardData?.items) {
+        for (const item of Array.from(e.clipboardData.items)) {
+          if (item.kind === "file" && item.type.startsWith("image/")) {
+            const file = item.getAsFile();
+            if (file) {
+              e.preventDefault();
+              attachImageFile(file);
+              return;
+            }
+          }
         }
       }
+      // Fallback: async Clipboard API — more reliable on Windows/Chrome when
+      // clipboardData.items is empty or getAsFile() returns null
+      try {
+        const clips = await navigator.clipboard.read();
+        for (const clip of clips) {
+          for (const type of clip.types) {
+            if (type.startsWith("image/")) {
+              const blob = await clip.getType(type);
+              attachImageFile(new File([blob], "pasted.png", { type }));
+              return;
+            }
+          }
+        }
+      } catch { /* clipboard API unavailable or no image */ }
     }
     document.addEventListener("paste", handlePaste);
     return () => document.removeEventListener("paste", handlePaste);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Also on the input element directly so the event is caught even if React intercepts it first
+  // Also on the input element directly
   function handleInputPaste(e: React.ClipboardEvent<HTMLInputElement>) {
-    console.log("[chat] input onPaste fired, items:", e.clipboardData?.items?.length ?? 0);
     if (!e.clipboardData) return;
     for (const item of Array.from(e.clipboardData.items)) {
-      if (item.type.startsWith("image/")) {
+      if (item.kind === "file" && item.type.startsWith("image/")) {
         const file = item.getAsFile();
         if (!file) continue;
         e.preventDefault();

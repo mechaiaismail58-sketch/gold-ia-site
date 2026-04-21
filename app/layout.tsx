@@ -46,7 +46,7 @@ export default async function RootLayout({
         <body className="min-h-screen bg-[#07060b] text-white">
           <NavigationProgress />
           <ChatProvider>
-            <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
               <ConditionalHeader initialEmail={initialEmail} initialAvatarUrl={initialAvatarUrl} />
             </div>
             {children}
@@ -67,9 +67,11 @@ export default async function RootLayout({
 
         <NavigationProgress />
         <ChatProvider>
-          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
             <PushManager />
             <ConditionalHeader initialEmail={initialEmail} initialAvatarUrl={initialAvatarUrl} />
+          </div>
+          <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
             <main className="pt-8 pb-10 animate-fade-in">{children}</main>
           </div>
         </ChatProvider>

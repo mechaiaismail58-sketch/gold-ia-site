@@ -132,11 +132,8 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
 
           {/* Logo */}
           <Link href="/" className="flex items-baseline gap-3 shrink-0">
-            <div className="text-[15px] tracking-[0.20em] uppercase">
+            <div className="text-[14px] tracking-[0.20em] uppercase">
               Bullion <span className="text-[color:var(--gold)]">Desk</span>
-            </div>
-            <div className="hidden lg:block text-xs text-[color:var(--muted)]">
-              Institutional Gold Intelligence
             </div>
           </Link>
 
