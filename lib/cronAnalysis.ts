@@ -98,7 +98,7 @@ export async function runCronAnalysis(mode: CronMode) {
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const response = await client.messages.create({
-    model: "claude-opus-4-6",
+    model: "claude-opus-4-7",
     max_tokens: 800,
     system: SYSTEM_PROMPT,
     messages: [{ role: "user", content: `${context}\n\n${userMessage}` }],

@@ -64,7 +64,7 @@ Trade:
 Write 2-3 sentences covering: (1) what was correctly identified, (2) what was missed or went wrong if applicable, (3) one specific improvement for next time. Be direct and actionable. No fluff, no generic advice.`;
 
         const response = await client.messages.create({
-          model: "claude-opus-4-6",
+          model: "claude-opus-4-7",
           max_tokens: 120,
           messages: [{ role: "user", content: lessonPrompt }],
         });

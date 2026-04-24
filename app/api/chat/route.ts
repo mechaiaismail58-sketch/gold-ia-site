@@ -8,6 +8,7 @@ import { getTradeMemory } from "@/lib/research/getTradeMemory";
 import { getPendingTradesContext, getPerformanceMemory } from "@/lib/research/getTradesContext";
 import { getPerformancePattern } from "@/lib/research/getPerformancePattern";
 import { getScanHistory } from "@/lib/research/getScanHistory";
+import { getNewsContext } from "@/lib/research/getNewsContext";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 // ── Clean context text builder — strips nulls, outputs readable text ──────────
@@ -600,13 +601,14 @@ export async function POST(req: Request) {
       .single();
     step("[3] user profile fetched");
 
-    const [researchContext, tradeMemory, pendingTrades, performanceMemory, performancePattern, scanHistory] = await Promise.all([
+    const [researchContext, tradeMemory, pendingTrades, performanceMemory, performancePattern, scanHistory, liveNews] = await Promise.all([
       buildResearchContext(),
       getTradeMemory(user.id, dbClient as typeof supabase),
       getPendingTradesContext(user.id, dbClient as typeof supabase),
       getPerformanceMemory(user.id, dbClient as typeof supabase),
       getPerformancePattern(),
       getScanHistory(),
+      getNewsContext(),
     ]);
     step("[4] research context + trade memory ready");
 
@@ -764,6 +766,7 @@ ${researchContext.cot_context ? `\nCOT DATA\n${researchContext.cot_context.summa
 ${researchContext.intermarket_context?.summary && researchContext.intermarket_context.summary !== "Intermarket data unavailable" ? `\nINTERMARKET DATA\n${researchContext.intermarket_context.summary}` : ""}
 ${researchContext.indicator_context?.market_regime ? `\nMARKET REGIME\n${researchContext.indicator_context.market_regime.summary}\nApproach: ${researchContext.indicator_context.market_regime.approach}` : ""}
 ${researchContext.upcoming_events && researchContext.upcoming_events.events.length > 0 ? `\nUPCOMING HIGH-IMPACT EVENTS\n${researchContext.upcoming_events.summary}` : ""}
+${liveNews ? `\n${liveNews}` : ""}
 ${tradeMemory && tradeMemory.signals.length > 0 ? `\nPREVIOUS TRADE SIGNALS\n${tradeMemory.summary}` : ""}${performanceMemory ? `\n\n${performanceMemory.summary}` : ""}${performancePattern ? `\n\n${performancePattern}` : ""}${pendingTrades ? `\n\n${pendingTrades.prompt}` : ""}${savedLevelsBlock}${scanHistory ? `\n\n${scanHistory}` : ""}${userProfileBlock}`.trim();
 
     const finalUserInput = `${researchBlock}
@@ -796,7 +799,7 @@ ${userMessage || "Analyse XAUUSD."}`.trim();
       ? `\n\nWhen an image is attached, analyze it and integrate what you see directly into your analysis — visible price structure, key levels, patterns, orderblocks, zones — without ever mentioning that an image was provided or making any explicit reference to it. The analysis must simply be more precise and enriched by what the image reveals, as if you had access to the chart in real time.`
       : "";
 
-    const MODEL = "claude-opus-4-6";
+    const MODEL = "claude-opus-4-7";
 
     step(`[5] starting Anthropic stream model=${MODEL} max_tokens=${maxOut}`);
 

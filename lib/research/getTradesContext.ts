@@ -46,28 +46,51 @@ export async function getPendingTradesContext(
       .order("created_at", { ascending: false })
       .limit(3);
 
-    if (error || !data || data.length === 0) return null;
+    // Also fetch scenario_pending trades from last 3 days
+    const { data: scenarioData } = await db
+      .from("trades")
+      .select("id, bias, entry, stop_loss, tp1, created_at, justification")
+      .eq("user_id", userId)
+      .eq("result", "scenario_pending")
+      .gte("created_at", threeDaysAgo)
+      .order("created_at", { ascending: false })
+      .limit(3);
 
-    const tradeLines = data.map((t: PendingTrade) => {
+    if ((error || !data || data.length === 0) && (!scenarioData || scenarioData.length === 0)) return null;
+
+    const tradeLines = (data ?? []).map((t: PendingTrade) => {
       const d = new Date(t.created_at).toISOString().slice(0, 16).replace("T", " ");
       return `- Trade ${d} UTC : ${t.bias ?? "—"} | Entry ${t.entry ?? "—"} | SL ${t.stop_loss ?? "—"} | TP1 ${t.tp1 ?? "—"} — result unknown`;
     });
 
-    // The oldest unresolved trade is most urgently awaiting result
-    const oldest = data[data.length - 1] as PendingTrade;
-    const oldestDate = new Date(oldest.created_at).toISOString().slice(0, 16).replace("T", " ");
+    const scenarioLines = (scenarioData ?? []).map((t: PendingTrade & { justification?: string }) => {
+      const d = new Date(t.created_at).toISOString().slice(0, 16).replace("T", " ");
+      const cond = (t as { justification?: string }).justification ?? "condition unspecified";
+      return `- Scenario ${d} UTC : ${t.bias ?? "—"} | Entry ${t.entry ?? "—"} | SL ${t.stop_loss ?? "—"} | TP1 ${t.tp1 ?? "—"} | Condition: ${cond} — not yet triggered`;
+    });
 
-    const prompt =
-      `PENDING TRADE RESULTS REQUIRED:\n` +
-      `You have ${data.length} trade(s) awaiting result feedback:\n` +
-      tradeLines.join("\n") +
-      `\n\nAt the END of your response, after your main analysis, always add this exact line:\n` +
-      `"⏳ Pending result: ${oldest.bias ?? "—"} trade from ${oldestDate} UTC at entry ${oldest.entry ?? "—"} — did it hit TP1, TP2, SL, or still open? Reply with the result to help me learn."`;
+    // The oldest unresolved trade is most urgently awaiting result
+    const allData = data ?? [];
+    const oldest = allData[allData.length - 1] as PendingTrade | undefined;
+    const oldestDate = oldest ? new Date(oldest.created_at).toISOString().slice(0, 16).replace("T", " ") : "";
+
+    const parts: string[] = [];
+    if (tradeLines.length > 0) {
+      parts.push(`PENDING TRADES (result required — max 3 days, auto-invalidated if entry >100pts from current price):\n${tradeLines.join("\n")}`);
+    }
+    if (scenarioLines.length > 0) {
+      parts.push(`PENDING SCENARIOS (conditional plans — not yet triggered):\n${scenarioLines.join("\n")}`);
+    }
+    if (oldest) {
+      parts.push(`At the END of your response, add this exact line:\n"⏳ Pending result: ${oldest.bias ?? "—"} trade from ${oldestDate} UTC at entry ${oldest.entry ?? "—"} — did it hit TP1, TP2, SL, or still open? Reply with the result to help me learn."`);
+    }
+
+    const prompt = parts.join("\n\n");
 
     return {
-      count: data.length,
-      trades: data,
-      first_id: oldest.id,
+      count: allData.length,
+      trades: allData,
+      first_id: oldest?.id ?? (scenarioData?.[0]?.id ?? ""),
       prompt,
     };
   } catch (err) {

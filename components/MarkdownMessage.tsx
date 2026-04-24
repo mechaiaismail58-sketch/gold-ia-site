@@ -24,6 +24,109 @@ interface NoTradeData {
   NEXT_CHECK?: string;
 }
 
+interface ScenarioData {
+  CONDITION?:   string;
+  DIRECTION?:   string;
+  ENTRY?:       string;
+  SL?:          string;
+  TP1?:         string;
+  VALID_UNTIL?: string;
+}
+
+// ── ScenarioCard ──────────────────────────────────────────────────────────────
+
+function ScenarioCard({ data }: { data: ScenarioData }) {
+  const [saveState, setSaveState] = useState<"idle" | "loading" | "done">("idle");
+
+  async function saveScenario() {
+    setSaveState("loading");
+    try {
+      await fetch("/api/trades/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bias:       data.DIRECTION ?? "Scenario",
+          entry:      data.ENTRY ? parseFloat(data.ENTRY.replace(/[^0-9.]/g, "")) : null,
+          sl:         data.SL ? parseFloat(data.SL.replace(/[^0-9.]/g, "")) : null,
+          tp1:        data.TP1 ? parseFloat(data.TP1.replace(/[^0-9.]/g, "")) : null,
+          type:       "scenario",
+          condition:  data.CONDITION ?? "",
+        }),
+      });
+      setSaveState("done");
+    } catch {
+      setSaveState("idle");
+    }
+  }
+
+  return (
+    <div style={{
+      padding: "14px",
+      borderRadius: "10px",
+      background: "rgba(255,255,255,0.02)",
+      border: "1px solid rgba(255,255,255,0.08)",
+      borderLeft: "3px solid rgba(212,175,55,0.3)",
+      margin: "10px 0",
+      maxWidth: "100%",
+      boxSizing: "border-box",
+    }}>
+      <div style={{ fontSize: "9px", fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(212,175,55,0.4)", marginBottom: "8px" }}>
+        CONDITIONAL SCENARIO
+      </div>
+
+      {data.CONDITION && (
+        <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.7)", marginBottom: "8px", lineHeight: "1.5" }}>
+          {data.CONDITION}
+        </div>
+      )}
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "8px" }}>
+        {[
+          { label: "DIRECTION", value: data.DIRECTION },
+          { label: "ENTRY",     value: data.ENTRY },
+          { label: "SL",        value: data.SL },
+          { label: "TP1",       value: data.TP1 },
+        ].filter((r) => r.value).map(({ label, value }) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "11px", minWidth: "64px" }}>{label}</span>
+            <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "13px" }}>{value}</span>
+          </div>
+        ))}
+      </div>
+
+      {data.VALID_UNTIL && (
+        <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", marginBottom: "10px" }}>
+          Valid until: {data.VALID_UNTIL}
+        </div>
+      )}
+
+      <div>
+        {saveState === "done" ? (
+          <span style={{ color: "rgba(212,175,55,0.6)", fontSize: "11px", fontFamily: "var(--font-mono, monospace)" }}>Scenario saved ✓</span>
+        ) : (
+          <button
+            onClick={saveScenario}
+            disabled={saveState === "loading"}
+            style={{
+              border: "1px solid rgba(212,175,55,0.25)",
+              background: "transparent",
+              color: "rgba(212,175,55,0.7)",
+              padding: "6px 14px",
+              borderRadius: "7px",
+              fontSize: "11px",
+              minHeight: "36px",
+              cursor: saveState === "loading" ? "not-allowed" : "pointer",
+              opacity: saveState === "loading" ? 0.6 : 1,
+            }}
+          >
+            {saveState === "loading" ? "Saving…" : "Save scenario"}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── TradeCard ─────────────────────────────────────────────────────────────────
 
 function TradeCard({ data }: { data: TradeData }) {
@@ -201,6 +304,20 @@ function parseTradeBlock(block: string): TradeData {
   return data;
 }
 
+function parseScenarioBlock(block: string): ScenarioData {
+  const data: ScenarioData = {};
+  for (const line of block.split("\n")) {
+    const m = (key: string) => line.match(new RegExp(`^\\s*${key}\\s*:\\s*(.+)`, "i"))?.[1]?.trim();
+    if (m("CONDITION"))   data.CONDITION   = m("CONDITION")!;
+    if (m("DIRECTION"))   data.DIRECTION   = m("DIRECTION")!;
+    if (m("ENTRY"))       data.ENTRY       = m("ENTRY")!;
+    if (m("SL"))          data.SL          = m("SL")!;
+    if (m("TP1"))         data.TP1         = m("TP1")!;
+    if (m("VALID UNTIL")) data.VALID_UNTIL = m("VALID UNTIL")!;
+  }
+  return data;
+}
+
 function parseNoTradeBlock(block: string): NoTradeData {
   const data: NoTradeData = {};
   const firstLine = block.split("\n").find(l => l.trim());
@@ -223,12 +340,12 @@ type Segment =
   | { type: "markdown"; content: string }
   | { type: "trade"; data: TradeData }
   | { type: "notrade"; data: NoTradeData }
+  | { type: "scenario"; data: ScenarioData }
   | { type: "thinking"; text: string };
 
 function splitSegments(content: string): Segment[] {
   const segments: Segment[] = [];
-  // Match :::thinking ... ::: or :::trade ... ::: or :::notrade ... :::
-  const blockRe = /:::thinking\b([\s\S]*?)^:::\s*$|:::trade\b([\s\S]*?)^:::\s*$|:::notrade\b([\s\S]*?)^:::\s*$/gm;
+  const blockRe = /:::thinking\b([\s\S]*?)^:::\s*$|:::trade\b([\s\S]*?)^:::\s*$|:::notrade\b([\s\S]*?)^:::\s*$|:::scenario\b([\s\S]*?)^:::\s*$/gm;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -237,20 +354,16 @@ function splitSegments(content: string): Segment[] {
       segments.push({ type: "markdown", content: content.slice(lastIndex, match.index) });
     }
     if (match[1] != null) {
-      // :::thinking block
       segments.push({ type: "thinking", text: match[1].trim() });
     } else if (match[2] != null) {
-      try {
-        segments.push({ type: "trade", data: parseTradeBlock(match[2]) });
-      } catch {
-        segments.push({ type: "markdown", content: match[0] });
-      }
+      try { segments.push({ type: "trade", data: parseTradeBlock(match[2]) }); }
+      catch { segments.push({ type: "markdown", content: match[0] }); }
     } else if (match[3] != null) {
-      try {
-        segments.push({ type: "notrade", data: parseNoTradeBlock(match[3]) });
-      } catch {
-        segments.push({ type: "markdown", content: match[0] });
-      }
+      try { segments.push({ type: "notrade", data: parseNoTradeBlock(match[3]) }); }
+      catch { segments.push({ type: "markdown", content: match[0] }); }
+    } else if (match[4] != null) {
+      try { segments.push({ type: "scenario", data: parseScenarioBlock(match[4]) }); }
+      catch { segments.push({ type: "markdown", content: match[0] }); }
     }
     lastIndex = match.index + match[0].length;
   }
@@ -471,9 +584,10 @@ export default function MarkdownMessage({ content }: Props) {
   return (
     <>
       {segments.map((seg, i) => {
-        if (seg.type === "thinking") return null; // silently strip thinking blocks
-        if (seg.type === "trade") return <TradeCard key={i} data={seg.data} />;
-        if (seg.type === "notrade") return <NoTradeCard key={i} data={seg.data} />;
+        if (seg.type === "thinking") return null;
+        if (seg.type === "trade")    return <TradeCard key={i} data={seg.data} />;
+        if (seg.type === "notrade")  return <NoTradeCard key={i} data={seg.data} />;
+        if (seg.type === "scenario") return <ScenarioCard key={i} data={seg.data} />;
         return <MarkdownSegment key={i} content={seg.content} />;
       })}
     </>

@@ -32,7 +32,7 @@ export async function GET(req: Request) {
     });
 
     const response = await client.messages.create({
-      model: "claude-opus-4-6",
+      model: "claude-opus-4-7",
       max_tokens: 400,
       system: BETA_PROMPT,
       messages: [{

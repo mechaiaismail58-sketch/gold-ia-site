@@ -99,11 +99,12 @@ function parseTwelveQuote(
 
 /* ── Main handler ───────────────────────────────────────────── */
 export async function GET() {
-  const [xauRaw, dxyData, xagData, us10y] = await Promise.all([
+  const [xauRaw, dxyData, xagData, us10y, vixData] = await Promise.all([
     getTwelveXAU(),
     getYahooChart("DX-Y.NYB"),   // DXY — US Dollar Index
     getYahooChart("XAG=X"),      // Silver spot
     getFredUS10Y(),
+    getYahooChart("^VIX"),       // CBOE Volatility Index
   ]);
 
   const items: TickerItem[] = [];
@@ -149,6 +150,18 @@ export async function GET() {
       changePercent: parseFloat(xagData.changePercent.toFixed(2)),
       decimals:      2,
       prefix:        "$",
+    });
+  }
+
+  // 5. VIX (Yahoo Finance)
+  if (vixData.price !== null) {
+    items.push({
+      symbol:        "VIX",
+      name:          "VIX",
+      price:         vixData.price,
+      change:        parseFloat(vixData.change.toFixed(3)),
+      changePercent: parseFloat(vixData.changePercent.toFixed(2)),
+      decimals:      2,
     });
   }
 

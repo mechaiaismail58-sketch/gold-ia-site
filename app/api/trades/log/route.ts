@@ -10,26 +10,28 @@ export async function POST(req: Request) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    const { bias, entry, sl, tp1, tp2, confluence } = body ?? {};
+    const { bias, entry, sl, tp1, tp2, confluence, type, condition } = body ?? {};
 
     if (!bias || entry == null) {
       return NextResponse.json({ error: "bias and entry are required" }, { status: 400 });
     }
 
+    const isScenario = type === "scenario";
     const db = createAdminClient() ?? supabase;
 
     const { data: inserted, error } = await (db as typeof supabase)
       .from("trades")
       .insert({
-        user_id: user.id,
+        user_id:      user.id,
         bias,
-        entry: Number(entry),
-        stop_loss: sl != null ? Number(sl) : null,
-        tp1: tp1 != null ? Number(tp1) : null,
-        tp2: tp2 != null ? Number(tp2) : null,
-        confluence: confluence != null ? Number(confluence) : null,
-        result: "pending",
-        source: "user_logged",
+        entry:        Number(entry),
+        stop_loss:    sl != null ? Number(sl) : null,
+        tp1:          tp1 != null ? Number(tp1) : null,
+        tp2:          tp2 != null ? Number(tp2) : null,
+        confluence:   confluence != null ? Number(confluence) : null,
+        result:       isScenario ? "scenario_pending" : "pending",
+        source:       isScenario ? "scenario" : "user_logged",
+        justification: isScenario && condition ? String(condition) : null,
       })
       .select("id")
       .single();

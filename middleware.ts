@@ -19,6 +19,7 @@ const NORMAL_PUBLIC_PREFIXES = [
   "/payment-success",
   "/about",
   "/methodology",
+  "/partners",
 ];
 
 function isNormalPublic(pathname: string): boolean {
@@ -95,8 +96,8 @@ export async function middleware(req: NextRequest) {
       return NextResponse.next();
     }
 
-    // ── Landing page itself ──────────────────────────────────────────────────
-    if (pathname === "/") {
+    // ── Landing page + public pages ─────────────────────────────────────────
+    if (pathname === "/" || pathname === "/partners") {
       return NextResponse.next();
     }
 

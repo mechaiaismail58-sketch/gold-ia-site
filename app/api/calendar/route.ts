@@ -21,34 +21,56 @@ export type CalendarEvent = {
   previous: string | null;
 };
 
+// ── Checked FIRST — these override HIGH keywords ───────────────────────────────
+// Fed speakers, FOMC minutes, Beige Book, press conferences = MEDIUM, not HIGH
+const FED_SPEAKER_PATTERNS = [
+  "speaks", "speech", "testimony", "remarks",
+  "fomc minutes", "meeting minutes",
+  "beige book",
+  "press conference",
+];
+
+// ── HIGH impact — most significant USD events for gold ─────────────────────────
 const HIGH_IMPACT_KEYWORDS = [
   "cpi", "consumer price index", "core cpi",
   "non-farm", "nonfarm", "nfp", "payroll",
   "fomc", "federal open market", "federal funds rate", "rate decision",
   "gdp", "gross domestic",
   "pce", "personal consumption expenditure",
-];
-
-const MEDIUM_IMPACT_KEYWORDS = [
   "ppi", "producer price",
   "retail sales",
-  "ism", "purchasing managers",
-  "jobless claims", "initial jobless", "initial claims", "continuing claims",
-  "unemployment claims",
+  "unemployment rate",
+  "ism manufacturing", "ism services", "ism non-manufacturing",
+  "purchasing managers", "pmi",
 ];
 
+// ── MEDIUM impact ─────────────────────────────────────────────────────────────
+const MEDIUM_IMPACT_KEYWORDS = [
+  "jobless claims", "initial jobless", "initial claims", "continuing claims",
+  "unemployment claims",
+  "jolts",
+  "durable goods",
+  "industrial production",
+  "consumer sentiment",
+  "consumer confidence",
+  "michigan",
+];
+
+// ── LOW impact ────────────────────────────────────────────────────────────────
 const LOW_IMPACT_KEYWORDS = [
-  "fed", "federal reserve", "speaks", "speech", "testimony",
-  "treasury", "dollar", "inflation", "interest rate", "monetary",
-  "employment", "jolts", "durable goods", "industrial production",
-  "capacity utilization", "consumer sentiment", "consumer confidence",
-  "trade balance", "housing", "building permits", "existing home", "new home",
-  "ism services", "ism manufacturing", "services pmi", "manufacturing pmi",
-  "beige book", "crude oil inventories", "michigan",
+  "capacity utilization",
+  "trade balance",
+  "housing", "building permits", "existing home", "new home",
+  "crude oil inventories",
+  "treasury",
 ];
 
 function classifyImpact(title: string): "high" | "medium" | "low" | null {
   const t = title.toLowerCase();
+
+  // Fed speakers and FOMC minutes are MEDIUM regardless of other keywords
+  if (FED_SPEAKER_PATTERNS.some((k) => t.includes(k))) return "medium";
+
   if (HIGH_IMPACT_KEYWORDS.some((k) => t.includes(k))) return "high";
   if (MEDIUM_IMPACT_KEYWORDS.some((k) => t.includes(k))) return "medium";
   if (LOW_IMPACT_KEYWORDS.some((k) => t.includes(k))) return "low";
@@ -77,11 +99,11 @@ export async function GET() {
         return classifyImpact(e.title) !== null;
       })
       .map((e, i) => ({
-        id: `${e.date}-${i}`,
-        title: e.title,
-        country: e.country,
-        date: e.date,
-        impact: classifyImpact(e.title)!,
+        id:       `${e.date}-${i}`,
+        title:    e.title,
+        country:  e.country,
+        date:     e.date,
+        impact:   classifyImpact(e.title)!,
         forecast: e.forecast?.trim() || null,
         previous: e.previous?.trim() || null,
       }))
