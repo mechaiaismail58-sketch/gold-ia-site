@@ -17,7 +17,7 @@ export default function ConditionalHeader({ initialEmail, initialAvatarUrl }: Pr
     typeof document !== "undefined" &&
     document.cookie.split(";").some((c) => c.trim().startsWith("admin_bypass="));
 
-  if (pathname === "/" && !isAdmin) return null;
+  if ((pathname === "/" || pathname === "/partners") && !isAdmin) return null;
 
   return <Header initialEmail={initialEmail} initialAvatarUrl={initialAvatarUrl} />;
 }

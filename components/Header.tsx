@@ -13,6 +13,7 @@ const navItems = [
   { href: "/market", label: "Market" },
   { href: "/calendar", label: "Calendar" },
   { href: "/about", label: "About" },
+  { href: "/partners", label: "Partners" },
 ];
 
 function HamburgerIcon() {
