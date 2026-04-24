@@ -31,7 +31,7 @@ export async function GET(req: Request) {
     const userMsg = `Generate a concise pre-market gold brief for ${new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" })} UTC. Keep it to 3-5 paragraphs: key levels for today, macro context, technical structure, and main watch points. Institutional tone. No emojis.`;
 
     const response = await client.messages.create({
-      model: "claude-opus-4-7",
+      model: "claude-opus-4-6",
       max_tokens: 600,
       system: SYSTEM_PROMPT,
       messages: [
