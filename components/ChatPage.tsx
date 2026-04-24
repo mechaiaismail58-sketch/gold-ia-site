@@ -58,7 +58,8 @@ export default function ChatPage() {
   const [isStreaming, setIsStreaming] = useState(false);
 
   // Smart scroll
-  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  const chatContainerRef  = useRef<HTMLDivElement | null>(null);
+  const userScrolledUpRef = useRef(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
 
   function attachImageFile(file: File) {
@@ -78,14 +79,12 @@ export default function ChatPage() {
   const chatInputRef = useRef<HTMLInputElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  // Smart scroll — only scroll if already near the bottom
+  // Smart scroll — uses ref so the check is never stale during streaming
   function scrollToBottom(force = false) {
     const c = chatContainerRef.current;
     if (!c) return;
-    const distFromBottom = c.scrollHeight - c.scrollTop - c.clientHeight;
-    if (force || distFromBottom < 150) {
-      c.scrollTo({ top: c.scrollHeight, behavior: "smooth" });
-    }
+    if (!force && userScrolledUpRef.current) return;
+    c.scrollTo({ top: c.scrollHeight, behavior: "smooth" });
   }
 
   useEffect(() => {
@@ -100,6 +99,7 @@ export default function ChatPage() {
     function onScroll() {
       if (!c) return;
       const distFromBottom = c.scrollHeight - c.scrollTop - c.clientHeight;
+      userScrolledUpRef.current = distFromBottom > 120;
       setShowScrollBtn(distFromBottom > 150 && isStreaming);
     }
     c.addEventListener("scroll", onScroll, { passive: true });
@@ -260,6 +260,7 @@ export default function ChatPage() {
     }
 
     setLoading(true);
+    userScrolledUpRef.current = false; // reset so the new response auto-scrolls
 
     setMessages((m) => [
       ...m,
@@ -603,9 +604,13 @@ export default function ChatPage() {
                   </span>
                 </div>
                 <div className="pl-3 border-l border-white/[0.06] flex items-center gap-1.5 py-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" style={{ animationDelay: "0s" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" style={{ animationDelay: "0.2s" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" style={{ animationDelay: "0.4s" }} />
+                  {[0, 0.2, 0.4].map((delay) => (
+                    <span
+                      key={delay}
+                      className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"
+                      style={{ animation: `dot-bounce 1.2s ease-in-out infinite`, animationDelay: `${delay}s` }}
+                    />
+                  ))}
                 </div>
               </div>
             )}

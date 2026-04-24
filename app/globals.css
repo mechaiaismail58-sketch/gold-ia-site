@@ -219,6 +219,12 @@ textarea.text-xs {
   animation: fadeInUp 200ms ease-out both;
 }
 
+/* Loading dots — scale + opacity bounce with stagger */
+@keyframes dot-bounce {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.35); }
+}
+
 /* Typing cursor */
 @keyframes cursorBlink {
   0%, 100% { opacity: 1; }
