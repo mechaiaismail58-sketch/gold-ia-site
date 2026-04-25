@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
+import StructureChart, { type ChartData } from "@/components/StructureChart";
 
 // ── Trade card types ──────────────────────────────────────────────────────────
 
@@ -304,6 +305,94 @@ function parseTradeBlock(block: string): TradeData {
   return data;
 }
 
+function parseChartBlock(block: string): ChartData | null {
+  const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+  const d: Partial<ChartData> = {};
+
+  for (const line of lines) {
+    const ci = line.indexOf(":");
+    if (ci < 0) continue;
+    const key = line.slice(0, ci).trim().toUpperCase();
+    const val = line.slice(ci + 1).trim();
+
+    const num = (s: string) => { const n = parseFloat(s); return isFinite(n) ? n : null; };
+    const parts = (s: string) => s.split("|").map((p) => p.trim());
+
+    // range "low-high" where both are positive numbers
+    const parseRange = (s: string): [number, number] | null => {
+      const m = s.match(/^([\d.]+)\s*-\s*([\d.]+)/);
+      if (!m) return null;
+      const lo = parseFloat(m[1]), hi = parseFloat(m[2]);
+      return isFinite(lo) && isFinite(hi) ? [Math.min(lo, hi), Math.max(lo, hi)] : null;
+    };
+
+    switch (key) {
+      case "CURRENT": { const n = num(val); if (n) d.current = n; break; }
+      case "BIAS": {
+        const b = val.toLowerCase();
+        if (b === "bullish" || b === "bearish" || b === "neutral") d.bias = b;
+        break;
+      }
+      case "TIMEFRAME": { d.timeframe = val; break; }
+      case "OB_BULL": case "OB_BEAR": {
+        const ps = parts(val); const r = parseRange(ps[0]);
+        if (r) {
+          const item = { low: r[0], high: r[1], status: ps[1] ?? "clean", label: ps[2] ?? "" };
+          if (key === "OB_BULL") d.ob_bull = [...(d.ob_bull ?? []), item];
+          else                   d.ob_bear = [...(d.ob_bear ?? []), item];
+        }
+        break;
+      }
+      case "FVG_BULL": case "FVG_BEAR": {
+        const ps = parts(val); const r = parseRange(ps[0]);
+        if (r) {
+          const item = { low: r[0], high: r[1], label: ps[1] ?? "" };
+          if (key === "FVG_BULL") d.fvg_bull = [...(d.fvg_bull ?? []), item];
+          else                    d.fvg_bear = [...(d.fvg_bear ?? []), item];
+        }
+        break;
+      }
+      case "LIQUIDITY_ABOVE": case "LIQUIDITY_BELOW": {
+        const ps = parts(val); const p = num(ps[0]);
+        if (p) {
+          const item = { price: p, label: ps[1] ?? "" };
+          if (key === "LIQUIDITY_ABOVE") d.liquidity_above = [...(d.liquidity_above ?? []), item];
+          else                           d.liquidity_below = [...(d.liquidity_below ?? []), item];
+        }
+        break;
+      }
+      case "SUPPORT": {
+        const ps = parts(val); const p = num(ps[0]);
+        if (p) d.support = [...(d.support ?? []), { price: p, label: ps[1] ?? "" }];
+        break;
+      }
+      case "RESISTANCE": {
+        const ps = parts(val); const p = num(ps[0]);
+        if (p) d.resistance = [...(d.resistance ?? []), { price: p, label: ps[1] ?? "" }];
+        break;
+      }
+      case "VWAP":  { const n = num(val); if (n) d.vwap = n; break; }
+      case "ENTRY": {
+        const ps = parts(val); const p = num(ps[0]);
+        if (p) d.entry = { price: p, type: ps[1] ?? "limit" };
+        break;
+      }
+      case "SL":  { const n = num(val); if (n != null) d.sl  = n; break; }
+      case "TP1": { const n = num(val); if (n != null) d.tp1 = n; break; }
+      case "TP2": { const n = num(val); if (n != null) d.tp2 = n; break; }
+      case "AMD":   { d.amd = val; break; }
+      case "SWEEP": {
+        const ps = parts(val); const p = num(ps[0]);
+        if (p) d.sweep = { price: p, direction: ps[1] ?? "above" };
+        break;
+      }
+    }
+  }
+
+  if (!d.current || !isFinite(d.current)) return null;
+  return d as ChartData;
+}
+
 function parseScenarioBlock(block: string): ScenarioData {
   const data: ScenarioData = {};
   for (const line of block.split("\n")) {
@@ -338,14 +427,16 @@ function parseNoTradeBlock(block: string): NoTradeData {
 
 type Segment =
   | { type: "markdown"; content: string }
-  | { type: "trade"; data: TradeData }
-  | { type: "notrade"; data: NoTradeData }
+  | { type: "trade";    data: TradeData }
+  | { type: "notrade";  data: NoTradeData }
   | { type: "scenario"; data: ScenarioData }
+  | { type: "chart";    data: ChartData }
   | { type: "thinking"; text: string };
 
 function splitSegments(content: string): Segment[] {
   const segments: Segment[] = [];
-  const blockRe = /:::thinking\b([\s\S]*?)^:::\s*$|:::trade\b([\s\S]*?)^:::\s*$|:::notrade\b([\s\S]*?)^:::\s*$|:::scenario\b([\s\S]*?)^:::\s*$/gm;
+  const blockRe =
+    /:::thinking\b([\s\S]*?)^:::\s*$|:::trade\b([\s\S]*?)^:::\s*$|:::notrade\b([\s\S]*?)^:::\s*$|:::scenario\b([\s\S]*?)^:::\s*$|:::chart\b([\s\S]*?)^:::\s*$/gm;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -356,14 +447,18 @@ function splitSegments(content: string): Segment[] {
     if (match[1] != null) {
       segments.push({ type: "thinking", text: match[1].trim() });
     } else if (match[2] != null) {
-      try { segments.push({ type: "trade", data: parseTradeBlock(match[2]) }); }
+      try { segments.push({ type: "trade",    data: parseTradeBlock(match[2]) }); }
       catch { segments.push({ type: "markdown", content: match[0] }); }
     } else if (match[3] != null) {
-      try { segments.push({ type: "notrade", data: parseNoTradeBlock(match[3]) }); }
+      try { segments.push({ type: "notrade",  data: parseNoTradeBlock(match[3]) }); }
       catch { segments.push({ type: "markdown", content: match[0] }); }
     } else if (match[4] != null) {
       try { segments.push({ type: "scenario", data: parseScenarioBlock(match[4]) }); }
       catch { segments.push({ type: "markdown", content: match[0] }); }
+    } else if (match[5] != null) {
+      const chartData = parseChartBlock(match[5]);
+      if (chartData) segments.push({ type: "chart", data: chartData });
+      // silently skip malformed chart blocks
     }
     lastIndex = match.index + match[0].length;
   }
@@ -588,6 +683,7 @@ export default function MarkdownMessage({ content }: Props) {
         if (seg.type === "trade")    return <TradeCard key={i} data={seg.data} />;
         if (seg.type === "notrade")  return <NoTradeCard key={i} data={seg.data} />;
         if (seg.type === "scenario") return <ScenarioCard key={i} data={seg.data} />;
+        if (seg.type === "chart")    return <StructureChart key={i} data={seg.data} />;
         return <MarkdownSegment key={i} content={seg.content} />;
       })}
     </>
