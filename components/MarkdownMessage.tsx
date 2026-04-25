@@ -371,6 +371,11 @@ function parseChartBlock(block: string): ChartData | null {
         if (p) d.resistance = [...(d.resistance ?? []), { price: p, label: ps[1] ?? "" }];
         break;
       }
+      case "CLOSES": {
+        const nums = val.split(",").map(s => parseFloat(s.trim())).filter(n => isFinite(n));
+        if (nums.length > 0) d.closes = nums;
+        break;
+      }
       case "VWAP":  { const n = num(val); if (n) d.vwap = n; break; }
       case "ENTRY": {
         const ps = parts(val); const p = num(ps[0]);
