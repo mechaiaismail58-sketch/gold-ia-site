@@ -180,7 +180,8 @@ export default function StructureChart({ data }: { data: ChartData }) {
               <rect x={X_LEFT} y={y1} width={X_RIGHT - X_LEFT} height={h}
                 fill="rgba(74,222,128,0.06)" stroke="rgba(74,222,128,0.18)" strokeWidth="0.8" rx="1" />
               <text x={X_LEFT + 7} y={y1 + 11} fontSize="8" fill="rgba(74,222,128,0.5)"
-                fontFamily="monospace" textTransform="uppercase">
+                fontFamily="monospace" 
+                 style={{ textTransform: "uppercase" }}>
                 OB {ob.label}
               </text>
               <text x={X_LEFT + 7} y={y1 + 21} fontSize="8.5" fill="rgba(74,222,128,0.65)"
