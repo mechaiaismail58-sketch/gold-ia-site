@@ -17,6 +17,8 @@ export default function ConditionalHeader({ initialEmail, initialAvatarUrl }: Pr
     typeof document !== "undefined" &&
     document.cookie.split(";").some((c) => c.trim().startsWith("admin_bypass="));
 
+  // Dashboard has its own navigation rail — never show the header there
+  if (pathname === "/dashboard") return null;
   if ((pathname === "/" || pathname === "/partners") && !isAdmin) return null;
 
   return <Header initialEmail={initialEmail} initialAvatarUrl={initialAvatarUrl} />;
