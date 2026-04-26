@@ -9,10 +9,11 @@ type DashData = {
   tradability_label:   string;
   tradability_summary: string;
   active_trades:       Array<{ id: string; bias: string | null; entry: number | null; tp1: number | null; sl: number | null }>;
-  wins:    number;
-  losses:  number;
-  winrate: number;
-  events:  Array<{ title: string; date: string; impact: string }>;
+  wins:         number;
+  losses:       number;
+  winrate:      number;
+  total_trades: number;
+  events:       Array<{ title: string; date: string; impact: string }>;
 };
 
 type TickerItem = {
@@ -220,7 +221,7 @@ export default function AppSidebar() {
             })}
           </div>
         )}
-        {dash && dash.total_trades > 0 && (
+        {dash && (dash.total_trades ?? 0) > 0 && (
           <div style={{ marginTop: 8, fontSize: 9, color: "rgba(255,255,255,0.2)", fontFamily: "monospace" }}>
             {dash.winrate}% winrate · {dash.wins}W / {dash.losses}L
           </div>
