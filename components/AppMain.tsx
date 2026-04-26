@@ -60,37 +60,39 @@ export default function AppMain({ onChatOpen }: Props) {
     return () => clearInterval(id);
   }, []);
 
-  const xau = tickers.find(t => t.symbol === "XAUUSD");
   const dxy = tickers.find(t => t.symbol === "DXY");
   const y10 = tickers.find(t => t.symbol === "US10Y");
   const vix = tickers.find(t => t.symbol === "VIX");
+
+  const dxyChg = dxy?.changePercent ?? 0;
+  const y10Chg = y10?.changePercent ?? 0;
 
   const lastTrade = dash?.active_trades[0] ?? null;
   const isLong    = lastTrade?.bias?.toLowerCase().includes("bull") || lastTrade?.bias?.toLowerCase().includes("long");
   const biasColor = isLong ? "#4ADE80" : "#F87171";
 
-  // Confluence rows data (what we can compute from ticker)
-  const dxyUp  = (dxy?.changePercent ?? 0) > 0.1;
-  const dxyDn  = (dxy?.changePercent ?? 0) < -0.1;
-  const y10Up  = (y10?.changePercent ?? 0) > 0.1;
-  const y10Dn  = (y10?.changePercent ?? 0) < -0.1;
-  const vixHi  = (vix?.price ?? 0) > 20;
-  const hour   = new Date().getUTCHours();
-  const isKZ   = (hour >= 7 && hour < 10) || (hour >= 12 && hour < 15);
-  const dow    = new Date().getUTCDay();
-  const isWkd  = dow === 0 || dow === 6;
+  // Confluence rows derived from ticker data
+  const dxyUp = dxyChg > 0.1;
+  const dxyDn = dxyChg < -0.1;
+  const vixHi = (vix?.price ?? 0) > 20;
+  const hour  = new Date().getUTCHours();
+  const isKZ  = (hour >= 7 && hour < 10) || (hour >= 12 && hour < 15);
+  const dow   = new Date().getUTCDay();
+  const isWkd = dow === 0 || dow === 6;
 
   const confluenceRows = [
     {
       label: "Macro",
-      value: dxy ? `DXY ${dxy.changePercent >= 0 ? "+" : ""}${dxy.changePercent.toFixed(2)}% · US10Y ${y10?.changePercent >= 0 ? "+" : ""}${y10?.changePercent.toFixed(2)}%` : "Loading...",
+      value: dxy
+        ? `DXY ${dxyChg >= 0 ? "+" : ""}${dxyChg.toFixed(2)}% · US10Y ${y10Chg >= 0 ? "+" : ""}${y10Chg.toFixed(2)}%`
+        : "Loading...",
       score: dxyDn ? 0.8 : dxyUp ? 0.3 : 0.55,
       tag: dxyDn ? "ALIGNED" : dxyUp ? "AGAINST" : "MIXED",
       tagColor: dxyDn ? "#4ADE80" : dxyUp ? "#F87171" : "rgba(255,255,255,0.25)",
     },
     {
       label: "Intermarket",
-      value: `VIX ${vix ? vix.price.toFixed(1) : "—"}${vixHi ? " (risk-off)" : ""}`,
+      value: vix ? `VIX ${vix.price.toFixed(1)}${vixHi ? " (risk-off)" : ""}` : "Loading...",
       score: vixHi ? 0.65 : 0.45,
       tag: vixHi ? "ALIGNED" : "NEUTRAL",
       tagColor: vixHi ? "#4ADE80" : "rgba(255,255,255,0.25)",
