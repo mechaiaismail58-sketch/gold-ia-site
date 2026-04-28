@@ -67,12 +67,12 @@ export default async function RootLayout({
 
         <NavigationProgress />
         <ChatProvider>
-          <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
+          <div className="mx-auto max-w-[1400px] px-6 md:px-10 lg:px-16">
             <PushManager />
             <ConditionalHeader initialEmail={initialEmail} initialAvatarUrl={initialAvatarUrl} />
           </div>
-          <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
-            <main className="pt-8 pb-10 animate-fade-in">{children}</main>
+          <div className="mx-auto max-w-[1200px] px-6 md:px-10 lg:px-16">
+            <main className="pt-10 pb-14 animate-fade-in">{children}</main>
           </div>
         </ChatProvider>
       </body>
