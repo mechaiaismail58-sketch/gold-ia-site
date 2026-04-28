@@ -1,8 +1,7 @@
-import { redirect } from "next/navigation";
+import ChatPage from "@/components/ChatPage";
 
 export const dynamic = "force-dynamic";
 
-// /chat is the legacy route — redirect to the dashboard where the chat overlay lives
-export default function ChatPage() {
-  redirect("/dashboard");
+export default function ChatRoute() {
+  return <ChatPage />;
 }
