@@ -22,8 +22,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Read session server-side so Header never flashes "logged out" state.
-  // Done before the WAITLIST_MODE check so admins get the header on all non-landing pages.
   let initialEmail: string | null = null;
   let initialAvatarUrl: string | null = null;
 
@@ -36,29 +34,13 @@ export default async function RootLayout({
       initialAvatarUrl = data?.avatar_url ?? null;
     }
   } catch {
-    // Not authenticated — fine, middleware handles redirect
-  }
-
-  // Waitlist mode — ConditionalHeader still included so admins can navigate non-landing pages.
-  if (process.env.WAITLIST_MODE?.trim() === "true") {
-    return (
-      <html lang="en">
-        <body className="min-h-screen bg-[#07060b] text-white">
-          <NavigationProgress />
-          <ChatProvider>
-            <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
-              <ConditionalHeader initialEmail={initialEmail} initialAvatarUrl={initialAvatarUrl} />
-            </div>
-            {children}
-          </ChatProvider>
-        </body>
-      </html>
-    );
+    // Not authenticated — middleware handles redirect
   }
 
   return (
     <html lang="en">
       <body className="min-h-screen bg-[#07060b] text-white">
+        {/* Background glows */}
         <div className="pointer-events-none fixed inset-0 -z-10">
           <div className="absolute -top-24 left-[-140px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.22)] blur-[110px]" />
           <div className="absolute top-[-120px] right-[-180px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.14)] blur-[120px]" />
@@ -67,12 +49,14 @@ export default async function RootLayout({
 
         <NavigationProgress />
         <ChatProvider>
-          <div className="mx-auto max-w-[1400px] px-6 md:px-10 lg:px-16">
+          {/* Navbar row */}
+          <div className="mx-auto max-w-[1400px] px-4 sm:px-6 md:px-10 lg:px-16 xl:px-20">
             <PushManager />
             <ConditionalHeader initialEmail={initialEmail} initialAvatarUrl={initialAvatarUrl} />
           </div>
-          <div className="mx-auto max-w-[1200px] px-6 md:px-10 lg:px-16">
-            <main className="pt-10 pb-14 animate-fade-in">{children}</main>
+          {/* Page content */}
+          <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10 lg:px-16 xl:px-20">
+            <main className="pt-10 pb-16 animate-fade-in">{children}</main>
           </div>
         </ChatProvider>
       </body>
