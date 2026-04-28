@@ -69,20 +69,15 @@ export async function getPendingTradesContext(
       return `- Scenario ${d} UTC : ${t.bias ?? "—"} | Entry ${t.entry ?? "—"} | SL ${t.stop_loss ?? "—"} | TP1 ${t.tp1 ?? "—"} | Condition: ${cond} — not yet triggered`;
     });
 
-    // The oldest unresolved trade is most urgently awaiting result
     const allData = data ?? [];
     const oldest = allData[allData.length - 1] as PendingTrade | undefined;
-    const oldestDate = oldest ? new Date(oldest.created_at).toISOString().slice(0, 16).replace("T", " ") : "";
 
     const parts: string[] = [];
     if (tradeLines.length > 0) {
-      parts.push(`PENDING TRADES (result required — max 3 days, auto-invalidated if entry >100pts from current price):\n${tradeLines.join("\n")}`);
+      parts.push(`PENDING TRADES (auto-invalidated if entry >100pts from current price, or older than 3 days):\n${tradeLines.join("\n")}`);
     }
     if (scenarioLines.length > 0) {
       parts.push(`PENDING SCENARIOS (conditional plans — not yet triggered):\n${scenarioLines.join("\n")}`);
-    }
-    if (oldest) {
-      parts.push(`At the END of your response, add this exact line:\n"⏳ Pending result: ${oldest.bias ?? "—"} trade from ${oldestDate} UTC at entry ${oldest.entry ?? "—"} — did it hit TP1, TP2, SL, or still open? Reply with the result to help me learn."`);
     }
 
     const prompt = parts.join("\n\n");
