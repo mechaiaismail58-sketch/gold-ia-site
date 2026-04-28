@@ -126,7 +126,7 @@ Format:
 :::chart
 CURRENT: [current price]
 BIAS: [bullish/bearish/neutral]
-CLOSES: [comma-separated list of last 20 H1 close prices from context data, oldest first]
+CLOSES: [last 20 H1 close prices from the OHLCV data in your context, comma-separated, oldest first. Example: CLOSES: 4720,4715,4730,4740,4711,4690,4658,4670,4688,4707,4712,4718,4705,4698,4710,4715,4722,4708,4695,4672] — This is MANDATORY — without it, the chart cannot draw the price curve. Copy the exact close values from the H1 bars in your research context.
 OB_BULL: [low]-[high] | [label]
 OB_BEAR: [low]-[high] | [label]
 ENTRY: [price]
@@ -144,8 +144,8 @@ Rules:
 — Include ONLY: the 1-2 most important OBs, entry/SL/TP if giving a trade, the most important liquidity level, sweep if one occurred recently
 — Do NOT include: VWAP, FVG zones, support/resistance lines, round numbers, indicators — these belong in text analysis, not on the chart
 — The chart draws: the real H1 price curve (from CLOSES), key structural zones (OBs), and trade levels (entry/SL/TP). That is it.
-— CLOSES: copy the last 20 H1 close prices from the OHLCV data in your context, comma-separated, oldest to newest. This draws the real price curve.
-— CURRENT is mandatory. CLOSES is strongly recommended. Everything else is optional.
+— CLOSES: MANDATORY. Copy the exact last 20 H1 close prices from the OHLCV data in your context, comma-separated, oldest to newest. Without CLOSES, the chart is just static levels — no price curve. Do NOT invent or estimate numbers — copy them verbatim from the H1 bars in your research context.
+— CURRENT is mandatory. CLOSES is mandatory. Everything else is optional.
 — Include :::chart in full analyses and trade setups ONLY. Not in quick reads or short answers.
 — Place :::chart right after the Technical Structure section or right after the Trade Plan.
 

@@ -80,14 +80,25 @@ export default function StructureChart({ data }: { data: ChartData }) {
     return Y_TOP + (pMax - price) / pSpan * CHART_H;
   }
 
-  // ── Price curve ───────────────────────────────────────────────────────────
+  // ── Price curve (smooth quadratic bezier) ────────────────────────────────
   const n = closes.length;
   const curvePoints = n > 1
-    ? closes.map((c, i) => {
-        const x = X_LEFT + (i / (n - 1)) * (X_CURVE_R - X_LEFT);
-        return `${x.toFixed(1)},${py(c).toFixed(1)}`;
-      }).join(" ")
-    : "";
+    ? closes.map((c, i) => ({
+        x: X_LEFT + (i / (n - 1)) * (X_CURVE_R - X_LEFT),
+        y: py(c),
+      }))
+    : [];
+
+  let bezierPath = "";
+  if (curvePoints.length > 1) {
+    bezierPath = `M ${curvePoints[0].x.toFixed(1)},${curvePoints[0].y.toFixed(1)}`;
+    for (let i = 1; i < curvePoints.length; i++) {
+      const prev = curvePoints[i - 1];
+      const curr = curvePoints[i];
+      const cpx  = ((prev.x + curr.x) / 2).toFixed(1);
+      bezierPath += ` Q ${cpx},${prev.y.toFixed(1)} ${curr.x.toFixed(1)},${curr.y.toFixed(1)}`;
+    }
+  }
 
   const lastClose = n > 0 ? closes[n - 1] : data.current;
   const dotX      = n > 1 ? X_CURVE_R : (X_LEFT + X_CURVE_R) / 2;
@@ -270,14 +281,13 @@ export default function StructureChart({ data }: { data: ChartData }) {
           </g>
         ))}
 
-        {/* ── Price curve (most prominent element) ── */}
-        {curvePoints && (
-          <polyline
-            points={curvePoints}
+        {/* ── Price curve (smooth bezier) ── */}
+        {bezierPath && (
+          <path
+            d={bezierPath}
             fill="none"
-            stroke="rgba(255,255,255,0.62)"
-            strokeWidth="1.6"
-            strokeLinejoin="round"
+            stroke="rgba(255,255,255,0.55)"
+            strokeWidth="1.5"
             strokeLinecap="round"
           />
         )}
