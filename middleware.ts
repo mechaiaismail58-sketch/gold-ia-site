@@ -138,6 +138,10 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // TEMP BYPASS — paywall disabled. Re-enable by uncommenting the block below.
+  return NextResponse.next();
+
+  /* PAYWALL — re-enable when ready
   const { data: profile } = await supabase
     .from("users")
     .select("has_paid")
@@ -153,6 +157,7 @@ export async function middleware(req: NextRequest) {
   }
 
   return NextResponse.next();
+  */
 }
 
 export const config = {
