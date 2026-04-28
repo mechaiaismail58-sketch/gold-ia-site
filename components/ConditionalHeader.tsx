@@ -13,13 +13,8 @@ interface Props {
 export default function ConditionalHeader({ initialEmail, initialAvatarUrl }: Props) {
   const pathname = usePathname();
 
-  const isAdmin =
-    typeof document !== "undefined" &&
-    document.cookie.split(";").some((c) => c.trim().startsWith("admin_bypass="));
-
-  // Dashboard has its own navigation rail — never show the header there
-  if (pathname === "/dashboard") return null;
-  if ((pathname === "/" || pathname === "/partners") && !isAdmin) return null;
+  // Never show header on the landing page — it has its own design
+  if (pathname === "/") return null;
 
   return <Header initialEmail={initialEmail} initialAvatarUrl={initialAvatarUrl} />;
 }
