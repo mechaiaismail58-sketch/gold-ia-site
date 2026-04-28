@@ -8,5 +8,5 @@ export default function Home() {
   if (process.env.WAITLIST_MODE?.trim() === "true") {
     return <WaitlistLanding />;
   }
-  redirect("/dashboard");
+  redirect("/chat");
 }
