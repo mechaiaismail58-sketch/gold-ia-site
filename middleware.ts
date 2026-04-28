@@ -26,11 +26,8 @@ export async function middleware(req: NextRequest) {
   if (pathname.startsWith("/admin")) {
     const secret = req.nextUrl.searchParams.get("secret");
     if (adminSecret && secret === adminSecret) {
-      // Valid secret → set cookie, redirect straight to /chat
-      const dest = req.nextUrl.clone();
-      dest.pathname = "/chat";
-      dest.search = "";
-      const res = NextResponse.redirect(dest);
+      // Valid secret → set cookie, show admin portal
+      const res = NextResponse.next();
       res.cookies.set("admin_bypass", adminSecret, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
