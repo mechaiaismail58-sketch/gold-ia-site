@@ -57,6 +57,13 @@ export default function ChatPage() {
 
   const [isStreaming, setIsStreaming] = useState(false);
 
+  // Abort controller for stop-generating
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  function stopGeneration() {
+    abortControllerRef.current?.abort();
+  }
+
   // Smart scroll
   const chatContainerRef  = useRef<HTMLDivElement | null>(null);
   const userScrolledUpRef = useRef(false);
@@ -92,7 +99,7 @@ export default function ChatPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
-  // Show scroll-to-bottom button when user scrolled up and streaming is active
+  // Show scroll-to-bottom button whenever user has scrolled up (not just during streaming)
   useEffect(() => {
     const c = chatContainerRef.current;
     if (!c) return;
@@ -100,11 +107,11 @@ export default function ChatPage() {
       if (!c) return;
       const distFromBottom = c.scrollHeight - c.scrollTop - c.clientHeight;
       userScrolledUpRef.current = distFromBottom > 120;
-      setShowScrollBtn(distFromBottom > 150 && isStreaming);
+      setShowScrollBtn(distFromBottom > 150);
     }
     c.addEventListener("scroll", onScroll, { passive: true });
     return () => c.removeEventListener("scroll", onScroll);
-  }, [isStreaming]);
+  }, []);
 
   useEffect(() => {
     fetch("/api/profile")
@@ -280,10 +287,12 @@ export default function ChatPage() {
       if (previousResponseId) body.previous_response_id = previousResponseId;
       if (imageBase64ToSend) body.chartImageBase64 = imageBase64ToSend;
 
+      abortControllerRef.current = new AbortController();
       const r = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
+        signal: abortControllerRef.current.signal,
       });
 
       // Pre-stream error (JSON response)
@@ -379,14 +388,22 @@ export default function ChatPage() {
         }).catch(() => {});
       }
     } catch (err) {
-      console.error("[chat] fetch error:", err);
-      const errMsg = err instanceof Error ? err.message : "Unknown error";
-      setMessages((m) => [
-        ...m,
-        { role: "assistant", content: `System error: ${errMsg}` },
-      ]);
+      // AbortError = user clicked Stop — keep whatever streamed, no error message
+      if (err instanceof Error && err.name === "AbortError") {
+        setIsStreaming(false);
+        setShowScrollBtn(false);
+      } else {
+        console.error("[chat] fetch error:", err);
+        const errMsg = err instanceof Error ? err.message : "Unknown error";
+        setMessages((m) => [
+          ...m,
+          { role: "assistant", content: `System error: ${errMsg}` },
+        ]);
+      }
     } finally {
       setLoading(false);
+      setIsStreaming(false);
+      abortControllerRef.current = null;
     }
   }
 
@@ -629,6 +646,20 @@ export default function ChatPage() {
             )}
             <div ref={bottomRef} />
           </div>
+
+          {/* ── Stop generating button ── */}
+          {isStreaming && (
+            <div className="flex justify-center py-2 border-t border-[color:var(--border)]">
+              <button
+                type="button"
+                onClick={stopGeneration}
+                className="flex items-center gap-2 rounded-xl border border-white/12 px-4 py-1.5 text-[11px] uppercase tracking-[0.08em] text-white/40 hover:border-red-500/30 hover:text-red-400/75 transition"
+              >
+                <span className="h-2 w-2 rounded-sm bg-current shrink-0" />
+                Stop generating
+              </button>
+            </div>
+          )}
 
           <div
             className={cn(
