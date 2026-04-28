@@ -17,17 +17,39 @@ export async function POST(req: Request) {
     }
 
     const isScenario = type === "scenario";
+
+    // Normalise direction so the lesson generator always has a clean value
+    const rawBias = String(bias).toLowerCase();
+    const isLong = rawBias.includes("long") || rawBias.includes("bull");
+    const isShort = rawBias.includes("short") || rawBias.includes("bear");
+    const normalisedBias = isLong ? "Bullish" : isShort ? "Bearish" : String(bias);
+
+    const entryNum = Number(entry);
+    const slNum    = sl  != null ? Number(sl)  : null;
+    const tp1Num   = tp1 != null ? Number(tp1) : null;
+    const tp2Num   = tp2 != null ? Number(tp2) : null;
+
+    // Validate Entry/SL/TP direction coherence
+    if (slNum != null) {
+      if (isLong  && slNum >= entryNum) console.warn("[trades/log] Long but SL >= entry:", slNum, entryNum);
+      if (isShort && slNum <= entryNum) console.warn("[trades/log] Short but SL <= entry:", slNum, entryNum);
+    }
+    if (tp1Num != null) {
+      if (isLong  && tp1Num <= entryNum) console.warn("[trades/log] Long but TP1 <= entry:", tp1Num, entryNum);
+      if (isShort && tp1Num >= entryNum) console.warn("[trades/log] Short but TP1 >= entry:", tp1Num, entryNum);
+    }
+
     const db = createAdminClient() ?? supabase;
 
     const { data: inserted, error } = await (db as typeof supabase)
       .from("trades")
       .insert({
         user_id:      user.id,
-        bias,
-        entry:        Number(entry),
-        stop_loss:    sl != null ? Number(sl) : null,
-        tp1:          tp1 != null ? Number(tp1) : null,
-        tp2:          tp2 != null ? Number(tp2) : null,
+        bias:         normalisedBias,
+        entry:        entryNum,
+        stop_loss:    slNum,
+        tp1:          tp1Num,
+        tp2:          tp2Num,
         confluence:   confluence != null ? Number(confluence) : null,
         result:       isScenario ? "scenario_pending" : "pending",
         source:       isScenario ? "scenario" : "user_logged",

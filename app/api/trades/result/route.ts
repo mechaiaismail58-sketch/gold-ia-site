@@ -51,16 +51,23 @@ export async function POST(req: Request) {
           sl_hit: "Stop Loss hit (loss)",
           breakeven: "Breakeven (SL moved to entry, no gain/loss)",
         };
+        // Determine direction from stored bias — never infer from levels
+        const biasLower = (trade.bias ?? "").toLowerCase();
+        const direction = biasLower.includes("bull") || biasLower.includes("long") ? "Long"
+          : biasLower.includes("bear") || biasLower.includes("short") ? "Short"
+          : trade.bias ?? "Unknown";
+
         const lessonPrompt = `You are an institutional trade analyst reviewing a completed XAUUSD trade. Write a lesson learned in exactly 2-3 sentences.
 
 Trade:
-- Direction: ${trade.bias}
+- Direction: ${direction}
 - Entry: ${trade.entry} | SL: ${trade.stop_loss} | TP1: ${trade.tp1} | TP2: ${trade.tp2}
 - R/R: ${trade.rr ?? "unknown"} | Confluence: ${trade.confluence ?? "unknown"}/8
 - Setup justification: ${trade.justification ?? "none"}
 - Market context at entry: ${trade.context_summary ?? "none"}
 - Result: ${resultLabel[result] ?? result}${pnl != null ? ` | PnL: ${pnl > 0 ? "+" : ""}${pnl}` : ""}${notes ? `\n- Notes: ${notes}` : ""}
 
+For a ${direction} trade: SL is ${direction === "Long" ? "below" : "above"} entry, TP is ${direction === "Long" ? "above" : "below"} entry.
 Write 2-3 sentences covering: (1) what was correctly identified, (2) what was missed or went wrong if applicable, (3) one specific improvement for next time. Be direct and actionable. No fluff, no generic advice.`;
 
         const response = await client.messages.create({

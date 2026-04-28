@@ -62,26 +62,60 @@ function ScenarioCard({ data }: { data: ScenarioData }) {
 
   return (
     <div style={{
-      padding: "14px",
       borderRadius: "10px",
-      background: "rgba(255,255,255,0.02)",
-      border: "1px solid rgba(255,255,255,0.08)",
-      borderLeft: "3px solid rgba(212,175,55,0.3)",
+      border: "1px solid rgba(212,175,55,0.18)",
+      borderLeft: "3px solid #D4AF37",
       margin: "10px 0",
       maxWidth: "100%",
       boxSizing: "border-box",
+      overflow: "hidden",
     }}>
-      <div style={{ fontSize: "9px", fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(212,175,55,0.4)", marginBottom: "8px" }}>
-        CONDITIONAL SCENARIO
+
+      {/* ── TRIGGER REQUIRED header ── */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: "8px",
+        padding: "10px 14px",
+        background: "rgba(212,175,55,0.08)",
+        borderBottom: "1px solid rgba(212,175,55,0.15)",
+      }}>
+        <span style={{ fontSize: "13px" }}>🔒</span>
+        <span style={{ fontSize: "11px", fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.1em", color: "#D4AF37", fontWeight: 700 }}>
+          Trigger Required — Conditional Scenario
+        </span>
       </div>
 
+      {/* ── Conditions block ── */}
       {data.CONDITION && (
-        <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.7)", marginBottom: "8px", lineHeight: "1.5" }}>
-          {data.CONDITION}
+        <div style={{
+          padding: "10px 14px",
+          background: "rgba(212,175,55,0.04)",
+          borderBottom: "1px solid rgba(212,175,55,0.1)",
+        }}>
+          <div style={{ fontSize: "9px", fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(212,175,55,0.5)", marginBottom: "6px" }}>
+            Condition to trigger
+          </div>
+          <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+            <span style={{ color: "#D4AF37", marginTop: "1px", flexShrink: 0 }}>●</span>
+            <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.82)", lineHeight: "1.55" }}>
+              {data.CONDITION}
+            </span>
+          </div>
         </div>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "8px" }}>
+      {/* ── Warning line ── */}
+      <div style={{
+        padding: "8px 14px",
+        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        background: "rgba(251,146,60,0.04)",
+      }}>
+        <span style={{ fontSize: "11px", color: "rgba(251,146,60,0.85)", fontWeight: 600 }}>
+          ⚠ Do not enter before all conditions are met — front-running invalidates the setup
+        </span>
+      </div>
+
+      {/* ── Levels ── */}
+      <div style={{ padding: "10px 14px", display: "flex", flexDirection: "column", gap: "4px" }}>
         {[
           { label: "DIRECTION", value: data.DIRECTION },
           { label: "ENTRY",     value: data.ENTRY },
@@ -89,21 +123,21 @@ function ScenarioCard({ data }: { data: ScenarioData }) {
           { label: "TP1",       value: data.TP1 },
         ].filter((r) => r.value).map(({ label, value }) => (
           <div key={label} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "11px", minWidth: "64px" }}>{label}</span>
-            <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "13px" }}>{value}</span>
+            <span style={{ color: "rgba(255,255,255,0.28)", fontSize: "10px", fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.08em", minWidth: "68px" }}>{label}</span>
+            <span style={{ color: "rgba(255,255,255,0.88)", fontSize: "13px", fontFamily: "monospace" }}>{value}</span>
           </div>
         ))}
+        {data.VALID_UNTIL && (
+          <div style={{ marginTop: "4px", fontSize: "10px", color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>
+            Valid until: {data.VALID_UNTIL}
+          </div>
+        )}
       </div>
 
-      {data.VALID_UNTIL && (
-        <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", marginBottom: "10px" }}>
-          Valid until: {data.VALID_UNTIL}
-        </div>
-      )}
-
-      <div>
+      {/* ── Save button ── */}
+      <div style={{ padding: "8px 14px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
         {saveState === "done" ? (
-          <span style={{ color: "rgba(212,175,55,0.6)", fontSize: "11px", fontFamily: "var(--font-mono, monospace)" }}>Scenario saved ✓</span>
+          <span style={{ color: "rgba(212,175,55,0.6)", fontSize: "11px", fontFamily: "monospace" }}>Scenario saved ✓</span>
         ) : (
           <button
             onClick={saveScenario}
