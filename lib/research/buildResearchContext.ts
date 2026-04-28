@@ -13,6 +13,8 @@ import { getYahooFinanceContext } from "./getYahooFinanceContext";
 import { getETFFlowsContext } from "./getETFFlowsContext";
 import { buildFedWatchContext } from "./getFedWatchContext";
 import { getCentralBankContext } from "./getCentralBankContext";
+import { buildNarrativeContext } from "./buildNarrativeContext";
+import type { NarrativeContext } from "./buildNarrativeContext";
 import type { IndicatorContext } from "./getIndicatorContext";
 import type { COTContext } from "./getCOTContext";
 import type { UpcomingEventsContext } from "./getUpcomingEvents";
@@ -455,6 +457,7 @@ export type EnrichedResearchContext = ResearchContext & {
   round_numbers_summary: string | null;
   multi_day_context: string | null;
   vwap_summary: string | null;
+  narrative_context: NarrativeContext | null;
 };
 
 // ── COT with one automatic retry ──────────────────────────────────────────────
@@ -643,8 +646,13 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
   // ── Phase 2: Gold-price-dependent fetches ──────────────────────────────────
   const goldPrice = priceContext.xauusd ?? technicalContext.current_price;
 
-  const [yahooFinance] = await Promise.all([
+  const [yahooFinance, narrativeContext] = await Promise.all([
     withTimeout(getYahooFinanceContext(goldPrice), 4000, null),
+    withTimeout(
+      buildNarrativeContext({ managedMoneyNet: cotContext?.managed_money_net ?? null }),
+      15000,
+      null
+    ),
   ]);
 
   // ── Fed Watch context (pure computation, no extra fetch) ───────────────────
@@ -975,6 +983,7 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     round_numbers_summary: roundNumbersSummary,
     multi_day_context: multiDayContextSummary,
     vwap_summary: vwapSummary,
+    narrative_context: narrativeContext,
     data_freshness: {
       price_age_seconds: priceAgeSeconds,
       cot_age_days: cotAgeDays,

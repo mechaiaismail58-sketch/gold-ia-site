@@ -3,6 +3,7 @@ export const maxDuration = 120;
 
 import Anthropic from "@anthropic-ai/sdk";
 import { BETA_PROMPT } from "@/lib/prompts";
+import { formatNarrativeContext } from "@/lib/research/buildNarrativeContext";
 import { buildResearchContext } from "@/lib/research/buildResearchContext";
 import { getTradeMemory } from "@/lib/research/getTradeMemory";
 import { getPendingTradesContext, getPerformanceMemory } from "@/lib/research/getTradesContext";
@@ -314,6 +315,11 @@ Completeness: ${vc.completeness} | Source: ${vc.source_consistency} | Timestamp:
     if (missing.length > 0) {
       lines.push(`\nMISSING DATA SOURCES (impact conviction accordingly)\n${missing.join(", ")}`);
     }
+  }
+
+  // Narrative Intelligence
+  if (ctx.narrative_context) {
+    lines.push(`\n${formatNarrativeContext(ctx.narrative_context)}`);
   }
 
   return lines.filter(Boolean).join("\n");

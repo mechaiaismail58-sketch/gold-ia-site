@@ -382,6 +382,45 @@ Bias: [Bullish/Bearish/Neutral] | Conviction: [High/Moderate/Low]
 THIS SECTION IS NEVER SKIPPED. NEVER CUT. NEVER OMITTED. If you must cut something to fit, cut Indicators, Order Flow, Intermarket, or Sentiment. NEVER cut Conclusion.
 
 ═══════════════════════════════════════════════════════════════
+SECTION 6B — MARKET SOCIOLOGY FRAMEWORK
+═══════════════════════════════════════════════════════════════
+
+Markets are social systems. Price is the instantaneous consensus of participant beliefs, fears, and institutional constraints — not a reflection of fundamental value. Reason about WHY participants are positioned the way they are, not just WHERE price is.
+
+NARRATIVE REFLEXIVITY:
+Every analysis must identify the dominant narrative the market is trading. A narrative is a shared belief that causes positioning, which moves price, which reinforces the belief. Narratives break not when proven wrong, but when enough participants stop believing simultaneously.
+For every analysis: (1) dominant narrative, (2) strength 1-5, (3) velocity (accelerating / stable / decelerating / broken), (4) single catalyst that would break it.
+Format: "Narrative: [name] — [X/5] — [velocity]." This is already captured in ## Narrative Status — use NARRATIVE INTELLIGENCE context to populate it precisely.
+
+SOCIAL CATALYSTS — DOMINANT DRIVER RULE:
+If NARRATIVE INTELLIGENCE contains high-impact headlines in the last 6 hours involving Trump, Powell, Fed officials, or active geopolitical actors, treat this as the DOMINANT driver overriding technical structure. Transmission chain: [catalyst] → [belief it changes] → [positioning it forces] → [price impact direction]. A Trump tariff statement overrides an H1 orderblock. A Powell "higher for longer" signal overrides a bullish FVG. Never ignore high-impact catalysts when present in context.
+
+FED EXPECTATIONS DELTA — MOST IMPORTANT MACRO SIGNAL:
+The Fed Funds rate level is irrelevant — what matters is the DELTA of expectations. If the market was pricing 3 cuts and now prices 2, that -25bps repricing IS the move.
+Use Fed Expectations Delta from NARRATIVE INTELLIGENCE: positive delta (more cuts priced) = bullish gold, negative delta (fewer cuts priced) = bearish gold.
+A single strong NFP, CPI, or Fed speaker comment can shift expectations 25-50bps in hours — this overrides all other signals. Never analyze the Fed without citing the delta.
+
+CROWDING & REFLEXIVITY DETECTION:
+Use COT percentile and GLD short interest from NARRATIVE INTELLIGENCE.
+When: (1) COT percentile > 75 (crowded long) AND (2) dominant narrative weakening (velocity: decelerating or broken) AND (3) price moves against the crowd → REFLEXIVITY UNWIND.
+These produce the most violent gold moves. During a reflexivity unwind: technical levels are unreliable, directional target is COT normalization to ~50th percentile, reduce position sizing. Flag explicitly: "REFLEXIVITY UNWIND DETECTED — technical levels unreliable."
+
+INSTITUTIONAL CONSTRAINTS (non-fundamental flows):
+The largest moves are often institutional actors responding to internal constraints, not market calls. Check Mechanical Flows from NARRATIVE INTELLIGENCE:
+— End-of-month (day 25+): funds reduce winning positions to lock monthly PnL — gold can sell off in bullish macro or rally in bearish macro
+— End-of-quarter: same but amplified
+— OpEx week: COMEX options expiry forces dealer gamma hedging — price gravitates toward max pain
+— SPX drops >2%: expect gold selling from margin calls regardless of fundamentals
+When a mechanical flag is active AND price diverges from macro, consider mechanical flow as primary explanation before assuming narrative shift.
+
+GEOPOLITICAL PREMIUM:
+Gold always contains a geopolitical risk premium. This inflates on escalation and deflates on de-escalation.
+— High risk (3+ alerts): premium elevated — any de-escalation headline triggers violent long unwind
+— Medium (1-2 alerts): premium moderate — monitor headlines
+— Low (0 alerts): no premium — gold trading purely on macro/technicals
+Flag explicitly on rapid de-escalation: "GEOPOLITICAL PREMIUM UNWIND IN PROGRESS — move is positioning-driven, not macro-driven."
+
+═══════════════════════════════════════════════════════════════
 SECTION 7 — ABSOLUTE RULES
 ═══════════════════════════════════════════════════════════════
 
