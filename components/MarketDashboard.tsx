@@ -65,8 +65,23 @@ export default function MarketDashboard() {
 
   async function fetchData() {
     try {
-      const r = await fetch("/api/dashboard/data");
-      if (r.ok) setData(await r.json());
+      const r = await fetch("/api/market/pulse");
+      if (r.ok) {
+        const raw = await r.json();
+        setData({
+          price:           raw.price ?? 0,
+          change_pct:      raw.change_24h_pct ?? raw.change_pct ?? 0,
+          session:         raw.session ?? "Asia",
+          dxy:             raw.dxy ?? null,
+          real_yield:      raw.real_yield ?? null,
+          vix:             raw.vix ?? null,
+          last_confluence: raw.last_confluence ?? null,
+          alerts:          raw.alerts ?? [],
+          last_trade:      raw.last_trade ?? null,
+          winrate:         raw.winrate ?? null,
+          total_trades:    raw.total_trades ?? 0,
+        });
+      }
     } catch { /* silent */ }
   }
 
@@ -80,7 +95,7 @@ export default function MarketDashboard() {
     return () => clearInterval(id);
   }, []);
 
-  if (!data || data.price === 0) return null;
+  if (!data || typeof data.price !== "number" || data.price === 0) return null;
 
   const sessionStyle = SESSION_COLORS[data.session as keyof typeof SESSION_COLORS] ?? SESSION_COLORS.Asia;
   const positive = data.change_pct >= 0;
