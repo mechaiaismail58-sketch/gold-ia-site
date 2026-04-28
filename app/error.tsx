@@ -28,9 +28,14 @@ export default function GlobalError({
       <h2 className="text-[22px] tracking-[-0.02em] mb-3">
         Something went wrong
       </h2>
-      <p className="text-sm text-white/45 max-w-[40ch] leading-6 mb-8">
+      <p className="text-sm text-white/45 max-w-[40ch] leading-6 mb-4">
         An unexpected error occurred. Your data is intact.
       </p>
+      {error?.message && (
+        <pre className="text-xs text-red-400/80 bg-red-500/5 border border-red-500/15 rounded-lg px-4 py-3 max-w-[80ch] text-left overflow-x-auto mb-8 whitespace-pre-wrap break-words">
+          {error.message}{error.digest ? `\n\nDigest: ${error.digest}` : ""}
+        </pre>
+      )}
 
       <div className="flex items-center justify-center gap-3 flex-wrap">
         <button
