@@ -57,6 +57,21 @@ export default function ChatPage() {
 
   const [isStreaming, setIsStreaming] = useState(false);
 
+  // Dynamic contextual suggestions
+  const [suggestions, setSuggestions] = useState<string[]>([
+    "Give me a full gold analysis",
+    "Quick market brief",
+    "Give me a trade setup",
+    "What are the key levels right now?",
+  ]);
+
+  function fetchSuggestions() {
+    fetch("/api/suggestions")
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data.suggestions)) setSuggestions(data.suggestions); })
+      .catch(() => {}); // keep defaults on failure
+  }
+
   // Abort controller for stop-generating
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -112,6 +127,12 @@ export default function ChatPage() {
     c.addEventListener("scroll", onScroll, { passive: true });
     return () => c.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Fetch contextual suggestions on mount and whenever chat becomes empty
+  useEffect(() => {
+    if (messages.length <= 1) fetchSuggestions(); // ≤1 = only initial message
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length]);
 
   useEffect(() => {
     fetch("/api/profile")
@@ -236,20 +257,7 @@ export default function ChatPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  function getSuggestions(content: string): string[] {
-    if (content.includes(":::notrade") || /\bNO[- ]TRADE\b/i.test(content)) {
-      return ["Check back later", "What-if scenario", "Quick update"];
-    }
-    if (content.includes(":::trade")) {
-      return ["Manage position", "Risk sizing", "What if it reverses?"];
-    }
-    if (content.length > 600) {
-      return ["Give me a trade", "Quick summary", "Key level to watch"];
-    }
-    return ["Full analysis", "Quick update", "Trade setup"];
-  }
-
-  async function send(textOverride?: string) {
+async function send(textOverride?: string) {
     const isSuggestion = textOverride !== undefined;
     const userText = isSuggestion ? textOverride.trim() : input.trim();
     const imageBase64ToSend = isSuggestion ? null : selectedImageBase64;
@@ -362,6 +370,7 @@ export default function ChatPage() {
 
       setIsStreaming(false);
       setShowScrollBtn(false);
+      fetchSuggestions(); // refresh after each AI response
 
       // Update with trade_id metadata
       if (tradeId && messageAdded) {
@@ -558,7 +567,7 @@ export default function ChatPage() {
                     </div>
                     {!loading && !isStreaming && i === messages.length - 1 && (
                       <div className="pl-3 flex flex-wrap gap-2 mt-1">
-                        {getSuggestions(m.content).map((suggestion) => (
+                        {suggestions.map((suggestion) => (
                           <button
                             key={suggestion}
                             type="button"
