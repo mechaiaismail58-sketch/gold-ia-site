@@ -18,49 +18,79 @@ type DashData = {
   updatedAt: string;
 };
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// ── Design tokens ─────────────────────────────────────────────────────────────
 
 const GOLD    = "#C9A227";
 const BULL    = "#4CAF75";
 const BEAR    = "#E05252";
 const NEUTRAL = "#888888";
 
-const cardBase: React.CSSProperties = {
-  background: "linear-gradient(180deg, rgba(15,15,15,0.95), rgba(8,8,8,0.95))",
-  border: "0.5px solid rgba(201,162,39,0.2)",
-  borderRadius: 8,
-  padding: "12px 14px",
+const kpiCard: React.CSSProperties = {
+  background: "linear-gradient(180deg, rgba(15,15,15,0.95) 0%, rgba(8,8,8,0.95) 100%)",
+  border: "1px solid rgba(201,162,39,0.12)",
+  borderRadius: 12,
+  padding: "14px 16px",
   position: "relative",
+  minHeight: 90,
   overflow: "hidden",
+};
+
+const chartCard: React.CSSProperties = {
+  ...kpiCard,
+  minHeight: 180,
 };
 
 const lbl: React.CSSProperties = {
   fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-  fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase",
-  color: "rgba(201,162,39,0.55)", marginBottom: 6,
+  fontSize: 9,
+  letterSpacing: "0.2em",
+  textTransform: "uppercase",
+  color: "rgba(201,162,39,0.6)",
+  marginBottom: 8,
 };
 
-const num: React.CSSProperties = {
+const numVal: React.CSSProperties = {
   fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-  fontSize: 20, fontWeight: 600, color: "#F5F0E8", lineHeight: "1.1",
+  fontSize: 22,
+  fontWeight: 600,
+  color: "#F5F0E8",
+  lineHeight: 1.1,
 };
 
-const sm: React.CSSProperties = {
+const smText: React.CSSProperties = {
   fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-  fontSize: 10, color: "rgba(255,255,255,0.32)",
+  fontSize: 10,
+  color: "rgba(255,255,255,0.32)",
+  marginTop: 4,
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 function AccentLine() {
-  return <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg, transparent, rgba(201,162,39,0.35), transparent)" }} />;
+  return (
+    <div style={{
+      position: "absolute", top: 0, left: 0, right: 0, height: 1,
+      background: "linear-gradient(90deg, transparent 0%, rgba(201,162,39,0.4) 50%, transparent 100%)",
+    }} />
+  );
+}
+
+function SectionDivider({ title }: { title: string }) {
+  return (
+    <div style={{ margin: "20px 0 14px", display: "flex", alignItems: "center", gap: 12 }}>
+      <span style={{ fontSize: 9, letterSpacing: "0.25em", color: "rgba(201,162,39,0.7)", textTransform: "uppercase", fontFamily: "ui-sans-serif, system-ui, sans-serif", flexShrink: 0 }}>
+        {title}
+      </span>
+      <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, rgba(201,162,39,0.3) 0%, transparent 100%)" }} />
+    </div>
+  );
 }
 
 function Dot({ color }: { color: string }) {
   return <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: color, marginRight: 5, flexShrink: 0 }} />;
 }
 
-function fmt(n: number | null | undefined, dec = 2): string {
+function fmt(n: number | null | undefined, dec = 2) {
   return n == null ? "—" : n.toFixed(dec);
 }
 
@@ -69,20 +99,33 @@ function biasColor(b: string) {
   return l.includes("bull") ? BULL : l.includes("bear") ? BEAR : NEUTRAL;
 }
 
+function useIsMobile() {
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    function check() { setMobile(window.innerWidth < 768); }
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return mobile;
+}
+
 // ── KPI Card ──────────────────────────────────────────────────────────────────
 
-function KPICard({ title, main, sub, mainColor = "#F5F0E8" }: { title: string; main: string; sub?: string; mainColor?: string }) {
+function KPICard({ title, main, sub, mainColor = "#F5F0E8" }: {
+  title: string; main: string; sub?: string; mainColor?: string;
+}) {
   return (
-    <div style={cardBase}>
+    <div style={kpiCard}>
       <AccentLine />
       <div style={lbl}>{title}</div>
-      <div style={{ ...num, color: mainColor }}>{main}</div>
-      {sub && <div style={{ ...sm, marginTop: 4 }}>{sub}</div>}
+      <div style={{ ...numVal, color: mainColor }}>{main}</div>
+      {sub && <div style={smText}>{sub}</div>}
     </div>
   );
 }
 
-// ── COT Chart ─────────────────────────────────────────────────────────────────
+// ── COT Bar Chart ─────────────────────────────────────────────────────────────
 
 function COTChart({ data }: { data: DashData["cot"] }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -100,15 +143,15 @@ function COTChart({ data }: { data: DashData["cot"] }) {
     chartRef.current = new w.Chart(ref.current, {
       type: "bar",
       data: {
-        labels: ["Mgd Money", "Swap Deal", "Sm Specs"],
-        datasets: [{ data: [mm, sd, ss], backgroundColor: [GOLD + "CC", BEAR + "CC", "rgba(136,136,136,0.7)"], borderRadius: 3, borderWidth: 0 }],
+        labels: ["Managed Money", "Swap Dealers", "Small Specs"],
+        datasets: [{ data: [mm, sd, ss], backgroundColor: [GOLD + "CC", BEAR + "CC", "rgba(136,136,136,0.7)"], borderRadius: 4, borderWidth: 0 }],
       },
       options: {
         indexAxis: "y", responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c: { raw: number }) => `${c.raw.toFixed(1)}k` } } },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c: { raw: number }) => `${c.raw.toFixed(1)}k contracts` } } },
         scales: {
-          x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "rgba(255,255,255,0.3)", font: { family: "monospace", size: 8 } } },
-          y: { grid: { display: false }, ticks: { color: "rgba(255,255,255,0.35)", font: { family: "monospace", size: 8 } } },
+          x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "rgba(255,255,255,0.3)", font: { family: "monospace", size: 9 } } },
+          y: { grid: { display: false }, ticks: { color: "rgba(255,255,255,0.35)", font: { family: "monospace", size: 9 } } },
         },
       },
     });
@@ -116,17 +159,32 @@ function COTChart({ data }: { data: DashData["cot"] }) {
   }, [data]);
 
   return (
-    <div style={{ ...cardBase, display: "flex", flexDirection: "column" }}>
+    <div style={{ ...chartCard, display: "flex", flexDirection: "column" }}>
       <AccentLine />
-      <div style={lbl}>COT Positioning</div>
-      {data
-        ? <div style={{ flex: 1, minHeight: 100, position: "relative" }}><canvas ref={ref} /></div>
-        : <div style={{ ...sm, marginTop: 4 }}>— unavailable</div>}
+      <div style={lbl}>COT Institutional Positioning</div>
+      {data ? (
+        <>
+          <div style={{ height: 140, position: "relative", flex: 1 }}>
+            <canvas ref={ref} />
+          </div>
+          <div style={{ display: "flex", gap: 12, marginTop: 8, flexWrap: "wrap" }}>
+            {[
+              { color: GOLD,    l: "Mgd Money", v: `${((data.managedMoney ?? 0) / 1000).toFixed(0)}k` },
+              { color: BEAR,    l: "Swap Deal",  v: `${((data.swapDealers  ?? 0) / 1000).toFixed(0)}k` },
+              { color: NEUTRAL, l: "Sm Specs",   v: `${((data.smallSpecs  ?? 0) / 1000).toFixed(0)}k` },
+            ].map(r => (
+              <span key={r.l} style={{ ...smText, marginTop: 0, display: "flex", alignItems: "center" }}>
+                <Dot color={r.color} />{r.l}: {r.v}
+              </span>
+            ))}
+          </div>
+        </>
+      ) : <div style={smText}>— unavailable</div>}
     </div>
   );
 }
 
-// ── FedWatch Chart ────────────────────────────────────────────────────────────
+// ── FedWatch Doughnut ─────────────────────────────────────────────────────────
 
 function FedWatchChart({ data }: { data: DashData["fedWatch"] }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -153,35 +211,46 @@ function FedWatchChart({ data }: { data: DashData["fedWatch"] }) {
   }, [data]);
 
   return (
-    <div style={{ ...cardBase, display: "flex", flexDirection: "column" }}>
+    <div style={{ ...chartCard, display: "flex", flexDirection: "column" }}>
       <AccentLine />
-      <div style={lbl}>FedWatch — FOMC</div>
+      <div style={lbl}>FedWatch — Next FOMC</div>
       {data ? (
-        <div style={{ display: "flex", gap: 10, alignItems: "center", flex: 1, minHeight: 0 }}>
-          <div style={{ height: 100, width: 100, flexShrink: 0, position: "relative" }}><canvas ref={ref} /></div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            {[{ color: "#444", l: "Hold", v: data.hold }, { color: BULL, l: "Cut", v: data.cut }, { color: BEAR, l: "Hike", v: data.hike }].map(r => (
-              <div key={r.l} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <div style={{ display: "flex", gap: 16, alignItems: "center", flex: 1 }}>
+          <div style={{ height: 140, width: 140, flexShrink: 0, position: "relative" }}>
+            <canvas ref={ref} />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {[
+              { color: "#444", l: "Hold", v: data.hold },
+              { color: BULL,   l: "Cut",  v: data.cut  },
+              { color: BEAR,   l: "Hike", v: data.hike },
+            ].map(r => (
+              <div key={r.l} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <Dot color={r.color} />
-                <span style={{ ...sm, fontSize: 9 }}>{r.l}</span>
-                <span style={{ ...sm, fontSize: 11, color: r.color, marginLeft: 4 }}>{r.v ?? "—"}%</span>
+                <span style={{ ...smText, marginTop: 0, fontSize: 10 }}>{r.l}</span>
+                <span style={{ ...smText, marginTop: 0, fontSize: 13, color: r.color, marginLeft: 4 }}>{r.v ?? "—"}%</span>
               </div>
             ))}
+            {data.summary && (
+              <div style={{ ...smText, fontSize: 9, color: "rgba(255,255,255,0.22)", lineHeight: 1.5, marginTop: 4 }}>
+                {data.summary}
+              </div>
+            )}
           </div>
         </div>
-      ) : <div style={{ ...sm, marginTop: 4 }}>— unavailable</div>}
+      ) : <div style={smText}>— unavailable</div>}
     </div>
   );
 }
 
-// ── Yield Curve ───────────────────────────────────────────────────────────────
+// ── Yield Curve SVG ───────────────────────────────────────────────────────────
 
 function YieldCurveCard({ data }: { data: DashData["yieldCurve"] }) {
   const spread = data?.spread ?? 0;
   const points: number[] = [-0.85,-0.72,-0.65,-0.55,-0.40,-0.28,-0.15,0.05,0.12,0.18,0.22, spread];
   const min = Math.min(...points) - 0.1;
   const max = Math.max(...points) + 0.1;
-  const W = 180, H = 70, PAD = 8;
+  const W = 240, H = 80, PAD = 10;
   const toX = (i: number) => PAD + (i / (points.length - 1)) * (W - PAD * 2);
   const toY = (v: number) => PAD + (1 - (v - min) / (max - min)) * (H - PAD * 2);
   const polyline = points.map((v, i) => `${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(" ");
@@ -189,19 +258,24 @@ function YieldCurveCard({ data }: { data: DashData["yieldCurve"] }) {
   const statusColor = data?.status === "inverted" ? BEAR : data?.status === "flat" ? GOLD : BULL;
 
   return (
-    <div style={cardBase}>
+    <div style={chartCard}>
       <AccentLine />
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-        <div style={lbl}>Yield Curve 10Y-2Y</div>
-        <div style={{ ...sm, fontSize: 11, color: statusColor, fontWeight: 600 }}>{fmt(spread, 3)}%</div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+        <div style={lbl}>Yield Curve 10Y − 2Y</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ ...numVal, fontSize: 16, color: statusColor }}>{fmt(spread, 3)}%</span>
+          <span style={{ ...smText, fontSize: 9, marginTop: 0, color: statusColor, background: statusColor + "22", padding: "2px 8px", borderRadius: 4 }}>
+            {data?.status?.toUpperCase() ?? "—"}
+          </span>
+        </div>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block" }}>
         <line x1={PAD} y1={zeroY} x2={W - PAD} y2={zeroY} stroke={BEAR} strokeWidth="0.7" strokeDasharray="3,3" opacity="0.4" />
-        <polyline points={polyline} fill="none" stroke={GOLD} strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round" />
-        <circle cx={toX(points.length - 1)} cy={toY(spread)} r="2.5" fill={GOLD} />
+        <polyline points={polyline} fill="none" stroke={GOLD} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+        <circle cx={toX(points.length - 1)} cy={toY(spread)} r="3" fill={GOLD} />
       </svg>
-      <div style={{ ...sm, fontSize: 9, color: statusColor, background: statusColor + "22", padding: "2px 7px", borderRadius: 4, display: "inline-block", marginTop: 4 }}>
-        {data?.status?.toUpperCase() ?? "—"}
+      <div style={{ display: "flex", justifyContent: "space-between", ...smText, fontSize: 9, color: "rgba(255,255,255,0.2)", marginTop: 4 }}>
+        <span>6 months ago</span><span>now</span>
       </div>
     </div>
   );
@@ -231,15 +305,20 @@ function GoldSilverCard({ data }: { data: DashData["goldSilver"] }) {
   }, [data, ratio, zoneColor]);
 
   return (
-    <div style={{ ...cardBase, display: "flex", gap: 10, alignItems: "center" }}>
+    <div style={{ ...chartCard, display: "flex", gap: 16, alignItems: "center" }}>
       <AccentLine />
-      <div style={{ height: 80, width: 80, flexShrink: 0, position: "relative" }}>
+      <div style={{ height: 90, width: 90, flexShrink: 0, position: "relative" }}>
         {data ? <canvas ref={ref} /> : null}
       </div>
       <div>
-        <div style={lbl}>Gold / Silver</div>
-        <div style={{ ...num, fontSize: 18, color: zoneColor }}>{fmt(ratio, 1)}</div>
-        <div style={{ ...sm, fontSize: 9, color: zoneColor, marginTop: 3 }}>{data?.zone?.replace("_", " ") ?? "—"}</div>
+        <div style={lbl}>Gold / Silver Ratio</div>
+        <div style={{ ...numVal, color: zoneColor }}>{fmt(ratio, 1)}</div>
+        <div style={{ ...smText, color: zoneColor, fontSize: 10 }}>{data?.zone?.replace("_", " ") ?? "—"}</div>
+        <div style={{ ...smText, fontSize: 9, color: "rgba(255,255,255,0.2)", marginTop: 8, lineHeight: 1.7 }}>
+          <span style={{ color: BULL }}>{"<70"}</span> cheap ·{" "}
+          <span style={{ color: GOLD }}>70–85</span> normal ·{" "}
+          <span style={{ color: BEAR }}>{">85"}</span> exp.
+        </div>
       </div>
     </div>
   );
@@ -252,51 +331,85 @@ function ETFFlowsCard({ data }: { data: DashData["etfFlows"] }) {
 
   function Sparkline({ pct, color }: { pct: number | null; color: string }) {
     const v = pct ?? 0;
-    const pts = [-1.2,-0.8,-0.3,0.1,0.5,v].map((x, i) => `${20 + i * 26},${25 - x * 5}`).join(" ");
+    const pts = [-1.2,-0.8,-0.3,0.1,0.5,v].map((x, i) => `${24 + i * 30},${28 - x * 5}`).join(" ");
     return (
-      <svg viewBox="0 0 175 35" width="100%" height="24" style={{ display: "block" }}>
-        <polyline points={pts} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx={20 + 5 * 26} cy={25 - v * 5} r="2" fill={color} />
+      <svg viewBox="0 0 200 40" width="100%" height="30" style={{ display: "block" }}>
+        <polyline points={pts} fill="none" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx={24 + 5 * 30} cy={28 - v * 5} r="2.5" fill={color} />
       </svg>
     );
   }
 
   return (
-    <div style={cardBase}>
+    <div style={{ ...chartCard, display: "flex", flexDirection: "column" }}>
       <AccentLine />
-      <div style={lbl}>ETF Flows GLD / IAU</div>
+      <div style={lbl}>ETF Flows — GLD / IAU</div>
       {data ? (
         <>
-          <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
             <Dot color={GOLD} />
-            <span style={{ ...sm, fontSize: 9 }}>GLD 5d: {data.gld5d != null ? `${data.gld5d > 0 ? "+" : ""}${data.gld5d.toFixed(1)}%` : "—"}</span>
+            <span style={{ ...smText, marginTop: 0, fontSize: 10 }}>
+              GLD 5d: {data.gld5d != null ? `${data.gld5d > 0 ? "+" : ""}${data.gld5d.toFixed(1)}%` : "—"}
+            </span>
           </div>
           <Sparkline pct={data.gld5d} color={GOLD} />
-          <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 1, marginTop: 3 }}>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, marginBottom: 2 }}>
             <Dot color={NEUTRAL} />
-            <span style={{ ...sm, fontSize: 9 }}>IAU 5d: {data.iau5d != null ? `${data.iau5d > 0 ? "+" : ""}${data.iau5d.toFixed(1)}%` : "—"}</span>
+            <span style={{ ...smText, marginTop: 0, fontSize: 10 }}>
+              IAU 5d: {data.iau5d != null ? `${data.iau5d > 0 ? "+" : ""}${data.iau5d.toFixed(1)}%` : "—"}
+            </span>
           </div>
           <Sparkline pct={data.iau5d} color={NEUTRAL} />
-          <div style={{ ...sm, fontSize: 10, color: signalColor, marginTop: 4, fontWeight: 600, letterSpacing: "0.08em" }}>
+
+          <div style={{ ...numVal, fontSize: 12, color: signalColor, marginTop: 10, letterSpacing: "0.1em" }}>
             {data.signal?.toUpperCase() ?? "—"}
           </div>
         </>
-      ) : <div style={{ ...sm, marginTop: 4 }}>— unavailable</div>}
+      ) : <div style={smText}>— unavailable</div>}
     </div>
   );
 }
 
-// ── Mobile hook ───────────────────────────────────────────────────────────────
+// ── Narrative Intelligence ────────────────────────────────────────────────────
 
-function useIsMobile() {
-  const [mobile, setMobile] = useState(false);
-  useEffect(() => {
-    function check() { setMobile(window.innerWidth < 768); }
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-  return mobile;
+function NarrativeCard() {
+  const metrics = [
+    { label: "Phase",      value: "—",      color: GOLD    },
+    { label: "Velocity",   value: "—",      color: NEUTRAL },
+    { label: "Confluence", value: "—",      color: NEUTRAL },
+    { label: "Catalyst",   value: "—",      color: NEUTRAL },
+  ];
+
+  return (
+    <div style={{ ...chartCard, display: "flex", flexDirection: "column" }}>
+      <AccentLine />
+      <div style={lbl}>Narrative Intelligence</div>
+
+      {/* 2×2 metrics grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+        {metrics.map(m => (
+          <div key={m.label} style={{ background: "rgba(255,255,255,0.03)", borderRadius: 6, padding: "8px 10px" }}>
+            <div style={{ ...smText, marginTop: 0, fontSize: 8, letterSpacing: "0.15em", textTransform: "uppercase" }}>{m.label}</div>
+            <div style={{ ...numVal, fontSize: 14, color: m.color, marginTop: 4 }}>{m.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Liquidation progress bar */}
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ ...smText, marginTop: 0, fontSize: 9, marginBottom: 4 }}>Spec Liquidation Progress</div>
+        <div style={{ height: 4, background: "rgba(255,255,255,0.07)", borderRadius: 2, overflow: "hidden" }}>
+          <div style={{ height: "100%", width: "0%", background: GOLD, borderRadius: 2 }} />
+        </div>
+      </div>
+
+      {/* Top catalyst */}
+      <div style={{ ...smText, fontSize: 10, color: "rgba(255,255,255,0.28)", lineHeight: 1.6, marginTop: "auto" }}>
+        Ask the AI for a full analysis to get the current narrative score, phase, and velocity.
+      </div>
+    </div>
+  );
 }
 
 // ── Main component ─────────────────────────────────────────────────────────────
@@ -332,8 +445,8 @@ export default function MarketDashboard() {
 
   void chartJsReady;
 
-  const p = data?.price;
-  const b = data?.bias;
+  const p  = data?.price;
+  const b  = data?.bias;
   const ry = data?.realYield;
   const ryColor = (ry?.value ?? 0) > 1 ? BEAR : (ry?.value ?? 0) < 0 ? BULL : GOLD;
   const lastUpdate = data?.updatedAt
@@ -341,32 +454,27 @@ export default function MarketDashboard() {
     : null;
 
   return (
-    <section style={{
-      width: "100%",
-      maxWidth: 1400,
-      margin: "0 auto",
-      padding: "24px 20px",
-      borderBottom: "1px solid rgba(201,162,39,0.12)",
-    }}>
+    <section style={{ width: "100%", maxWidth: 1400, margin: "0 auto", padding: "32px 20px" }}>
 
       {/* Live indicator */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-        <span style={{ width: 7, height: 7, borderRadius: "50%", background: BULL, display: "inline-block", animation: "pulse 1.5s ease-in-out infinite" }} />
-        <span style={{ ...lbl, fontSize: 9, color: "rgba(255,255,255,0.28)", marginBottom: 0 }}>
-          {data?.session?.session ?? "LIVE"} · {lastUpdate ?? "—"}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+        <span style={{ width: 7, height: 7, borderRadius: "50%", background: BULL, display: "inline-block", flexShrink: 0, animation: "pulse 1.5s ease-in-out infinite" }} />
+        <span style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+          Live · {data?.session?.session ?? "—"} · {lastUpdate ?? "—"}
         </span>
       </div>
 
       {loading ? (
-        <div style={{ ...sm, color: "rgba(255,255,255,0.2)", fontSize: 11 }}>Loading market data…</div>
+        <div style={{ ...smText, color: "rgba(255,255,255,0.2)", fontSize: 11, marginTop: 12 }}>Loading market data…</div>
       ) : (
         <>
-          {/* ROW 1 — 5 KPI cards */}
+          {/* ── MARKET STATE ── */}
+          <SectionDivider title="Market State" />
+
           <div style={{
             display: "grid",
             gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(5, 1fr)",
             gap: 10,
-            marginBottom: 10,
           }}>
             <KPICard
               title="XAUUSD"
@@ -401,17 +509,30 @@ export default function MarketDashboard() {
             />
           </div>
 
-          {/* ROW 2 — 5 chart cards */}
+          {/* ── INSTITUTIONAL POSITIONING ── */}
+          <SectionDivider title="Institutional Positioning" />
+
           <div style={{
             display: "grid",
-            gridTemplateColumns: isMobile ? "1fr" : "1.2fr 1fr 1fr 1fr 1fr",
+            gridTemplateColumns: isMobile ? "1fr" : "1.2fr 1fr 1fr",
             gap: 10,
           }}>
-            <div style={{ minHeight: 160 }}><COTChart data={data?.cot ?? null} /></div>
-            <div style={{ minHeight: 160 }}><FedWatchChart data={data?.fedWatch ?? null} /></div>
-            <div style={{ minHeight: 160 }}><YieldCurveCard data={data?.yieldCurve ?? null} /></div>
-            <div style={{ minHeight: 160 }}><GoldSilverCard data={data?.goldSilver ?? null} /></div>
-            <div style={{ minHeight: 160 }}><ETFFlowsCard data={data?.etfFlows ?? null} /></div>
+            <COTChart      data={data?.cot       ?? null} />
+            <FedWatchChart data={data?.fedWatch  ?? null} />
+            <YieldCurveCard data={data?.yieldCurve ?? null} />
+          </div>
+
+          {/* ── NARRATIVE & FLOWS ── */}
+          <SectionDivider title="Narrative & Flows" />
+
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1.2fr",
+            gap: 10,
+          }}>
+            <GoldSilverCard data={data?.goldSilver ?? null} />
+            <ETFFlowsCard   data={data?.etfFlows   ?? null} />
+            <NarrativeCard />
           </div>
         </>
       )}

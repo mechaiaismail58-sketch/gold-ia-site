@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import MarketDashboard from "@/components/MarketDashboard";
 import TradeTracker from "@/components/TradeTracker";
 import OnboardingModal from "@/components/OnboardingModal";
 import ShareSignalButton from "@/components/ShareSignalButton";
@@ -470,6 +471,8 @@ async function send(textOverride?: string) {
           </div>
         </div>
       </section>
+
+      <MarketDashboard />
 
       <TradeTracker />
 
