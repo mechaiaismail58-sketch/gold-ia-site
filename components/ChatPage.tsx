@@ -442,7 +442,7 @@ async function send(textOverride?: string) {
   }
 
   return (
-    <main>
+    <main style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0, overflowY: "auto" }}>
       {showOnboarding && (
         <OnboardingModal onComplete={() => setShowOnboarding(false)} />
       )}
@@ -491,9 +491,9 @@ async function send(textOverride?: string) {
 
       <TradeTracker />
 
-      <section className="mt-8">
-        <div className="card rounded-2xl sm:rounded-3xl p-0 overflow-hidden border border-white/10 shadow-[0_18px_90px_rgba(109,40,217,0.14)]">
-          <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-[color:var(--border)]">
+      <section className="mt-8" style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <div className="card rounded-2xl sm:rounded-3xl p-0 overflow-hidden border border-white/10 shadow-[0_18px_90px_rgba(109,40,217,0.14)]" style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+          <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-[color:var(--border)]" style={{ flexShrink: 0 }}>
             <div className="text-sm uppercase tracking-widest text-[color:var(--muted)]">
               Live Signal Console
             </div>
@@ -527,7 +527,8 @@ async function send(textOverride?: string) {
 
           <div
             ref={chatContainerRef}
-            className="px-4 sm:px-6 py-6 h-[calc(100svh-380px)] min-h-[320px] sm:h-[560px] overflow-y-auto flex flex-col gap-6 relative"
+            className="px-4 sm:px-6 py-6 overflow-y-auto flex flex-col gap-6 relative"
+            style={{ flex: 1, minHeight: 320, scrollbarGutter: "stable" }}
           >
             {messages.map((m, i) => (
               <div key={i} className="animate-fade-in-fast">
@@ -675,6 +676,7 @@ async function send(textOverride?: string) {
               "px-4 sm:px-6 py-4 border-t border-[color:var(--border)] transition",
               isDragging && "bg-[rgba(109,40,217,0.06)] border-t-[rgba(109,40,217,0.4)]"
             )}
+            style={{ flexShrink: 0 }}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
