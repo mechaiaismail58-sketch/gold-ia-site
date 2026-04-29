@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import LiveTicker from "@/components/LiveTicker";
-import MarketDashboard from "@/components/MarketDashboard";
 import TradeTracker from "@/components/TradeTracker";
 import OnboardingModal from "@/components/OnboardingModal";
 import ShareSignalButton from "@/components/ShareSignalButton";
@@ -442,7 +440,7 @@ async function send(textOverride?: string) {
   }
 
   return (
-    <main style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0, overflowY: "auto" }}>
+    <main>
       {showOnboarding && (
         <OnboardingModal onComplete={() => setShowOnboarding(false)} />
       )}
@@ -473,27 +471,11 @@ async function send(textOverride?: string) {
         </div>
       </section>
 
-      <section className="mt-5">
-        <div className="flex items-stretch overflow-hidden rounded-xl border border-[rgba(109,40,217,0.40)] bg-[rgba(109,40,217,0.06)] shadow-[0_0_30px_rgba(109,40,217,0.08)]">
-          <div className="flex items-center gap-2 px-4 shrink-0 border-r border-[rgba(109,40,217,0.30)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-pulse shrink-0" />
-            <span className="text-[10px] font-mono font-semibold tracking-[0.22em] uppercase text-white/35 whitespace-nowrap">Live</span>
-          </div>
-          <div className="flex-1 min-w-0 py-0.5">
-            <LiveTicker />
-          </div>
-        </div>
-      </section>
-
-      <div className="mt-3">
-        <MarketDashboard />
-      </div>
-
       <TradeTracker />
 
-      <section className="mt-8" style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-        <div className="card rounded-2xl sm:rounded-3xl p-0 overflow-hidden border border-white/10 shadow-[0_18px_90px_rgba(109,40,217,0.14)]" style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-          <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-[color:var(--border)]" style={{ flexShrink: 0 }}>
+      <section className="mt-8">
+        <div className="card rounded-2xl sm:rounded-3xl p-0 overflow-hidden border border-white/10 shadow-[0_18px_90px_rgba(109,40,217,0.14)]">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-[color:var(--border)]">
             <div className="text-sm uppercase tracking-widest text-[color:var(--muted)]">
               Live Signal Console
             </div>
@@ -527,8 +509,7 @@ async function send(textOverride?: string) {
 
           <div
             ref={chatContainerRef}
-            className="px-4 sm:px-6 py-6 overflow-y-auto flex flex-col gap-6 relative"
-            style={{ flex: 1, minHeight: 320, scrollbarGutter: "stable" }}
+            className="px-4 sm:px-6 py-6 h-[calc(100svh-380px)] min-h-[320px] sm:h-[560px] overflow-y-auto flex flex-col gap-6 relative"
           >
             {messages.map((m, i) => (
               <div key={i} className="animate-fade-in-fast">
@@ -676,7 +657,6 @@ async function send(textOverride?: string) {
               "px-4 sm:px-6 py-4 border-t border-[color:var(--border)] transition",
               isDragging && "bg-[rgba(109,40,217,0.06)] border-t-[rgba(109,40,217,0.4)]"
             )}
-            style={{ flexShrink: 0 }}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
