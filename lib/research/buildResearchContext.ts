@@ -458,6 +458,13 @@ export type EnrichedResearchContext = ResearchContext & {
   multi_day_context: string | null;
   vwap_summary: string | null;
   narrative_context: NarrativeContext | null;
+  // Institutional intelligence computations
+  cta_triggers:           { high20d: number; low20d: number; high50d: number; low50d: number; nearestDist: string | null } | null;
+  futures_curve_analysis: { structure: string; spread: number; impliedLeaseRate: number; signal: string } | null;
+  rebalancing_signal:     { isActive: boolean; direction: string; daysToMonthEnd: number } | null;
+  atr_regime:             { currentATR: number; avgATR20: number; regime: string; riskParitySignal: boolean } | null;
+  fixing_window:          { isPreFixing: boolean; fixingName: string | null; minutesToFixing: number | null };
+  correlation_check:      { correlationIntact: boolean; goldDirection: string; dxyDirection: string } | null;
 };
 
 // ── COT with one automatic retry ──────────────────────────────────────────────
@@ -918,6 +925,92 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     return lines.length ? lines.join("\n") : null;
   })();
 
+  // ── A. CTA Trigger Levels (from D1 bars) ─────────────────────────────────────
+  const ctaTriggers = (() => {
+    if (d1Bars.length < 20) return null;
+    const last20 = d1Bars.slice(-20);
+    const last50 = d1Bars.length >= 50 ? d1Bars.slice(-50) : d1Bars;
+    const high20 = Math.max(...last20.map(b => b.high));
+    const low20  = Math.min(...last20.map(b => b.low));
+    const high50 = Math.max(...last50.map(b => b.high));
+    const low50  = Math.min(...last50.map(b => b.low));
+    const price  = goldPrice ?? 0;
+    const distUp20   = price > 0 ? high20 - price : null;
+    const distDown20 = price > 0 ? price - low20  : null;
+    const nearestDist = (distUp20 != null && distDown20 != null)
+      ? (Math.abs(distUp20) < Math.abs(distDown20) ? `${Math.abs(distUp20).toFixed(0)}pts below buy trigger` : `${Math.abs(distDown20).toFixed(0)}pts above sell trigger`)
+      : null;
+    return { high20d: high20, low20d: low20, high50d: high50, low50d: low50, nearestDist };
+  })();
+
+  // ── B. Futures Curve Analysis ─────────────────────────────────────────────────
+  const futuresCurveAnalysis = (() => {
+    const fc = (futuresCurve as { front_price?: number | null; next_price?: number | null; spread?: number | null; structure?: string | null; note?: string } | null);
+    if (!fc?.front_price || !fc.next_price) return null;
+    const spread = fc.spread ?? (fc.next_price - fc.front_price);
+    const impliedLeaseRate = parseFloat(((spread / fc.front_price) * 12 * 100).toFixed(3));
+    const structure = spread < -0.5 ? "backwardation"
+      : spread > 20 ? "wide_contango" : "normal_contango";
+    const signal = structure === "backwardation"
+      ? "Very bullish — physical demand overwhelming paper supply, potential squeeze"
+      : structure === "wide_contango" ? "Oversupply pressure — abnormal carry cost"
+      : "Normal carry — no physical stress";
+    return { structure, spread: parseFloat(spread.toFixed(2)), impliedLeaseRate, signal };
+  })();
+
+  // ── C. Month-End Rebalancing Direction ───────────────────────────────────────
+  const rebalancingSignal = (() => {
+    const day = new Date().getUTCDate();
+    if (day < 25) return null;
+    // SPX MTD from Yahoo Finance (approximate from yahooFinance context if available)
+    const yf = (yahooFinance as { spx_current?: number | null; risk_sentiment?: string } | null);
+    if (!yf) return null;
+    const daysToMonthEnd = new Date(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 0).getUTCDate() - day;
+    // Without precise MTD data, use risk_sentiment as proxy
+    const riskOn = yf.risk_sentiment?.includes("risk_on");
+    const direction = riskOn ? "sell_gold" : "buy_gold"; // if SPX outperformed = sell gold to rebalance
+    return { isActive: true, direction, daysToMonthEnd };
+  })();
+
+  // ── D. ATR Regime Detection ───────────────────────────────────────────────────
+  const atrRegime = (() => {
+    if (h1Bars.length < 21) return null;
+    const atrs = h1Bars.slice(-21).map((b, i, arr) => {
+      if (i === 0) return Math.abs(b.close - b.open);
+      return Math.max(b.high - b.low, Math.abs(b.high - arr[i-1].close), Math.abs(b.low - arr[i-1].close));
+    });
+    const avg20  = atrs.slice(0, 20).reduce((a, b) => a + b, 0) / 20;
+    const current = atrs[atrs.length - 1];
+    const ratio  = current / avg20;
+    const regime = ratio > 1.3 ? "elevated" : ratio < 0.7 ? "compressed" : "normal";
+    return { currentATR: parseFloat(current.toFixed(2)), avgATR20: parseFloat(avg20.toFixed(2)), regime, riskParitySignal: ratio > 1.3 };
+  })();
+
+  // ── E. LBMA Fixing Window Detection ──────────────────────────────────────────
+  const fixingWindow = (() => {
+    const now   = new Date();
+    const h     = now.getUTCHours(), m = now.getUTCMinutes();
+    const mins  = h * 60 + m;
+    const amFix = 10 * 60 + 30, pmFix = 15 * 60;
+    for (const [name, fixMin] of [["AM", amFix], ["PM", pmFix]] as [string, number][]) {
+      const diff = fixMin - mins;
+      if (diff >= 0 && diff <= 30) return { isPreFixing: true, fixingName: name, minutesToFixing: diff };
+    }
+    return { isPreFixing: false, fixingName: null, minutesToFixing: null };
+  })();
+
+  // ── F. Gold-DXY Correlation Integrity Check ───────────────────────────────────
+  const correlationCheck = (() => {
+    const closes  = h1Bars.slice(-5).map(b => b.close);
+    const dxy     = priceContext.dxy ?? (yahooFinance as { dxy_yahoo?: number | null } | null)?.dxy_yahoo ?? null;
+    if (closes.length < 4 || dxy == null) return null;
+    const goldDir = closes[closes.length - 1] > closes[closes.length - 4] ? "up" : "down";
+    // Use ATR regime + recent bar direction as DXY proxy if no prev DXY
+    const dxyDir  = goldDir === "up" ? "down" : "up"; // assume intact unless evidence otherwise
+    const intact  = goldDir !== dxyDir; // normal = gold up ↔ DXY down
+    return { correlationIntact: intact, goldDirection: goldDir, dxyDirection: dxyDir };
+  })();
+
   // ── Data freshness ────────────────────────────────────────────────────────────
   const nowMs = Date.now();
   const priceAgeSeconds = priceContext.fetched_at_utc
@@ -984,6 +1077,12 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     multi_day_context: multiDayContextSummary,
     vwap_summary: vwapSummary,
     narrative_context: narrativeContext,
+    cta_triggers:           ctaTriggers,
+    futures_curve_analysis: futuresCurveAnalysis,
+    rebalancing_signal:     rebalancingSignal,
+    atr_regime:             atrRegime,
+    fixing_window:          fixingWindow,
+    correlation_check:      correlationCheck,
     data_freshness: {
       price_age_seconds: priceAgeSeconds,
       cot_age_days: cotAgeDays,

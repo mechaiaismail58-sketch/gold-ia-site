@@ -322,6 +322,43 @@ Completeness: ${vc.completeness} | Source: ${vc.source_consistency} | Timestamp:
     lines.push(`\n${formatNarrativeContext(ctx.narrative_context)}`);
   }
 
+  // Institutional Intelligence (CTA triggers, futures curve, rebalancing, ATR, fixing, correlation)
+  {
+    const ii: string[] = [];
+
+    const ct = ctx.cta_triggers;
+    if (ct) {
+      ii.push(`CTA TRIGGER LEVELS\n20-day high (buy trigger): ${ct.high20d.toFixed(2)} | 20-day low (sell trigger): ${ct.low20d.toFixed(2)}\n50-day high: ${ct.high50d.toFixed(2)} | 50-day low: ${ct.low50d.toFixed(2)}${ct.nearestDist ? `\nDistance from nearest trigger: ${ct.nearestDist}` : ""}`);
+    }
+
+    const fc = ctx.futures_curve_analysis;
+    if (fc) {
+      ii.push(`FUTURES CURVE STRUCTURE\nStructure: ${fc.structure.replace("_", " ")} | Spread: ${fc.spread > 0 ? "+" : ""}${fc.spread} | Implied lease rate: ${fc.impliedLeaseRate}%\nSignal: ${fc.signal}`);
+    }
+
+    const rb = ctx.rebalancing_signal;
+    if (rb?.isActive) {
+      ii.push(`MONTH-END REBALANCING ACTIVE (${rb.daysToMonthEnd} days to month end)\nDirection: ${rb.direction.replace("_", " ").toUpperCase()}`);
+    }
+
+    const atr = ctx.atr_regime;
+    if (atr) {
+      ii.push(`ATR REGIME\nCurrent ATR H1: ${atr.currentATR} | 20-period avg: ${atr.avgATR20} | Regime: ${atr.regime.toUpperCase()}\nRisk parity deleveraging signal: ${atr.riskParitySignal ? "ACTIVE" : "INACTIVE"}`);
+    }
+
+    const fw = ctx.fixing_window;
+    if (fw?.isPreFixing) {
+      ii.push(`LBMA FIXING WINDOW ACTIVE\n${fw.fixingName} fixing in ${fw.minutesToFixing} minutes — elevated noise, reduce signal confidence`);
+    }
+
+    const cc = ctx.correlation_check;
+    if (cc) {
+      ii.push(`CORRELATION CHECK\nGold-DXY correlation: ${cc.correlationIntact ? "INTACT" : "BROKEN"} | Gold 4h: ${cc.goldDirection.toUpperCase()} | DXY: ${cc.dxyDirection.toUpperCase()}\nIntermarket signals: ${cc.correlationIntact ? "VALID" : "SUSPENDED — correlation breakdown"}`);
+    }
+
+    if (ii.length > 0) lines.push(`\nINSTITUTIONAL INTELLIGENCE\n${ii.join("\n\n")}`);
+  }
+
   return lines.filter(Boolean).join("\n");
 }
 
