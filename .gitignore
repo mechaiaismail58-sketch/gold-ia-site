@@ -42,3 +42,13 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+# Python virtualenv
+.venv311/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Aurum Quant — binary/generated cache (CSVs, pickles, plots)
+aurum_quant/data/cache/
