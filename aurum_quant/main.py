@@ -67,6 +67,13 @@ def _banner(step: int, title: str) -> None:
 
 # ===========================================================================
 class Pipeline:
+    # 1h bar hour (bar-start label) that contains each C-window's minute range.
+    _C_WINDOW_HOURS: dict[str, int] = {
+        "LONDON_GOLD_FIX": 14,       # 14:52-15:00 → 14:00-15:00 bar
+        "NY_OPEN_MOMENTUM": 13,      # 13:30-13:45 → 13:00-14:00 bar
+        "LONDON_CLOSE_REVERSION": 16, # 16:00-16:15 → 16:00-17:00 bar
+    }
+
     def __init__(self, fred_api_key: Optional[str] = None) -> None:
         self.fred_api_key = fred_api_key or config.FRED_API_KEY
         self.panel: Optional[pd.DataFrame] = None
@@ -82,6 +89,7 @@ class Pipeline:
         self.guard: Optional[DualEntropyGuard] = None
         self.break_detector: Optional[StructuralBreakDetector] = None
         self.scorer: Optional[RegimeAwareScorer] = None
+        self._bars_1h: Optional[pd.DataFrame] = None   # UTC-naive 1h OHLCV
 
     # ---------- step 1 ------------------------------------------------
     def step1_data(self) -> pd.DataFrame:
@@ -92,15 +100,14 @@ class Pipeline:
         return self.panel
 
     # ---------- step 2 ------------------------------------------------
-    def step2_preprocess(self) -> dict[str, pd.DataFrame]:
+    def step2_preprocess(self, train_end: Optional[str] = None) -> dict[str, pd.DataFrame]:
         _banner(2, "PREPROCESSING")
         prep = Preprocessor()
         result = prep.fit_transform(self.panel)
         prep.print_report(result)
         self.preproc_result = result
-        # train ends 2021-12-31 (≤ TRAIN_END), validation ends VALIDATION_END.
-        # Test (post-VALIDATION_END) is held back for step 11 only.
-        self.splits = prep.split(result.features)
+        self.splits = prep.split(result.features,
+                                  train_end=train_end or config.TRAIN_END)
         for name, df in self.splits.items():
             print(f"  {name:<12s} {len(df):>6d} rows  {df.index.min().date()} → {df.index.max().date()}")
         return self.splits
@@ -321,7 +328,8 @@ class Pipeline:
                 frame[col] = base_features[col]
         # Pass-through features from preprocessor (stationary or normalised)
         for col in ("real_rate_abs", "real_rate_delta_21d", "dxy_momentum_ratio",
-                    "cot_z_260d", "gold_vs_trend", "trend_strength"):
+                    "cot_z_260d", "gold_vs_trend", "trend_strength",
+                    "market_structure", "market_structure_str"):
             if col in base_features.columns:
                 frame[col] = base_features[col].reindex(idx)
         return frame.dropna(how="all")
@@ -412,6 +420,21 @@ class Pipeline:
             self.beta_tracker.fit(features["log_return"], rr_full.diff())
 
     # ------------------------------------------------------------------
+    @classmethod
+    def _c_window_from_1h_date(cls, ts: pd.Timestamp, bars_1h: pd.DataFrame) -> str:
+        """Return C-window name if a matching 1h bar exists on *ts* date, else ''."""
+        day = ts.normalize()
+        mask = (bars_1h.index >= day) & (bars_1h.index < day + pd.Timedelta(days=1))
+        day_bars = bars_1h.loc[mask]
+        if day_bars.empty:
+            return ""
+        bar_hours = set(day_bars.index.hour)
+        for win_name, hour in cls._C_WINDOW_HOURS.items():
+            if hour in bar_hours:
+                return win_name
+        return ""
+
+    # ------------------------------------------------------------------
     def _classify_signal(self, score: float, regime: int) -> Optional[str]:
         """Return signal class (A/B/C) for a raw p_win*100 score and regime.
 
@@ -480,6 +503,14 @@ class Pipeline:
                 if regime == 2:
                     mom = float(feat_row.get("momentum_20d", 0.0))
                     direction = "LONG" if mom > 0 else "SHORT"
+                    # Class A/B require confirmed market structure alignment.
+                    # Class C (lower bar) passes without structure filter.
+                    if signal_class in ("A", "B"):
+                        ms = float(feat_row.get("market_structure", 0.0))
+                        required_ms = 1.0 if direction == "LONG" else -1.0
+                        if ms != required_ms:
+                            diag["n_gap"] += 1   # reuse gap-reject counter
+                            return None
                 else:
                     direction = "LONG" if gap < 0 else "SHORT"
 
@@ -492,6 +523,13 @@ class Pipeline:
                 tp_dist = 2.0 * sl_dist
                 sl = price - sl_dist if direction == "LONG" else price + sl_dist
                 tp = price + tp_dist if direction == "LONG" else price - tp_dist
+                # For Class C: look up which C-window 1h bar exists on this date.
+                # Signals with no matching bar are tagged hors_fenetre (c_window="")
+                # but still simulated so in-window vs out-of-window WR can be compared.
+                c_window = ""
+                if signal_class == "C" and self._bars_1h is not None:
+                    c_window = self._c_window_from_1h_date(timestamp, self._bars_1h)
+
                 return {
                     "direction": direction,
                     "stop_loss": sl,
@@ -499,13 +537,83 @@ class Pipeline:
                     "score": score,
                     "signal_class": signal_class,
                     "regime": regime,
-                    "c_window": "",   # daily bars — no intraday time
+                    "c_window": c_window,
                     "timestamp": timestamp,
                 }
 
             return evaluator
 
         return signal_factory
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _print_rr_stats(bt, label: str = "") -> None:
+        """Print realized RR breakdown: wins (TP), losses (SL), timeouts."""
+        from .backtest.metrics import Trade
+        all_trades: list[Trade] = []
+        for it in bt.report.iterations:
+            all_trades.extend(it.trades)
+        if not all_trades:
+            return
+        wins    = [t for t in all_trades if t.win]
+        losses  = [t for t in all_trades if not t.win and t.rr_realized == -1.0]
+        timeout = [t for t in all_trades if not t.win and t.rr_realized != -1.0]
+        import numpy as np
+        rrs_all = [t.rr_realized for t in all_trades]
+        print(f"\n[RR Stats] {label}  n={len(all_trades)}")
+        print(f"  TP hits   : {len(wins):>3d}  median RR = {np.median([t.rr_realized for t in wins]):+.3f}" if wins else "  TP hits   :   0")
+        print(f"  SL hits   : {len(losses):>3d}  median RR = {np.median([t.rr_realized for t in losses]):+.3f}" if losses else "  SL hits   :   0")
+        print(f"  Timeouts  : {len(timeout):>3d}  median RR = {np.median([t.rr_realized for t in timeout]):+.3f}" if timeout else "  Timeouts  :   0")
+        print(f"  ALL trades: {len(all_trades):>3d}  median RR = {np.median(rrs_all):+.3f}"
+              f"  mean RR = {np.mean(rrs_all):+.3f}")
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _export_class_c_csv(bt, label: str, out_path: Optional[str] = None) -> str:
+        """Export Class C trades to CSV with in-window vs out-of-window breakdown."""
+        import csv
+        from .backtest.metrics import Trade
+        all_trades: list[Trade] = []
+        for it in bt.report.iterations:
+            all_trades.extend(it.trades)
+        class_c = [t for t in all_trades if t.signal_class == "C"]
+        path = out_path or f"class_c_{label}.csv"
+        with open(path, "w", newline="", encoding="utf-8") as fh:
+            writer = csv.writer(fh)
+            writer.writerow(["date", "heure_utc", "c_window", "dans_fenetre",
+                             "regime", "outcome", "pnl", "rr"])
+            for t in class_c:
+                date_s = t.timestamp.strftime("%Y-%m-%d") if t.timestamp else ""
+                utc_s  = t.timestamp.strftime("%H:%M")    if t.timestamp else "00:00"
+                cwin   = t.c_window if t.c_window else ""
+                in_win = "oui" if cwin else "non"
+                writer.writerow([
+                    date_s, utc_s, cwin, in_win,
+                    f"R{t.regime}", "W" if t.win else "L",
+                    f"{t.pnl_dollars:.2f}", f"{t.rr_realized:.3f}",
+                ])
+
+        def _group_stats(trades: list) -> str:
+            if not trades:
+                return "n=0"
+            wr = sum(t.win for t in trades) / len(trades)
+            rrs = np.array([t.rr_realized for t in trades])
+            sharpe = float(rrs.mean() / (rrs.std() + 1e-9) * np.sqrt(252)) if len(trades) > 1 else float("nan")
+            pnl = sum(t.pnl_dollars for t in trades)
+            return (f"n={len(trades):>3d}  WR={wr:.1%}  "
+                    f"Sharpe={sharpe:+.2f}  PnL=${pnl:>+,.0f}")
+
+        in_w  = [t for t in class_c if t.c_window]
+        out_w = [t for t in class_c if not t.c_window]
+        has_1h = bool(in_w or out_w)
+        print(f"\n[Class C CSV] {label} → {path}  ({len(class_c)} trades)")
+        if has_1h and (in_w or out_w):
+            print(f"  Dans fenêtre : {_group_stats(in_w)}")
+            print(f"  Hors fenêtre : {_group_stats(out_w)}")
+        else:
+            print(f"  (quotidien — pas de données 1h chargées, tous hors fenêtre)")
+            print(f"  Hors fenêtre : {_group_stats(out_w)}")
+        return path
 
     # ------------------------------------------------------------------
     def _print_trade_detail(self, bt) -> None:
@@ -570,7 +678,13 @@ class Pipeline:
             self.beta_tracker.fit(train_features["log_return"], rr.diff())
 
     # ------------------------------------------------------------------
-    def run_multi_validation(self, n_trials: int = 10) -> None:
+    def run_multi_validation(
+        self,
+        n_trials: int = 10,
+        window_filter: Optional[str] = None,
+        train_end_override: Optional[str] = None,
+        export_csv: bool = False,
+    ) -> None:
         """Stress-test the fitted models across three distinct market regimes.
 
         Uses pickled models (trained on 2010-2021).  Engines are extended
@@ -580,10 +694,21 @@ class Pipeline:
         from .backtest.walk_forward import WalkForwardBacktester
 
         _banner(0, "MULTI-PERIOD VALIDATION")
+        if train_end_override:
+            print(f"  [strict-cutoff] training cutoff overridden to {train_end_override}")
         t0 = datetime.now()
 
         self.step1_data()
-        self.step2_preprocess()
+
+        # Fetch 1h bars for Class C window tagging (cached, fast on repeat runs).
+        collector = DataCollector(fred_api_key=self.fred_api_key)
+        bars_1h = collector.fetch_intraday_1h()
+        self._bars_1h = bars_1h if not bars_1h.empty else None
+        if self._bars_1h is not None:
+            print(f"  1h bars: {len(self._bars_1h):,}  "
+                  f"{self._bars_1h.index[0].date()} → {self._bars_1h.index[-1].date()}")
+
+        self.step2_preprocess(train_end=train_end_override)
         self.load_pickled_models()
         self.step10_xgboost(n_trials=n_trials)
 
@@ -602,6 +727,8 @@ class Pipeline:
         table_rows: list[dict] = []
 
         for label, start, end in config.VALIDATION_WINDOWS:
+            if window_filter and label != window_filter:
+                continue
             print(f"\n{'─'*70}")
             print(f"  Window: {label}  ({start} → {end})")
             print(f"{'─'*70}")
@@ -613,15 +740,25 @@ class Pipeline:
                 oos_end = self.panel.index.max()
             if oos_start < self.panel.index.min():
                 oos_start = self.panel.index.min()
+            # CLASS_C_1H: clip start to actual 1h data availability.
+            if label == "CLASS_C_1H" and self._bars_1h is not None:
+                h1_start = pd.Timestamp(self._bars_1h.index[0].date())
+                if oos_start < h1_start:
+                    oos_start = h1_start
+                    print(f"  [1h clip] start adjusted to {oos_start.date()} "
+                          f"(first 1h bar available)")
 
             diag: dict = {"n_miss": 0, "n_exc": 0, "n_score": 0,
                           "n_gap": 0, "n_pass": 0, "scores": []}
             bt = WalkForwardBacktester(signal_factory=self._build_signal_factory(diag))
             bt.run(ohlc, oos_start=oos_start, oos_end=oos_end)
             bt.print_report()
+            self._print_rr_stats(bt, label)
 
             if label == "BULL_2024_2025":
                 self._print_trade_detail(bt)
+            if export_csv:
+                self._export_class_c_csv(bt, label)
 
             m = bt.report.overall_metrics
             table_rows.append({
@@ -659,6 +796,123 @@ class Pipeline:
         print("─" * 80)
         elapsed = (datetime.now() - t0).total_seconds()
         print(f"\nMulti-validation finished in {elapsed:.0f}s")
+
+    # ------------------------------------------------------------------
+    def run_multi_engine(
+        self,
+        n_trials: int = 50,
+        window: str = "BULL_2024_ALL",
+        train_end_override: Optional[str] = None,
+    ) -> None:
+        """Backtest VolumeEngine + MeanReversionSniper separately and combined.
+
+        Runs on the specified validation window, then estimates P(challenge pass)
+        via Monte Carlo bootstrap on the combined trade stream.
+        """
+        from .signals.engines.volume_engine import VolumeEngine
+        from .signals.engines.mean_reversion_sniper import MeanReversionSniper
+        from .signals.allocator import (
+            MultiEngineAllocator, AllocatorConfig,
+            run_multi_engine_backtest, monte_carlo_challenge_pass,
+        )
+
+        _banner(0, f"MULTI-ENGINE BACKTEST — {window}")
+        t0 = datetime.now()
+
+        self.step1_data()
+        collector = DataCollector(fred_api_key=self.fred_api_key)
+        bars_1h = collector.fetch_intraday_1h()
+        self._bars_1h = bars_1h if not bars_1h.empty else None
+
+        self.step2_preprocess(train_end=train_end_override)
+        self.load_pickled_models()
+        self.step10_xgboost(n_trials=n_trials)
+
+        # Extend engines + build feature matrix
+        full_features = self.preproc_result.features.copy() if self.preproc_result else pd.concat(list(self.splits.values()))
+        self._extend_engines(full_features)
+        self._wf_features = self._build_scorer_features(full_features)
+
+        # Find OOS window
+        win_cfg = next((w for w in config.VALIDATION_WINDOWS if w[0] == window), None)
+        if win_cfg is None:
+            print(f"  Window '{window}' not found in config.VALIDATION_WINDOWS")
+            return
+        _, win_start, win_end = win_cfg
+        oos_start = pd.Timestamp(win_start)
+        oos_end = min(pd.Timestamp(win_end), self.panel.index.max())
+
+        ohlc = self.panel[["gold_open", "gold_high", "gold_low", "gold_close"]].copy()
+
+        # ── Per-engine standalone backtest ─────────────────────────────
+        vol_engine = VolumeEngine(self, bars_1h=self._bars_1h)
+        mrs_engine = MeanReversionSniper(self)
+
+        print(f"\n{'='*70}")
+        print("  STANDALONE ENGINE RESULTS")
+        print(f"{'='*70}")
+        print(f"  Period: {oos_start.date()} -> {oos_end.date()}")
+        months = max(1, (oos_end - oos_start).days / 30.44)
+
+        for eng_obj, eng_name in [(vol_engine, "VOLUME"), (mrs_engine, "MRS")]:
+            from .signals.allocator import AllocationState, AllocatorConfig
+            alloc = MultiEngineAllocator([eng_obj], initial_balance=100_000.0)
+            metrics = run_multi_engine_backtest(alloc, ohlc, oos_start, oos_end)
+            em = metrics["by_engine"].get(eng_name, {})
+            if not em:
+                print(f"  {eng_name:<10}: no signals generated")
+                continue
+            print(f"\n  [{eng_name}]")
+            print(f"    n={em['n']:>3d}  WR={em['wr']:.1%}  Sharpe={em['sharpe']:+.2f}  "
+                  f"PnL=${em['pnl']:>+,.0f}  MaxDD=${em['max_dd']:>,.0f}  "
+                  f"Sigs/mo={em['sigs_mo']:.1f}")
+
+        # ── Combined backtest ───────────────────────────────────────────
+        print(f"\n{'='*70}")
+        print("  COMBINED (VOLUME + MRS + ALLOCATOR)")
+        print(f"{'='*70}")
+        alloc_combined = MultiEngineAllocator(
+            [vol_engine, mrs_engine],
+            cfg=AllocatorConfig(daily_stop=0.02, weekly_stop=0.04),
+            initial_balance=100_000.0,
+        )
+        metrics_c = run_multi_engine_backtest(alloc_combined, ohlc, oos_start, oos_end)
+
+        for eng_name, em in metrics_c["by_engine"].items():
+            print(f"\n  [{eng_name}]")
+            print(f"    n={em['n']:>3d}  WR={em['wr']:.1%}  Sharpe={em['sharpe']:+.2f}  "
+                  f"PnL=${em['pnl']:>+,.0f}  MaxDD=${em['max_dd']:>,.0f}  Sigs/mo={em['sigs_mo']:.1f}")
+
+        cm = metrics_c.get("combined", {})
+        if cm:
+            print(f"\n  [COMBINED PORTFOLIO]")
+            print(f"    n={cm['n']:>3d}  PnL=${cm['pnl']:>+,.0f}  "
+                  f"Sharpe={cm['sharpe']:+.2f}  MaxDD=${cm['max_dd']:>,.0f}")
+
+        # ── Monte Carlo P(challenge pass) ───────────────────────────────
+        print(f"\n{'─'*70}")
+        print("  MONTE CARLO — P(challenge pass) [10k simulations]")
+        print(f"{'─'*70}")
+        raw_trades: list[dict] = []
+        for eng_trades in metrics_c.get("_raw_trades", {}).values():
+            raw_trades.extend(eng_trades)
+
+        if raw_trades:
+            p_pass = monte_carlo_challenge_pass(
+                raw_trades,
+                n_sims=10_000,
+                initial_balance=100_000.0,
+                profit_target_pct=0.10,
+                max_dd_pct=0.05,
+                challenge_days=30,
+            )
+            print(f"  P(challenge pass in 30d) = {p_pass:.1%}  "
+                  f"[target +10%, DD cap -5%]")
+        else:
+            print("  (insufficient trades for Monte Carlo)")
+
+        elapsed = (datetime.now() - t0).total_seconds()
+        print(f"\nMulti-engine run finished in {elapsed:.0f}s")
 
     # ------------------------------------------------------------------
     def run_fast(self, n_trials: int = 10) -> str:
@@ -721,13 +975,35 @@ def main(argv: list[str] | None = None) -> int:
     args = argv or []
     fast = "--fast" in args
     multi = "--multi-validate" in args or "--validate-all" in args
-    _class_split = "--class-split" in args   # reporting flag — always on now, kept for compat
-    # n_trials: 50 in fast/validate modes; 50 default for full pipeline too
+    strict = "--strict-cutoff" in args    # train only to 2023-12-31
+    export_csv = "--export-csv" in args
+    class_c_bt = "--class-c-backtest" in args  # shortcut: CLASS_C_1H + export-csv
+    _class_split = "--class-split" in args
+    window_filter: Optional[str] = None
+    if "--window" in args:
+        idx = args.index("--window")
+        if idx + 1 < len(args):
+            window_filter = args[idx + 1]
+    if class_c_bt:
+        window_filter = "CLASS_C_1H"
+        export_csv = True
+    multi_engine = "--multi-engine" in args
     n_trials = 50
+    train_end_override = "2023-12-31" if strict else None
     p = Pipeline()
     try:
-        if multi:
-            p.run_multi_validation(n_trials=n_trials)
+        if multi_engine:
+            me_window = "BULL_2024_ALL"
+            if "--window" in args:
+                idx = args.index("--window")
+                if idx + 1 < len(args):
+                    me_window = args[idx + 1]
+            p.run_multi_engine(n_trials=n_trials, window=me_window,
+                               train_end_override=train_end_override)
+        elif multi or window_filter:
+            p.run_multi_validation(n_trials=n_trials, window_filter=window_filter,
+                                   train_end_override=train_end_override,
+                                   export_csv=export_csv)
         elif fast:
             p.run_fast(n_trials=n_trials)
         else:

@@ -35,6 +35,10 @@ VALIDATION_WINDOWS: Final[list[tuple[str, str, str]]] = [
     ("COVID_2019_2020",  "2019-01-01", "2020-06-30"),   # COVID crash + recovery
     ("FED_2022_2023",    "2022-01-01", "2023-06-30"),   # Fed hawkish cycle
     ("BULL_2024_2025",   "2024-11-01", "2025-04-30"),   # geopolitical bull (OOS)
+    # Extended OOS: train=2010-2023, eval=all of 2024+early 2025 (use --strict-cutoff)
+    ("BULL_2024_ALL",    "2024-01-01", "2025-04-30"),
+    # Class C 1h window validation: start auto-clipped to actual 1h data (~730d back)
+    ("CLASS_C_1H",       "2024-05-15", "2025-04-30"),
 ]
 
 # Free key from https://fred.stlouisfed.org/docs/api/api_key.html

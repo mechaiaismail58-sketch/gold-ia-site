@@ -301,6 +301,68 @@ class DataCollector:
             config.TICKER_GOLD_INTRADAY, "gold", interval="1h", intraday_start=start,
         )
 
+    def fetch_intraday_1h(self) -> pd.DataFrame:
+        """Fetch last 730 days of 1h GC=F bars for Class C window validation.
+
+        Cached as pickle (``gold_1h.pkl``) to preserve timezone-safe datetimes.
+        Index: datetime_utc (UTC-naive Timestamp). Columns: open, high, low, close, volume.
+        """
+        pkl_path = config.CACHE_DIR / "gold_1h.pkl"
+        meta_path = config.CACHE_DIR / "gold_1h.meta.json"
+
+        if pkl_path.exists() and meta_path.exists():
+            try:
+                meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                ts = datetime.fromisoformat(meta["downloaded_at"])
+                if datetime.now(timezone.utc) - ts < timedelta(hours=self.cache_max_age_hours):
+                    log.info("[cache] gold 1h (gold_1h.pkl)")
+                    return pd.read_pickle(pkl_path)
+            except Exception:
+                pass
+
+        try:
+            import yfinance as yf
+
+            print(f"  [1h] fetching {config.TICKER_GOLD_INTRADAY}  period=730d")
+            df = yf.download(
+                config.TICKER_GOLD_INTRADAY,
+                period="730d",
+                interval="1h",
+                progress=False,
+                auto_adjust=False,
+            )
+            if df.empty:
+                raise RuntimeError("yfinance 1h returned empty DataFrame")
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
+            # Normalise to UTC-naive datetime
+            if hasattr(df.index, "tz") and df.index.tz is not None:
+                df.index = df.index.tz_convert("UTC").tz_localize(None)
+            else:
+                df.index = pd.to_datetime(df.index)
+            df.index.name = "datetime_utc"
+            df = df[["Open", "High", "Low", "Close", "Volume"]].rename(columns=str.lower)
+            df = df.dropna(how="all").sort_index()
+            df.to_pickle(pkl_path)
+            meta_path.write_text(
+                json.dumps({
+                    "downloaded_at": datetime.now(timezone.utc).isoformat(),
+                    "source": f"yfinance:{config.TICKER_GOLD_INTRADAY}:1h:730d",
+                    "rows": int(len(df)),
+                    "start": str(df.index[0]),
+                    "end": str(df.index[-1]),
+                }, indent=2),
+                encoding="utf-8",
+            )
+            print(f"    {len(df):,} bars  {df.index[0].date()} → {df.index[-1].date()}")
+            return df
+        except Exception as exc:
+            log.error("1h fetch failed: %s", exc)
+            if pkl_path.exists():
+                log.warning("Falling back to stale 1h cache")
+                return pd.read_pickle(pkl_path)
+            return pd.DataFrame()
+
     # ------------------------------------------------------------------
     # Top-level orchestration
     # ------------------------------------------------------------------

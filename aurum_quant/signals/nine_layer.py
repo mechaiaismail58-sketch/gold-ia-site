@@ -31,7 +31,7 @@ from ..engine.merton_hawkes import MertonHawkesProcess
 from ..engine.pca_macro import MacroCouplingPCA
 from ..prop_firms.consistency import ConsistencyManager
 from .ev_filter import EVFilter
-from .scorer import XGBoostScorer
+from .scorer import RegimeAwareScorer as XGBoostScorer
 from .sizing import GrossmanZhouSizer, SizerInputs
 
 log = logging.getLogger(__name__)
@@ -92,6 +92,16 @@ class NineLayerFilter:
         "HAWKES_CLUSTERING", "WASSERSTEIN", "EV_FILTER", "PROP_RULES", "META_MODEL",
     )
 
+    # 1h bar hour (bar start) that contains each C-window's minute range.
+    # LONDON_GOLD_FIX 14:52-15:00 → bar 14:00-15:00 (hour=14)
+    # NY_OPEN_MOMENTUM 13:30-13:45 → bar 13:00-14:00 (hour=13)
+    # LONDON_CLOSE_REVERSION 16:00-16:15 → bar 16:00-17:00 (hour=16)
+    _C_WINDOW_HOURS: dict[str, int] = {
+        "LONDON_GOLD_FIX": 14,
+        "NY_OPEN_MOMENTUM": 13,
+        "LONDON_CLOSE_REVERSION": 16,
+    }
+
     def __init__(
         self,
         hmm: GoldHMM,
@@ -106,6 +116,7 @@ class NineLayerFilter:
         atr_window: int = 14,
         sl_mult: float = 1.0,
         rr_default: float = 2.0,
+        bars_1h: Optional[pd.DataFrame] = None,
     ) -> None:
         self.hmm = hmm
         self.kalman = kalman
@@ -119,6 +130,7 @@ class NineLayerFilter:
         self.atr_window = atr_window
         self.sl_mult = sl_mult
         self.rr_default = rr_default
+        self._bars_1h = bars_1h   # UTC-naive 1h OHLCV; None = live intraday mode
         # rolling state for meta model
         self._recent_outcomes: list[int] = []  # 1=win, 0=loss
         self._meta_window: int = 30
@@ -269,6 +281,25 @@ class NineLayerFilter:
                 return name
         return None
 
+    @classmethod
+    def _c_window_from_1h(cls, date: pd.Timestamp, bars_1h: pd.DataFrame) -> Optional[str]:
+        """Return the first C-window name whose 1h bar exists on *date*.
+
+        Checks whether a 1h bar at the expected UTC hour is present in
+        ``bars_1h`` for the given trading date.  If none of the three window
+        hours are covered, returns None (→ Class C rejected).
+        """
+        day = date.normalize()
+        mask = (bars_1h.index >= day) & (bars_1h.index < day + pd.Timedelta(days=1))
+        day_bars = bars_1h.loc[mask]
+        if day_bars.empty:
+            return None
+        bar_hours = set(day_bars.index.hour)
+        for win_name, hour in cls._C_WINDOW_HOURS.items():
+            if hour in bar_hours:
+                return win_name
+        return None
+
     @staticmethod
     def _base_risk(cls: str) -> float:
         return {"A": config.CLASS_A_BASE_RISK, "B": config.CLASS_B_BASE_RISK, "C": config.CLASS_C_BASE_RISK}[cls]
@@ -313,10 +344,15 @@ class NineLayerFilter:
         signal_class: Optional[str] = self._classify_from_layers(core_layers)
 
         if signal_class is None:
-            # Class C fast path: composite score + temporal window + R2/R3
-            if composite >= config.CLASS_C_THRESHOLD:
-                c_window = self._c_window_name(state.intraday_minute_utc) or ""
-                if c_window and state.regime in (2, 3):
+            # Class C fast path: composite score ≥ threshold + R2/R3 + C-window presence.
+            # With 1h bars: verify a window bar exists on this date (reject if not).
+            # Without 1h bars (live intraday): check state.intraday_minute_utc directly.
+            if composite >= config.CLASS_C_THRESHOLD and state.regime in (2, 3):
+                if self._bars_1h is not None and not self._bars_1h.empty:
+                    c_window = self._c_window_from_1h(state.timestamp, self._bars_1h) or ""
+                else:
+                    c_window = self._c_window_name(state.intraday_minute_utc) or ""
+                if c_window:
                     signal_class = "C"
 
         if signal_class is None:
