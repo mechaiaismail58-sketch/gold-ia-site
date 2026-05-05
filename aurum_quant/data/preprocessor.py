@@ -58,6 +58,82 @@ def _adx(high: pd.Series, low: pd.Series, close: pd.Series, period: int = 14) ->
 
 
 # =====================================================================
+# Market-structure helpers — swing pivots and HH/HL / LH/LL detection
+# =====================================================================
+def _swing_pivots(high: pd.Series, low: pd.Series, n: int = 5) -> tuple[pd.Series, pd.Series]:
+    """Identify swing highs and swing lows using a n-bar pivot rule.
+
+    A bar at index i is a swing high if its high is the highest of the
+    [i-n .. i+n] window (2n+1 bars).  Analogously for swing lows.
+    Returns two boolean Series: swing_hi, swing_lo.
+    """
+    h = high.values
+    lo = low.values
+    size = len(h)
+    sh = np.zeros(size, dtype=bool)
+    sl = np.zeros(size, dtype=bool)
+    for i in range(n, size - n):
+        window_h = h[i - n: i + n + 1]
+        window_l = lo[i - n: i + n + 1]
+        if h[i] == window_h.max():
+            sh[i] = True
+        if lo[i] == window_l.min():
+            sl[i] = True
+    return pd.Series(sh, index=high.index), pd.Series(sl, index=low.index)
+
+
+def _market_structure(
+    high: pd.Series, low: pd.Series, n: int = 5
+) -> tuple[pd.Series, pd.Series]:
+    """Compute continuous market-structure signal from daily bars.
+
+    ms  : +1 = HH+HL (bullish structure), -1 = LH+LL (bearish), 0 = mixed
+    str : [0,1] — magnitude of the structure relative to ATR-20
+    """
+    sh_bool, sl_bool = _swing_pivots(high, low, n=n)
+    h_arr = high.values.astype(float)
+    l_arr = low.values.astype(float)
+    sh_idx = np.where(sh_bool.values)[0]
+    sl_idx = np.where(sl_bool.values)[0]
+
+    atr20 = pd.concat([
+        high - low,
+        (high - high.shift(1)).abs(),
+        (low - low.shift(1)).abs(),
+    ], axis=1).max(axis=1).rolling(20).mean().values.astype(float)
+
+    ms_arr = np.zeros(len(h_arr))
+    str_arr = np.zeros(len(h_arr))
+
+    # For each bar i, find the last two swing pivots up to and including i
+    # using searchsorted — O(n log k) total instead of O(n²)
+    for i in range(len(h_arr)):
+        # last 2 swing highs at or before bar i
+        cut_sh = np.searchsorted(sh_idx, i, side="right")   # sh_idx[:cut_sh] <= i
+        if cut_sh < 2:
+            continue
+        h2, h1 = h_arr[sh_idx[cut_sh - 2]], h_arr[sh_idx[cut_sh - 1]]
+
+        cut_sl = np.searchsorted(sl_idx, i, side="right")
+        if cut_sl < 2:
+            continue
+        l2, l1 = l_arr[sl_idx[cut_sl - 2]], l_arr[sl_idx[cut_sl - 1]]
+
+        hh, hl = h1 > h2, l1 > l2
+        lh, ll = h1 < h2, l1 < l2
+        atr = atr20[i] if not np.isnan(atr20[i]) else 1.0
+
+        if hh and hl:
+            ms_arr[i] = 1.0
+            str_arr[i] = min(1.0, ((h1 - h2) + (l1 - l2)) / max(2.0 * atr, 1e-9))
+        elif lh and ll:
+            ms_arr[i] = -1.0
+            str_arr[i] = min(1.0, ((h2 - h1) + (l2 - l1)) / max(2.0 * atr, 1e-9))
+
+    return pd.Series(ms_arr, index=high.index), pd.Series(str_arr, index=high.index)
+
+
+# =====================================================================
 # Fractional differentiation (Lopez de Prado, 2018)
 # =====================================================================
 def get_weights(d: float, size: int) -> np.ndarray:
@@ -181,8 +257,10 @@ class Preprocessor:
         "real_rate_delta_21d",
         "dxy_momentum_ratio",
         "cot_z_260d",
-        "gold_vs_trend",    # (close - EMA_63) / ATR_20  — normalised distance to trend
-        "trend_strength",   # ADX_14 — trend strength 0-100
+        "gold_vs_trend",          # (close - EMA_63) / ATR_20  — normalised distance to trend
+        "trend_strength",         # ADX_14 — trend strength 0-100
+        "market_structure",       # +1 HH+HL, -1 LH+LL, 0 mixed
+        "market_structure_str",   # magnitude [0,1]
     )
     # Features whose level should be frac-diffed.
     LEVEL_FEATURES: tuple[str, ...] = (
@@ -270,6 +348,12 @@ class Preprocessor:
 
         # trend_strength: ADX-14 (0-100, higher = stronger trend)
         f["trend_strength"] = _adx(high, low, close, period=14)
+
+        # Market structure: HH+HL (+1), LH+LL (-1), mixed (0), and magnitude.
+        # Used by R2 to require confirmed trend structure before entering.
+        ms, ms_str = _market_structure(high, low, n=5)
+        f["market_structure"] = ms          # +1 bull, -1 bear, 0 mixed
+        f["market_structure_str"] = ms_str  # [0,1] strength of structure
 
         # Macro levels (fractionally differentiated below).
         f["dxy_level"] = panel.get("dxy", np.nan)

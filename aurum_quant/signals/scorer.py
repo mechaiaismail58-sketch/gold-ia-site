@@ -89,7 +89,8 @@ class XGBArtifacts:
 REGIME_FEATURES: dict[int, tuple[str, ...]] = {
     2: ("momentum_5d", "momentum_10d", "momentum_20d",
         "dxy_momentum_ratio", "real_rate_delta_21d", "cot_z_260d",
-        "gold_vs_trend", "trend_strength"),
+        "gold_vs_trend", "trend_strength",
+        "market_structure", "market_structure_str"),
     3: ("kalman_gap_sigma", "real_rate_abs", "beta_dev",
         "macro_alignment", "P_R3", "w2"),
     4: ("kalman_gap_sigma", "P_R4", "apen",
