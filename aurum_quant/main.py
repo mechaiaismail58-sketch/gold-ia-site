@@ -845,8 +845,17 @@ class Pipeline:
         ohlc = self.panel[["gold_open", "gold_high", "gold_low", "gold_close"]].copy()
 
         # ── Per-engine standalone backtest ─────────────────────────────
+        from .signals.engines.event_edge import EventEdge
+
         vol_engine = VolumeEngine(self, bars_1h=self._bars_1h)
         mrs_engine = MeanReversionSniper(self)
+        gvz_series = self.panel["gvz"] if "gvz" in self.panel.columns else None
+        ee_engine = EventEdge(
+            bars_1h=self._bars_1h if self._bars_1h is not None else pd.DataFrame(),
+            daily_panel=self.panel,
+            regimes_train=self.regimes_train,
+            gvz_series=gvz_series,
+        ) if self._bars_1h is not None and not self._bars_1h.empty else None
 
         print(f"\n{'='*70}")
         print("  STANDALONE ENGINE RESULTS")
@@ -854,7 +863,11 @@ class Pipeline:
         print(f"  Period: {oos_start.date()} -> {oos_end.date()}")
         months = max(1, (oos_end - oos_start).days / 30.44)
 
-        for eng_obj, eng_name in [(vol_engine, "VOLUME"), (mrs_engine, "MRS")]:
+        engines_to_test = [(vol_engine, "VOLUME"), (mrs_engine, "MRS")]
+        if ee_engine is not None:
+            engines_to_test.append((ee_engine, "EVENT"))
+
+        for eng_obj, eng_name in engines_to_test:
             from .signals.allocator import AllocationState, AllocatorConfig
             alloc = MultiEngineAllocator([eng_obj], initial_balance=100_000.0)
             metrics = run_multi_engine_backtest(alloc, ohlc, oos_start, oos_end)
@@ -869,10 +882,14 @@ class Pipeline:
 
         # ── Combined backtest ───────────────────────────────────────────
         print(f"\n{'='*70}")
-        print("  COMBINED (VOLUME + MRS + ALLOCATOR)")
+        engines_desc = "VOLUME + MRS" + (" + EVENT" if ee_engine else "")
+        print(f"  COMBINED ({engines_desc} + ALLOCATOR)")
         print(f"{'='*70}")
+        alloc_engines = [vol_engine, mrs_engine]
+        if ee_engine is not None:
+            alloc_engines.append(ee_engine)
         alloc_combined = MultiEngineAllocator(
-            [vol_engine, mrs_engine],
+            alloc_engines,
             cfg=AllocatorConfig(daily_stop=0.02, weekly_stop=0.04),
             initial_balance=100_000.0,
         )
