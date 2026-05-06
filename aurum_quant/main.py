@@ -381,6 +381,42 @@ class Pipeline:
         return bt
 
     # ------------------------------------------------------------------
+    def _propagate_model_outputs(self, features: pd.DataFrame) -> pd.DataFrame:
+        """Add model outputs as columns to features: HMM regime, Kalman gap, etc."""
+        features = features.copy()
+
+        # HMM: regime + posterior probabilities
+        if self.hmm is not None:
+            try:
+                regimes = self.hmm.predict_regime(features)
+                features["hmm_regime"] = regimes
+                probas = self.hmm.predict_proba(features)
+                for col in probas.columns:
+                    features[col] = probas[col]
+                log.info(f"  [propagate] HMM outputs added: regime + P_R1..P_R4")
+            except Exception as e:
+                log.warning(f"  [propagate] HMM failed: {e}")
+
+        # Kalman: gap_sigma + beta
+        if self.kalman is not None and self.kalman.result is not None:
+            try:
+                gap_series = self.kalman.result.gap_sigma.reindex(features.index)
+                features["kalman_gap_sigma"] = gap_series
+                log.info(f"  [propagate] Kalman gap_sigma added")
+            except Exception as e:
+                log.warning(f"  [propagate] Kalman gap failed: {e}")
+
+        if self.beta_tracker is not None and self.beta_tracker.beta_series is not None:
+            try:
+                beta_series = self.beta_tracker.beta_series.reindex(features.index)
+                features["beta_gold_realrate"] = beta_series
+                log.info(f"  [propagate] Beta tracker series added")
+            except Exception as e:
+                log.warning(f"  [propagate] Beta tracker failed: {e}")
+
+        return features
+
+    # ------------------------------------------------------------------
     def _extend_engines(self, features: pd.DataFrame) -> None:
         """Extend Kalman, Guard, PCA, beta tracker to cover features.index.
 
@@ -721,6 +757,8 @@ class Pipeline:
         if self.preproc_result is not None:
             full_features = self.preproc_result.features.copy()
         self._extend_engines(full_features)
+        # Propagate model outputs to features
+        full_features = self._propagate_model_outputs(full_features)
         self._wf_features = self._build_scorer_features(full_features)
 
         ohlc = self.panel[["gold_open", "gold_high", "gold_low", "gold_close"]].copy()
@@ -798,6 +836,64 @@ class Pipeline:
         print(f"\nMulti-validation finished in {elapsed:.0f}s")
 
     # ------------------------------------------------------------------
+    def run_volume_only(
+        self,
+        n_trials: int = 50,
+        window: str = "BULL_2024_ALL",
+        train_end_override: Optional[str] = None,
+    ) -> None:
+        """Test VolumeEngine ONLY with WalkForwardBacktester (original system).
+
+        No allocator, no MRS, no EVENT. Uses the exact same backtester as
+        run_multi_validation to isolate what changed between the working run
+        and the broken multi-engine run.
+        """
+        from .backtest.walk_forward import WalkForwardBacktester
+
+        _banner(0, f"VOLUME ONLY (WFB) — {window}")
+        t0 = datetime.now()
+
+        self.step1_data()
+        collector = DataCollector(fred_api_key=self.fred_api_key)
+        bars_1h = collector.fetch_intraday_1h()
+        self._bars_1h = bars_1h if not bars_1h.empty else None
+
+        self.step2_preprocess(train_end=train_end_override)
+        self.load_pickled_models()
+        self.step10_xgboost(n_trials=n_trials)
+
+        # Extend engines to full data range
+        full_features = self.preproc_result.features.copy() if self.preproc_result else pd.concat(list(self.splits.values()))
+        self._extend_engines(full_features)
+        # Propagate model outputs to features
+        full_features = self._propagate_model_outputs(full_features)
+        self._wf_features = self._build_scorer_features(full_features)
+
+        ohlc = self.panel[["gold_open", "gold_high", "gold_low", "gold_close"]].copy()
+
+        # Find OOS window
+        win_cfg = next((w for w in config.VALIDATION_WINDOWS if w[0] == window), None)
+        if win_cfg is None:
+            print(f"  Window '{window}' not found in config.VALIDATION_WINDOWS")
+            return
+        _, win_start, win_end = win_cfg
+        oos_start = pd.Timestamp(win_start)
+        oos_end = min(pd.Timestamp(win_end), self.panel.index.max())
+
+        print(f"  Period: {oos_start.date()} -> {oos_end.date()}")
+        print(f"  Using WalkForwardBacktester (original system)")
+        print()
+
+        diag: dict = {"n_miss": 0, "n_exc": 0, "n_score": 0, "n_gap": 0, "n_pass": 0, "scores": []}
+        bt = WalkForwardBacktester(signal_factory=self._build_signal_factory(diag))
+        bt.run(ohlc, oos_start=oos_start, oos_end=oos_end)
+        bt.print_report()
+        self._print_rr_stats(bt, window)
+
+        elapsed = (datetime.now() - t0).total_seconds()
+        print(f"\nVolume-only run finished in {elapsed:.0f}s")
+
+    # ------------------------------------------------------------------
     def run_multi_engine(
         self,
         n_trials: int = 50,
@@ -831,6 +927,8 @@ class Pipeline:
         # Extend engines + build feature matrix
         full_features = self.preproc_result.features.copy() if self.preproc_result else pd.concat(list(self.splits.values()))
         self._extend_engines(full_features)
+        # Propagate model outputs to features
+        full_features = self._propagate_model_outputs(full_features)
         self._wf_features = self._build_scorer_features(full_features)
 
         # Find OOS window
@@ -1005,11 +1103,20 @@ def main(argv: list[str] | None = None) -> int:
         window_filter = "CLASS_C_1H"
         export_csv = True
     multi_engine = "--multi-engine" in args
+    volume_only = "--volume-only" in args
     n_trials = 50
     train_end_override = "2023-12-31" if strict else None
     p = Pipeline()
     try:
-        if multi_engine:
+        if volume_only:
+            vo_window = "BULL_2024_ALL"
+            if "--window" in args:
+                idx = args.index("--window")
+                if idx + 1 < len(args):
+                    vo_window = args[idx + 1]
+            p.run_volume_only(n_trials=n_trials, window=vo_window,
+                              train_end_override=train_end_override)
+        elif multi_engine:
             me_window = "BULL_2024_ALL"
             if "--window" in args:
                 idx = args.index("--window")
