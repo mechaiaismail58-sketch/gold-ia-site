@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 
 from aurum_quant.microstructure.data_loader import IntraDayDataLoader
 from aurum_quant.microstructure.vpin import VPINCalculator
+from aurum_quant.microstructure.block_bootstrap_test import BlockBootstrapTester, compare_permutation_tests
 
 logging.basicConfig(
     level=logging.INFO,
@@ -161,22 +162,25 @@ class VPINEdgeTester:
             log.info(f"  {horizon}m horizon: {signal_mask.sum()} signals, "
                      f"hit_rate={hit_rate:.1%}, mean_ret={mean_ret:+.3f}%")
 
-        # 6. Permutation test
-        log.info("\n[6] Running permutation test (1000 iterations)...")
+        # 6. Permutation test (naive + block bootstrap)
+        log.info("\n[6] Running permutation tests (naive + block bootstrap, 1000 iterations)...")
         perm_results = self._permutation_test(df, n_perms=1000)
+        bb_results = self._block_bootstrap_test(df, n_perms=1000)
 
         log.info("\n" + "=" * 80)
-        log.info("SUMMARY")
+        log.info("SUMMARY — Naive vs Block Bootstrap")
         log.info("=" * 80)
         for horizon in self.return_horizons:
             hit = results[horizon]["hit_rate"]
-            pval = perm_results[horizon]["p_value"]
-            log.info(f"  {horizon}m: hit_rate={hit:.1%} vs random={pval:.3f} (p-value)")
+            pval_naive = perm_results[horizon]["p_value"]
+            pval_bb = bb_results[horizon]["p_value"]
+            log.info(f"  {horizon}m: HR={hit:.1%} | Naive p={pval_naive:.3f} | BB p={pval_bb:.3f}")
 
         return {
             "data": df,
             "results": results,
             "perm_results": perm_results,
+            "bb_results": bb_results,
         }
 
     def _empty_result(self) -> dict:
@@ -240,6 +244,29 @@ class VPINEdgeTester:
                      f"perm_std={perm_hrs.std():.1%}, p-value={p_value:.3f}")
 
         return perm_results
+
+    def _block_bootstrap_test(self, df: pd.DataFrame, n_perms: int = 1000) -> dict:
+        """
+        Block bootstrap permutation test preserving autocorrelation.
+
+        Returns:
+            dict with p-values and distributions for each horizon
+        """
+        bb_results = {}
+        bb_tester = BlockBootstrapTester(block_size=60)
+
+        for horizon in self.return_horizons:
+            ret_col = f"fwd_ret_{horizon}m"
+            signal = df["signal"].values
+            returns = df[ret_col].values
+
+            bb_result = bb_tester.run_block_bootstrap_test(signal, returns, n_perms=n_perms, seed=42)
+            bb_results[horizon] = bb_result
+
+            log.info(f"  {horizon}m BB: real_HR={bb_result['real_hr']:.1%}, "
+                     f"perm_mean={bb_result['perm_mean']:.1%}, p-value={bb_result['p_value']:.3f}")
+
+        return bb_results
 
 
 if __name__ == "__main__":

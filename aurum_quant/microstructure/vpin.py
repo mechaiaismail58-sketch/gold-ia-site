@@ -108,16 +108,18 @@ class VPINCalculator:
             lookback = max(1, n_total_buckets // 3)  # 1/3 of total buckets
             log.info(f"    Lookback window: {lookback} buckets (1/3 of {n_total_buckets})")
 
-        # Step 4: Rolling VPIN calculation
-        bucket_stats["rolling_buy"] = bucket_stats["bucket_buy_vol"].rolling(
+        # Step 4: Rolling VPIN calculation (PRIOR buckets only — no look-ahead)
+        # Shift by 1 to exclude current bucket from rolling window
+        # This ensures VPIN(bucket_i) uses only buckets < i (information available AT end of bucket i-1)
+        bucket_stats["rolling_buy"] = bucket_stats["bucket_buy_vol"].shift(1).rolling(
             window=lookback, min_periods=1
         ).sum()
-        bucket_stats["rolling_sell"] = bucket_stats["bucket_sell_vol"].rolling(
+        bucket_stats["rolling_sell"] = bucket_stats["bucket_sell_vol"].shift(1).rolling(
             window=lookback, min_periods=1
         ).sum()
         bucket_stats["rolling_total"] = bucket_stats["rolling_buy"] + bucket_stats["rolling_sell"]
 
-        # VPIN = |buy - sell| / total_vol
+        # VPIN = |buy - sell| / total_vol (using only prior bucket volumes)
         bucket_stats["vpin"] = (
             (bucket_stats["rolling_buy"] - bucket_stats["rolling_sell"]).abs()
             / bucket_stats["rolling_total"].replace(0, np.nan)
@@ -173,11 +175,11 @@ class VPINCalculator:
 
         bucket_stats = bucket_stats.rename(columns={"buy_vol": "bucket_buy_vol", "sell_vol": "bucket_sell_vol"})
 
-        # Rolling VPIN
-        bucket_stats["rolling_buy"] = bucket_stats["bucket_buy_vol"].rolling(
+        # Rolling VPIN (prior buckets only — no look-ahead)
+        bucket_stats["rolling_buy"] = bucket_stats["bucket_buy_vol"].shift(1).rolling(
             window=lookback, min_periods=1
         ).sum()
-        bucket_stats["rolling_sell"] = bucket_stats["bucket_sell_vol"].rolling(
+        bucket_stats["rolling_sell"] = bucket_stats["bucket_sell_vol"].shift(1).rolling(
             window=lookback, min_periods=1
         ).sum()
         bucket_stats["rolling_total"] = bucket_stats["rolling_buy"] + bucket_stats["rolling_sell"]
