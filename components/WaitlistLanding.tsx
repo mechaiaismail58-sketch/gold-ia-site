@@ -8,16 +8,16 @@ function isValidEmail(v: string) {
 
 const FEATURES = [
   {
-    title: "Market Intelligence",
-    desc: "Complete market analysis across all asset classes — Forex, Metals, Indices, Futures, Energy.",
+    title: "All Markets",
+    desc: "Forex, Metals, Indices, Futures, Energy. One advisor that covers everything you trade — with the same institutional-grade depth on every asset.",
   },
   {
-    title: "Prop Firm Ready",
-    desc: "Real-time DD monitoring for FTMO, The5ers, Apex, E8, FundedNext and more. Know your limits before you trade.",
+    title: "Prop Firm Intelligence",
+    desc: "FTMO, The5ers, Apex, E8, FundedNext and more. Real-time DD tracking, consistency rules, phase-specific guidance. Never blow a funded account on a technicality.",
   },
   {
-    title: "Institutional Clarity",
-    desc: "No signals. No predictions. Macro context, tradability scoring, and risk management — like a professional trading desk.",
+    title: "Your Trading VP",
+    desc: "Market structure, macro context, tradability score, risk sizing, psychology detection. Like having a 30-year veteran in your corner before every trade.",
   },
 ];
 
@@ -68,7 +68,7 @@ export default function WaitlistLanding() {
           <span className="inline-flex items-center gap-2 rounded-full border border-[color:var(--gold)] border-opacity-30 bg-[rgba(212,175,55,0.06)] px-4 py-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--gold)] animate-pulse shrink-0" />
             <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-[color:var(--gold)]">
-              Coming Soon
+              Early Access
             </span>
           </span>
         </div>
@@ -82,6 +82,22 @@ export default function WaitlistLanding() {
           <p className="text-[16px] text-[color:var(--muted)] leading-[1.7] max-w-[46ch] mx-auto">
             Institutional-grade market intelligence across all assets. Forex, Metals, Indices, Futures. Built for serious traders and prop firm accounts.
           </p>
+          <div className="flex items-center justify-center gap-6 mt-6 flex-wrap">
+            {[
+              { value: "431", label: "Research trades" },
+              { value: "7", label: "Prop firms supported" },
+              { value: "15+", label: "Asset classes" },
+            ].map((s) => (
+              <div key={s.label} className="text-center">
+                <div className="text-[22px] font-light tracking-[-0.02em] text-[color:var(--gold)]">
+                  {s.value}
+                </div>
+                <div className="text-[10px] uppercase tracking-[0.16em] text-white/30 mt-0.5">
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* ── Form card — same .card glass as the rest of the site ── */}
@@ -144,7 +160,7 @@ export default function WaitlistLanding() {
                 )}
 
                 <p className="mt-3 text-center text-[11px] text-white/25">
-                  Less than 100 spots available · One-time beta access · $10
+                  Limited early access · No signals · No BS · Just clarity
                 </p>
               </form>
             )}
@@ -164,6 +180,27 @@ export default function WaitlistLanding() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* ── What BullionDesk is NOT ── */}
+        <div className="mt-4 mb-4 rounded-2xl border border-white/[0.06] p-4"
+          style={{ background: "rgba(255,255,255,0.02)" }}>
+          <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/25 mb-3 text-center">
+            What BullionDesk is not
+          </p>
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-1.5">
+            {[
+              "Not a signal service",
+              "No entry prices",
+              "No stop loss targets",
+              "No performance promises",
+              "No Telegram group",
+            ].map((item) => (
+              <span key={item} className="text-[11px] text-white/30 flex items-center gap-1.5">
+                <span className="text-red-500/50">✕</span> {item}
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* ── Footer ── */}
