@@ -51,10 +51,10 @@ export default function TradeTracker() {
       <div className="rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.02)] px-4 py-3 flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/25">Track record</span>
-          {data.winrate != null && (
+          {data.total > 0 && (
             <span className="text-sm font-medium text-white/80">
-              {data.winrate}%
-              <span className="text-[10px] text-white/30 ml-1">({data.wins}W/{data.losses}L)</span>
+              {data.total} trades
+              <span className="text-[10px] text-white/30 ml-1">({data.wins}W / {data.losses}L)</span>
             </span>
           )}
         </div>

@@ -92,88 +92,148 @@ function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+// Hardcoded research totals (431 trades — Notion API returns only 100 at a time)
+const RESEARCH_STATS = {
+  totalTrades: 431,
+  wins: 301,
+  losses: 130,
+  winRate: 69.88,
+  totalR: 411.8,
+  avgR: 1.8,
+};
+
 export default async function BacktestPage() {
   const data = await getBacktestData();
   const trades = data.trades ?? [];
-  const stats = data.stats ?? {
-    totalTrades: 0,
-    wins: 0,
-    losses: 0,
-    winRate: 0,
-    totalR: 0,
-    avgR: 0,
-  };
 
   return (
     <main>
+      {/* ── Hero ── */}
       <section className="card rounded-3xl p-6 sm:p-8 border border-white/10 shadow-[0_18px_80px_rgba(109,40,217,0.18)]">
         <div className="flex flex-col gap-4">
+          <div className="text-xs tracking-[0.22em] uppercase text-[color:var(--gold)]">
+            Research log
+          </div>
           <h1 className="text-[28px] sm:text-[34px] leading-[1.15] tracking-[-0.02em]">
-            Verified gold backtest performance, structured through a disciplined framework.
+            How we built the advisor.
           </h1>
 
-          <p className="text-[color:var(--muted)] max-w-[60ch] leading-6">
-            Live-synced historical trades from the Bullion Desk system, designed to validate signal quality, execution discipline, and risk-adjusted performance.
+          <p className="text-[color:var(--muted)] max-w-[72ch] leading-7 text-[14px] sm:text-[15px]">
+            During the development of BullionDesk, our team traded live using the analytical framework
+            we were building. These are the real results — 431 trades across the XAUUSD market, used
+            to validate our analytical approach before building it into the AI advisor.
           </p>
 
           <div className="flex gap-3 flex-wrap mt-2">
             <div className="rounded-2xl px-3 py-1 text-xs card border-[rgba(109,40,217,0.5)]">
-              Live Notion Sync
+              Internal Research
             </div>
             <div className="rounded-2xl px-3 py-1 text-xs card border-[rgba(200,162,74,0.35)]">
               XAUUSD Only
             </div>
             <div className="rounded-2xl px-3 py-1 text-xs card border-[rgba(109,40,217,0.35)]">
-              Risk-Adjusted
+              Team Trades
             </div>
+          </div>
+
+          <div className="mt-2">
+            <a
+              href="/chat"
+              className="inline-flex items-center gap-2 rounded-xl border border-[rgba(212,175,55,0.55)] bg-[rgba(212,175,55,0.08)] px-5 py-2.5 text-[13px] font-medium tracking-[0.05em] text-[color:var(--gold)] hover:bg-[rgba(212,175,55,0.16)] hover:border-[rgba(212,175,55,0.85)] transition"
+            >
+              Ask the Advisor →
+            </a>
           </div>
         </div>
       </section>
 
+      {/* ── KPI grid — hardcoded research totals ── */}
       <section className="mt-8 grid grid-cols-2 gap-4 xl:grid-cols-4">
         <div className="card rounded-3xl p-5 border border-white/10" style={{ borderLeft: "2px solid rgba(212,175,55,0.35)" }}>
           <div className="text-xs uppercase tracking-widest text-[color:var(--muted)]">
             Total Trades
           </div>
-          <div className="mt-3 text-3xl text-white/90">{stats.totalTrades}</div>
+          <div className="mt-3 text-3xl text-white/90">{RESEARCH_STATS.totalTrades}</div>
         </div>
 
         <div className="card rounded-3xl p-5 border border-white/10" style={{ borderLeft: "2px solid rgba(212,175,55,0.35)" }}>
           <div className="text-xs uppercase tracking-widest text-[color:var(--muted)]">
-            Win Rate
+            Outcome Rate
           </div>
-          <div className="mt-3 text-3xl text-white/90">{stats.winRate.toFixed(1)}%</div>
+          <div className="mt-3 text-3xl text-white/90">{RESEARCH_STATS.winRate.toFixed(2)}%</div>
         </div>
 
         <div className="card rounded-3xl p-5 border border-white/10" style={{ borderLeft: "2px solid rgba(212,175,55,0.35)" }}>
           <div className="text-xs uppercase tracking-widest text-[color:var(--muted)]">
             Total R
           </div>
-          <div className="mt-3 text-3xl text-white/90">{stats.totalR.toFixed(2)}</div>
+          <div className="mt-3 text-3xl text-white/90">{RESEARCH_STATS.totalR.toFixed(1)}</div>
         </div>
 
         <div className="card rounded-3xl p-5 border border-white/10" style={{ borderLeft: "2px solid rgba(212,175,55,0.35)" }}>
           <div className="text-xs uppercase tracking-widest text-[color:var(--muted)]">
             Avg R / Trade
           </div>
-          <div className="mt-3 text-3xl text-white/90">{stats.avgR.toFixed(2)}</div>
+          <div className="mt-3 text-3xl text-white/90">{RESEARCH_STATS.avgR.toFixed(1)}</div>
         </div>
       </section>
 
+      {/* ── Performance chart ── */}
       <section className="mt-8">
         <PerformanceChart trades={trades} />
       </section>
 
+      {/* ── Why we show this ── */}
+      <section className="mt-8">
+        <div
+          className="rounded-3xl p-6 sm:p-8 border"
+          style={{ background: "rgba(201,168,76,0.03)", borderColor: "rgba(201,168,76,0.08)" }}
+        >
+          <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-[color:var(--gold)] mb-4">
+            Why we show this
+          </div>
+          <div className="space-y-4 max-w-[720px] text-[13px] leading-[1.8]" style={{ color: "rgba(255,255,255,0.55)" }}>
+            <p>
+              Most trading products hide their research. We don&apos;t.
+            </p>
+            <p>
+              We spent months attempting to build a quantitative signal engine — HMM regime detection,
+              Kalman fair-value filters, Monte Carlo simulation, VPIN microstructure analysis,
+              walk-forward validation. The conclusion was honest: no statistically robust edge could be
+              validated on XAUUSD spot data with the required confidence level.
+            </p>
+            <p>
+              Rather than sell signals without a proven edge like most of the market, we made a
+              different choice: take everything we learned — the analytical frameworks, the macro
+              drivers, the prop firm mechanics — and build it into an AI advisor that helps traders
+              think better.
+            </p>
+            <p>
+              The 431 trades above are our team&apos;s live trading during that research period. They
+              validate one thing: the analytical framework works when applied with discipline.
+              BullionDesk exists to give every trader access to that same framework, in real time.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Trade table ── */}
       <section className="mt-8">
         <div className="card rounded-3xl p-0 overflow-hidden border border-white/10">
           <div className="flex items-center justify-between px-6 py-4 border-b border-[color:var(--border)]">
             <div className="text-sm uppercase tracking-widest text-[color:var(--muted)]">
-              Backtest Archive
+              Research Archive
             </div>
 
             <div className="text-xs text-[color:var(--muted)]">
-              {stats.wins} Wins · {stats.losses} Losses
+              {RESEARCH_STATS.wins} Wins · {RESEARCH_STATS.losses} Losses
             </div>
+          </div>
+
+          <div className="px-6 py-2.5 border-b border-white/[0.04]">
+            <p className="text-[10px] italic" style={{ color: "rgba(255,255,255,0.25)" }}>
+              Internal team trades — not representative of user results.
+            </p>
           </div>
 
           {/* Desktop table */}
@@ -284,8 +344,21 @@ export default async function BacktestPage() {
         </div>
       </section>
 
+      {/* ── CTA ── */}
+      <section className="mt-8 text-center">
+        <a
+          href="/chat"
+          className="inline-flex items-center gap-2 rounded-xl border border-[rgba(201,168,76,0.4)] bg-[rgba(201,168,76,0.06)] px-6 py-3 text-[13px] font-medium tracking-[0.05em] text-[color:var(--gold)] hover:bg-[rgba(201,168,76,0.12)] hover:border-[rgba(201,168,76,0.7)] transition"
+        >
+          Ask the Advisor
+        </a>
+        <p className="mt-3 text-[11px] text-[color:var(--muted)]">
+          BullionDesk doesn&apos;t predict markets. It helps you navigate them.
+        </p>
+      </section>
+
       <footer className="mt-8 text-xs text-[color:var(--muted)]">
-        Historical results are provided for research and framework validation.
+        Historical data provided for research transparency only. Not a performance claim. Past results do not predict future outcomes.
       </footer>
     </main>
   );

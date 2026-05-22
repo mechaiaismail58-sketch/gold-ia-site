@@ -222,8 +222,8 @@ export default function ChatOverlay({ isOpen, onClose }: Props) {
   function getSuggestions(content: string): string[] {
     if (content.includes(":::notrade") || /\bNO[- ]TRADE\b/i.test(content)) return ["Check back later", "What-if scenario", "Quick update"];
     if (content.includes(":::trade")) return ["Manage position", "Risk sizing", "What if it reverses?"];
-    if (content.length > 600) return ["Give me a trade", "Quick summary", "Key level to watch"];
-    return ["Full analysis", "Quick update", "Trade setup"];
+    if (content.length > 600) return ["Conditions de tradabilité", "Résumé rapide", "Niveau clé à surveiller"];
+    return ["Analyse complète", "Mise à jour rapide", "Contexte macro actuel"];
   }
 
   return (
@@ -262,7 +262,7 @@ export default function ChatOverlay({ isOpen, onClose }: Props) {
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: 11, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.16em", color: "rgba(255,255,255,0.5)" }}>
-              Live Signal Console
+              Trading Intelligence Console
             </span>
             <span style={{ fontSize: 9, fontFamily: "monospace", color: "#4ADE80", background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: 3, padding: "1px 6px" }}>
               AI Connected

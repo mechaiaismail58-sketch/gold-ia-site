@@ -57,7 +57,7 @@ const BADGE_STYLES: Record<string, string> = {
 const FRAMEWORKS = [
   {
     name: "ICT / Smart Money Concepts",
-    desc: "Orderblocks, Fair Value Gaps, Liquidity Sweeps, BOS/CHOCH, Market Structure Shift, Optimal Trade Entry, Premium/Discount zones",
+    desc: "Orderblocks, Fair Value Gaps, Liquidity Sweeps, BOS/CHOCH, Market Structure Shift, Premium/Discount zones, Precision context levels",
   },
   {
     name: "Wyckoff Method",
@@ -91,14 +91,14 @@ const STEPS = [
   { n: "03", label: "Structure Alignment",       desc: "D1 → H4 → H1, minimum 2/3 aligned" },
   { n: "04", label: "Institutional Cross-Check", desc: "COT, ETF flows, smart money verdict" },
   { n: "05", label: "Confluence Scoring",        desc: "9 factors scored, minimum 5/9 for a trade" },
-  { n: "06", label: "Entry Validation",          desc: "Price AT the level, SL within 2× ATR, TP before obstacles" },
+  { n: "06", label: "Precision Assessment",       desc: "Price AT the level, risk within 2× ATR, target before obstacles" },
 ];
 
 const DISCIPLINE = [
-  "Target 2–3 trades per 10 analyses — extremely selective",
-  "Entry only at precise structural levels — never mid-range",
-  "SL always structural, maximum 2× ATR",
-  "TP1 minimum 1.5R, TP2 minimum 2R",
+  "Target 2–3 actionable setups per 10 analyses — extremely selective",
+  "Precision only at structural levels — never mid-range",
+  "Risk always structural, maximum 2× ATR",
+  "Minimum 1.5R reward-to-risk, 2R+ preferred",
   "No trades within 2 hours of high-impact events (CPI, NFP, FOMC, GDP)",
   "Killzone preference — London (07–10 UTC) and New York (12–15 UTC) sessions prioritized",
 ];
@@ -120,7 +120,7 @@ export default function MethodologyPage() {
             A disciplined, multi-framework approach to gold analysis — built on the same principles used by institutional trading desks.
           </p>
           <div className="mt-8 flex flex-wrap gap-2">
-            {["22+ Data Sources", "7 Analytical Frameworks", "6-Step Reasoning", "2–3 Trades / 10 Analyses"].map((tag) => (
+            {["22+ Data Sources", "7 Analytical Frameworks", "6-Step Reasoning", "Institutional Clarity"].map((tag) => (
               <span
                 key={tag}
                 className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-[color:var(--muted)]"

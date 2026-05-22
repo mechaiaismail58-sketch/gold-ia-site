@@ -40,7 +40,8 @@ export default function PerformanceChart({ trades }: { trades: Trade[] }) {
           Performance Curve
         </div>
         <p className="mt-2 max-w-[60ch] text-sm leading-6 text-[color:var(--muted)]">
-          Cumulative R progression across recorded Bullion Desk trades.
+          Cumulative R progression across 431 internal research trades.
+          This is not a signal service record — it is the research that shaped how BullionDesk analyses markets.
         </p>
       </div>
 

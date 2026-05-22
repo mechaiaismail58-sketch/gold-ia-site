@@ -106,9 +106,9 @@ export default function AppMain({ onChatOpen }: Props) {
     },
     {
       label: "Structure",
-      value: lastTrade ? `Last signal: ${isLong ? "Bullish" : "Bearish"} bias` : "No active signal",
+      value: lastTrade ? `Last analysis: ${isLong ? "Bullish" : "Bearish"} bias` : "No active analysis",
       score: lastTrade ? 0.65 : 0.4,
-      tag: lastTrade ? "SIGNAL" : "NEUTRAL",
+      tag: lastTrade ? "ANALYSIS" : "NEUTRAL",
       tagColor: lastTrade ? "#D4AF37" : "rgba(255,255,255,0.25)",
     },
     {
@@ -150,7 +150,7 @@ export default function AppMain({ onChatOpen }: Props) {
 
       <div style={{ padding: "24px 28px", display: "flex", flexDirection: "column", gap: 20 }}>
 
-        {/* ── Signal Hero Card ── */}
+        {/* ── Last Analysis Card ── */}
         <div style={{
           border: "1px solid rgba(255,255,255,0.06)",
           borderRadius: 12,
@@ -216,7 +216,7 @@ export default function AppMain({ onChatOpen }: Props) {
                       ? `1:${Math.abs((lastTrade.tp1 - lastTrade.entry) / (lastTrade.entry - lastTrade.sl)).toFixed(1)}`
                       : "—",
                   },
-                  { label: "WINRATE", value: dash?.total_trades ? `${dash.winrate}%` : "—" },
+                  { label: "TRADES",  value: dash?.total_trades ? `${dash.total_trades}` : "—" },
                   { label: "STATUS",  value: "PENDING" },
                 ].map((s, i) => (
                   <div key={s.label} style={{
@@ -228,7 +228,7 @@ export default function AppMain({ onChatOpen }: Props) {
                     <div style={{
                       ...STAT_VALUE,
                       fontSize: 16,
-                      color: s.label === "STATUS" ? "#D4AF37" : s.label === "WINRATE" && dash?.winrate && dash.winrate > 50 ? "#4ADE80" : "rgba(255,255,255,0.75)",
+                      color: s.label === "STATUS" ? "#D4AF37" : "rgba(255,255,255,0.75)",
                     }}>
                       {s.value}
                     </div>
@@ -239,7 +239,7 @@ export default function AppMain({ onChatOpen }: Props) {
           ) : (
             <div style={{ padding: "40px 24px", textAlign: "center" }}>
               <div style={{ fontSize: 13, color: "rgba(255,255,255,0.3)", marginBottom: 16 }}>
-                No active signal — ask the AI for an analysis
+                No active analysis — ask the advisor
               </div>
               <button
                 onClick={onChatOpen}

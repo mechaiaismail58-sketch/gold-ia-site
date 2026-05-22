@@ -9,7 +9,7 @@ import Avatar from "@/components/Avatar";
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/methodology", label: "Methodology" },
-  { href: "/backtest", label: "Backtest" },
+  { href: "/backtest", label: "Our Research" },
   { href: "/market", label: "Market" },
   { href: "/calendar", label: "Calendar" },
   { href: "/about", label: "About" },

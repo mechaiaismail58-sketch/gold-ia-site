@@ -481,7 +481,7 @@ async function send(textOverride?: string) {
         <div className="card rounded-2xl sm:rounded-3xl p-0 overflow-hidden border border-white/10 shadow-[0_18px_90px_rgba(109,40,217,0.14)]">
           <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-[color:var(--border)]">
             <div className="text-sm uppercase tracking-widest text-[color:var(--muted)]">
-              Live Signal Console
+              Trading Intelligence Console
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -756,7 +756,7 @@ async function send(textOverride?: string) {
               Joindre votre chart améliore la précision de l'analyse.
             </div>
             <div className="mt-2 text-[12px] text-[color:var(--muted)]">
-              Not investment advice. Trade at your own risk.
+              Not investment advice. No signals. Trade at your own risk.
             </div>
           </div>
         </div>

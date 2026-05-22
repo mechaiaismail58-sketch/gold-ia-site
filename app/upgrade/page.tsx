@@ -32,7 +32,7 @@ const FEATURES = [
         <path d="M8 5v3l2 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
       </svg>
     ),
-    text: "Real-time data: COT positioning, ETF flows, intermarket signals",
+    text: "Real-time data: COT positioning, ETF flows, intermarket context",
   },
   {
     icon: (
@@ -40,7 +40,7 @@ const FEATURES = [
         <path d="M3 12L6 7l3 3 2-4 2 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
-    text: "Sniper entries with calibrated SL/TP — 8-criterion confluence scoring",
+    text: "8-criterion confluence scoring — tradability assessment before every decision",
   },
 ];
 
@@ -140,7 +140,7 @@ function UpgradeContent() {
               Bullion Desk Beta Access
             </h1>
             <p className="text-[color:var(--muted)] text-[14px] leading-relaxed mb-8 max-w-[44ch]">
-              Full access to the institutional gold analysis engine — macro-technical signals, live data, and precision trade plans.
+              Full access to the AI Senior Trading Advisor — macro-technical analysis, live data, prop firm monitoring, and institutional-grade clarity.
             </p>
 
             {/* Feature list */}

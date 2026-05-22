@@ -176,11 +176,11 @@ export default function AppSidebar() {
         </div>
       </Section>
 
-      {/* ── Active Signals ── */}
-      <Section title="Active Signals" count={dash?.active_trades.length}>
+      {/* ── Active Analyses ── */}
+      <Section title="Active Analyses" count={dash?.active_trades.length}>
         {!dash || dash.active_trades.length === 0 ? (
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", fontFamily: "monospace", padding: "8px 0" }}>
-            No pending signals
+            No active analyses
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -223,7 +223,7 @@ export default function AppSidebar() {
         )}
         {dash && (dash.total_trades ?? 0) > 0 && (
           <div style={{ marginTop: 8, fontSize: 9, color: "rgba(255,255,255,0.2)", fontFamily: "monospace" }}>
-            {dash.winrate}% winrate · {dash.wins}W / {dash.losses}L
+            {dash.total_trades} trades · {dash.wins}W / {dash.losses}L
           </div>
         )}
       </Section>

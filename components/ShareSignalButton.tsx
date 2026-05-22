@@ -71,7 +71,7 @@ function drawSignalCard(signal: ParsedSignal): string {
 
   ctx.font = "10px 'Courier New', monospace";
   ctx.fillStyle = "rgba(255,255,255,0.22)";
-  ctx.fillText("XAUUSD  ·  INSTITUTIONAL GOLD INTELLIGENCE", 40, 56);
+  ctx.fillText("XAUUSD  ·  AI SENIOR TRADING ADVISOR", 40, 56);
 
   // Timestamp top-right
   const now = new Date().toUTCString().slice(0, 25);
@@ -153,7 +153,7 @@ function drawSignalCard(signal: ParsedSignal): string {
   ctx.font = "10px 'Courier New', monospace";
   ctx.fillStyle = "rgba(255,255,255,0.15)";
   ctx.textAlign = "right";
-  ctx.fillText("GOLD SIGNAL", W - 40, 292);
+  ctx.fillText("GOLD ANALYSIS", W - 40, 292);
   ctx.font = "bold 13px 'Courier New', monospace";
   ctx.fillStyle = "rgba(212,175,55,0.4)";
   ctx.fillText("XAUUSD", W - 40, 316);
@@ -187,21 +187,20 @@ export default function ShareSignalButton({ text }: { text: string }) {
     const dataUrl = drawSignalCard(signal!);
     const a = document.createElement("a");
     a.href = dataUrl;
-    a.download = `bulliondesk-signal-${signal!.direction.toLowerCase()}-${Date.now()}.png`;
+    a.download = `bulliondesk-analysis-${signal!.direction.toLowerCase()}-${Date.now()}.png`;
     a.click();
     setShowMenu(false);
   }
 
   function handleTwitter() {
     const tweetText = [
-      `New gold signal — Bullion Desk`,
+      `Gold market analysis — Bullion Desk`,
       ``,
       `${signal!.direction} XAUUSD`,
-      `Entry: ${signal!.entry} | SL: ${signal!.stopLoss}`,
-      `TP1: ${signal!.tp1} | TP2: ${signal!.tp2}`,
       signal!.confluenceScore ? `Confluence: ${signal!.confluenceScore}` : "",
       ``,
-      `bulliondesk.pro — Institutional Gold Intelligence`,
+      `bulliondesk.pro — AI Senior Trading Advisor`,
+      `Not investment advice.`,
     ].filter(Boolean).join("\n");
 
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
@@ -220,7 +219,7 @@ export default function ShareSignalButton({ text }: { text: string }) {
           <path d="M8 1L11 4L8 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
           <path d="M11 4H5C3.34 4 2 5.34 2 7V11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
-        Share Signal
+        Share Analysis
       </button>
 
       {showMenu && (

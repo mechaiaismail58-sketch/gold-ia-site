@@ -8,16 +8,16 @@ function isValidEmail(v: string) {
 
 const FEATURES = [
   {
-    title: "Institutional Analysis",
-    desc: "Full macro-technical confluence: COT positioning, ETF flows, yields, DXY and smart money reads.",
+    title: "Market Intelligence",
+    desc: "Complete market analysis across all asset classes — Forex, Metals, Indices, Futures, Energy.",
   },
   {
-    title: "Sniper Entries",
-    desc: "OB/FVG-based entry levels with structural SL and minimum 1.5R TP — never a guess.",
+    title: "Prop Firm Ready",
+    desc: "Real-time DD monitoring for FTMO, The5ers, Apex, E8, FundedNext and more. Know your limits before you trade.",
   },
   {
-    title: "Real-time Data",
-    desc: "Live XAUUSD price, intermarket context, and AI-driven confluence scoring updated on demand.",
+    title: "Institutional Clarity",
+    desc: "No signals. No predictions. Macro context, tradability scoring, and risk management — like a professional trading desk.",
   },
 ];
 
@@ -59,7 +59,7 @@ export default function WaitlistLanding() {
             Bullion <span className="text-[color:var(--gold)]">Desk</span>
           </p>
           <p className="mt-2 text-[10px] tracking-[0.18em] uppercase text-[color:var(--muted)]">
-            Institutional Gold Intelligence
+            AI Senior Trading Advisor
           </p>
         </div>
 
@@ -76,11 +76,11 @@ export default function WaitlistLanding() {
         {/* ── Hero ── */}
         <div className="text-center mb-10">
           <h1 className="text-[30px] sm:text-[44px] leading-[1.08] tracking-[-0.03em] font-normal mb-5">
-            Institutional-grade gold intelligence.{" "}
-            <span className="text-[color:var(--gold)] italic">Coming soon.</span>
+            Your Senior Trading Advisor.{" "}
+            <span className="text-[color:var(--gold)] italic">Always on.</span>
           </h1>
           <p className="text-[16px] text-[color:var(--muted)] leading-[1.7] max-w-[46ch] mx-auto">
-            AI-powered XAUUSD analysis combining macro, smart money, and technical confluence. Beta access opening soon.
+            Institutional-grade market intelligence across all assets. Forex, Metals, Indices, Futures. Built for serious traders and prop firm accounts.
           </p>
         </div>
 
@@ -128,7 +128,7 @@ export default function WaitlistLanding() {
                         <span className="h-3.5 w-3.5 rounded-full border-2 border-[rgba(212,175,55,0.25)] border-t-[color:var(--gold)] animate-spin" />
                         Joining…
                       </span>
-                    ) : "Join the waitlist"}
+                    ) : "Join the waitlist — AI Trading Advisor"}
                   </button>
                 </div>
 
@@ -168,7 +168,7 @@ export default function WaitlistLanding() {
 
         {/* ── Footer ── */}
         <p className="text-center text-[11px] text-white/25">
-          Bullion Desk © 2026 · Institutional Gold Intelligence
+          Bullion Desk © 2026 · AI Senior Trading Advisor · Not investment advice
         </p>
       </div>
 
