@@ -137,14 +137,14 @@ export default function WaitlistLanding() {
                   />
                   <button
                     type="submit" disabled={loading}
-                    className="rounded-xl border border-[rgba(212,175,55,0.55)] bg-[rgba(212,175,55,0.08)] px-6 py-3 text-[13px] font-medium tracking-[0.05em] text-[color:var(--gold)] hover:bg-[rgba(212,175,55,0.16)] hover:border-[rgba(212,175,55,0.85)] disabled:opacity-50 disabled:cursor-not-allowed transition min-h-[48px] shrink-0"
+                    className="rounded-xl border border-[rgba(212,175,55,0.55)] bg-[rgba(212,175,55,0.08)] px-6 py-3 text-[13px] font-medium tracking-[0.05em] text-[color:var(--gold)] hover:bg-[rgba(212,175,55,0.16)] hover:border-[rgba(212,175,55,0.85)] disabled:opacity-50 disabled:cursor-not-allowed transition min-h-[48px] shrink-0 whitespace-nowrap"
                   >
                     {loading ? (
                       <span className="flex items-center gap-2 justify-center">
                         <span className="h-3.5 w-3.5 rounded-full border-2 border-[rgba(212,175,55,0.25)] border-t-[color:var(--gold)] animate-spin" />
                         Joining…
                       </span>
-                    ) : "Join the waitlist — AI Trading Advisor"}
+                    ) : "Join Early Access"}
                   </button>
                 </div>
 
