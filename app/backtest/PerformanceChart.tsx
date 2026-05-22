@@ -18,38 +18,47 @@ type Trade = {
 };
 
 function buildCurve(): { tradeNumber: number; cumulativeR: number }[] {
-  const pts: { tradeNumber: number; cumulativeR: number }[] = [];
-  let cum = 0;
+  const points: number[] = [0];
+  const TARGET = 411.8;
+  const N = 431;
 
-  for (let i = 1; i <= 431; i++) {
-    // Deterministic noise — two sine waves with different periods (averages ~0)
-    const noise =
-      Math.sin(i * 3.7 + 0.8) * 0.45 +
-      Math.sin(i * 1.1 + 2.1) * 0.25;
-
-    // Base per-trade increment (~0.956 × 431 ≈ 412R before drawdowns)
-    let inc = 0.956 + noise;
-
-    // Drawdown zone 1 — trades 85-115: smooth arc shape via sin, ~12R repli
-    if (i >= 85 && i <= 115) {
-      inc -= Math.sin(((i - 85) / 30) * Math.PI) * 1.8;
-    }
-
-    // Drawdown zone 2 — trades 252-278: smooth arc shape via sin, ~8R repli
-    if (i >= 252 && i <= 278) {
-      inc -= Math.sin(((i - 252) / 26) * Math.PI) * 1.35;
-    }
-
-    cum += inc;
-    pts.push({ tradeNumber: i, cumulativeR: +cum.toFixed(2) });
+  function pseudoRand(seed: number): number {
+    const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+    return x - Math.floor(x); // 0..1
   }
 
-  // Scale so the curve ends at exactly 411.8R
-  const finalR = pts[pts.length - 1].cumulativeR;
-  const scale = 411.8 / finalR;
-  return pts.map((p) => ({
-    tradeNumber: p.tradeNumber,
-    cumulativeR: +(p.cumulativeR * scale).toFixed(2),
+  for (let i = 1; i < N; i++) {
+    const prev = points[i - 1];
+    const r = pseudoRand(i);
+
+    const isWin = r < 0.6988;
+    let tradeR: number;
+
+    if (isWin) {
+      const rSize = pseudoRand(i + 500);
+      tradeR = 1.0 + rSize * 2.2;
+    } else {
+      const rSize = pseudoRand(i + 1000);
+      tradeR = -(0.8 + rSize * 0.5);
+    }
+
+    // DD1 : trades 78-118 — série difficile
+    if (i >= 78 && i <= 118) {
+      tradeR = isWin ? tradeR * 0.4 : tradeR * 1.6;
+    }
+    // DD2 : trades 248-272 — correction rapide
+    if (i >= 248 && i <= 272) {
+      tradeR = isWin ? tradeR * 0.3 : tradeR * 1.8;
+    }
+
+    points.push(prev + tradeR);
+  }
+
+  const rawFinal = points[N - 1];
+  const scale = TARGET / rawFinal;
+  return points.map((v, idx) => ({
+    tradeNumber: idx + 1,
+    cumulativeR: parseFloat((v * scale).toFixed(2)),
   }));
 }
 
