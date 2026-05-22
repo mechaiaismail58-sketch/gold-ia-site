@@ -2,7 +2,7 @@ const DATA_CATEGORIES = [
   {
     title: "Price & Structure",
     items: [
-      { text: "Twelve Data — H1, H4, D1 OHLCV bars for XAUUSD", badge: "LIVE" },
+      { text: "Twelve Data — H1, H4, D1 OHLCV bars for all covered assets (XAUUSD, Forex pairs, Indices, Futures, Energy)", badge: "LIVE" },
       { text: "Calculated indicators — RSI, MACD, EMA, ADX, Bollinger, Stochastic, CCI, ATR, VWAP", badge: "LIVE" },
       { text: "Orderblocks, Fair Value Gaps, BOS/CHOCH detection — computed locally", badge: "LIVE" },
     ],
@@ -91,16 +91,18 @@ const STEPS = [
   { n: "03", label: "Structure Alignment",       desc: "D1 → H4 → H1, minimum 2/3 aligned" },
   { n: "04", label: "Institutional Cross-Check", desc: "COT, ETF flows, smart money verdict" },
   { n: "05", label: "Confluence Scoring",        desc: "9 factors scored, minimum 5/9 for a trade" },
-  { n: "06", label: "Precision Assessment",       desc: "Price AT the level, risk within 2× ATR, target before obstacles" },
+  { n: "06", label: "Precision Assessment",       desc: "Price at the level, volatility within range, reward-to-risk structurally justified" },
 ];
 
 const DISCIPLINE = [
-  "Target 2–3 actionable setups per 10 analyses — extremely selective",
-  "Precision only at structural levels — never mid-range",
-  "Risk always structural, maximum 2× ATR",
-  "Minimum 1.5R reward-to-risk, 2R+ preferred",
-  "No trades within 2 hours of high-impact events (CPI, NFP, FOMC, GDP)",
-  "Killzone preference — London (07–10 UTC) and New York (12–15 UTC) sessions prioritized",
+  "Extremely selective — 'nothing to do today' is a complete and valid answer",
+  "Analysis only at structural levels — never mid-range, never forced",
+  "Risk always structural and proportional to account phase",
+  "Minimum 1.5R reward-to-risk context required to recommend engagement",
+  "Caution flag raised automatically within 2 hours of high-impact events (CPI, NFP, FOMC, GDP)",
+  "Session awareness — London (07–10 UTC) and New York (12–15 UTC) prioritized for actionable conditions",
+  "Prop firm rules enforced automatically — DD limits, consistency rules, phase-specific guidance",
+  "Psychological pattern detection — revenge trading, FOMO, and overtrading flagged before analysis",
 ];
 
 export default function MethodologyPage() {
@@ -117,10 +119,10 @@ export default function MethodologyPage() {
             Our Methodology
           </h1>
           <p className="mt-6 text-[color:var(--muted)] leading-7 max-w-[68ch]">
-            A disciplined, multi-framework approach to gold analysis — built on the same principles used by institutional trading desks.
+            A disciplined, multi-framework approach to market analysis across all asset classes — built on the same principles used by institutional trading desks.
           </p>
           <div className="mt-8 flex flex-wrap gap-2">
-            {["22+ Data Sources", "7 Analytical Frameworks", "6-Step Reasoning", "Institutional Clarity"].map((tag) => (
+            {["22+ Data Sources", "7 Analytical Frameworks", "6-Step Reasoning", "All Asset Classes", "No Signals"].map((tag) => (
               <span
                 key={tag}
                 className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-[color:var(--muted)]"
