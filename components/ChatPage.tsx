@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import AccountDashboard from "@/components/AccountDashboard";
 import MarketDashboard from "@/components/MarketDashboard";
 import TradeTracker from "@/components/TradeTracker";
 import OnboardingModal from "@/components/OnboardingModal";
@@ -58,10 +59,10 @@ export default function ChatPage() {
 
   // Dynamic contextual suggestions
   const [suggestions, setSuggestions] = useState<string[]>([
-    "Give me a full gold analysis",
-    "Quick market brief",
-    "Give me a trade setup",
-    "What are the key levels right now?",
+    "Analyse XAUUSD — marché et biais",
+    "Analyse EURUSD — structure H4",
+    "Brief rapide sur le NAS100",
+    "Contexte macro actuel",
   ]);
 
   function fetchSuggestions() {
@@ -94,7 +95,7 @@ export default function ChatPage() {
     reader.readAsDataURL(file);
   }
 
-  const PLACEHOLDER_TEXT = "Analyse XAUUSD";
+  const PLACEHOLDER_TEXT = "Analyse EURUSD, Gold, NAS100…";
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const chatInputRef = useRef<HTMLInputElement | null>(null);
@@ -451,28 +452,28 @@ async function send(textOverride?: string) {
       <section className="card rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/10 shadow-[0_18px_80px_rgba(109,40,217,0.18)]">
         <div className="flex flex-col gap-4">
           <h1 className="text-[28px] sm:text-[34px] leading-[1.15] tracking-[-0.02em]">
-            Institutional-grade gold trade signals, filtered through a disciplined framework.
+            Senior Trading Advisor. Tous les marchés. Niveau institutionnel.
           </h1>
 
           <p className="text-[color:var(--muted)] max-w-[60ch] leading-6 text-[14px] sm:text-base">
-            Bullion Desk evaluates whether the market is tradable first, then delivers structured gold trade signals, directional bias, and risk-aware execution logic only when conditions justify action.
+            BullionDesk analyse la structure de marché, le contexte macro et les conditions de tradabilité sur tous les actifs — Forex, Métaux, Indices, Futures, Énergie. Optimisé prop firm.
           </p>
 
           <div className="flex gap-3 flex-wrap mt-2">
             <div className="rounded-2xl px-3 py-1 text-xs card border-[rgba(109,40,217,0.5)]">
-              XAUUSD Signals
+              Forex · Métaux
             </div>
             <div className="rounded-2xl px-3 py-1 text-xs card border-[rgba(200,162,74,0.35)]">
-              Market Filter
+              Indices · Futures
             </div>
             <div className="rounded-2xl px-3 py-1 text-xs card border-[rgba(109,40,217,0.35)]">
-              Risk-First
+              Prop Firm Ready
             </div>
           </div>
         </div>
       </section>
 
-      <MarketDashboard />
+      <AccountDashboard />
 
       <TradeTracker />
 
@@ -752,7 +753,7 @@ async function send(textOverride?: string) {
               <svg width="11" height="11" viewBox="0 0 12 12" fill="none" className="shrink-0">
                 <path d="M2 10V7.5M5 10V4.5M8 10V2M11 10V5.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
               </svg>
-              Attaching your chart is recommended for more accurate signals.
+              Joindre votre chart améliore la précision de l'analyse.
             </div>
             <div className="mt-2 text-[12px] text-[color:var(--muted)]">
               Not investment advice. Trade at your own risk.

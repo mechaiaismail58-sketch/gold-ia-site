@@ -416,6 +416,27 @@ function detectMode(message: string): Mode {
     "full analysis",
     "full xauusd analysis",
     "status board",
+    "analyse le marché",
+    "analyse marché",
+    "analyse le forex",
+    "analyse forex",
+    "analyse eurusd",
+    "analyse gbpusd",
+    "analyse usdjpy",
+    "analyse nasdaq",
+    "analyse nas100",
+    "analyse sp500",
+    "analyse spx",
+    "analyse dax",
+    "analyse oil",
+    "analyse crude",
+    "analyse silver",
+    "analyse xagusd",
+    "analyze the market",
+    "full market analysis",
+    "deep analysis",
+    "analyse complète",
+    "analyse complete",
   ];
 
   const educationSignals = [
@@ -631,7 +652,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const mode = detectMode(userMessage || "analyse xauusd");
+    const mode = detectMode(userMessage || "analyse marché");
     const tradeHorizon = detectTradeHorizon(userMessage || "");
 
     // Fetch user profile for context injection
@@ -639,7 +660,7 @@ export async function POST(req: Request) {
     const dbClient = admin ?? supabase;
     const { data: userProfile } = await (dbClient as typeof supabase)
       .from("users")
-      .select("trading_horizon, trading_style, account_size, experience_level, risk_profile")
+      .select("trading_horizon, trading_style, account_size, experience_level, risk_profile, account_type, prop_firm, prop_firm_phase, primary_assets")
       .eq("id", user.id)
       .single();
     step("[3] user profile fetched");
@@ -761,13 +782,19 @@ Rules:
     let userProfileBlock = "";
     if (userProfile) {
       const profileLines: string[] = [];
+      if (userProfile.account_type)     profileLines.push(`- Account type: ${userProfile.account_type}`);
+      if (userProfile.prop_firm)        profileLines.push(`- Prop firm: ${userProfile.prop_firm}`);
+      if (userProfile.prop_firm_phase)  profileLines.push(`- Prop firm phase: ${userProfile.prop_firm_phase}`);
       if (userProfile.trading_style)    profileLines.push(`- Trading style: ${userProfile.trading_style}`);
       if (userProfile.experience_level) profileLines.push(`- Experience level: ${userProfile.experience_level}`);
       if (userProfile.account_size)     profileLines.push(`- Account size: ${userProfile.account_size}`);
       if (userProfile.risk_profile)     profileLines.push(`- Risk profile: ${userProfile.risk_profile}`);
+      if (Array.isArray(userProfile.primary_assets) && userProfile.primary_assets.length > 0) {
+        profileLines.push(`- Primary assets: ${(userProfile.primary_assets as string[]).join(", ")}`);
+      }
 
       if (profileLines.length > 0) {
-        userProfileBlock = `\nUSER PROFILE (adapt subtly, do not mention this profile explicitly in your response):\n${profileLines.join("\n")}\n\nSubtle adaptation rules:\n- trading_style = scalp → focus on H1/M15 levels, tighter entries, faster TP targets\n- trading_style = swing → focus on H4/D1 levels, wider structure, longer TP targets\n- experience_level = beginner → slightly simpler vocabulary, mention risk management reminders\n- experience_level = advanced or professional → straight to execution, no basic explanations\n- account_size = under $5k → suggest smaller position sizes, tighter risk per trade\n- account_size = $100k+ → position sizing in standard lots, institutional perspective\n- risk_profile = conservative → emphasize SL importance, prefer higher R/R setups only\n- risk_profile = aggressive → accept slightly lower R/R, mention higher position size options\n\nThese adaptations must be invisible — never say 'because you are a beginner' or 'given your account size'. Just naturally adjust depth, vocabulary, level focus, and sizing suggestions.`;
+        userProfileBlock = `\nUSER PROFILE (adapt subtly, do not mention this profile explicitly in your response):\n${profileLines.join("\n")}\n\nSubtle adaptation rules:\n- account_type = prop_firm or both → always include a PROP FIRM note at the end of market analyses; adapt risk advice to prop firm DD rules\n- prop_firm → cite the specific firm's rules when relevant (FTMO 5% daily DD, E8 8% max loss, etc.)\n- prop_firm_phase = challenge_1 or challenge_2 → be more conservative; emphasize consistency rule\n- prop_firm_phase = funded → focus on capital preservation and payout conditions\n- trading_style = scalp → focus on H1/M15 levels, faster timeframes\n- trading_style = swing → focus on H4/D1 levels, wider structure\n- experience_level = beginner → simpler vocabulary, mention risk management reminders\n- experience_level = advanced → straight to the point, no basic explanations\n- account_size = under $5k → suggest smaller sizes, tighter risk per trade\n- account_size = $100k+ → institutional perspective, standard lots\n- primary_assets → reference these assets first when giving market context or correlations\n\nThese adaptations must be invisible — never say 'because you are a beginner' or 'given your account size'. Just naturally adjust depth, vocabulary, and risk framing.`;
       }
     }
 
@@ -817,7 +844,7 @@ ${tradeMemory && tradeMemory.signals.length > 0 ? `\nPREVIOUS TRADE SIGNALS\n${t
 ${horizonInstruction}
 
 ${conversationHistory}USER REQUEST
-${userMessage || "Analyse XAUUSD."}`.trim();
+${userMessage || "Analyse le marché."}`.trim();
 
     // Build user message content for Anthropic API
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
