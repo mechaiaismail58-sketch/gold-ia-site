@@ -232,7 +232,8 @@ export default async function BacktestPage() {
 
           <div className="px-6 py-2.5 border-b border-white/[0.04]">
             <p className="text-[10px] italic" style={{ color: "rgba(255,255,255,0.25)" }}>
-              Internal team trades — not representative of user results.
+              Showing a selected sample of trades from our internal research period.
+              Full dataset: 431 trades. Sample shown for transparency.
             </p>
           </div>
 
