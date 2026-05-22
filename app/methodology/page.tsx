@@ -221,9 +221,10 @@ export default function MethodologyPage() {
       <section className="card rounded-3xl p-8 border border-white/10">
         <h2 className="text-[22px] tracking-[-0.02em]">Trade Discipline</h2>
         <p className="mt-3 text-[color:var(--muted)] leading-6 text-sm max-w-[60ch]">
-          The AI says{" "}
-          <span className="text-white font-medium">NO TRADE</span> more often than it gives a
-          trade. That is by design.
+          The advisor says{" "}
+          <span className="text-white font-medium">WAIT</span>{" "}more often than it
+          validates conditions. That is by design.{" "}
+          <span className="text-white/50">No position pressure. Ever.</span>
         </p>
 
         <div className="mt-7 space-y-2.5">
@@ -234,6 +235,32 @@ export default function MethodologyPage() {
             >
               <span className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--gold)]" />
               <span className="text-[13px] text-[color:var(--muted)] leading-5">{rule}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Section 5 — What the Advisor Will Never Do ── */}
+      <section className="card rounded-3xl p-8 border border-white/10">
+        <h2 className="text-[22px] tracking-[-0.02em]">What the Advisor Will Never Do</h2>
+        <p className="mt-3 text-[color:var(--muted)] leading-6 text-sm max-w-[60ch]">
+          These constraints are hard-coded into every response. Not guidelines — rules.
+        </p>
+        <div className="mt-7 grid sm:grid-cols-2 gap-3">
+          {[
+            { label: "No entry prices", desc: "Never gives a specific price to enter a trade" },
+            { label: "No stop loss targets", desc: "Never gives an exact SL price — explains the logic instead" },
+            { label: "No take profit targets", desc: "Never gives a TP price — explains the structural context" },
+            { label: "No directional predictions", desc: "Never says 'price will go to X'" },
+            { label: "No position recommendations", desc: "Never says 'buy' or 'sell' as a direct instruction" },
+            { label: "No performance promises", desc: "Never claims past or future returns" },
+          ].map((item) => (
+            <div key={item.label} className="flex items-start gap-3 rounded-xl border border-red-500/10 bg-red-500/[0.03] px-4 py-3">
+              <span className="mt-[3px] text-red-500/50 text-[13px] shrink-0">✕</span>
+              <div>
+                <div className="text-[13px] text-white/70">{item.label}</div>
+                <div className="text-[11px] text-white/30 mt-0.5 leading-5">{item.desc}</div>
+              </div>
             </div>
           ))}
         </div>
