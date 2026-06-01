@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   keywords: "trading advisor, AI trading, prop firm, market analysis, FTMO, gold analysis, risk management, trading psychology, gold trading coach, XAUUSD analysis, gold market structure",
   openGraph: {
     title: "BullionDesk — Your AI Gold Trading Coach",
-    description: "Institutional-grade market intelligence for serious traders. Forex, Metals, Indices, Futures. Prop firm ready. No signals. Just clarity.",
+    description: "Institutional-grade gold analysis for serious XAUUSD traders. Structure, macro, risk management. Prop firm ready. No signals. Just clarity.",
     type: "website",
   },
   icons: {
