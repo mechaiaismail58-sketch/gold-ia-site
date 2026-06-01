@@ -155,7 +155,8 @@ export default function MarketPage() {
             { label: "DXY",          value: fmtPrice(dxy), chg: fmtChg(dxy), hasItem: !!dxy },
             { label: "10Y Yield",    value: fmtPrice(y10), chg: fmtChg(y10), hasItem: !!y10 },
             { label: "VIX",          value: fmtPrice(vix), chg: fmtChg(vix), hasItem: !!vix },
-            { label: "Gold / Silver", value: gsRatio,       chg: null,        hasItem: !!xau && !!xag },
+            // TODO: réactiver quand l'API est branchée
+            // { label: "Gold / Silver", value: gsRatio, chg: null, hasItem: !!xau && !!xag },
           ].map((m) => (
             <div
               key={m.label}
@@ -186,7 +187,8 @@ export default function MarketPage() {
         <GoldTradingViewChart />
       </section>
 
-      {/* ── Section 3 — News ── */}
+      {/* TODO: réactiver quand l'API est branchée */}
+      {/* Section 3 — News (masquée temporairement — API /api/news non branchée)
       <section className="card rounded-3xl p-6 sm:p-8 border border-white/10">
         <div className="text-xs tracking-[0.18em] uppercase text-[color:var(--muted)] mb-5">
           Recent News
@@ -228,6 +230,7 @@ export default function MarketPage() {
           </ul>
         )}
       </section>
+      */}
 
       {/* ── Section 4 — Economic Calendar ── */}
       <section className="card rounded-3xl p-6 sm:p-8 border border-white/10">
