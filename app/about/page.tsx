@@ -67,7 +67,7 @@ export default function AboutPage() {
             BullionDesk was born from that frustration. The idea: build an intelligence engine
             that does this work automatically — one that reads 22+ data sources, applies
             institutional frameworks, and delivers clear analysis with iron discipline. Not a
-            signal service. Not another indicator. A real trading advisor that thinks before it
+            signal service. Not another indicator. A real trading coach that thinks before it
             speaks, and says no when conditions don&apos;t warrant a trade.
           </p>
 

@@ -37,10 +37,10 @@ const SUGGESTIONS: Record<MarketState, string[]> = {
     "What would invalidate the bullish structure?",
   ],
   ranging: [
-    "Is gold accumulating or distributing?",
-    "What breaks this range — up or down?",
-    "Best strategy for a ranging gold market",
-    "What is the institutional positioning right now?",
+    "What's the current gold structure?",
+    "Is gold tradable today? Give me the full picture.",
+    "What macro factors are driving gold right now?",
+    "Review my trade idea on XAUUSD",
   ],
   pre_event: [
     "Should I close my position before this event?",

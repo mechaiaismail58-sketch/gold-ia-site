@@ -212,11 +212,11 @@ export default function ProfileClient({ email, tradingHorizon, avatarUrl }: Prop
       {/* ── Push alerts ── */}
       <section className="card rounded-3xl border border-white/10 p-8">
         <div className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--muted)] mb-1">Notifications</div>
-        <h2 className="text-[20px] tracking-[-0.02em] mb-5">Automated alerts</h2>
+        <h2 className="text-[20px] tracking-[-0.02em] mb-5">Analysis alerts</h2>
         <div className="flex gap-4 flex-wrap items-center">
           {[
-            { key: "scalp", label: "Scalp alerts", val: scalpAlerts, set: (v: boolean) => saveAlerts(v, swingAlerts ?? true) },
-            { key: "swing", label: "Swing alerts", val: swingAlerts, set: (v: boolean) => saveAlerts(scalpAlerts ?? true, v) },
+            { key: "scalp", label: "Scalp updates", val: scalpAlerts, set: (v: boolean) => saveAlerts(v, swingAlerts ?? true) },
+            { key: "swing", label: "Swing updates", val: swingAlerts, set: (v: boolean) => saveAlerts(scalpAlerts ?? true, v) },
           ].map(({ key, label, val, set }) => (
             <button
               key={key}
@@ -235,7 +235,7 @@ export default function ProfileClient({ email, tradingHorizon, avatarUrl }: Prop
           {alertsSaved && <span className="text-[11px] text-emerald-400 tracking-[0.08em]">Saved</span>}
         </div>
         <p className="mt-3 text-[11px] text-white/30">
-          Receive a push notification when the AI detects a valid signal.
+          Receive a notification when new high-conviction analysis is available.
         </p>
       </section>
 

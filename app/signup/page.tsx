@@ -99,7 +99,7 @@ export default function SignupPage() {
             Bullion <span className="text-[color:var(--gold)]">Desk</span>
           </Link>
           <p className="mt-2 text-xs text-[color:var(--muted)] tracking-[0.12em] uppercase">
-            Institutional Gold Intelligence
+            AI Gold Trading Coach
           </p>
         </div>
 

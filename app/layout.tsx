@@ -7,11 +7,11 @@ import { ChatProvider } from "@/context/ChatContext";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "BullionDesk — AI Senior Trading Advisor",
-  description: "Institutional-grade market intelligence for serious traders. Forex, Metals, Indices, Futures. Prop firm ready. No signals. Just clarity.",
-  keywords: "trading advisor, AI trading, prop firm, market analysis, FTMO, forex analysis, gold analysis, risk management, trading psychology",
+  title: "BullionDesk — AI Gold Trading Coach",
+  description: "Institutional-grade gold analysis for serious XAUUSD traders. Structure, macro, risk management. Prop firm ready. No signals. Just clarity.",
+  keywords: "trading advisor, AI trading, prop firm, market analysis, FTMO, gold analysis, risk management, trading psychology, gold trading coach, XAUUSD analysis, gold market structure",
   openGraph: {
-    title: "BullionDesk — Your AI Trading Advisor",
+    title: "BullionDesk — Your AI Gold Trading Coach",
     description: "Institutional-grade market intelligence for serious traders. Forex, Metals, Indices, Futures. Prop firm ready. No signals. Just clarity.",
     type: "website",
   },

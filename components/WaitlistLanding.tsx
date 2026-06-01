@@ -8,16 +8,16 @@ function isValidEmail(v: string) {
 
 const FEATURES = [
   {
-    title: "All Markets",
-    desc: "Forex, Metals, Indices, Futures, Energy. One advisor that covers everything you trade — with the same institutional-grade depth on every asset.",
+    title: "Gold Specialist",
+    desc: "Deep XAUUSD analysis combining structure, macro context, intermarket correlations, and institutional flow. The depth of a trading desk, available 24/7.",
   },
   {
     title: "Prop Firm Intelligence",
     desc: "FTMO, The5ers, Apex, E8, FundedNext and more. Real-time DD tracking, consistency rules, phase-specific guidance. Never blow a funded account on a technicality.",
   },
   {
-    title: "Your Trading VP",
-    desc: "Market structure, macro context, tradability score, risk sizing, psychology detection. Like having a 30-year veteran in your corner before every trade.",
+    title: "Your Trading Coach",
+    desc: "Market structure, macro context, tradability score, risk sizing, psychology detection. Like having a senior gold trader in your corner — challenging your bias, sharpening your process, keeping you disciplined.",
   },
 ];
 
@@ -59,7 +59,7 @@ export default function WaitlistLanding() {
             Bullion <span className="text-[color:var(--gold)]">Desk</span>
           </p>
           <p className="mt-2 text-[10px] tracking-[0.18em] uppercase text-[color:var(--muted)]">
-            AI Senior Trading Advisor
+            AI Gold Trading Coach
           </p>
         </div>
 
@@ -76,17 +76,17 @@ export default function WaitlistLanding() {
         {/* ── Hero ── */}
         <div className="text-center mb-10">
           <h1 className="text-[30px] sm:text-[44px] leading-[1.08] tracking-[-0.03em] font-normal mb-5">
-            Your Senior Trading Advisor.{" "}
+            Your AI Gold Trading Coach.{" "}
             <span className="text-[color:var(--gold)] italic">Always on.</span>
           </h1>
           <p className="text-[16px] text-[color:var(--muted)] leading-[1.7] max-w-[46ch] mx-auto">
-            Institutional-grade market intelligence across all assets. Forex, Metals, Indices, Futures. Built for serious traders and prop firm accounts.
+            Institutional-grade gold analysis. Structure, macro, risk — everything you need to trade XAUUSD with clarity. Built for serious gold traders and prop firm candidates.
           </p>
           <div className="flex items-center justify-center gap-6 mt-6 flex-wrap">
             {[
               { value: "431", label: "Research trades" },
               { value: "7", label: "Prop firms supported" },
-              { value: "15+", label: "Asset classes" },
+              { value: "24/7", label: "Market coverage" },
             ].map((s) => (
               <div key={s.label} className="text-center">
                 <div className="text-[22px] font-light tracking-[-0.02em] text-[color:var(--gold)]">
@@ -205,7 +205,7 @@ export default function WaitlistLanding() {
 
         {/* ── Footer ── */}
         <p className="text-center text-[11px] text-white/25">
-          Bullion Desk © 2026 · AI Senior Trading Advisor · Not investment advice
+          Bullion Desk © 2026 · AI Gold Trading Coach · Not investment advice
         </p>
       </div>
 

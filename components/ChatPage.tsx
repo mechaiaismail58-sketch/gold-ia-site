@@ -95,7 +95,7 @@ export default function ChatPage() {
     reader.readAsDataURL(file);
   }
 
-  const PLACEHOLDER_TEXT = "Analyse EURUSD, Gold, NAS100…";
+  const PLACEHOLDER_TEXT = "Ask about XAUUSD — structure, context, risk…";
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const chatInputRef = useRef<HTMLInputElement | null>(null);
@@ -452,21 +452,18 @@ async function send(textOverride?: string) {
       <section className="card rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/10 shadow-[0_18px_80px_rgba(109,40,217,0.18)]">
         <div className="flex flex-col gap-4">
           <h1 className="text-[28px] sm:text-[34px] leading-[1.15] tracking-[-0.02em]">
-            Senior Trading Advisor. Tous les marchés. Niveau institutionnel.
+            Your AI Gold Trading Coach. Institutional-grade XAUUSD intelligence.
           </h1>
 
           <p className="text-[color:var(--muted)] max-w-[60ch] leading-6 text-[14px] sm:text-base">
-            BullionDesk analyse la structure de marché, le contexte macro et les conditions de tradabilité sur tous les actifs — Forex, Métaux, Indices, Futures, Énergie. Optimisé prop firm.
+            BullionDesk analyzes gold market structure, macro context, and tradability conditions. Built for serious traders and prop firm accounts.
           </p>
 
           <div className="flex gap-3 flex-wrap mt-2">
             <div className="rounded-2xl px-3 py-1 text-xs card border-[rgba(109,40,217,0.5)]">
-              Forex · Métaux
+              XAUUSD
             </div>
             <div className="rounded-2xl px-3 py-1 text-xs card border-[rgba(200,162,74,0.35)]">
-              Indices · Futures
-            </div>
-            <div className="rounded-2xl px-3 py-1 text-xs card border-[rgba(109,40,217,0.35)]">
               Prop Firm Ready
             </div>
           </div>
@@ -753,7 +750,7 @@ async function send(textOverride?: string) {
               <svg width="11" height="11" viewBox="0 0 12 12" fill="none" className="shrink-0">
                 <path d="M2 10V7.5M5 10V4.5M8 10V2M11 10V5.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
               </svg>
-              Joindre votre chart améliore la précision de l'analyse.
+              Attach your chart to improve analysis accuracy.
             </div>
             <div className="mt-2 text-[12px] text-[color:var(--muted)]">
               Not investment advice. No signals. Trade at your own risk.

@@ -23,7 +23,7 @@ type ChatContextValue = {
 
 const INITIAL_MSG: Msg = {
   role: "assistant",
-  content: "Bullion Desk ready. Ask for a gold trade signal (intraday, swing, risk context).",
+  content: "Bullion Desk ready. Ask me to analyze gold — structure, macro context, tradability, risk.",
 };
 
 const ChatContext = createContext<ChatContextValue | null>(null);

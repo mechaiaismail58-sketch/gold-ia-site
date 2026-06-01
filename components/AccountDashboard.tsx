@@ -266,7 +266,7 @@ export default function AccountDashboard() {
   const profitPct    = bal > 0 ? (snap.total_profit / bal) * 100 : 0;
 
   const overallStatus = getDDStatus(snap.daily_dd, dailyDDLimit);
-  const firmLabel     = profile?.prop_firm === "Other" ? "Autre" : profile?.prop_firm ?? "Compte Personnel";
+  const firmLabel     = profile?.prop_firm === "Other" ? "Other" : profile?.prop_firm ?? "Personal Account";
   const phaseStr      = phaseLabel(profile?.prop_firm_phase ?? null);
 
   const dailyRemaining = dailyDDLimit !== null ? Math.max(0, dailyDDLimit - snap.daily_dd) : null;
@@ -323,11 +323,11 @@ export default function AccountDashboard() {
 
         {/* 1. DD Journalier */}
         <div style={cardStyle}>
-          <div style={metricTitle}>DD Journalier</div>
+          <div style={metricTitle}>Daily DD</div>
           <div style={{ ...metricMain, color: STATUS_COLOR[overallStatus] }}>
             {fmtUSD(snap.daily_dd)}
           </div>
-          <div style={metricSub}>{dailyDDPct.toFixed(2)}% du capital</div>
+          <div style={metricSub}>{dailyDDPct.toFixed(2)}% of capital</div>
           {dailyDDLimit !== null && (
             <>
               <ProgressBar pct={(snap.daily_dd / dailyDDLimit) * 100} color={STATUS_COLOR[overallStatus]} />
@@ -338,11 +338,11 @@ export default function AccountDashboard() {
 
         {/* 2. DD Total */}
         <div style={cardStyle}>
-          <div style={metricTitle}>DD Total</div>
+          <div style={metricTitle}>Total DD</div>
           <div style={{ ...metricMain, color: totalDDLimit && snap.total_dd / totalDDLimit > 0.7 ? CAUTION_C : "#F5F0E8" }}>
             {fmtUSD(snap.total_dd)}
           </div>
-          <div style={metricSub}>{totalDDPct.toFixed(2)}% du capital</div>
+          <div style={metricSub}>{totalDDPct.toFixed(2)}% of capital</div>
           {totalDDLimit !== null && (
             <>
               <ProgressBar pct={(snap.total_dd / totalDDLimit) * 100} color={totalDDLimit && snap.total_dd / totalDDLimit > 0.7 ? CAUTION_C : SAFE_C} />
@@ -353,7 +353,7 @@ export default function AccountDashboard() {
 
         {/* 3. Profit Mois */}
         <div style={cardStyle}>
-          <div style={metricTitle}>Profit Mois</div>
+          <div style={metricTitle}>Monthly P&amp;L</div>
           <div style={{ ...metricMain, color: snap.total_profit >= 0 ? SAFE_C : DANGER_C }}>
             {fmtUSD(snap.total_profit)}
           </div>
@@ -373,13 +373,13 @@ export default function AccountDashboard() {
         <div style={cardStyle}>
           <div style={metricTitle}>Trades</div>
           <div style={metricMain}>{snap.trade_count_today}</div>
-          <div style={metricSub}>aujourd'hui</div>
-          {snap.trade_count_month > 0 && <div style={{ ...metricSub, marginTop: 2 }}>{snap.trade_count_month} ce mois</div>}
+          <div style={metricSub}>today</div>
+          {snap.trade_count_month > 0 && <div style={{ ...metricSub, marginTop: 2 }}>{snap.trade_count_month} this month</div>}
         </div>
 
         {/* 5. Jours tradés */}
         <div style={cardStyle}>
-          <div style={metricTitle}>Jours Tradés</div>
+          <div style={metricTitle}>Trading Days</div>
           <div style={{ ...metricMain, color: limits.min_trading_days && snap.trading_days >= limits.min_trading_days ? SAFE_C : "#F5F0E8" }}>
             {snap.trading_days}
           </div>
@@ -388,13 +388,13 @@ export default function AccountDashboard() {
               / {limits.min_trading_days} min {snap.trading_days >= limits.min_trading_days ? "✓" : "⚠"}
             </div>
           ) : (
-            <div style={metricSub}>ce mois</div>
+            <div style={metricSub}>this month</div>
           )}
         </div>
 
         {/* 6. Marge journalière */}
         <div style={cardStyle}>
-          <div style={metricTitle}>Marge Jour</div>
+          <div style={metricTitle}>Daily Margin</div>
           {dailyDDLimit !== null && dailyRemaining !== null ? (
             <>
               <div style={{ ...metricMain, color: STATUS_COLOR[overallStatus] }}>
@@ -407,7 +407,7 @@ export default function AccountDashboard() {
           ) : (
             <>
               <div style={metricMain}>—</div>
-              <div style={metricSub}>Définissez votre solde</div>
+              <div style={metricSub}>Set your balance</div>
             </>
           )}
         </div>
@@ -438,7 +438,7 @@ export default function AccountDashboard() {
         onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(201,162,78,0.5)"; e.currentTarget.style.background = "rgba(201,162,78,0.07)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(201,162,78,0.22)"; e.currentTarget.style.background = "rgba(201,162,78,0.03)"; }}
       >
-        Mettre à jour mon compte
+        Update My Account
       </button>
 
       {/* ── MODAL ────────────────────────────────────────────────── */}

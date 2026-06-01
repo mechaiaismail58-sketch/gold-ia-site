@@ -14,7 +14,7 @@ const FEATURES = [
         <path d="M2 8h12M8 2v12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
       </svg>
     ),
-    text: "Institutional-grade XAUUSD macro-technical analysis",
+    text: "AI-powered XAUUSD coaching & analysis",
   },
   {
     icon: (
@@ -23,7 +23,7 @@ const FEATURES = [
         <path d="M5 8h6M8 5v6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
       </svg>
     ),
-    text: "3 analysis modes: Deep Analysis, Quick Brief, Trade Only",
+    text: "3 analysis modes: Deep Analysis, Quick Brief, Trade Review",
   },
   {
     icon: (
@@ -106,7 +106,7 @@ function UpgradeContent() {
             Bullion <span className="text-[color:var(--gold)]">Desk</span>
           </Link>
           <p className="mt-1.5 text-xs text-[color:var(--muted)] tracking-[0.12em] uppercase">
-            Institutional Gold Intelligence
+            AI Gold Trading Coach
           </p>
         </div>
 
@@ -140,7 +140,7 @@ function UpgradeContent() {
               Bullion Desk Beta Access
             </h1>
             <p className="text-[color:var(--muted)] text-[14px] leading-relaxed mb-8 max-w-[44ch]">
-              Full access to the AI Senior Trading Advisor — macro-technical analysis, live data, prop firm monitoring, and institutional-grade clarity.
+              Full access to your AI Gold Trading Coach — macro-technical analysis, live data, prop firm monitoring, and institutional-grade clarity.
             </p>
 
             {/* Feature list */}
