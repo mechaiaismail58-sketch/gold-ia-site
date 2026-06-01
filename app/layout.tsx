@@ -15,6 +15,10 @@ export const metadata: Metadata = {
     description: "Institutional-grade market intelligence for serious traders. Forex, Metals, Indices, Futures. Prop firm ready. No signals. Just clarity.",
     type: "website",
   },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
