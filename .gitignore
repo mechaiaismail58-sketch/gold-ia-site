@@ -52,3 +52,5 @@ __pycache__/
 
 # Aurum Quant — binary/generated cache (CSVs, pickles, plots)
 aurum_quant/data/cache/
+
+.env*.local
