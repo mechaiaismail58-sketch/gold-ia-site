@@ -46,8 +46,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(dest);
   }
 
-  // ── Landing page — always public ──────────────────────────────────────────
-  if (pathname === "/") return NextResponse.next();
+  // ── Public pages — no auth required ──────────────────────────────────────
+  const PUBLIC_PATHS = ["/", "/about", "/methodology", "/login", "/signup"];
+  if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 
   // ── Bypassed users — full access ─────────────────────────────────────────
   if (hasBypass) return NextResponse.next();
