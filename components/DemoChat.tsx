@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const WELCOME_MESSAGE =
   "Welcome to BullionDesk. I'm your AI Gold Trading Coach. Ask me anything about XAUUSD — structure, macro context, risk management, or prop firm strategy.";
@@ -47,13 +49,14 @@ export default function DemoChat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [userCount, setUserCount] = useState(0);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const limitReached = userCount >= MAX_FREE_MESSAGES;
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = messagesRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [messages, loading]);
 
   async function handleSend() {
@@ -122,7 +125,7 @@ export default function DemoChat() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+        <div ref={messagesRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
           {messages.map((msg, i) => (
             <div
               key={i}
@@ -140,7 +143,14 @@ export default function DemoChat() {
                     : "max-w-[82%] rounded-2xl rounded-tl-sm px-3.5 py-2.5 text-sm text-white/85 bg-white/[0.04] border border-white/[0.07] leading-relaxed"
                 }
               >
-                {msg.content}
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
               </div>
             </div>
           ))}
@@ -156,7 +166,6 @@ export default function DemoChat() {
             </div>
           )}
 
-          <div ref={bottomRef} />
         </div>
 
         {/* Input or CTA */}
