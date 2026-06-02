@@ -64,6 +64,22 @@ export default function WaitlistLanding() {
           </p>
         </div>
 
+        {/* ── Secondary nav links ── */}
+        <div className="flex justify-center gap-3 mb-7">
+          <a
+            href="/methodology"
+            className="rounded-xl px-4 py-2.5 text-[11px] tracking-[0.10em] uppercase border border-[rgba(212,175,55,0.45)] text-[color:var(--gold)] transition hover:border-[rgba(212,175,55,0.9)] hover:bg-[rgba(212,175,55,0.07)]"
+          >
+            Our Methodology →
+          </a>
+          <a
+            href="/about"
+            className="rounded-xl px-4 py-2.5 text-[11px] tracking-[0.10em] uppercase border border-[rgba(212,175,55,0.45)] text-[color:var(--gold)] transition hover:border-[rgba(212,175,55,0.9)] hover:bg-[rgba(212,175,55,0.07)]"
+          >
+            About Us →
+          </a>
+        </div>
+
         {/* ── Badge ── */}
         <div className="text-center mb-7">
           <span className="inline-flex items-center gap-2 rounded-full border border-[color:var(--gold)] border-opacity-30 bg-[rgba(212,175,55,0.06)] px-4 py-1.5">
