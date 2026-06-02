@@ -1,108 +1,145 @@
-function GoldBarIcon({ className = "" }: { className?: string }) {
+function CheckIcon() {
   return (
-    <svg
-      viewBox="0 0 48 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      <rect x="4" y="6" width="40" height="14" rx="2" fill="currentColor" opacity="0.15" />
-      <rect x="4" y="6" width="40" height="14" rx="2" stroke="currentColor" strokeWidth="1.2" opacity="0.5" />
-      <rect x="8" y="10" width="32" height="6" rx="1" stroke="currentColor" strokeWidth="0.8" opacity="0.35" />
-      <line x1="4" y1="6" x2="8" y2="2" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-      <line x1="44" y1="6" x2="40" y2="2" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-      <line x1="8" y1="2" x2="40" y2="2" stroke="currentColor" strokeWidth="1.2" opacity="0.5" />
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 mt-0.5">
+      <circle cx="7" cy="7" r="6.5" stroke="rgba(212,175,55,0.35)" />
+      <path d="M4 7l2 2 4-4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
+function CrossIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 mt-0.5">
+      <circle cx="7" cy="7" r="6.5" stroke="rgba(239,68,68,0.3)" />
+      <path d="M4.5 4.5l5 5M9.5 4.5l-5 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+const STORY_BLOCKS = [
+  {
+    tag: "The Problem",
+    text: "Two traders. Countless hours analyzing XAUUSD. Too many indicators, too much noise, not enough discipline. Like most retail traders, they lost before they won — chasing signals, ignoring structure, letting emotion drive decisions.",
+  },
+  {
+    tag: "The Discovery",
+    text: "What changed everything was institutional analysis — ICT, Wyckoff, order flow, macro reading. The best traders in the world don't watch RSI. They watch structure, positioning, and flow. But accessing that level of analysis demanded hours of work every day and a discipline few retail traders can maintain alone.",
+  },
+  {
+    tag: "The Solution",
+    text: "BullionDesk was built to do that work automatically. An intelligence engine that reads 22+ data sources, applies institutional frameworks, and delivers clear analysis with iron discipline. Not a signal service. Not another indicator. A real trading coach that says no when conditions don't warrant a trade.",
+  },
+];
+
+const IS_LIST = [
+  "AI Trading Coach specialized in XAUUSD",
+  "Institutional-grade structure & macro analysis",
+  "Structure + Macro + Risk — all in one place",
+  "Prop firm guidance for FTMO, E8, Apex & more",
+];
+
+const IS_NOT_LIST = [
+  "A signal provider with entry/exit prices",
+  "Copy trading or trade mirroring",
+  "A get-rich-quick scheme",
+  "A Telegram group or community",
+];
+
 export default function AboutPage() {
   return (
-    <main className="text-white space-y-6">
+    <main className="text-white space-y-5">
 
-      {/* ── Hero ── */}
+      {/* ── Section 1 — Hero ── */}
       <section className="card rounded-3xl border border-white/10 overflow-hidden">
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.4)] to-transparent" />
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.45)] to-transparent" />
         <div className="p-8 sm:p-12">
-          <div className="flex items-center gap-3">
-            <div className="text-xs tracking-[0.22em] uppercase text-[color:var(--gold)]">
-              About
-            </div>
-            <GoldBarIcon className="h-4 w-8 text-[color:var(--gold)]" />
-          </div>
-
-          <h1 className="mt-5 text-[30px] sm:text-[44px] leading-[1.08] tracking-[-0.03em] max-w-3xl">
-            About Bullion Desk
+          <p className="text-[10px] tracking-[0.22em] uppercase text-[color:var(--gold)] mb-5">
+            About
+          </p>
+          <h1 className="text-[32px] sm:text-[48px] leading-[1.06] tracking-[-0.03em] font-normal mb-4">
+            About BullionDesk
           </h1>
-
-          <p className="mt-4 text-[15px] text-[color:var(--gold)] tracking-[-0.01em]">
+          <p className="text-[16px] sm:text-[18px] text-[color:var(--muted)] tracking-[-0.01em]">
             Built by traders, for traders.
           </p>
         </div>
       </section>
 
-      {/* ── Story ── */}
-      <section className="card rounded-3xl border border-white/10 p-8 sm:p-12">
-        <div className="space-y-7 max-w-[72ch]">
-          <p className="text-[color:var(--muted)] leading-7 text-[15px]">
-            Two traders passionate about gold met through their shared journey — countless hours
-            spent analyzing XAUUSD, learning from losses, searching for the perfect framework.
-            Like most retail traders, they started with too many indicators, too much noise, and
-            not enough discipline. They lost before they won.
-          </p>
+      {/* ── Section 2 — The Story ── */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {STORY_BLOCKS.map((block) => (
+          <div key={block.tag} className="card rounded-2xl border border-white/10 overflow-hidden">
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(139,92,246,0.4)] to-transparent" />
+            <div className="p-6">
+              <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-[color:var(--gold)] mb-3">
+                {block.tag}
+              </p>
+              <p className="text-[13px] text-[color:var(--muted)] leading-[1.7]">
+                {block.text}
+              </p>
+            </div>
+          </div>
+        ))}
+      </section>
 
-          <div className="h-px bg-white/8" />
+      {/* ── Section 3 — What We Are / What We're Not ── */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-          <p className="text-[color:var(--muted)] leading-7 text-[15px]">
-            What transformed their approach was the discovery of institutional analysis — ICT,
-            Wyckoff, order flow, macro reading. They realized the best traders in the world
-            don&apos;t watch RSI — they watch structure, positioning, and flow. But accessing that
-            level of analysis demanded hours of work every day, dozens of sources to monitor, and
-            a discipline that few retail traders can maintain on their own.
-          </p>
+        {/* Left — IS */}
+        <div className="card rounded-2xl border border-white/10 overflow-hidden">
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.4)] to-transparent" />
+          <div className="p-6">
+            <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-[color:var(--gold)] mb-4">
+              What BullionDesk IS
+            </p>
+            <ul className="space-y-3">
+              {IS_LIST.map((item) => (
+                <li key={item} className="flex items-start gap-2.5 text-[13px] text-white/80">
+                  <span className="text-[color:var(--gold)]"><CheckIcon /></span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
-          <div className="h-px bg-white/8" />
-
-          <p className="text-[color:var(--muted)] leading-7 text-[15px]">
-            BullionDesk was born from that frustration. The idea: build an intelligence engine
-            that does this work automatically — one that reads 22+ data sources, applies
-            institutional frameworks, and delivers clear analysis with iron discipline. Not a
-            signal service. Not another indicator. A real trading coach that thinks before it
-            speaks, and says no when conditions don&apos;t warrant a trade.
-          </p>
-
-          <div className="h-px bg-white/8" />
-
-          <p className="text-[color:var(--muted)] leading-7 text-[15px]">
-            Today, BullionDesk is in beta. The product improves every day thanks to feedback
-            from early users. The goal remains the same: make institutional gold analysis
-            accessible to every trader willing to trade with discipline.
-          </p>
+        {/* Right — IS NOT */}
+        <div className="card rounded-2xl border border-white/10 overflow-hidden">
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(239,68,68,0.25)] to-transparent" />
+          <div className="p-6">
+            <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-red-400/60 mb-4">
+              What BullionDesk is NOT
+            </p>
+            <ul className="space-y-3">
+              {IS_NOT_LIST.map((item) => (
+                <li key={item} className="flex items-start gap-2.5 text-[13px] text-white/50">
+                  <span className="text-red-400/70"><CrossIcon /></span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
-      {/* ── Quote ── */}
-      <section className="card rounded-3xl border border-white/10 overflow-hidden relative">
-        <div className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-transparent via-[rgba(212,175,55,0.5)] to-transparent" />
-
-        <div className="px-10 py-10 sm:py-12">
-          <div className="mb-5 flex items-center gap-2">
-            <div className="h-px w-6 bg-[rgba(212,175,55,0.4)]" />
-            <GoldBarIcon className="h-3 w-6 text-[color:var(--gold)]" />
-            <div className="h-px w-6 bg-[rgba(212,175,55,0.4)]" />
+      {/* ── Section 4 — CTA ── */}
+      <section className="card rounded-3xl border border-white/10 overflow-hidden">
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.4)] to-transparent" />
+        <div className="p-8 sm:p-12 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div>
+            <h2 className="text-[22px] sm:text-[28px] leading-[1.15] tracking-[-0.02em] font-normal mb-1.5">
+              Ready to trade with clarity?
+            </h2>
+            <p className="text-[13px] text-[color:var(--muted)]">
+              3 free messages. No signup required.
+            </p>
           </div>
-
-          <blockquote className="text-[22px] sm:text-[28px] leading-[1.3] tracking-[-0.02em] max-w-3xl">
-            BullionDesk provides gold analysis — but only when the market{" "}
-            <span className="text-[color:var(--gold)]">deserves</span> to be traded.
-          </blockquote>
-
-          <div className="mt-6 flex items-center gap-2">
-            <div className="h-1 w-1 rounded-full bg-[rgba(212,175,55,0.5)]" />
-            <span className="text-[11px] uppercase tracking-[0.18em] text-white/30">
-              Bullion Desk — Core Principle
-            </span>
-          </div>
+          <a
+            href="/#demo"
+            className="shrink-0 rounded-xl px-6 py-3 text-[12px] tracking-[0.10em] uppercase font-medium border border-[rgba(212,175,55,0.55)] text-[color:var(--gold)] transition hover:border-[rgba(212,175,55,0.95)] hover:bg-[rgba(212,175,55,0.08)] whitespace-nowrap"
+          >
+            Try it free →
+          </a>
         </div>
       </section>
 

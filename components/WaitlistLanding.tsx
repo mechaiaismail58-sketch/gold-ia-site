@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DemoChat from "@/components/DemoChat";
 
 function isValidEmail(v: string) {
@@ -27,6 +27,16 @@ export default function WaitlistLanding() {
   const [loading, setLoading]   = useState(false);
   const [status, setStatus]     = useState<"idle" | "success" | "already" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (window.location.hash) {
+        const el = document.querySelector(window.location.hash);
+        if (el) { el.scrollIntoView({ behavior: "smooth" }); return; }
+      }
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }, 0);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -185,7 +195,7 @@ export default function WaitlistLanding() {
         </div>
 
         {/* ── Demo chat ── */}
-        <div className="mb-5">
+        <div id="demo" className="mb-5">
           <div className="text-center mb-4">
             <h2 className="text-[18px] font-normal tracking-[-0.01em] text-white mb-1">
               Try it now
