@@ -147,6 +147,7 @@ export default function DemoChat() {
                   remarkPlugins={[remarkGfm]}
                   components={{
                     p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+                    strong: ({ children }) => <span className="font-semibold text-amber-200">{children}</span>,
                   }}
                 >
                   {msg.content}
