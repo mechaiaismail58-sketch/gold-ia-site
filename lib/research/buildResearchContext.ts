@@ -619,8 +619,8 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     withTimeout(getLatestFredValue("WTREGEN"), 3000, null),
     withTimeout(getLatestFredValue("DFEDTARU"), 3000, null),
     withTimeout(getLatestFredValue("FEDFUNDS"), 3000, null),
-    withTimeout(fetchOHLCVBars("EUR/USD", "4h", 10, 900), 3000, []),
-    withTimeout(fetchOHLCVBars("USD/JPY", "4h", 10, 900), 3000, []),
+    Promise.resolve([]), // EUR/USD — disabled, gold-only
+    Promise.resolve([]), // USD/JPY — disabled, gold-only
     withTimeout(fetchGLDImpliedVol(), 4000, null),
     withTimeout(fetchFuturesCurveData(), 4000, { front_price: null, next_price: null, spread: null, structure: null, note: "Futures curve data unavailable" }),
   ]);

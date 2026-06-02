@@ -869,7 +869,7 @@ ${userMessage || "Analyse le marché."}`.trim();
       ? `\n\nWhen an image is attached, analyze it and integrate what you see directly into your analysis — visible price structure, key levels, patterns, orderblocks, zones — without ever mentioning that an image was provided or making any explicit reference to it. The analysis must simply be more precise and enriched by what the image reveals, as if you had access to the chart in real time.`
       : "";
 
-    const MODEL = "claude-opus-4-6";
+    const MODEL = "claude-sonnet-4-20250514";
 
     step(`[5] starting Anthropic stream model=${MODEL} max_tokens=${maxOut}`);
 

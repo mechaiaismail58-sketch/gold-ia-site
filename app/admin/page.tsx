@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 /**
  * Admin portal — only accessible with a valid admin_bypass cookie.
@@ -8,14 +6,6 @@ import { redirect } from "next/navigation";
  * The middleware sets the cookie and renders this page.
  */
 export default async function AdminPage() {
-  const cookieStore = await cookies();
-  const bypass = cookieStore.get("admin_bypass")?.value;
-  const adminSecret = process.env.ADMIN_SECRET;
-
-  // Double-check: if cookie is missing or invalid, bounce to landing
-  if (!adminSecret || bypass !== adminSecret) {
-    redirect("/");
-  }
 
   const links = [
     { href: "/",            label: "Landing (Waitlist)" },

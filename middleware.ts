@@ -37,17 +37,12 @@ export async function middleware(req: NextRequest) {
       });
       return res;
     }
-    // Already bypassed → show admin portal normally
-    if (hasBypass) return NextResponse.next();
-    // No valid secret, no cookie → back to landing
-    const dest = req.nextUrl.clone();
-    dest.pathname = "/";
-    dest.search = "";
-    return NextResponse.redirect(dest);
+    // Public — no auth required
+    return NextResponse.next();
   }
 
   // ── Public pages — no auth required ──────────────────────────────────────
-  const PUBLIC_PATHS = ["/", "/about", "/methodology", "/login", "/signup"];
+  const PUBLIC_PATHS = ["/", "/about", "/methodology", "/login", "/signup", "/admin", "/chat"];
   if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 
   // ── Bypassed users — full access ─────────────────────────────────────────
