@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import DemoChat from "@/components/DemoChat";
 
 function isValidEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -165,6 +166,19 @@ export default function WaitlistLanding() {
               </form>
             )}
           </div>
+        </div>
+
+        {/* ── Demo chat ── */}
+        <div className="mb-5">
+          <div className="text-center mb-4">
+            <h2 className="text-[18px] font-normal tracking-[-0.01em] text-white mb-1">
+              Try it now
+            </h2>
+            <p className="text-[12px] text-white/35 tracking-[0.04em]">
+              3 free messages. No signup required.
+            </p>
+          </div>
+          <DemoChat />
         </div>
 
         {/* ── Feature cards — same style as site's pill tags / small cards ── */}
