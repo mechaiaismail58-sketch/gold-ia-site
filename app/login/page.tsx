@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -10,14 +10,27 @@ function LoginForm() {
   const searchParams = useSearchParams();
   // Sanitise: only allow relative paths to prevent open redirect
   const raw = searchParams.get("redirectTo") || "/chat";
-  const redirectTo = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/chat";
+  const redirectTo = raw.startsWith("/") && !raw.startsWith("//") && raw !== "/login" ? raw : "/chat";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<{ message: string; noAccount?: boolean } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
+
+  // Redirect immediately if a session is already active
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        router.replace(redirectTo);
+      } else {
+        setChecking(false);
+      }
+    });
+  }, [router, redirectTo]);
 
   const canSubmit = email.trim().length > 0 && password.length > 0 && !loading;
 
@@ -30,9 +43,9 @@ function LoginForm() {
     try {
       const supabase = createClient();
 
-      // 10 s hard timeout — prevents infinite "Signing in…" state
+      // 20 s hard timeout — Supabase auth can be slow in certain regions
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("timeout")), 10_000)
+        setTimeout(() => reject(new Error("timeout")), 20_000)
       );
 
       const { error: signInError } = await Promise.race([
@@ -77,6 +90,14 @@ function LoginForm() {
     } finally {
       setForgotLoading(false);
     }
+  }
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-[#07060b] flex items-center justify-center">
+        <span className="h-5 w-5 rounded-full border-2 border-white/10 border-t-white/50 animate-spin" />
+      </div>
+    );
   }
 
   return (

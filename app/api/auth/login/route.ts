@@ -5,8 +5,12 @@ import { checkRateLimit, getIP } from "@/lib/rate-limit";
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  const rl = await checkRateLimit(getIP(req), "login");
-  if (rl.limited) return rl.response;
+  try {
+    const rl = await checkRateLimit(getIP(req), "login");
+    if (rl.limited) return rl.response;
+  } catch {
+    // Upstash unreachable or slow — let the request through rather than blocking login
+  }
 
   try {
     const { email, password } = await req.json();
