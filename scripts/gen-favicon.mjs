@@ -13,6 +13,7 @@ const PUBLIC = resolve(__dirname, "../public");
 // We use a square viewBox so it scales cleanly at every size.
 // font-family falls back through system fonts available in libvips/fontconfig.
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">
+  <rect width="100" height="100" fill="#FFFFFF"/>
   <text
     x="50" y="73"
     text-anchor="middle"
@@ -29,7 +30,7 @@ const svgBuf = Buffer.from(svg);
 async function toPng(size) {
   return sharp(svgBuf, { density: Math.ceil((size / 100) * 96) })
     .resize(size, size)
-    .ensureAlpha()
+    .flatten({ background: "#FFFFFF" })
     .png()
     .toBuffer();
 }

@@ -14,142 +14,148 @@ import type { NextRequest } from "next/server";
 // Bypass:     admin_bypass cookie or /admin?secret=ADMIN_SECRET
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Pages that never require a session
-const PUBLIC_PATHS = ["/", "/about", "/methodology", "/terms", "/privacy"];
-// Auth pages: public when logged out, redirect to /chat when logged in
-const AUTH_PATHS = ["/login", "/signup"];
-// Routes that require auth AND has_paid = true
+const PUBLIC_PATHS  = ["/", "/about", "/methodology", "/terms", "/privacy"];
+const AUTH_PATHS    = ["/login", "/signup"];
 const PAID_PREFIXES = ["/chat", "/calendar", "/market", "/backtest", "/dashboard"];
 
-// Query has_paid directly via Supabase REST (Edge-compatible, bypasses RLS).
-// Fails open (returns true) so paid users are never wrongly blocked if the DB
-// is temporarily unreachable.
+// Query has_paid via Supabase REST (Edge-compatible, bypasses RLS).
+// Fails CLOSED (returns false) so an unauthenticated/unverified user is always
+// sent to /upgrade rather than getting free access to paid routes.
 async function getHasPaid(userId: string): Promise<boolean> {
   try {
-    const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users?id=eq.${userId}&select=has_paid&limit=1`;
+    const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey   = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !serviceKey) return false; // config missing → deny
+
+    const url = `${supabaseUrl}/rest/v1/users?id=eq.${encodeURIComponent(userId)}&select=has_paid&limit=1`;
     const res = await fetch(url, {
       headers: {
-        apikey:        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+        apikey:        serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
       },
       cache: "no-store",
     });
-    if (!res.ok) return true; // fail open
-    const [row] = await res.json() as Array<{ has_paid: boolean | null }>;
-    return row?.has_paid === true;
+    if (!res.ok) return false; // fail closed for payment check
+    const rows = await res.json() as Array<{ has_paid: boolean | null }>;
+    return rows[0]?.has_paid === true;
   } catch {
-    return true; // fail open — don't block paid users if DB is unreachable
+    return false; // fail closed — better to send to /upgrade than give free access
   }
+}
+
+function redirectTo(req: NextRequest, pathname: string, search = ""): NextResponse {
+  const url = req.nextUrl.clone();
+  url.pathname = pathname;
+  url.search   = search;
+  return NextResponse.redirect(url);
 }
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ── Static assets — always pass through ──────────────────────────────────
-  if (pathname.includes(".") || pathname.startsWith("/_next")) return NextResponse.next();
+  // ── Static assets & Next.js internals — always pass through ─────────────
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon") ||
+    pathname.includes(".")
+  ) {
+    return NextResponse.next();
+  }
 
-  // ── API routes — always pass through (each route handles its own auth) ────
+  // ── API routes — each route handles its own auth ─────────────────────────
   if (pathname.startsWith("/api/")) return NextResponse.next();
 
-  // ── Purely public pages — no auth check needed ───────────────────────────
+  // ── Purely public pages ──────────────────────────────────────────────────
   if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 
-  const adminSecret = process.env.ADMIN_SECRET;
+  // ── /admin — bypass cookie or secret query param ─────────────────────────
+  const adminSecret  = process.env.ADMIN_SECRET;
+  const bypassCookie = req.cookies.get("admin_bypass")?.value;
 
-  // ── /admin — cookie-only access (Supabase session not sufficient) ──────────
   if (pathname.startsWith("/admin")) {
     const secret = req.nextUrl.searchParams.get("secret");
     if (adminSecret && secret === adminSecret) {
       const res = NextResponse.next();
       res.cookies.set("admin_bypass", adminSecret, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24, // 24 h
-        path: "/",
+        secure:   process.env.NODE_ENV === "production",
+        maxAge:   60 * 60 * 24,
+        path:     "/",
         sameSite: "lax",
       });
       return res;
     }
-    const bypassValue = req.cookies.get("admin_bypass")?.value;
-    if (adminSecret && bypassValue === adminSecret) return NextResponse.next();
-    // No valid secret or cookie — deny even authenticated Supabase users
-    const loginUrl = req.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    loginUrl.search = "";
-    return NextResponse.redirect(loginUrl);
+    if (adminSecret && bypassCookie === adminSecret) return NextResponse.next();
+    return redirectTo(req, "/login");
   }
 
-  // ── admin_bypass cookie — full access to other protected routes ───────────
-  const bypassValue = req.cookies.get("admin_bypass")?.value;
-  if (adminSecret && bypassValue === adminSecret) return NextResponse.next();
+  // ── admin_bypass cookie — full access ────────────────────────────────────
+  if (adminSecret && bypassCookie === adminSecret) return NextResponse.next();
 
-  // ── Supabase session check ────────────────────────────────────────────────
-  const res = NextResponse.next();
+  // ── Supabase auth check ───────────────────────────────────────────────────
+  // Wrapped in try/catch: if Supabase is unreachable, deny access (fail closed).
+  let user: { id: string } | null = null;
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => req.cookies.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            res.cookies.set(name, value, options)
-          );
+  try {
+    const res = NextResponse.next();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => req.cookies.getAll(),
+          setAll: (cookiesToSet) => {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              res.cookies.set(name, value, options)
+            );
+          },
         },
-      },
-    }
-  );
+      }
+    );
+    const { data } = await supabase.auth.getUser();
+    user = data.user ?? null;
+  } catch {
+    // Supabase unreachable → treat as unauthenticated
+    user = null;
+  }
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // ── Auth pages (/login, /signup) — redirect to /chat if already logged in ─
+  // ── Auth pages: public when logged out, /chat when logged in ─────────────
   if (AUTH_PATHS.includes(pathname)) {
     if (user) {
-      const chatUrl = req.nextUrl.clone();
-      chatUrl.pathname = "/chat";
-      chatUrl.search = "";
-      return NextResponse.redirect(chatUrl);
+      // Check payment status before deciding where to redirect logged-in users
+      const hasPaid = await getHasPaid(user.id);
+      return redirectTo(req, hasPaid ? "/chat" : "/upgrade");
     }
-    return res;
+    return NextResponse.next();
   }
 
-  // ── Not authenticated → redirect to /login with return destination ─────────
+  // ── Not authenticated → /login ────────────────────────────────────────────
   if (!user) {
-    const loginUrl = req.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    loginUrl.search = `?redirectTo=${encodeURIComponent(pathname)}`;
-    return NextResponse.redirect(loginUrl);
+    return redirectTo(
+      req,
+      "/login",
+      `?redirectTo=${encodeURIComponent(pathname)}`
+    );
   }
 
-  // ── /upgrade — authenticated only; redirect to /chat if already paid ───────
+  // ── /upgrade: requires auth; redirect to /chat if already paid ────────────
   if (pathname === "/upgrade") {
     const hasPaid = await getHasPaid(user.id);
-    if (hasPaid) {
-      const chatUrl = req.nextUrl.clone();
-      chatUrl.pathname = "/chat";
-      chatUrl.search = "";
-      return NextResponse.redirect(chatUrl);
-    }
-    return res;
+    return hasPaid ? redirectTo(req, "/chat") : NextResponse.next();
   }
 
-  // ── Paid routes — require has_paid; unpaid users go to /upgrade ───────────
+  // ── Paid routes: requires auth + has_paid ────────────────────────────────
   if (PAID_PREFIXES.some((p) => pathname.startsWith(p))) {
     const hasPaid = await getHasPaid(user.id);
-    if (!hasPaid) {
-      const upgradeUrl = req.nextUrl.clone();
-      upgradeUrl.pathname = "/upgrade";
-      upgradeUrl.search = "";
-      return NextResponse.redirect(upgradeUrl);
-    }
-    return res;
+    return hasPaid ? NextResponse.next() : redirectTo(req, "/upgrade");
   }
 
-  // ── All other protected pages — auth sufficient ────────────────────────────
-  return res;
+  // ── All other protected pages: auth is sufficient ────────────────────────
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Matches every path except Next.js static files and image optimization.
+  // /chat IS matched. Explicitly keep this broad.
+  matcher: ["/((?!_next/static|_next/image).*)"],
 };
