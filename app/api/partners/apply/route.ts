@@ -4,6 +4,15 @@ import { resend } from "@/lib/resend";
 
 export const runtime = "nodejs";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
 const FROM = "Bullion Desk <noreply@bulliondesk.pro>";
 const NOTIFY_TO = "partners@bulliondesk.pro";
 
@@ -68,13 +77,13 @@ export async function POST(req: Request) {
         subject: `New Partner Application — ${String(name).trim()} (${String(platform).trim()})`,
         html: `
           <div style="font-family:monospace;font-size:13px;line-height:1.7;">
-            <p><strong>Name:</strong> ${String(name).trim()}</p>
-            <p><strong>Email:</strong> ${String(email).trim()}</p>
-            <p><strong>Platform:</strong> ${String(platform).trim()}</p>
-            <p><strong>Handle:</strong> ${String(handle).trim()}</p>
-            <p><strong>Followers:</strong> ${follower_count || "—"}</p>
-            <p><strong>Content link:</strong> ${content_link || "—"}</p>
-            <p><strong>Motivation:</strong><br>${String(motivation).trim().replace(/\n/g, "<br>")}</p>
+            <p><strong>Name:</strong> ${escapeHtml(String(name).trim())}</p>
+            <p><strong>Email:</strong> ${escapeHtml(String(email).trim())}</p>
+            <p><strong>Platform:</strong> ${escapeHtml(String(platform).trim())}</p>
+            <p><strong>Handle:</strong> ${escapeHtml(String(handle).trim())}</p>
+            <p><strong>Followers:</strong> ${follower_count ? escapeHtml(String(follower_count)) : "—"}</p>
+            <p><strong>Content link:</strong> ${content_link ? escapeHtml(String(content_link)) : "—"}</p>
+            <p><strong>Motivation:</strong><br>${escapeHtml(String(motivation).trim()).replace(/\n/g, "<br>")}</p>
           </div>
         `,
       }).catch((e) => console.error("[partners/apply] notification email error:", e));

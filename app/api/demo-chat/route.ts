@@ -27,7 +27,13 @@ export async function POST(req: Request) {
     return Response.json({ error: "message is required" }, { status: 400 });
   }
 
-  if (messageIndex > 3) {
+  if (message.length > 500) {
+    return Response.json({ error: "Message too long" }, { status: 400 });
+  }
+
+  // messageIndex is client-supplied — clamp to valid range to avoid negative tricks
+  const clampedIndex = Math.max(1, Math.min(messageIndex, 100));
+  if (clampedIndex > 3) {
     return Response.json({ error: "Demo limit reached" }, { status: 403 });
   }
 

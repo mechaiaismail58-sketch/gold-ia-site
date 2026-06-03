@@ -2,7 +2,12 @@ export const maxDuration = 30;
 
 import Anthropic from "@anthropic-ai/sdk";
 
-export async function GET() {
+export async function GET(req: Request) {
+  if (process.env.NODE_ENV === "production") return Response.json({ error: "Not available" }, { status: 404 });
+  const secret = req.headers.get("x-admin-secret") ?? new URL(req.url).searchParams.get("secret");
+  if (!secret || secret !== process.env.ADMIN_SECRET) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
   const t0 = Date.now();
   const steps: string[] = [];
 

@@ -41,12 +41,27 @@ const nextConfig: NextConfig = {
 
   // Security headers
   async headers() {
+    const csp = [
+      "default-src 'self'",
+      // Next.js App Router requires unsafe-inline for its runtime hydration scripts
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://wegvgmovhcwxjqnqqjat.supabase.co",
+      "font-src 'self'",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.twelvedata.com https://api.stlouisfed.org https://newsdata.io https://api.anthropic.com",
+      "frame-src https://js.stripe.com https://hooks.stripe.com",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; ");
+
     return [
       {
         source: "/(.*)",
         headers: [
-          { key: "X-Frame-Options",         value: "DENY" },
-          { key: "X-Content-Type-Options",  value: "nosniff" },
+          { key: "Content-Security-Policy",  value: csp },
+          { key: "X-Frame-Options",          value: "DENY" },
+          { key: "X-Content-Type-Options",   value: "nosniff" },
           { key: "Referrer-Policy",          value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy",       value: "camera=(), microphone=(), geolocation=()" },
         ],
