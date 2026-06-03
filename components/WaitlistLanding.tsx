@@ -4,20 +4,6 @@ import { useEffect } from "react";
 import Link from "next/link";
 import DemoChat from "@/components/DemoChat";
 
-const FEATURES = [
-  {
-    title: "Gold Specialist",
-    desc: "Deep XAUUSD analysis combining structure, macro context, intermarket correlations, and institutional flow. The depth of a trading desk, available 24/7.",
-  },
-  {
-    title: "Prop Firm Intelligence",
-    desc: "FTMO, The5ers, Apex, E8, FundedNext and more. Real-time DD tracking, consistency rules, phase-specific guidance. Never blow a funded account on a technicality.",
-  },
-  {
-    title: "Your Trading Coach",
-    desc: "Market structure, macro context, tradability score, risk sizing, psychology detection. Like having a senior gold trader in your corner — challenging your bias, sharpening your process, keeping you disciplined.",
-  },
-];
 
 export default function WaitlistLanding() {
   useEffect(() => {
@@ -131,42 +117,6 @@ export default function WaitlistLanding() {
             </p>
           </div>
           <DemoChat />
-        </div>
-
-        {/* ── Feature cards ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="card rounded-2xl border border-white/10 overflow-hidden">
-              <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(139,92,246,0.35)] to-transparent" />
-              <div className="p-4">
-                <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-[color:var(--gold)] mb-2">
-                  {f.title}
-                </p>
-                <p className="text-xs text-[color:var(--muted)] leading-[1.65]">{f.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* ── What BullionDesk is NOT ── */}
-        <div className="mt-4 mb-4 rounded-2xl border border-white/[0.06] p-4"
-          style={{ background: "rgba(255,255,255,0.02)" }}>
-          <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/25 mb-3 text-center">
-            What BullionDesk is not
-          </p>
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-1.5">
-            {[
-              "Not a signal service",
-              "No entry prices",
-              "No stop loss targets",
-              "No performance promises",
-              "No Telegram group",
-            ].map((item) => (
-              <span key={item} className="text-[11px] text-white/30 flex items-center gap-1.5">
-                <span className="text-red-500/50">✕</span> {item}
-              </span>
-            ))}
-          </div>
         </div>
 
         {/* ── Track Record ── */}
