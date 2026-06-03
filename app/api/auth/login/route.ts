@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit, getIP } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  const rl = await checkRateLimit(getIP(req), "login");
+  if (rl.limited) return rl.response;
+
   try {
     const { email, password } = await req.json();
 

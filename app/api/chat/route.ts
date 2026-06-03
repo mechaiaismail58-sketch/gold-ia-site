@@ -11,6 +11,7 @@ import { getPerformancePattern } from "@/lib/research/getPerformancePattern";
 import { getScanHistory } from "@/lib/research/getScanHistory";
 import { getNewsContext } from "@/lib/research/getNewsContext";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // ── Clean context text builder — strips nulls, outputs readable text ──────────
 
@@ -609,6 +610,9 @@ export async function POST(req: Request) {
     if (!user) {
       return Response.json({ ok: false, error: "Unauthorized.", steps }, { status: 401 });
     }
+
+    const rl = await checkRateLimit(user.id, "chat");
+    if (rl.limited) return rl.response;
 
     let userMessage = "";
     let previous_response_id: string | undefined;
