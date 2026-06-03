@@ -185,7 +185,7 @@ function LoginForm() {
           <div className="mt-6 pt-6 border-t border-white/[0.06] text-center">
             <span className="text-[12px] text-[color:var(--muted)]">No account? </span>
             <Link href="/signup" className="text-[12px] text-white hover:text-[color:var(--gold)] transition">
-              Sign in
+              Sign up
             </Link>
           </div>
         </div>

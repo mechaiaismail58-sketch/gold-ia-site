@@ -192,7 +192,7 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
                   href="/signup"
                   className="rounded-xl px-3 py-1.5 text-xs tracking-[0.08em] uppercase border border-[rgba(212,175,55,0.55)] text-[color:var(--gold)] transition hover:border-[rgba(212,175,55,0.95)] hover:bg-[rgba(212,175,55,0.08)]"
                 >
-                  Sign in
+                  Sign Up
                 </Link>
               </>
             )}
@@ -210,7 +210,7 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
                   Log in
                 </Link>
                 <Link href="/signup" className="rounded-lg px-3 py-2 text-xs tracking-[0.08em] uppercase border border-[rgba(212,175,55,0.55)] text-[color:var(--gold)]">
-                  Sign in
+                  Sign Up
                 </Link>
               </>
             )}
