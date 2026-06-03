@@ -1,11 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import Link from "next/link";
 import DemoChat from "@/components/DemoChat";
-
-function isValidEmail(v: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-}
 
 const FEATURES = [
   {
@@ -23,11 +20,6 @@ const FEATURES = [
 ];
 
 export default function WaitlistLanding() {
-  const [email, setEmail]       = useState("");
-  const [loading, setLoading]   = useState(false);
-  const [status, setStatus]     = useState<"idle" | "success" | "already" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
-
   useEffect(() => {
     setTimeout(() => {
       if (window.location.hash) {
@@ -38,24 +30,10 @@ export default function WaitlistLanding() {
     }, 0);
   }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!isValidEmail(email)) { setStatus("error"); setErrorMsg("Please enter a valid email address."); return; }
-    setStatus("idle"); setErrorMsg(""); setLoading(true);
-    try {
-      const res  = await fetch("/api/waitlist", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
-      const data = await res.json();
-      if (res.status === 409) { setStatus("already"); return; }
-      if (!res.ok) { setStatus("error"); setErrorMsg(data.error || "Something went wrong. Please try again."); return; }
-      setStatus("success");
-    } catch { setStatus("error"); setErrorMsg("Network error — please try again."); }
-    finally { setLoading(false); }
-  }
-
   return (
     <div className="bg-[#07060b] text-white flex flex-col items-center px-4 pt-10 animate-fade-in">
 
-      {/* Same purple blobs as main site layout */}
+      {/* Background glows */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute -top-24 left-[-140px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.22)] blur-[110px]" />
         <div className="absolute top-[-120px] right-[-180px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.14)] blur-[120px]" />
@@ -95,7 +73,7 @@ export default function WaitlistLanding() {
           <span className="inline-flex items-center gap-2 rounded-full border border-[color:var(--gold)] border-opacity-30 bg-[rgba(212,175,55,0.06)] px-4 py-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--gold)] animate-pulse shrink-0" />
             <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-[color:var(--gold)]">
-              Early Access
+              Beta — Limited Spots
             </span>
           </span>
         </div>
@@ -112,90 +90,38 @@ export default function WaitlistLanding() {
           <div className="flex items-center justify-center gap-6 mt-6 flex-wrap">
             {[
               { value: "431", label: "Research trades" },
-              { value: "7", label: "Prop firms supported" },
+              { value: "7",   label: "Prop firms supported" },
               { value: "24/7", label: "Market coverage" },
             ].map((s) => (
               <div key={s.label} className="text-center">
-                <div className="text-[22px] font-light tracking-[-0.02em] text-[color:var(--gold)]">
-                  {s.value}
-                </div>
-                <div className="text-[10px] uppercase tracking-[0.16em] text-white/30 mt-0.5">
-                  {s.label}
-                </div>
+                <div className="text-[22px] font-light tracking-[-0.02em] text-[color:var(--gold)]">{s.value}</div>
+                <div className="text-[10px] uppercase tracking-[0.16em] text-white/30 mt-0.5">{s.label}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── Form card — same .card glass as the rest of the site ── */}
-        <div className="card rounded-3xl border border-white/10 overflow-hidden mb-5">
-          {/* Purple top accent bar — same as About, Methodology, etc. */}
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(139,92,246,0.5)] to-transparent" />
-
-          <div className="p-6 sm:p-8">
-            {status === "success" ? (
-              <div className="text-center py-4">
-                <div className="flex justify-center mb-5">
-                  <svg width="52" height="52" viewBox="0 0 52 52">
-                    <circle cx="26" cy="26" r="22" fill="none" stroke="rgba(139,92,246,0.20)" strokeWidth="1.5" />
-                    <circle cx="26" cy="26" r="22" fill="none" stroke="#8B5CF6" strokeWidth="1.5"
-                      strokeDasharray="138" strokeLinecap="round"
-                      style={{ animation: "drawCircle 0.8s ease-out forwards" }} />
-                    <path d="M15 26l8 8 14-15" fill="none" stroke="#D4AF37" strokeWidth="2"
-                      strokeLinecap="round" strokeLinejoin="round"
-                      style={{ animation: "drawCheck 0.35s 0.65s ease-out both" }} />
-                  </svg>
-                </div>
-                <p className="text-lg font-medium text-white mb-1.5">You&apos;re on the list.</p>
-                <p className="text-sm text-[color:var(--muted)]">We&apos;ll notify you when beta access opens.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} noValidate>
-                <label className="block text-[11px] uppercase tracking-[0.14em] text-[color:var(--muted)] mb-2.5">
-                  Email address
-                </label>
-                <div className="flex flex-col sm:flex-row gap-2.5">
-                  <input
-                    type="email" autoComplete="email" required
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); setStatus("idle"); setErrorMsg(""); }}
-                    placeholder="your@email.com"
-                    className="flex-1 rounded-xl px-4 py-3 bg-transparent border border-[color:var(--border)] text-white text-base focus:outline-none focus:border-[rgba(212,175,55,0.50)] transition placeholder:text-white/20 min-h-[48px]"
-                  />
-                  <button
-                    type="submit" disabled={loading}
-                    className="rounded-xl border border-[rgba(212,175,55,0.55)] bg-[rgba(212,175,55,0.08)] px-6 py-3 text-[13px] font-medium tracking-[0.05em] text-[color:var(--gold)] hover:bg-[rgba(212,175,55,0.16)] hover:border-[rgba(212,175,55,0.85)] disabled:opacity-50 disabled:cursor-not-allowed transition min-h-[48px] shrink-0 whitespace-nowrap"
-                  >
-                    {loading ? (
-                      <span className="flex items-center gap-2 justify-center">
-                        <span className="h-3.5 w-3.5 rounded-full border-2 border-[rgba(212,175,55,0.25)] border-t-[color:var(--gold)] animate-spin" />
-                        Joining…
-                      </span>
-                    ) : "Join Early Access"}
-                  </button>
-                </div>
-
-                {status === "error" && errorMsg && (
-                  <p className="mt-2.5 text-xs text-red-400 border border-red-500/20 bg-red-500/[0.05] rounded-lg px-3 py-2">
-                    {errorMsg}
-                  </p>
-                )}
-                {status === "already" && (
-                  <p className="mt-2.5 text-xs text-center text-[color:var(--muted)]">
-                    This email is already on the list.
-                  </p>
-                )}
-
-                <p className="mt-3 text-center text-[11px] text-white/25">
-                  Limited early access · No signals · No BS · Just clarity
-                </p>
-              </form>
-            )}
-          </div>
+        {/* ── CTAs ── */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-3">
+          <button
+            onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
+            className="w-full sm:w-auto rounded-xl px-7 py-3.5 text-[13px] tracking-[0.06em] font-medium border border-[rgba(212,175,55,0.85)] bg-[rgba(212,175,55,0.15)] text-[color:var(--gold)] hover:bg-[rgba(212,175,55,0.26)] hover:border-[rgba(212,175,55,1)] transition min-h-[48px]"
+          >
+            Try the AI Coach — Free
+          </button>
+          <Link
+            href="/signup"
+            className="w-full sm:w-auto rounded-xl px-7 py-3.5 text-[13px] tracking-[0.06em] border border-white/15 text-white/70 hover:border-white/30 hover:text-white transition min-h-[48px] flex items-center justify-center"
+          >
+            Get Started — $10
+          </Link>
         </div>
+        <p className="text-center text-[11px] text-white/25 mb-10">
+          No signals · No BS · Just clarity
+        </p>
 
-        {/* ── Demo chat ── */}
-        <div id="demo" className="mb-5">
+        {/* ── Demo chat — front and centre ── */}
+        <div id="demo" className="mb-8">
           <div className="text-center mb-4">
             <h2 className="text-[18px] font-normal tracking-[-0.01em] text-white mb-1">
               Try it now
@@ -207,7 +133,7 @@ export default function WaitlistLanding() {
           <DemoChat />
         </div>
 
-        {/* ── Feature cards — same style as site's pill tags / small cards ── */}
+        {/* ── Feature cards ── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
           {FEATURES.map((f) => (
             <div key={f.title} className="card rounded-2xl border border-white/10 overflow-hidden">
@@ -243,22 +169,47 @@ export default function WaitlistLanding() {
           </div>
         </div>
 
+        {/* ── Track Record ── */}
+        <div className="card rounded-3xl border border-white/10 overflow-hidden mb-4">
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.45)] to-transparent" />
+          <div className="p-6 sm:p-8">
+            <div className="text-center mb-6">
+              <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-[color:var(--gold)] mb-2">
+                Research Track Record
+              </p>
+              <p className="text-[13px] text-white/40 leading-relaxed">
+                Exposed analysis on XAUUSD — backtested, documented, transparent.
+              </p>
+            </div>
+            <div className="flex items-start justify-center gap-8 sm:gap-12 flex-wrap mb-6">
+              {[
+                { value: "431",  label: "Research Trades" },
+                { value: "76%",  label: "Win Rate" },
+                { value: "7:1",  label: "Best R:R" },
+                { value: "3 mo.", label: "Track Record" },
+              ].map((s) => (
+                <div key={s.label} className="text-center">
+                  <div className="text-[28px] sm:text-[32px] font-light tracking-[-0.02em] text-[color:var(--gold)]">
+                    {s.value}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-white/30 mt-1">
+                    {s.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-[11px] text-white/20 leading-relaxed">
+              Based on backtested research trades on XAUUSD. Past performance does not guarantee future results.
+            </p>
+          </div>
+        </div>
+
         {/* ── Footer ── */}
-        <p className="text-center text-[11px] text-white/25">
+        <p className="text-center text-[11px] text-white/25 mb-6">
           Bullion Desk © 2026 · AI Gold Trading Coach · Not investment advice
         </p>
-      </div>
 
-      <style>{`
-        @keyframes drawCircle {
-          from { stroke-dashoffset: 138; }
-          to   { stroke-dashoffset: 0; }
-        }
-        @keyframes drawCheck {
-          from { stroke-dasharray: 0 40; }
-          to   { stroke-dasharray: 40 0; }
-        }
-      `}</style>
+      </div>
     </div>
   );
 }
