@@ -28,7 +28,7 @@ export async function middleware(req: NextRequest) {
 
   const adminSecret = process.env.ADMIN_SECRET;
 
-  // ── /admin — bypass entry point ───────────────────────────────────────────
+  // ── /admin — cookie-only access (Supabase session not sufficient) ──────────
   if (pathname.startsWith("/admin")) {
     const secret = req.nextUrl.searchParams.get("secret");
     if (adminSecret && secret === adminSecret) {
@@ -42,10 +42,16 @@ export async function middleware(req: NextRequest) {
       });
       return res;
     }
-    return NextResponse.next();
+    const bypassValue = req.cookies.get("admin_bypass")?.value;
+    if (adminSecret && bypassValue === adminSecret) return NextResponse.next();
+    // No valid secret or cookie — deny even authenticated Supabase users
+    const loginUrl = req.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.search = "";
+    return NextResponse.redirect(loginUrl);
   }
 
-  // ── admin_bypass cookie — full access ────────────────────────────────────
+  // ── admin_bypass cookie — full access to other protected routes ───────────
   const bypassValue = req.cookies.get("admin_bypass")?.value;
   if (adminSecret && bypassValue === adminSecret) return NextResponse.next();
 
