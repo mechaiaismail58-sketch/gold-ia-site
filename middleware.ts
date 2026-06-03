@@ -5,17 +5,42 @@ import type { NextRequest } from "next/server";
 // ─────────────────────────────────────────────────────────────────────────────
 // BullionDesk routing
 //
-// Public:  /, /about, /methodology, /login, /signup, /terms, /privacy, /api/demo-chat
-// Bypass:  /admin?secret=ADMIN_SECRET  → sets cookie + redirects to /chat
-//          admin_bypass cookie          → full access
-// Auth:    Supabase session via supabase.auth.getUser()
-// Private: everything else — redirect to /login
+// Public:     /, /about, /methodology, /terms, /privacy
+// Auth pages: /login, /signup  → redirect to /chat if already logged in
+// Paid:       /chat, /calendar, /market, /backtest, /dashboard
+//             → requires auth + has_paid; unpaid → /upgrade
+// Upgrade:    /upgrade → requires auth; already paid → /chat
+// Protected:  everything else → requires auth only
+// Bypass:     admin_bypass cookie or /admin?secret=ADMIN_SECRET
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Pages that never require a session
 const PUBLIC_PATHS = ["/", "/about", "/methodology", "/terms", "/privacy"];
 // Auth pages: public when logged out, redirect to /chat when logged in
 const AUTH_PATHS = ["/login", "/signup"];
+// Routes that require auth AND has_paid = true
+const PAID_PREFIXES = ["/chat", "/calendar", "/market", "/backtest", "/dashboard"];
+
+// Query has_paid directly via Supabase REST (Edge-compatible, bypasses RLS).
+// Fails open (returns true) so paid users are never wrongly blocked if the DB
+// is temporarily unreachable.
+async function getHasPaid(userId: string): Promise<boolean> {
+  try {
+    const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users?id=eq.${userId}&select=has_paid&limit=1`;
+    const res = await fetch(url, {
+      headers: {
+        apikey:        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+      },
+      cache: "no-store",
+    });
+    if (!res.ok) return true; // fail open
+    const [row] = await res.json() as Array<{ has_paid: boolean | null }>;
+    return row?.has_paid === true;
+  } catch {
+    return true; // fail open — don't block paid users if DB is unreachable
+  }
+}
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -89,13 +114,40 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
-  // ── Protected pages — redirect to /login if not authenticated ─────────────
-  if (user) return res;
+  // ── Not authenticated → redirect to /login with return destination ─────────
+  if (!user) {
+    const loginUrl = req.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.search = `?redirectTo=${encodeURIComponent(pathname)}`;
+    return NextResponse.redirect(loginUrl);
+  }
 
-  const loginUrl = req.nextUrl.clone();
-  loginUrl.pathname = "/login";
-  loginUrl.search = `?redirectTo=${encodeURIComponent(pathname)}`;
-  return NextResponse.redirect(loginUrl);
+  // ── /upgrade — authenticated only; redirect to /chat if already paid ───────
+  if (pathname === "/upgrade") {
+    const hasPaid = await getHasPaid(user.id);
+    if (hasPaid) {
+      const chatUrl = req.nextUrl.clone();
+      chatUrl.pathname = "/chat";
+      chatUrl.search = "";
+      return NextResponse.redirect(chatUrl);
+    }
+    return res;
+  }
+
+  // ── Paid routes — require has_paid; unpaid users go to /upgrade ───────────
+  if (PAID_PREFIXES.some((p) => pathname.startsWith(p))) {
+    const hasPaid = await getHasPaid(user.id);
+    if (!hasPaid) {
+      const upgradeUrl = req.nextUrl.clone();
+      upgradeUrl.pathname = "/upgrade";
+      upgradeUrl.search = "";
+      return NextResponse.redirect(upgradeUrl);
+    }
+    return res;
+  }
+
+  // ── All other protected pages — auth sufficient ────────────────────────────
+  return res;
 }
 
 export const config = {
