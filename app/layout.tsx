@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import ConditionalHeader from "../components/ConditionalHeader";
+import SiteFooter from "../components/SiteFooter";
 import PushManager from "../components/PushManager";
 import NavigationProgress from "../components/NavigationProgress";
 import { ChatProvider } from "@/context/ChatContext";
@@ -68,6 +69,7 @@ export default async function RootLayout({
           <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10 lg:px-16 xl:px-20">
             <main className="pt-10 pb-16 animate-fade-in">{children}</main>
           </div>
+          <SiteFooter />
         </ChatProvider>
       </body>
     </html>

@@ -5,14 +5,14 @@ import type { NextRequest } from "next/server";
 // ─────────────────────────────────────────────────────────────────────────────
 // BullionDesk routing
 //
-// Public:  /, /about, /methodology, /login, /signup, /api/demo-chat
+// Public:  /, /about, /methodology, /login, /signup, /terms, /privacy, /api/demo-chat
 // Bypass:  /admin?secret=ADMIN_SECRET  → sets cookie + redirects to /chat
 //          admin_bypass cookie          → full access
 // Auth:    Supabase session via supabase.auth.getUser()
 // Private: everything else — redirect to /login
 // ─────────────────────────────────────────────────────────────────────────────
 
-const PUBLIC_PATHS = ["/", "/about", "/methodology", "/login", "/signup"];
+const PUBLIC_PATHS = ["/", "/about", "/methodology", "/login", "/signup", "/terms", "/privacy"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
