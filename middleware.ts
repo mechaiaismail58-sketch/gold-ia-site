@@ -12,7 +12,10 @@ import type { NextRequest } from "next/server";
 // Private: everything else — redirect to /login
 // ─────────────────────────────────────────────────────────────────────────────
 
-const PUBLIC_PATHS = ["/", "/about", "/methodology", "/login", "/signup", "/terms", "/privacy"];
+// Pages that never require a session
+const PUBLIC_PATHS = ["/", "/about", "/methodology", "/terms", "/privacy"];
+// Auth pages: public when logged out, redirect to /chat when logged in
+const AUTH_PATHS = ["/login", "/signup"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -20,10 +23,10 @@ export async function middleware(req: NextRequest) {
   // ── Static assets — always pass through ──────────────────────────────────
   if (pathname.includes(".") || pathname.startsWith("/_next")) return NextResponse.next();
 
-  // ── API routes — always pass through (except specific protected ones) ─────
+  // ── API routes — always pass through (each route handles its own auth) ────
   if (pathname.startsWith("/api/")) return NextResponse.next();
 
-  // ── Public pages — no auth required ──────────────────────────────────────
+  // ── Purely public pages — no auth check needed ───────────────────────────
   if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 
   const adminSecret = process.env.ADMIN_SECRET;
@@ -75,9 +78,20 @@ export async function middleware(req: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
+  // ── Auth pages (/login, /signup) — redirect to /chat if already logged in ─
+  if (AUTH_PATHS.includes(pathname)) {
+    if (user) {
+      const chatUrl = req.nextUrl.clone();
+      chatUrl.pathname = "/chat";
+      chatUrl.search = "";
+      return NextResponse.redirect(chatUrl);
+    }
+    return res;
+  }
+
+  // ── Protected pages — redirect to /login if not authenticated ─────────────
   if (user) return res;
 
-  // ── Not authenticated → redirect to /login with return destination ─────────
   const loginUrl = req.nextUrl.clone();
   loginUrl.pathname = "/login";
   loginUrl.search = `?redirectTo=${encodeURIComponent(pathname)}`;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -8,31 +8,16 @@ import { createClient } from "@/lib/supabase/client";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // Sanitise: only allow relative paths to prevent open redirect
   const raw = searchParams.get("redirectTo") || "/chat";
+  // Sanitise: only allow relative paths to prevent open redirect
   const redirectTo = raw.startsWith("/") && !raw.startsWith("//") && raw !== "/login" ? raw : "/chat";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<{ message: string; noAccount?: boolean } | null>(null);
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
-
-  // Redirect immediately if a session is already active
-  useEffect(() => {
-    const supabase = createClient();
-    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000));
-    Promise.race([supabase.auth.getSession(), timeout]).then((result) => {
-      const session = result && "data" in result ? result.data.session : null;
-      if (session) {
-        router.replace(redirectTo);
-      } else {
-        setChecking(false);
-      }
-    });
-  }, [router, redirectTo]);
 
   const canSubmit = email.trim().length > 0 && password.length > 0 && !loading;
 
@@ -44,7 +29,6 @@ function LoginForm() {
 
     try {
       const supabase = createClient();
-
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
       if (signInError) {
@@ -59,8 +43,7 @@ function LoginForm() {
         return;
       }
 
-      // onAuthStateChange fires → Header updates immediately
-      router.push(redirectTo === "/login" ? "/chat" : redirectTo);
+      router.push(redirectTo);
       router.refresh();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Network error — please try again.";
@@ -84,14 +67,6 @@ function LoginForm() {
     } finally {
       setForgotLoading(false);
     }
-  }
-
-  if (checking) {
-    return (
-      <div className="min-h-screen bg-[#07060b] flex items-center justify-center">
-        <span className="h-5 w-5 rounded-full border-2 border-white/10 border-t-white/50 animate-spin" />
-      </div>
-    );
   }
 
   return (

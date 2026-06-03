@@ -136,7 +136,7 @@ export default function WaitlistLanding() {
                 { value: "431",  label: "Research Trades" },
                 { value: "76%",  label: "Win Rate" },
                 { value: "7:1",  label: "Best R:R" },
-                { value: "3 mo.", label: "Track Record" },
+                { value: "9 mo.", label: "Track Record" },
               ].map((s) => (
                 <div key={s.label} className="text-center">
                   <div className="text-[28px] sm:text-[32px] font-light tracking-[-0.02em] text-[color:var(--gold)]">
