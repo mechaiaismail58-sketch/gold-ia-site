@@ -23,7 +23,9 @@ function LoginForm() {
   // Redirect immediately if a session is already active
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+    Promise.race([supabase.auth.getSession(), timeout]).then((result) => {
+      const session = result && "data" in result ? result.data.session : null;
       if (session) {
         router.replace(redirectTo);
       } else {
