@@ -1,32 +1,37 @@
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BullionDesk routing
 //
-// Public:  /  (waitlist landing)
+// Public:  /, /about, /methodology, /login, /signup, /api/demo-chat
 // Bypass:  /admin?secret=ADMIN_SECRET  → sets cookie + redirects to /chat
-// Private: everything else — requires admin_bypass cookie
+//          admin_bypass cookie          → full access
+// Auth:    Supabase session via supabase.auth.getUser()
+// Private: everything else — redirect to /login
 // ─────────────────────────────────────────────────────────────────────────────
+
+const PUBLIC_PATHS = ["/", "/about", "/methodology", "/login", "/signup"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ── API routes + static assets — always pass through ─────────────────────
-  if (pathname.startsWith("/api/")) return NextResponse.next();
+  // ── Static assets — always pass through ──────────────────────────────────
   if (pathname.includes(".") || pathname.startsWith("/_next")) return NextResponse.next();
 
-  const adminSecret = process.env.ADMIN_SECRET;
+  // ── API routes — always pass through (except specific protected ones) ─────
+  if (pathname.startsWith("/api/")) return NextResponse.next();
 
-  // Check for valid admin bypass cookie
-  const bypassValue = req.cookies.get("admin_bypass")?.value;
-  const hasBypass = Boolean(adminSecret && bypassValue === adminSecret);
+  // ── Public pages — no auth required ──────────────────────────────────────
+  if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
+
+  const adminSecret = process.env.ADMIN_SECRET;
 
   // ── /admin — bypass entry point ───────────────────────────────────────────
   if (pathname.startsWith("/admin")) {
     const secret = req.nextUrl.searchParams.get("secret");
     if (adminSecret && secret === adminSecret) {
-      // Valid secret → set cookie, show admin portal
       const res = NextResponse.next();
       res.cookies.set("admin_bypass", adminSecret, {
         httpOnly: true,
@@ -37,22 +42,40 @@ export async function middleware(req: NextRequest) {
       });
       return res;
     }
-    // Public — no auth required
     return NextResponse.next();
   }
 
-  // ── Public pages — no auth required ──────────────────────────────────────
-  const PUBLIC_PATHS = ["/", "/about", "/methodology", "/login", "/signup", "/admin", "/chat"];
-  if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
+  // ── admin_bypass cookie — full access ────────────────────────────────────
+  const bypassValue = req.cookies.get("admin_bypass")?.value;
+  if (adminSecret && bypassValue === adminSecret) return NextResponse.next();
 
-  // ── Bypassed users — full access ─────────────────────────────────────────
-  if (hasBypass) return NextResponse.next();
+  // ── Supabase session check ────────────────────────────────────────────────
+  const res = NextResponse.next();
 
-  // ── Everyone else → back to landing ─────────────────────────────────────
-  const dest = req.nextUrl.clone();
-  dest.pathname = "/";
-  dest.search = "";
-  return NextResponse.redirect(dest);
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => req.cookies.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            res.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) return res;
+
+  // ── Not authenticated → redirect to /login ────────────────────────────────
+  const loginUrl = req.nextUrl.clone();
+  loginUrl.pathname = "/login";
+  loginUrl.search = "";
+  return NextResponse.redirect(loginUrl);
 }
 
 export const config = {

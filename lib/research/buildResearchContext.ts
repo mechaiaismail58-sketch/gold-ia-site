@@ -434,11 +434,7 @@ export type EnrichedResearchContext = ResearchContext & {
   } | null;
   sofr: number | null;
   tga_balance_bn: number | null;
-  fx_momentum: {
-    eurusd_h4: "bullish" | "bearish" | "neutral";
-    usdjpy_h4: "bullish" | "bearish" | "neutral";
-    summary: string;
-  } | null;
+  fx_momentum: null;
   gld_iv: number | null;
   futures_curve: FuturesCurveData | null;
   // D1 structural levels — institutional reference points
@@ -475,16 +471,6 @@ async function getCOTContextWithRetry() {
     if (result) return result;
   } catch { /* first attempt failed, retry */ }
   try { return await getCOTContext(); } catch { return null; }
-}
-
-// ── H4 momentum from last 3 candles ───────────────────────────────────────────
-
-function computeH4Momentum(bars: ParsedBar[]): "bullish" | "bearish" | "neutral" {
-  if (bars.length < 3) return "neutral";
-  const last3 = bars.slice(-3);
-  const ups = last3.filter(b => b.close > b.open).length;
-  const downs = last3.filter(b => b.close < b.open).length;
-  return ups >= 2 ? "bullish" : downs >= 2 ? "bearish" : "neutral";
 }
 
 // ── GLD implied volatility from Yahoo Finance options ─────────────────────────
@@ -593,8 +579,6 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     tgaRaw,
     targetUpper,
     effectiveRate,
-    eurusdBars,
-    usdjpyBars,
     gldIV,
     futuresCurve,
   ] = await Promise.all([
@@ -609,18 +593,16 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     withTimeout(getLatestFredValue("T10YIE"), 3000, null),
     withTimeout(getLatestFredValue("SLVPRUSD"), 3000, null),
     withTimeout(fetchYahooSpx(), 3000, { current: null, direction: "Data not found" }),
-    withTimeout(getCOTContextWithRetry(), 4000, null),
+    withTimeout(getCOTContextWithRetry(), 2000, null),
     withTimeout(getUpcomingEvents(), 3000, null),
     withTimeout(getPolygonOrderFlow(), 3000, null),
     withTimeout(getSentimentContext(), 3000, null),
-    withTimeout(getETFFlowsContext(), 3000, null),
+    withTimeout(getETFFlowsContext(), 2000, null),
     withTimeout(getCentralBankContext(), 3000, null),
     withTimeout(getLatestFredValue("SOFR"), 3000, null),
     withTimeout(getLatestFredValue("WTREGEN"), 3000, null),
     withTimeout(getLatestFredValue("DFEDTARU"), 3000, null),
     withTimeout(getLatestFredValue("FEDFUNDS"), 3000, null),
-    Promise.resolve([]), // EUR/USD — disabled, gold-only
-    Promise.resolve([]), // USD/JPY — disabled, gold-only
     withTimeout(fetchGLDImpliedVol(), 4000, null),
     withTimeout(fetchFuturesCurveData(), 4000, { front_price: null, next_price: null, spread: null, structure: null, note: "Futures curve data unavailable" }),
   ]);
@@ -733,18 +715,6 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
       indicatorContext.order_flow.summary += ` (local calculation)`;
     }
   }
-
-  // ── FX momentum — EUR/USD and USD/JPY H4 last 3 candles ───────────────────
-  const eurusdDir = computeH4Momentum(eurusdBars);
-  const usdjpyDir = computeH4Momentum(usdjpyBars);
-  const fxMomentum = (eurusdBars.length >= 3 || usdjpyBars.length >= 3) ? {
-    eurusd_h4: eurusdDir,
-    usdjpy_h4: usdjpyDir,
-    summary: [
-      eurusdBars.length >= 3 ? `EUR/USD H4: ${eurusdDir}${eurusdDir === "bullish" ? " (USD weakening — gold tailwind)" : eurusdDir === "bearish" ? " (USD strengthening — gold headwind)" : " (neutral)"}` : null,
-      usdjpyBars.length >= 3 ? `USD/JPY H4: ${usdjpyDir}${usdjpyDir === "bullish" ? " (USD strengthening — gold headwind)" : usdjpyDir === "bearish" ? " (USD weakening — gold tailwind)" : " (neutral)"}` : null,
-    ].filter(Boolean).join(" | "),
-  } : null;
 
   // ── COMEX Open Interest signal (4-scenario OI × price analysis) ────────────
   type OIScenario = "new_longs" | "new_shorts" | "short_covering" | "long_liquidation" | "unknown";
@@ -1065,7 +1035,7 @@ export async function buildResearchContext(): Promise<EnrichedResearchContext> {
     oi_signal,
     sofr,
     tga_balance_bn,
-    fx_momentum: fxMomentum,
+    fx_momentum: null,
     gld_iv: gldIV,
     futures_curve: futuresCurve.structure != null || futuresCurve.front_price != null ? futuresCurve : null,
     weekly_d1_high: weeklyD1High,
