@@ -2,6 +2,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Expose server-side env vars to the Edge Runtime (middleware).
+  // NEXT_PUBLIC_* vars are always available; others must be listed explicitly.
+  env: {
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
+    ADMIN_SECRET:              process.env.ADMIN_SECRET              ?? "",
+  },
+
   // Transpile ESM-only packages so SSR (Node.js) can require() them
   transpilePackages: [
     "react-markdown",
