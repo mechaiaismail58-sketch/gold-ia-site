@@ -23,7 +23,7 @@ function LoginForm() {
   // Redirect immediately if a session is already active
   useEffect(() => {
     const supabase = createClient();
-    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000));
     Promise.race([supabase.auth.getSession(), timeout]).then((result) => {
       const session = result && "data" in result ? result.data.session : null;
       if (session) {
@@ -45,15 +45,7 @@ function LoginForm() {
     try {
       const supabase = createClient();
 
-      // 20 s hard timeout — Supabase auth can be slow in certain regions
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("timeout")), 20_000)
-      );
-
-      const { error: signInError } = await Promise.race([
-        supabase.auth.signInWithPassword({ email, password }),
-        timeoutPromise,
-      ]);
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
       if (signInError) {
         const msg = signInError.message.toLowerCase();
@@ -71,8 +63,8 @@ function LoginForm() {
       router.push(redirectTo === "/login" ? "/chat" : redirectTo);
       router.refresh();
     } catch (err) {
-      const isTimeout = err instanceof Error && err.message === "timeout";
-      setError({ message: isTimeout ? "Request timed out — please try again." : "Network error — please try again." });
+      const msg = err instanceof Error ? err.message : "Network error — please try again.";
+      setError({ message: msg });
     } finally {
       setLoading(false);
     }
