@@ -104,7 +104,7 @@ function PaymentSuccessContent() {
         if (c <= 1) {
           clearInterval(interval);
           setPhase("redirecting");
-          router.push("/");
+          router.push("/chat");
           return 0;
         }
         return c - 1;
@@ -182,7 +182,7 @@ function PaymentSuccessContent() {
             {/* CTA — shown when confirmed or timeout */}
             {(confirmed || phase === "timeout") && (
               <button
-                onClick={() => { router.push("/"); router.refresh(); }}
+                onClick={() => { router.push("/chat"); router.refresh(); }}
                 className="block w-full rounded-2xl py-4 text-[14px] font-medium tracking-[0.06em] border border-[rgba(212,175,55,0.65)] bg-[rgba(212,175,55,0.10)] text-[#D4AF37] transition hover:bg-[rgba(212,175,55,0.18)] hover:border-[rgba(212,175,55,0.95)] text-center"
               >
                 {phase === "timeout" ? "Access my account →" : "Go to Dashboard"}
