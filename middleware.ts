@@ -77,10 +77,10 @@ export async function middleware(req: NextRequest) {
 
   if (user) return res;
 
-  // ── Not authenticated → redirect to /login ────────────────────────────────
+  // ── Not authenticated → redirect to /login with return destination ─────────
   const loginUrl = req.nextUrl.clone();
   loginUrl.pathname = "/login";
-  loginUrl.search = "";
+  loginUrl.search = `?redirectTo=${encodeURIComponent(pathname)}`;
   return NextResponse.redirect(loginUrl);
 }
 

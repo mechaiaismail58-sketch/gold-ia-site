@@ -8,7 +8,9 @@ import { createClient } from "@/lib/supabase/client";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const from = searchParams.get("from") || "/";
+  // Sanitise: only allow relative paths to prevent open redirect
+  const raw = searchParams.get("redirectTo") || "/chat";
+  const redirectTo = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/chat";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,7 +53,7 @@ function LoginForm() {
       }
 
       // onAuthStateChange fires → Header updates immediately
-      router.push(from === "/login" ? "/" : from);
+      router.push(redirectTo === "/login" ? "/chat" : redirectTo);
       router.refresh();
     } catch (err) {
       const isTimeout = err instanceof Error && err.message === "timeout";
