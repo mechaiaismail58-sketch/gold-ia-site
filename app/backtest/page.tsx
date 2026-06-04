@@ -1,4 +1,4 @@
-import PerformanceChart from "./PerformanceChart";
+import PerformanceChartClient from "./PerformanceChartClient";
 
 type NotionPage = any;
 
@@ -180,7 +180,7 @@ export default async function BacktestPage() {
 
       {/* ── Performance chart ── */}
       <section className="mt-8">
-        <PerformanceChart trades={trades} />
+        <PerformanceChartClient trades={trades} />
       </section>
 
       {/* ── Why we show this ── */}

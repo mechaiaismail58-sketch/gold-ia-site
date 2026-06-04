@@ -42,9 +42,6 @@ async function getHasPaid(userId: string): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ── DEBUG — remove after confirming middleware runs in production ─────────
-  console.log("[MW]", pathname, "service_key:", !!process.env.SUPABASE_SERVICE_ROLE_KEY, "anon_key:", !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-
   // ── Static assets ─────────────────────────────────────────────────────────
   if (pathname.startsWith("/_next") || pathname.startsWith("/favicon") || pathname.includes(".")) {
     return NextResponse.next();
@@ -115,9 +112,7 @@ export async function middleware(request: NextRequest) {
   try {
     const { data } = await supabase.auth.getUser();
     user = data.user ?? null;
-    console.log("[MW] getUser →", user ? user.id.slice(0, 8) : "null");
-  } catch (e) {
-    console.log("[MW] getUser threw:", String(e));
+  } catch {
     user = null;
   }
 
@@ -145,7 +140,6 @@ export async function middleware(request: NextRequest) {
 
   // ── Not authenticated ─────────────────────────────────────────────────────
   if (!user) {
-    console.log("[MW] no user → redirect /login");
     return redirect("/login", `?redirectTo=${encodeURIComponent(pathname)}`);
   }
 
@@ -158,10 +152,7 @@ export async function middleware(request: NextRequest) {
   // ── Paid routes ───────────────────────────────────────────────────────────
   if (PAID_PREFIXES.some((p) => pathname.startsWith(p))) {
     const hasPaid = await getHasPaid(user.id);
-    if (!hasPaid) {
-      console.log("[MW] not paid → redirect /upgrade");
-      return redirect("/upgrade");
-    }
+    if (!hasPaid) return redirect("/upgrade");
     return supabaseResponse;
   }
 
