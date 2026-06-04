@@ -292,12 +292,8 @@ export default function AccountDashboard() {
     rules.push({ label: "Jours minimum", status: snap.trading_days >= limits.min_trading_days ? "ok" : "warning", note: `${snap.trading_days}/${limits.min_trading_days} jours` });
   }
 
-  if (loading) {
-    return <section className="mt-6"><div style={{ fontSize: 11, color: MUTED, fontFamily: "monospace" }}>Chargement…</div></section>;
-  }
-
   return (
-    <section className="mt-6">
+    <section className="mt-6" style={{ opacity: loading ? 0.55 : 1, transition: "opacity 0.3s ease" }}>
 
       {/* ── BLOC 1 — En-tête compte ────────────────────────────── */}
       <div style={{ ...cardStyle, marginBottom: 8 }}>

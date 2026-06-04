@@ -134,8 +134,8 @@ export default function WaitlistLanding() {
             <div className="flex items-start justify-center gap-8 sm:gap-12 flex-wrap mb-6">
               {[
                 { value: "431",  label: "Research Trades" },
-                { value: "76%",  label: "Win Rate" },
-                { value: "7:1",  label: "Best R:R" },
+                { value: "69%",  label: "Win Rate" },
+                { value: "25",   label: "Selected Trades" },
                 { value: "9 mo.", label: "Track Record" },
               ].map((s) => (
                 <div key={s.label} className="text-center">

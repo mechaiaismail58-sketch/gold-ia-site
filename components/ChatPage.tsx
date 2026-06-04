@@ -56,6 +56,72 @@ export default function ChatPage() {
   const [respondedTradeIds, setRespondedTradeIds] = useState<Set<string>>(new Set());
 
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isTypewriting, setIsTypewriting] = useState(false);
+
+  // Typewriter effect refs
+  const typewriterQueueRef     = useRef<string>("");
+  const typewriterDisplayedRef = useRef<string>("");
+  const typewriterTimerRef     = useRef<ReturnType<typeof setInterval> | null>(null);
+  const streamingFinishedRef   = useRef<boolean>(false);
+
+  function startTypewriterTimer() {
+    if (typewriterTimerRef.current !== null) return;
+    setIsTypewriting(true);
+    typewriterTimerRef.current = setInterval(() => {
+      const queue = typewriterQueueRef.current;
+      if (queue.length === 0) {
+        if (streamingFinishedRef.current) {
+          clearInterval(typewriterTimerRef.current!);
+          typewriterTimerRef.current = null;
+          setIsTypewriting(false);
+        }
+        return;
+      }
+      // Process 1 word normally, more words if backlog is large (catch-up)
+      const wordsPerTick = queue.length > 500 ? 4 : queue.length > 200 ? 2 : 1;
+      let chunk = "";
+      let remaining = queue;
+      for (let i = 0; i < wordsPerTick && remaining.length > 0; i++) {
+        const space   = remaining.indexOf(" ");
+        const newline = remaining.indexOf("\n");
+        let end: number;
+        if (space === -1 && newline === -1) end = remaining.length;
+        else if (space === -1)              end = newline + 1;
+        else if (newline === -1)            end = space + 1;
+        else                                end = Math.min(space, newline) + 1;
+        chunk    += remaining.slice(0, end);
+        remaining = remaining.slice(end);
+      }
+      typewriterQueueRef.current     = remaining;
+      typewriterDisplayedRef.current += chunk;
+      const text = typewriterDisplayedRef.current;
+      setMessages((m) => {
+        const updated = [...m];
+        updated[updated.length - 1] = { ...updated[updated.length - 1], content: text };
+        return updated;
+      });
+      scrollToBottom();
+    }, 25);
+  }
+
+  function flushTypewriterQueue() {
+    if (typewriterTimerRef.current !== null) {
+      clearInterval(typewriterTimerRef.current);
+      typewriterTimerRef.current = null;
+    }
+    const remaining = typewriterQueueRef.current;
+    if (remaining.length > 0) {
+      typewriterDisplayedRef.current += remaining;
+      typewriterQueueRef.current      = "";
+      const text = typewriterDisplayedRef.current;
+      setMessages((m) => {
+        const updated = [...m];
+        updated[updated.length - 1] = { ...updated[updated.length - 1], content: text };
+        return updated;
+      });
+    }
+    setIsTypewriting(false);
+  }
 
   // Dynamic contextual suggestions
   const [suggestions, setSuggestions] = useState<string[]>([
@@ -77,6 +143,7 @@ export default function ChatPage() {
 
   function stopGeneration() {
     abortControllerRef.current?.abort();
+    flushTypewriterQueue();
   }
 
   // Smart scroll
@@ -341,21 +408,17 @@ async function send(textOverride?: string) {
             const event = JSON.parse(part.slice(6));
             if (event.type === "delta") {
               fullText += event.text;
-
-              if (fullText) {
-                if (!messageAdded) {
-                  setMessages((m) => [...m, { role: "assistant", content: fullText }]);
-                  messageAdded = true;
-                } else {
-                  setMessages((m) => {
-                    const updated = [...m];
-                    updated[updated.length - 1] = { ...updated[updated.length - 1], content: fullText };
-                    return updated;
-                  });
-                }
-                scrollToBottom();
+              if (!messageAdded) {
+                typewriterQueueRef.current     = "";
+                typewriterDisplayedRef.current = "";
+                streamingFinishedRef.current   = false;
+                setMessages((m) => [...m, { role: "assistant", content: "" }]);
+                messageAdded = true;
+                startTypewriterTimer();
               }
+              typewriterQueueRef.current += event.text;
             } else if (event.type === "done") {
+              streamingFinishedRef.current = true;
               tradeId = event.trade_id ?? event.pending_trade_id ?? null;
               streamResponseId = event.response_id ?? null;
             } else if (event.type === "error") {
@@ -397,11 +460,13 @@ async function send(textOverride?: string) {
         }).catch(() => {});
       }
     } catch (err) {
-      // AbortError = user clicked Stop — keep whatever streamed, no error message
+      // AbortError = user clicked Stop — flush typewriter queue, keep whatever streamed
       if (err instanceof Error && err.name === "AbortError") {
+        flushTypewriterQueue();
         setIsStreaming(false);
         setShowScrollBtn(false);
       } else {
+        flushTypewriterQueue();
         console.error("[chat] fetch error:", err);
         const errMsg = err instanceof Error ? err.message : "Unknown error";
         setMessages((m) => [
@@ -410,6 +475,8 @@ async function send(textOverride?: string) {
         ]);
       }
     } finally {
+      // Flush any remaining typewriter content if timer still running
+      if (typewriterTimerRef.current !== null) flushTypewriterQueue();
       setLoading(false);
       setIsStreaming(false);
       abortControllerRef.current = null;
@@ -541,7 +608,7 @@ async function send(textOverride?: string) {
                     </div>
                     <div className="pl-3 border-l border-white/[0.06]">
                       <MarkdownMessage content={m.content} />
-                      {isStreaming && i === messages.length - 1 && m.role === "assistant" && (
+                      {(isStreaming || isTypewriting) && i === messages.length - 1 && m.role === "assistant" && (
                         <span className="typing-cursor" />
                       )}
                     </div>
