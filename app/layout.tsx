@@ -5,7 +5,6 @@ import SiteFooter from "../components/SiteFooter";
 import PushManager from "../components/PushManager";
 import NavigationProgress from "../components/NavigationProgress";
 import { ChatProvider } from "@/context/ChatContext";
-import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "BullionDesk — AI Gold Trading Coach",
@@ -32,26 +31,11 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  let initialEmail: string | null = null;
-  let initialAvatarUrl: string | null = null;
-
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      initialEmail = user.email ?? null;
-      const { data } = await supabase.from("users").select("avatar_url").eq("id", user.id).single();
-      initialAvatarUrl = data?.avatar_url ?? null;
-    }
-  } catch {
-    // Not authenticated — middleware handles redirect
-  }
-
   return (
     <html lang="en">
       <body className="min-h-screen bg-[#07060b] text-white">
@@ -67,7 +51,7 @@ export default async function RootLayout({
           {/* Navbar row */}
           <div className="mx-auto max-w-[1400px] px-4 sm:px-6 md:px-10 lg:px-16 xl:px-20">
             <PushManager />
-            <ConditionalHeader initialEmail={initialEmail} initialAvatarUrl={initialAvatarUrl} />
+            <ConditionalHeader initialEmail={null} initialAvatarUrl={null} />
           </div>
           {/* Page content */}
           <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10 lg:px-16 xl:px-20">

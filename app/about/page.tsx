@@ -1,3 +1,5 @@
+export const dynamic = "force-static";
+
 function CheckIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 mt-0.5">

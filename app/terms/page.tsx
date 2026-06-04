@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+export const dynamic = "force-static";
+
 const LAST_UPDATED = "June 3, 2026";
 
 export const metadata = {
