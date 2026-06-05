@@ -232,7 +232,7 @@ export default function SignupPage() {
                     Signing up…
                   </span>
                 ) : (
-                  "Sign up"
+                  "Create Account"
                 )}
               </button>
             </form>

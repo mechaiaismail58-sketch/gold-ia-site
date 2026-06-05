@@ -49,7 +49,7 @@ const IS_NOT_LIST = [
 
 export default function AboutPage() {
   return (
-    <main className="text-white space-y-5">
+    <div className="text-white space-y-5">
 
       {/* ── Section 1 — Hero ── */}
       <section className="card rounded-3xl border border-white/10 overflow-hidden">
@@ -145,6 +145,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-    </main>
+    </div>
   );
 }
