@@ -7,7 +7,7 @@ import NavigationProgress from "../components/NavigationProgress";
 import { ChatProvider } from "@/context/ChatContext";
 
 export const metadata: Metadata = {
-  title: "BullionDesk — AI Gold Trading Coach",
+  title: "BullionDesk",
   description: "Institutional-grade gold analysis for serious XAUUSD traders. Structure, macro, risk management. Prop firm ready. No signals. Just clarity.",
   keywords: "trading advisor, AI trading, prop firm, market analysis, FTMO, gold analysis, risk management, trading psychology, gold trading coach, XAUUSD analysis, gold market structure",
   openGraph: {
