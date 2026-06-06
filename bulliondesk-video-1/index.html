@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #0a0700;
+      }
+
+      #bg {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 50% 60%, #1a1000 0%, #0a0700 70%);
+      }
+
+      #grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(212,175,55,0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(212,175,55,0.06) 1px, transparent 1px);
+        background-size: 80px 80px;
+      }
+
+      #glow {
+        position: absolute;
+        width: 900px;
+        height: 900px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%);
+        border-radius: 50%;
+      }
+
+      #logo-wrap {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+      }
+
+      #icon {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, #d4af37 0%, #f5e07a 50%, #b8860b 100%);
+        border-radius: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 64px;
+        box-shadow: 0 0 60px rgba(212,175,55,0.5), 0 0 120px rgba(212,175,55,0.2);
+      }
+
+      #logo-text {
+        font-family: 'Georgia', serif;
+        font-size: 96px;
+        font-weight: 700;
+        letter-spacing: -2px;
+        color: #fff;
+      }
+
+      #logo-text span {
+        color: #d4af37;
+      }
+
+      #tagline {
+        font-family: 'Helvetica Neue', sans-serif;
+        font-size: 28px;
+        font-weight: 300;
+        letter-spacing: 8px;
+        text-transform: uppercase;
+        color: rgba(212,175,55,0.8);
+      }
+
+      #line {
+        width: 0px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #d4af37, transparent);
+      }
+
+      #stats {
+        position: absolute;
+        bottom: 120px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 120px;
+        align-items: flex-end;
+      }
+
+      .stat {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .stat-value {
+        font-family: 'Georgia', serif;
+        font-size: 56px;
+        font-weight: 700;
+        color: #d4af37;
+        line-height: 1;
+      }
+
+      .stat-label {
+        font-family: 'Helvetica Neue', sans-serif;
+        font-size: 18px;
+        font-weight: 300;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.5);
+      }
+
+      .stat-divider {
+        width: 1px;
+        height: 80px;
+        background: linear-gradient(180deg, transparent, rgba(212,175,55,0.4), transparent);
+        align-self: center;
+      }
+
+      #ticker {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        display: flex;
+        gap: 80px;
+        justify-content: center;
+      }
+
+      .tick-item {
+        font-family: 'Helvetica Neue', sans-serif;
+        font-size: 22px;
+        color: rgba(255,255,255,0.6);
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .tick-name {
+        color: rgba(255,255,255,0.4);
+        font-weight: 300;
+        letter-spacing: 2px;
+      }
+
+      .tick-price {
+        color: #fff;
+        font-weight: 500;
+      }
+
+      .tick-up { color: #4ade80; }
+      .tick-down { color: #f87171; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="15" data-width="1920" data-height="1080">
+
+      <!-- Background -->
+      <div id="bg" class="clip" data-start="0" data-duration="15" data-track-index="1"></div>
+      <div id="grid" class="clip" data-start="0" data-duration="15" data-track-index="2"></div>
+      <div id="glow" class="clip" data-start="0" data-duration="15" data-track-index="3"></div>
+
+      <!-- Ticker top -->
+      <div id="ticker" class="clip" data-start="1" data-duration="14" data-track-index="4">
+        <div class="tick-item"><span class="tick-name">XAU/USD</span><span class="tick-price">$2,387.40</span><span class="tick-up">▲ +0.82%</span></div>
+        <div class="tick-item"><span class="tick-name">XAG/USD</span><span class="tick-price">$28.14</span><span class="tick-up">▲ +1.24%</span></div>
+        <div class="tick-item"><span class="tick-name">XPT/USD</span><span class="tick-price">$968.50</span><span class="tick-down">▼ -0.31%</span></div>
+        <div class="tick-item"><span class="tick-name">XPD/USD</span><span class="tick-price">$954.20</span><span class="tick-up">▲ +0.55%</span></div>
+      </div>
+
+      <!-- Logo center -->
+      <div id="logo-wrap" class="clip" data-start="0.5" data-duration="14.5" data-track-index="5">
+        <div id="icon">🪙</div>
+        <div id="logo-text">Bullion<span>Desk</span></div>
+        <div id="line"></div>
+        <div id="tagline">Live Precious Metals Prices</div>
+      </div>
+
+      <!-- Stats bottom -->
+      <div id="stats" class="clip" data-start="3" data-duration="12" data-track-index="6">
+        <div class="stat">
+          <div class="stat-value">30+</div>
+          <div class="stat-label">Years of Data</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <div class="stat-value">24/7</div>
+          <div class="stat-label">Live Prices</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <div class="stat-value">100+</div>
+          <div class="stat-label">Currencies</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <div class="stat-value">1M+</div>
+          <div class="stat-label">Monthly Users</div>
+        </div>
+      </div>
+
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Background fade in
+      tl.from("#bg", { opacity: 0, duration: 1.5 }, 0);
+      tl.from("#grid", { opacity: 0, duration: 2 }, 0.3);
+      tl.from("#glow", { opacity: 0, scale: 0.5, duration: 2, ease: "power2.out" }, 0.2);
+
+      // Ticker
+      tl.from("#ticker", { opacity: 0, y: -30, duration: 0.8, ease: "power2.out" }, 1);
+
+      // Icon drops in
+      tl.from("#icon", { scale: 0, opacity: 0, duration: 0.7, ease: "back.out(1.7)" }, 0.5);
+      tl.to("#icon", { boxShadow: "0 0 80px rgba(212,175,55,0.8), 0 0 160px rgba(212,175,55,0.3)", duration: 1, yoyo: true, repeat: -1, ease: "sine.inOut" }, 1.2);
+
+      // Logo text
+      tl.from("#logo-text", { opacity: 0, y: 20, duration: 0.8, ease: "power3.out" }, 1.0);
+
+      // Line expands
+      tl.to("#line", { width: 500, duration: 1, ease: "power3.inOut" }, 1.5);
+
+      // Tagline
+      tl.from("#tagline", { opacity: 0, letterSpacing: "20px", duration: 1.2, ease: "power2.out" }, 2.0);
+
+      // Stats stagger in
+      tl.from(".stat", { opacity: 0, y: 40, duration: 0.7, stagger: 0.15, ease: "power3.out" }, 3);
+      tl.from(".stat-divider", { opacity: 0, scaleY: 0, duration: 0.5, stagger: 0.15, ease: "power2.out" }, 3.2);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

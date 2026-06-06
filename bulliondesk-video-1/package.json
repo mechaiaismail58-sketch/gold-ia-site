@@ -1,0 +1,11 @@
+{
+  "name": "bulliondesk-video-1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes hyperframes@0.6.77 preview",
+    "check": "npx --yes hyperframes@0.6.77 lint && npx --yes hyperframes@0.6.77 validate && npx --yes hyperframes@0.6.77 inspect",
+    "render": "npx --yes hyperframes@0.6.77 render",
+    "publish": "npx --yes hyperframes@0.6.77 publish"
+  }
+}
