@@ -80,7 +80,17 @@ function UpgradeContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#07060b] flex items-center justify-center px-4 py-16 animate-fade-in">
+    <div className="min-h-screen flex items-center justify-center px-4 py-16">
+      <style>{`
+        @keyframes upgrade-card-in {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .upgrade-card-in {
+          animation: upgrade-card-in 500ms ease-out both;
+        }
+      `}</style>
+
       {/* Logout button */}
       <div className="fixed top-4 right-4 z-50">
         <button
@@ -92,102 +102,128 @@ function UpgradeContent() {
         </button>
       </div>
 
-      {/* Background blobs */}
+      {/* Background glows — purple/violet + gold counterpoint, matching the landing page */}
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute -top-24 left-[-140px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.18)] blur-[110px]" />
-        <div className="absolute top-[-120px] right-[-180px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.10)] blur-[120px]" />
-        <div className="absolute bottom-[-120px] left-[20%] h-[400px] w-[400px] rounded-full bg-[rgba(200,162,74,0.06)] blur-[120px]" />
+        <div
+          className="absolute -top-28 right-[-180px] h-[520px] w-[520px] rounded-full blur-[120px]"
+          style={{ background: "radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%)" }}
+        />
+        <div
+          className="absolute top-[60px] left-[-200px] h-[480px] w-[480px] rounded-full blur-[120px]"
+          style={{ background: "radial-gradient(circle, rgba(109,40,217,0.16) 0%, transparent 70%)" }}
+        />
+        <div
+          className="absolute bottom-[-220px] left-[18%] h-[520px] w-[520px] rounded-full blur-[130px]"
+          style={{ background: "radial-gradient(circle, rgba(212,168,67,0.09) 0%, transparent 70%)" }}
+        />
       </div>
 
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="text-center mb-10">
           <Link href="/" className="inline-block text-[16px] tracking-[0.22em] uppercase text-white">
-            Bullion <span className="text-[color:var(--gold)]">Desk</span>
+            Bullion <span className="text-[#D4A843]">Desk</span>
           </Link>
-          <p className="mt-1.5 text-xs text-[color:var(--muted)] tracking-[0.12em] uppercase">
+          <p className="mt-1.5 text-xs text-[#A1A1AA] tracking-[0.12em] uppercase">
             AI Gold Trading Coach
           </p>
         </div>
 
         {/* Card */}
-        <div className="card border border-white/10 rounded-3xl overflow-hidden">
-          {/* Top gold line */}
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.50)] to-transparent" />
+        <div className="relative">
+          {/* Subtle gold glow behind the card */}
+          <div
+            className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center"
+            aria-hidden="true"
+          >
+            <div
+              className="h-[440px] w-[440px] rounded-full"
+              style={{ background: "radial-gradient(circle, rgba(212,168,67,0.10) 0%, transparent 70%)" }}
+            />
+          </div>
 
-          <div className="p-8 sm:p-10">
-            {/* Badge */}
-            <div className="flex items-center gap-3 mb-5 flex-wrap">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.30)] bg-[rgba(212,175,55,0.06)] px-3 py-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
-                <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-[rgba(212,175,55,0.8)]">Beta Access</span>
+          <div className="upgrade-card-in rounded-2xl border border-white/5 bg-[rgba(17,17,17,0.6)] backdrop-blur-xl overflow-hidden">
+            {/* Top gold line */}
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.50)] to-transparent" />
+
+            <div className="p-8 sm:p-10">
+              {/* Badge */}
+              <div className="flex items-center gap-3 mb-5 flex-wrap">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.30)] bg-[rgba(212,175,55,0.06)] px-3 py-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
+                  <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-[rgba(212,175,55,0.8)]">Beta Access</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white/20 shrink-0 animate-pulse" />
+                  <span className="text-[10px] font-mono tracking-[0.12em] text-white/35">Less than 100 spots available</span>
+                </div>
               </div>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-white/20 shrink-0" />
-                <span className="text-[10px] font-mono tracking-[0.12em] text-white/35">Less than 100 spots available</span>
-              </div>
-            </div>
 
-            {/* Exhausted notice */}
-            {exhausted && (
-              <div className="mb-6 rounded-xl border border-[rgba(212,175,55,0.20)] bg-[rgba(212,175,55,0.05)] px-4 py-3 text-[13px] text-[rgba(212,175,55,0.85)]">
-                You&apos;ve used your 30 analyses included in beta access — upgrade to continue.
-              </div>
-            )}
-
-            {/* Title */}
-            <h1 className="text-[28px] sm:text-[32px] leading-[1.15] tracking-[-0.02em] mb-2">
-              Bullion Desk Beta Access
-            </h1>
-            <p className="text-[color:var(--muted)] text-[14px] leading-relaxed mb-8 max-w-[44ch]">
-              Full access to your AI Gold Trading Coach — macro-technical analysis, live data, prop firm monitoring, and institutional-grade clarity.
-            </p>
-
-            {/* Feature list */}
-            <ul className="space-y-3.5 mb-8">
-              {FEATURES.map((f, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <span className="mt-0.5 shrink-0 text-[#D4AF37]">{f.icon}</span>
-                  <span className="text-[13px] text-white/70 leading-[1.65]">{f.text}</span>
-                </li>
-              ))}
-            </ul>
-
-            {/* Pricing */}
-            <div className="rounded-2xl border border-[rgba(212,175,55,0.20)] bg-[rgba(212,175,55,0.04)] p-5 mb-7">
-              <div className="flex items-baseline gap-2">
-                <span className="text-[36px] font-semibold tracking-tight text-white">$10</span>
-                <span className="text-[color:var(--muted)] text-sm">one-time · beta pricing</span>
-              </div>
-              <p className="text-[12px] text-white/30 mt-1.5">No subscription. No recurring charges. Full access.</p>
-            </div>
-
-            {/* Error */}
-            {error && (
-              <p className="mb-4 text-[12px] text-red-400 border border-red-500/20 bg-red-500/[0.06] rounded-xl px-4 py-3">
-                {error}
-              </p>
-            )}
-
-            {/* CTA button */}
-            <button
-              onClick={handleCheckout}
-              disabled={loading}
-              className="w-full rounded-2xl py-4 text-[14px] font-medium tracking-[0.06em] border border-[rgba(212,175,55,0.65)] bg-[rgba(212,175,55,0.10)] text-[#D4AF37] transition hover:bg-[rgba(212,175,55,0.18)] hover:border-[rgba(212,175,55,0.95)] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="h-3.5 w-3.5 rounded-full border-2 border-[#D4AF37]/30 border-t-[#D4AF37] animate-spin" />
-                  Redirecting to checkout…
-                </span>
-              ) : (
-                "Get Access — $10"
+              {/* Exhausted notice */}
+              {exhausted && (
+                <div className="mb-6 rounded-xl border border-[rgba(212,175,55,0.20)] bg-[rgba(212,175,55,0.05)] px-4 py-3 text-[13px] text-[rgba(212,175,55,0.85)]">
+                  You&apos;ve used your 30 analyses included in beta access — upgrade to continue.
+                </div>
               )}
-            </button>
 
-            <p className="mt-4 text-[11px] text-white/20 text-center">
-              Secure checkout via Stripe. Not investment advice.
-            </p>
+              {/* Title */}
+              <h1 className="text-[28px] sm:text-[32px] leading-[1.15] tracking-[-0.02em] mb-2 text-white">
+                Bullion Desk Beta Access
+              </h1>
+              <p className="text-[#A1A1AA] text-[14px] leading-relaxed mb-8 max-w-[44ch]">
+                Full access to your AI Gold Trading Coach — macro-technical analysis, live data, prop firm monitoring, and institutional-grade clarity.
+              </p>
+
+              {/* Feature list */}
+              <ul className="space-y-3.5 mb-8">
+                {FEATURES.map((f, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="mt-0.5 shrink-0 text-[#D4A843]">{f.icon}</span>
+                    <span className="text-[13px] text-white/70 leading-[1.65]">{f.text}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Pricing */}
+              <div className="rounded-2xl border border-[rgba(212,175,55,0.20)] bg-[rgba(212,175,55,0.04)] p-5 mb-7">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-[36px] font-semibold tracking-tight text-white">$14.99</span>
+                  <span className="text-[#A1A1AA] text-sm">one-time · early access</span>
+                </div>
+                <p className="text-[12px] text-white/30 mt-1.5">Lock your beta price before it&apos;s gone.</p>
+              </div>
+
+              {/* Error */}
+              {error && (
+                <p className="mb-4 text-[12px] text-red-400 border border-red-500/20 bg-red-500/[0.06] rounded-xl px-4 py-3">
+                  {error}
+                </p>
+              )}
+
+              {/* CTA button */}
+              <button
+                onClick={handleCheckout}
+                disabled={loading}
+                className="w-full rounded-2xl py-4 text-[15px] font-bold tracking-[0.02em] bg-[#D4A843] text-black transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="h-3.5 w-3.5 rounded-full border-2 border-black/20 border-t-black animate-spin" />
+                    Redirecting to checkout…
+                  </span>
+                ) : (
+                  "Get Early Access — $14.99"
+                )}
+              </button>
+
+              <p className="mt-3 text-xs text-[#666] text-center">
+                🔒 Standard price: $39.99/mo after beta
+              </p>
+
+              <p className="mt-3 text-[11px] text-white/20 text-center">
+                Secure checkout via Stripe. Not investment advice.
+              </p>
+            </div>
           </div>
         </div>
 

@@ -182,12 +182,12 @@ function PropFirmMarquee() {
       >
         <div className="flex items-center gap-14 w-max" style={{ animation: "prop-marquee 30s linear infinite" }}>
           {track.map((firm, i) => (
-            <div key={`${firm.name}-${i}`} className="relative h-[35px] w-[120px] shrink-0">
+            <div key={`${firm.name}-${i}`} className="relative h-[50px] w-[140px] shrink-0">
               <Image
                 src={firm.src}
                 alt={firm.name}
                 fill
-                sizes="120px"
+                sizes="140px"
                 className="object-contain prop-logo"
               />
             </div>
@@ -260,11 +260,11 @@ export default function WaitlistLanding() {
           animation: badge-pulse 2s ease-in-out infinite;
         }
         .prop-logo {
-          filter: grayscale(100%) brightness(0.7) opacity(0.6);
+          filter: grayscale(1) brightness(1.7) contrast(0.7) opacity(0.5);
           transition: filter 300ms ease;
         }
         .prop-logo:hover {
-          filter: grayscale(0%) brightness(1) opacity(1);
+          filter: grayscale(1) brightness(1.7) contrast(0.7) opacity(1);
         }
         @keyframes cta-pulse {
           0%, 100% { transform: scale(1); }
@@ -386,7 +386,7 @@ export default function WaitlistLanding() {
           >
             Institutional-grade gold analysis. Structure, macro, risk — everything you need to trade XAUUSD with clarity. Built for serious gold traders and prop firm candidates.
           </p>
-          <div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mt-6">
             {HERO_STATS.map((s, i) => (
               <HeroStat key={s.label} value={s.value} label={s.label} start={heroReady} delay={700 + i * 200} />
             ))}
