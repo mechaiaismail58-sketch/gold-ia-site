@@ -246,6 +246,92 @@ textarea.text-xs {
   animation: nav-progress-enter 2.5s cubic-bezier(0.1, 0.4, 0.2, 1) forwards;
 }
 
+/* ===== Landing page — luxury dark trading desk ===== */
+
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-fade-in {
+  animation: hero-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-stat-enter {
+  opacity: 0;
+  animation: hero-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* SplitText fallback — each word slides up out of its clipped wrapper */
+@keyframes split-word-up {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.split-word-enter {
+  animation: split-word-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Gold glow behind "Always on." */
+.hero-glow-text {
+  text-shadow: 0 0 28px rgba(212, 168, 67, 0.35);
+}
+
+/* GradientText fallback — gold to white */
+.gradient-text-gold {
+  background: linear-gradient(90deg, #D4A843 0%, #F5F5F5 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Generic scroll-reveal — toggled by IntersectionObserver via .is-visible */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Pulsing green "online" dot */
+@keyframes pulse-green-glow {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  70%  { transform: scale(2.4); opacity: 0; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+.pulse-dot-green {
+  animation: pulse-green-glow 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+/* Glass-morphism stat cards */
+.glass-card {
+  background: rgba(17, 17, 17, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(212, 168, 67, 0.12);
+}
+
+/* Mixed gold + purple border glow around the demo chat */
+.chat-glow-mixed {
+  box-shadow:
+    0 0 0 1px rgba(212, 168, 67, 0.20),
+    0 0 50px rgba(124, 58, 237, 0.16),
+    0 0 90px rgba(212, 168, 67, 0.07);
+}
+
+/* Subtle noise texture overlay */
+.noise-overlay {
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC45IiBudW1PY3RhdmVzPSIyIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoJTIzbikiLz48L3N2Zz4=");
+}
+
 /* ===== Transitions ===== */
 
 /* Smooth button/interactive transitions */
