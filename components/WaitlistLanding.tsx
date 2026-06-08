@@ -26,7 +26,7 @@ const PROP_FIRM_LOGOS = [
   { name: "The 5%ers", src: "/logos/the5ers.png" },
   { name: "Apex Trader Funding", src: "/logos/apex.png" },
   { name: "E8 Funding", src: "/logos/e8.png" },
-  { name: "FundedNext", src: "/logos/fundednext.png" },
+  { name: "FundedNext", src: "/logos/fundednext.webp" },
   { name: "Blue Guardian", src: "/logos/blueguardian.jpeg" },
   { name: "Alpha Capital Group", src: "/logos/alphacapital.png" },
 ];
@@ -252,6 +252,13 @@ export default function WaitlistLanding() {
           from { transform: translateX(0); }
           to   { transform: translateX(-50%); }
         }
+        @keyframes badge-pulse {
+          0%, 100% { opacity: 0.7; }
+          50%      { opacity: 1; }
+        }
+        .badge-pulse {
+          animation: badge-pulse 2s ease-in-out infinite;
+        }
         .prop-logo {
           filter: grayscale(100%) brightness(0.7) opacity(0.6);
           transition: filter 300ms ease;
@@ -313,7 +320,7 @@ export default function WaitlistLanding() {
 
         {/* ── Badge ── */}
         <div className="text-center mb-7">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#D4A843] border-opacity-30 bg-[rgba(212,168,67,0.06)] px-4 py-1.5">
+          <span className="badge-pulse inline-flex items-center gap-2 rounded-full border border-[#D4A843] border-opacity-30 bg-[rgba(212,168,67,0.06)] px-4 py-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-[#D4A843] animate-pulse shrink-0" />
             <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-[#D4A843]">
               Beta — Limited Spots
@@ -333,7 +340,7 @@ export default function WaitlistLanding() {
             {HERO_HEADING_WORDS.map((w, i) => (
               <SplitWord key={`h-${i}`} word={w} index={i} ready={heroReady} />
             ))}
-            <span className="text-[#D4A843] italic hero-glow-text">
+            <span className="text-[#D4A843] italic">
               {HERO_HEADING_GOLD_WORDS.map((w, i) => (
                 <SplitWord key={`g-${i}`} word={w} index={HERO_HEADING_WORDS.length + i} ready={heroReady} />
               ))}
@@ -367,11 +374,14 @@ export default function WaitlistLanding() {
             href="/signup"
             className="w-full sm:w-auto rounded-xl px-7 py-3.5 text-[13px] tracking-[0.06em] border border-[#1A1A1A] text-[#A1A1AA] hover:border-[rgba(212,168,67,0.4)] hover:text-[#F5F5F5] transition min-h-[48px] flex items-center justify-center"
           >
-            Get Started — $10
+            Get Early Access — $14.99
           </Link>
         </div>
-        <p className="text-center text-[11px] text-[#A1A1AA]/70 mb-10">
+        <p className="text-center text-[11px] text-[#A1A1AA]/70 mb-2">
           No signals · No BS · Just clarity
+        </p>
+        <p className="text-center text-sm text-[#A1A1AA] mb-10">
+          🔒 Beta price ends soon. Standard price: $39.99/mo
         </p>
 
         {/* ── Gradient divider — purple to gold, separates hero from demo ── */}
