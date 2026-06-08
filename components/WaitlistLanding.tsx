@@ -266,6 +266,40 @@ export default function WaitlistLanding() {
         .prop-logo:hover {
           filter: grayscale(0%) brightness(1) opacity(1);
         }
+        @keyframes cta-pulse {
+          0%, 100% { transform: scale(1); }
+          50%      { transform: scale(1.02); }
+        }
+        .cta-primary {
+          animation: cta-pulse 3s ease-in-out infinite;
+          box-shadow: 0 0 25px rgba(212,168,67,0.3);
+          transition: transform 200ms ease, box-shadow 200ms ease;
+        }
+        .cta-primary:hover {
+          animation: none;
+          transform: scale(1.03);
+          box-shadow: 0 0 25px rgba(212,168,67,0.5);
+        }
+        @keyframes chat-border-pulse {
+          0%, 100% { opacity: 0.3; }
+          50%      { opacity: 0.65; }
+        }
+        .chat-border-glow {
+          position: relative;
+        }
+        .chat-border-glow::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          padding: 1px;
+          background: linear-gradient(135deg, rgba(212,168,67,0.6), rgba(124,58,237,0.6), rgba(212,168,67,0.6));
+          -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          pointer-events: none;
+          animation: chat-border-pulse 4s ease-in-out infinite;
+        }
       `}</style>
 
       {/* Subtle noise texture */}
@@ -362,20 +396,20 @@ export default function WaitlistLanding() {
         {/* ── Prop firm logo marquee — social proof, right after the hero stats ── */}
         <PropFirmMarquee />
 
-        {/* ── CTAs ── */}
+        {/* ── CTAs — "Get Early Access" is the PRIMARY action; "Try the AI Coach" is secondary ── */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-3">
-          <button
-            onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
-            className="w-full sm:w-auto rounded-xl px-7 py-3.5 text-[13px] tracking-[0.06em] font-medium border border-[rgba(212,168,67,0.85)] bg-[rgba(212,168,67,0.15)] text-[#D4A843] hover:bg-[rgba(212,168,67,0.26)] hover:border-[rgba(212,168,67,1)] transition min-h-[48px]"
-          >
-            Try the AI Coach — Free
-          </button>
           <Link
             href="/signup"
-            className="w-full sm:w-auto rounded-xl px-7 py-3.5 text-[13px] tracking-[0.06em] border border-[#1A1A1A] text-[#A1A1AA] hover:border-[rgba(212,168,67,0.4)] hover:text-[#F5F5F5] transition min-h-[48px] flex items-center justify-center"
+            className="cta-primary w-full sm:w-auto rounded-xl py-4 px-8 text-lg font-bold tracking-[0.02em] bg-[#D4A843] text-black flex items-center justify-center"
           >
             Get Early Access — $14.99
           </Link>
+          <button
+            onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
+            className="w-full sm:w-auto rounded-xl px-5 py-2.5 text-[12px] tracking-[0.06em] font-medium border border-[#1A1A1A] text-[#A1A1AA] hover:border-[rgba(212,168,67,0.35)] hover:text-[#F5F5F5] transition min-h-[40px]"
+          >
+            Try the AI Coach — Free
+          </button>
         </div>
         <p className="text-center text-[11px] text-[#A1A1AA]/70 mb-2">
           No signals · No BS · Just clarity
@@ -406,12 +440,19 @@ export default function WaitlistLanding() {
               </span>
             </span>
             <p className="text-[12px] text-[#A1A1AA] tracking-[0.04em]">
-              3 free messages. No signup required.
+              3 free messages. See why traders are switching.
             </p>
           </div>
-          <div className="rounded-2xl chat-glow-mixed">
-            <DemoChat />
+          <div className="rounded-2xl chat-border-glow">
+            <div className="rounded-2xl chat-glow-mixed">
+              <DemoChat />
+            </div>
           </div>
+          <p className="text-center mt-3">
+            <Link href="/signup" className="text-[12px] text-[#D4A843] hover:text-[#F5F5F5] transition">
+              Want unlimited access? →
+            </Link>
+          </p>
         </div>
 
         {/* ── Track Record ── */}
