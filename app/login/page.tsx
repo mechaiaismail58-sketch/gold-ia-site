@@ -70,113 +70,150 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#07060b] flex items-center justify-center px-4 animate-fade-in">
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <style>{`
+        @keyframes auth-form-in {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .auth-form-in {
+          animation: auth-form-in 500ms ease-out both;
+        }
+        .auth-input:focus-visible {
+          outline: none;
+        }
+      `}</style>
+
+      {/* Background glows — purple/violet + gold counterpoint, matching the landing page */}
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute -top-24 left-[-140px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.18)] blur-[110px]" />
-        <div className="absolute top-[-120px] right-[-180px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.10)] blur-[120px]" />
+        <div
+          className="absolute -top-28 right-[-180px] h-[520px] w-[520px] rounded-full blur-[120px]"
+          style={{ background: "radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%)" }}
+        />
+        <div
+          className="absolute top-[60px] left-[-200px] h-[480px] w-[480px] rounded-full blur-[120px]"
+          style={{ background: "radial-gradient(circle, rgba(109,40,217,0.16) 0%, transparent 70%)" }}
+        />
+        <div
+          className="absolute bottom-[-220px] left-[18%] h-[520px] w-[520px] rounded-full blur-[130px]"
+          style={{ background: "radial-gradient(circle, rgba(212,168,67,0.09) 0%, transparent 70%)" }}
+        />
       </div>
 
-      <div className="w-full max-w-sm">
+      <div className="relative w-full max-w-md auth-form-in">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block text-[16px] tracking-[0.22em] uppercase text-white">
-            Bullion <span className="text-[color:var(--gold)]">Desk</span>
+            Bullion <span className="text-[#D4A843]">Desk</span>
           </Link>
-          <p className="mt-2 text-xs text-[color:var(--muted)] tracking-[0.12em] uppercase">
+          <p className="mt-2 text-xs text-[#A1A1AA] tracking-[0.12em] uppercase">
             AI Gold Trading Coach
           </p>
         </div>
 
-        <div className="card border border-white/10 rounded-2xl p-8">
-          <div className="mb-6">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--muted)] mb-1">Log In</div>
-            <h1 className="text-[22px] tracking-[-0.02em]">Access your account</h1>
+        <div className="relative">
+          {/* Subtle gold glow behind the form card */}
+          <div
+            className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center"
+            aria-hidden="true"
+          >
+            <div
+              className="h-[420px] w-[420px] rounded-full"
+              style={{ background: "radial-gradient(circle, rgba(212,168,67,0.10) 0%, transparent 70%)" }}
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-            <div>
-              <label htmlFor="email" className="block text-[11px] uppercase tracking-[0.12em] text-[color:var(--muted)] mb-2">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); setError(null); }}
-                placeholder="your@email.com"
-                className="w-full rounded-xl px-4 py-3 bg-transparent border border-[color:var(--border)] text-white text-[16px] focus:outline-none focus:border-[rgba(109,40,217,0.75)] transition placeholder:text-white/25"
-              />
+          <div className="rounded-2xl border border-white/5 bg-[rgba(17,17,17,0.6)] backdrop-blur-xl p-8 max-w-md">
+            <div className="mb-6">
+              <h1 className="text-2xl font-extrabold text-white">Welcome back</h1>
+              <p className="mt-1.5 text-sm text-[#A1A1AA]">Sign in to your AI trading coach</p>
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-[11px] uppercase tracking-[0.12em] text-[color:var(--muted)] mb-2">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => { setPassword(e.target.value); setError(null); }}
-                placeholder="••••••••"
-                className="w-full rounded-xl px-4 py-3 bg-transparent border border-[color:var(--border)] text-white text-[16px] focus:outline-none focus:border-[rgba(109,40,217,0.75)] transition placeholder:text-white/25"
-              />
-            </div>
-
-            {error && (
-              <div className="text-[12px] text-red-400 border border-red-500/20 bg-red-500/[0.06] rounded-xl px-4 py-3">
-                {error.message}
-                {error.noAccount && (
-                  <>
-                    {" "}
-                    <Link href="/signup" className="underline text-red-300 hover:text-white transition">
-                      Create account →
-                    </Link>
-                  </>
-                )}
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+              <div>
+                <label htmlFor="email" className="block text-[11px] uppercase tracking-[0.12em] text-[#A1A1AA] mb-2">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setError(null); }}
+                  placeholder="your@email.com"
+                  className="auth-input w-full rounded-lg px-4 py-3 bg-white/5 border border-white/10 text-white text-[16px] placeholder-[#666] outline-none focus:border-[#D4A843] focus:ring-1 focus:ring-[#D4A843]/30 transition duration-200"
+                />
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="btn-primary w-full rounded-xl py-3 text-xs uppercase tracking-[0.14em] border border-[rgba(109,40,217,0.55)] text-white hover:border-[rgba(109,40,217,0.95)] hover:bg-[rgba(109,40,217,0.10)] disabled:opacity-40 disabled:cursor-not-allowed mt-2 min-h-[44px]"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="h-3.5 w-3.5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-                  Logging in…
-                </span>
-              ) : (
-                "Log in"
+              <div>
+                <label htmlFor="password" className="block text-[11px] uppercase tracking-[0.12em] text-[#A1A1AA] mb-2">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setError(null); }}
+                  placeholder="••••••••"
+                  className="auth-input w-full rounded-lg px-4 py-3 bg-white/5 border border-white/10 text-white text-[16px] placeholder-[#666] outline-none focus:border-[#D4A843] focus:ring-1 focus:ring-[#D4A843]/30 transition duration-200"
+                />
+              </div>
+
+              {error && (
+                <div className="text-[12px] text-red-400 border border-red-500/20 bg-red-500/[0.06] rounded-xl px-4 py-3">
+                  {error.message}
+                  {error.noAccount && (
+                    <>
+                      {" "}
+                      <Link href="/signup" className="underline text-red-300 hover:text-white transition">
+                        Create account →
+                      </Link>
+                    </>
+                  )}
+                </div>
               )}
-            </button>
-          </form>
 
-          <div className="mt-4 text-center">
-            {forgotSent ? (
-              <p className="text-[12px] text-emerald-400">Reset link sent — check your inbox.</p>
-            ) : (
               <button
-                type="button"
-                onClick={handleForgotPassword}
-                disabled={forgotLoading}
-                className="text-[12px] text-white/30 hover:text-white/60 transition disabled:opacity-40"
+                type="submit"
+                disabled={!canSubmit}
+                className="w-full rounded-lg py-3 font-bold bg-[#D4A843] text-black hover:brightness-110 transition duration-200 disabled:opacity-40 disabled:cursor-not-allowed mt-2 min-h-[44px]"
               >
-                {forgotLoading ? "Sending…" : "Forgot password?"}
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="h-3.5 w-3.5 rounded-full border-2 border-black/20 border-t-black animate-spin" />
+                    Logging in…
+                  </span>
+                ) : (
+                  "Log in"
+                )}
               </button>
-            )}
-          </div>
+            </form>
 
-          <div className="mt-6 pt-6 border-t border-white/[0.06] text-center">
-            <span className="text-[12px] text-[color:var(--muted)]">No account? </span>
-            <Link href="/signup" className="text-[12px] text-white hover:text-[color:var(--gold)] transition">
-              Sign up
-            </Link>
+            <div className="mt-4 text-center">
+              {forgotSent ? (
+                <p className="text-[12px] text-emerald-400">Reset link sent — check your inbox.</p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={forgotLoading}
+                  className="text-[12px] text-[#A1A1AA] hover:text-white transition disabled:opacity-40"
+                >
+                  {forgotLoading ? "Sending…" : "Forgot password?"}
+                </button>
+              )}
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-white/[0.06] text-center">
+              <span className="text-[12px] text-[#A1A1AA]">No account? </span>
+              <Link href="/signup" className="text-[12px] text-[#D4A843] hover:underline transition">
+                Sign up
+              </Link>
+            </div>
           </div>
         </div>
       </div>
