@@ -216,9 +216,10 @@ function UpgradeContent() {
                 )}
               </button>
 
-              <p className="mt-3 text-xs text-[#666] text-center">
-                🔒 Standard price: $39.99/mo after beta
-              </p>
+              <div className="mt-3 text-center">
+                <p className="text-sm font-medium" style={{ color: "#D4A843" }}>🔒 Pay $14.99 today. Lock $25/mo forever.</p>
+                <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>Standard price after beta: $39.99/mo</p>
+              </div>
 
               <p className="mt-3 text-[11px] text-white/20 text-center">
                 Secure checkout via Stripe. Not investment advice.

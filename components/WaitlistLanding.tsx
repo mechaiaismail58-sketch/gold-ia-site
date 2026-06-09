@@ -423,9 +423,10 @@ export default function WaitlistLanding() {
         <p className="text-center text-[11px] text-[#A1A1AA]/70 mb-2">
           No signals · No BS · Just clarity
         </p>
-        <p className="text-center text-sm text-[#A1A1AA] mb-10">
-          🔒 Beta price ends soon. Standard price: $39.99/mo
-        </p>
+        <div className="text-center mb-10">
+          <p className="text-sm font-medium" style={{ color: "#D4A843" }}>🔒 Pay $14.99 today. Lock $25/mo forever.</p>
+          <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>Standard price after beta: $39.99/mo</p>
+        </div>
 
         {/* ── Gradient divider — purple to gold, separates hero from demo ── */}
         <div

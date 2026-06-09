@@ -142,7 +142,7 @@ export default function SignupPage() {
           <div className="rounded-2xl border border-white/5 bg-[rgba(17,17,17,0.6)] backdrop-blur-xl p-8 max-w-md">
             <div className="mb-6">
               <h1 className="text-2xl font-extrabold text-white">Create your account</h1>
-              <p className="mt-1.5 text-sm text-[#A1A1AA]">Join the beta — $14.99 early access</p>
+              <p className="mt-1.5 text-sm text-[#A1A1AA]">Join the beta — $14.99 today, then $25/mo locked forever</p>
             </div>
 
             {success ? (
