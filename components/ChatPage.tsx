@@ -61,13 +61,13 @@ export default function ChatPage() {
 
   const [selectedImageBase64, setSelectedImageBase64] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
 
   const [respondedTradeIds, setRespondedTradeIds] = useState<Set<string>>(new Set());
 
   const [isStreaming, setIsStreaming] = useState(false);
   const [isTypewriting, setIsTypewriting] = useState(false);
 
-  // Trader profile state
   const [profileOpen, setProfileOpen] = useState(false);
   const [traderProfile, setTraderProfile] = useState<TraderProfile>({
     prop_firm: "",
@@ -186,13 +186,11 @@ export default function ChatPage() {
     c.scrollTo({ top: c.scrollHeight, behavior: "smooth" });
   }
 
-  // Lock body scroll while chat is mounted
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  // Load trader profile from localStorage
   useEffect(() => {
     try {
       const stored = localStorage.getItem(PROFILE_KEY);
@@ -399,7 +397,6 @@ export default function ChatPage() {
       if (previousResponseId) body.previous_response_id = previousResponseId;
       if (imageBase64ToSend) body.chartImageBase64 = imageBase64ToSend;
 
-      // Inject trader profile if set
       try {
         const stored = localStorage.getItem(PROFILE_KEY);
         if (stored) {
@@ -556,11 +553,17 @@ export default function ChatPage() {
 
   return (
     <div
-      className="h-screen flex flex-col bg-[#0A0A0A] overflow-hidden"
+      className="flex-1 flex flex-col bg-[#0A0A0A] overflow-hidden relative"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      {/* Slow-moving purple background blob */}
+      <div
+        className="pointer-events-none absolute w-[500px] h-[500px] rounded-full bg-[#7C3AED] opacity-[0.015] blur-[150px] purple-blob-drift"
+        style={{ top: "20%", left: "25%" }}
+      />
+
       {showOnboarding && (
         <OnboardingModal onComplete={() => setShowOnboarding(false)} />
       )}
@@ -585,7 +588,7 @@ export default function ChatPage() {
             {/* Center: always-visible anchor */}
             <div className="chat-anchor-pulse bg-[#D4A843]/[0.08] border border-[#D4A843]/20 rounded-xl px-4 py-2.5 flex-1 max-w-md">
               <p className="text-sm text-[#D4A843] font-medium text-center leading-snug">
-                ⚡ Don&apos;t take any trade before checking with the AI.
+                <span className="lightning-pulse">⚡</span> Don&apos;t take any trade before checking with the AI.
               </p>
             </div>
 
@@ -614,7 +617,7 @@ export default function ChatPage() {
                 </svg>
                 New
               </button>
-              <span className="text-[9px] uppercase bg-[#D4A843]/20 text-[#D4A843] px-2 py-0.5 rounded-full font-medium tracking-wide">
+              <span className="text-[9px] uppercase bg-[#D4A843]/20 text-[#D4A843] px-2 py-0.5 rounded-full font-medium tracking-wide shadow-[0_0_12px_rgba(212,168,67,0.15)]">
                 Beta
               </span>
             </div>
@@ -622,12 +625,21 @@ export default function ChatPage() {
         </div>
       </header>
 
+      {/* Gold gradient line below header */}
+      <div className="h-px bg-gradient-to-r from-transparent via-[#D4A843]/30 to-transparent flex-none" />
+
       {/* ── Quick stats bar ── */}
       <div className="flex-none bg-white/[0.015] border-b border-white/[0.06] px-6 md:px-10 py-2 overflow-x-auto">
-        <div className="max-w-5xl mx-auto flex items-center gap-6 text-xs whitespace-nowrap">
-          <span className="text-[#D4A843]/60 font-mono tracking-wider">XAUUSD</span>
-          <span className="text-white/[0.08]">·</span>
-          <span className="text-[#71717A]">Live data connected</span>
+        <div className="max-w-5xl mx-auto flex items-center gap-3 text-xs whitespace-nowrap">
+          <span className="text-[#D4A843] font-semibold font-mono tracking-wider">XAUUSD</span>
+          <span className="w-px h-3 bg-white/10 shrink-0" />
+          <span className="flex items-center gap-1.5 text-[#71717A]">
+            <span className="relative flex h-1.5 w-1.5 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+            </span>
+            Live data connected
+          </span>
           <span className="text-white/[0.08]">·</span>
           <span className="text-[#71717A]">Not investment advice · No signals · Trade at your own risk</span>
         </div>
@@ -667,7 +679,7 @@ export default function ChatPage() {
           }}
         >
           {profileOpen && (
-            <div className="px-6 md:px-10 pb-4 pt-1 profile-content-enter">
+            <div className="px-6 md:px-10 pb-4 pt-1 profile-content-enter bg-white/[0.03] border-t border-[#D4A843]/10">
               <div className="max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Prop Firm */}
                 <div className="flex flex-col gap-1">
@@ -675,7 +687,7 @@ export default function ChatPage() {
                   <select
                     value={traderProfile.prop_firm}
                     onChange={e => setTraderProfile(p => ({ ...p, prop_firm: e.target.value }))}
-                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:outline-none transition appearance-none cursor-pointer"
+                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
                   >
                     <option value="" className="bg-[#111]">Select firm…</option>
                     {PROP_FIRMS.map(f => <option key={f} value={f} className="bg-[#111]">{f}</option>)}
@@ -688,7 +700,7 @@ export default function ChatPage() {
                   <select
                     value={traderProfile.account_size}
                     onChange={e => setTraderProfile(p => ({ ...p, account_size: e.target.value }))}
-                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:outline-none transition appearance-none cursor-pointer"
+                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
                   >
                     <option value="" className="bg-[#111]">Select size…</option>
                     {ACCOUNT_SIZES.map(s => <option key={s} value={s} className="bg-[#111]">{s}</option>)}
@@ -701,7 +713,7 @@ export default function ChatPage() {
                   <select
                     value={traderProfile.challenge_phase}
                     onChange={e => setTraderProfile(p => ({ ...p, challenge_phase: e.target.value }))}
-                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:outline-none transition appearance-none cursor-pointer"
+                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
                   >
                     <option value="" className="bg-[#111]">Select phase…</option>
                     {CHALLENGE_PHASES.map(ph => <option key={ph} value={ph} className="bg-[#111]">{ph}</option>)}
@@ -716,7 +728,7 @@ export default function ChatPage() {
                     placeholder="e.g. 2.5%"
                     value={traderProfile.current_drawdown}
                     onChange={e => setTraderProfile(p => ({ ...p, current_drawdown: e.target.value }))}
-                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-[#525252] focus:border-[#D4A843]/30 focus:outline-none transition"
+                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-[#525252] focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition"
                   />
                 </div>
               </div>
@@ -724,7 +736,7 @@ export default function ChatPage() {
               <button
                 type="button"
                 onClick={saveProfile}
-                className="mt-3 flex items-center gap-2 rounded-lg border border-[#D4A843]/30 bg-[#D4A843]/[0.08] px-4 py-2 text-xs text-[#D4A843] hover:bg-[#D4A843]/[0.14] transition"
+                className="mt-3 flex items-center gap-2 rounded-lg border border-[#D4A843]/30 bg-[#D4A843]/[0.08] px-4 py-2 text-xs text-[#D4A843] hover:bg-[#D4A843]/[0.14] hover:shadow-[0_0_20px_rgba(212,168,67,0.2)] transition"
               >
                 Save profile
               </button>
@@ -738,11 +750,17 @@ export default function ChatPage() {
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto relative"
       >
-        {/* Empty state — absolutely centred in the scrollable area */}
+        {/* Fade gradient at top — messages scroll under this */}
+        <div className="sticky top-0 left-0 right-0 h-10 bg-gradient-to-b from-[#0A0A0A] to-transparent pointer-events-none z-10" />
+
+        {/* Empty state */}
         {messages.length === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center px-6 empty-state-enter">
-            <p className="text-xl font-medium text-white/50 mb-8 text-center leading-snug">
-              Before your next trade —<br className="hidden sm:block" /> let&apos;s check the full picture.
+            <p className="text-2xl font-medium text-white/50 mb-2 text-center leading-snug">
+              Before your next trade — let&apos;s talk.
+            </p>
+            <p className="text-sm text-[#71717A] mb-8 text-center">
+              Ask anything about XAUUSD.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
               {suggestions.map((s, i) => (
@@ -750,8 +768,8 @@ export default function ChatPage() {
                   key={s}
                   type="button"
                   onClick={() => send(s)}
-                  className="chip-enter bg-white/[0.04] border border-white/[0.07] rounded-xl px-5 py-3.5 text-sm text-[#A1A1AA] hover:border-[#D4A843]/30 hover:text-white cursor-pointer transition-all duration-300 text-left"
-                  style={{ animationDelay: `${i * 80}ms` }}
+                  className="chip-enter bg-white/[0.04] border border-l-2 border-white/[0.07] border-l-transparent rounded-xl px-5 py-3.5 text-sm text-[#A1A1AA] hover:border-[#D4A843]/20 hover:border-l-[#D4A843] hover:text-white cursor-pointer transition-all duration-300 text-left"
+                  style={{ animationDelay: `${i * 100}ms` }}
                 >
                   {s}
                 </button>
@@ -768,9 +786,9 @@ export default function ChatPage() {
           <div className="py-6 px-6 md:px-16 lg:px-24">
             <div className="max-w-3xl mx-auto">
               {messages.map((m, i) => (
-                <div key={i} className="animate-fade-in-fast">
+                <div key={i} className={m.role === "user" ? "animate-fade-in-fast" : "chat-msg-enter"}>
                   {m.role === "user" ? (
-                    <div className="flex justify-end mb-6">
+                    <div className="flex justify-end mb-8">
                       <div className="max-w-[75%] bg-white/[0.05] border border-white/[0.06] rounded-2xl rounded-br-md px-5 py-3">
                         {m.imagePreview && (
                           <div className="mb-2">
@@ -791,7 +809,7 @@ export default function ChatPage() {
                       <p className="text-[10px] uppercase tracking-[0.2em] text-[#D4A843]/60 mb-2">
                         BullionDesk
                       </p>
-                      <div className="border-l-2 border-[#D4A843]/20 pl-5 max-w-[85%]">
+                      <div className="border-l-[3px] border-[#D4A843]/20 pl-5 max-w-[85%]">
                         <div
                           className="text-[15px] font-light leading-[1.8] tracking-[0.01em] text-[#E5E5E5]"
                           style={{ fontFamily: "var(--font-geist)" }}
@@ -849,7 +867,7 @@ export default function ChatPage() {
                   <p className="text-[10px] uppercase tracking-[0.2em] text-[#D4A843]/60 mb-2">
                     BullionDesk
                   </p>
-                  <div className="border-l-2 border-[#D4A843]/20 pl-5 flex items-center gap-1.5 py-2">
+                  <div className="border-l-[3px] border-[#D4A843]/20 pl-5 flex items-center gap-1.5 py-2">
                     {[0, 0.2, 0.4].map((delay) => (
                       <span
                         key={delay}
@@ -897,10 +915,13 @@ export default function ChatPage() {
         </div>
       )}
 
+      {/* Gold gradient line above input */}
+      <div className="h-px bg-gradient-to-r from-transparent via-[#D4A843]/20 to-transparent flex-none" />
+
       {/* ── Input area ── */}
       <div className={cn(
-        "flex-none bg-[#0A0A0A] border-t border-white/[0.06] px-6 md:px-16 lg:px-24 py-4 transition",
-        isDragging && "bg-[rgba(109,40,217,0.04)] border-t-[rgba(109,40,217,0.3)]"
+        "flex-none bg-[#0A0A0A] px-6 md:px-16 lg:px-24 py-4 transition",
+        isDragging && "bg-[rgba(109,40,217,0.04)]"
       )}>
         <div className="max-w-3xl mx-auto">
 
@@ -932,6 +953,15 @@ export default function ChatPage() {
 
           {/* Input row */}
           <div className="relative flex items-center">
+            {/* Radial focus glow */}
+            {inputFocused && (
+              <div
+                className="absolute inset-0 pointer-events-none -mx-6 rounded-2xl"
+                style={{
+                  background: "radial-gradient(ellipse 400px 80px at center, rgba(212,168,67,0.02) 0%, transparent 70%)",
+                }}
+              />
+            )}
             <input
               ref={chatInputRef}
               className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-5 py-3.5 text-white text-sm placeholder-[#525252] focus:border-[#D4A843]/30 focus:shadow-[0_0_20px_rgba(212,168,67,0.06)] focus:outline-none transition pr-24"
@@ -940,13 +970,20 @@ export default function ChatPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") send(); }}
               onPaste={handleInputPaste}
+              onFocus={() => setInputFocused(true)}
+              onBlur={() => setInputFocused(false)}
             />
 
-            {/* Attach chart button */}
+            {/* Attach chart button — turns gold when there's input */}
             <button
               type="button"
               onClick={openFilePicker}
-              className="absolute right-12 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-white/25 hover:text-white/50 transition"
+              className={cn(
+                "absolute right-12 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center transition",
+                input.trim() || selectedImageBase64
+                  ? "text-[#D4A843]"
+                  : "text-white/25 hover:text-white/50"
+              )}
               title="Attach chart screenshot"
             >
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
@@ -958,7 +995,7 @@ export default function ChatPage() {
               </svg>
             </button>
 
-            {/* Send button — visible when there is content to send */}
+            {/* Send button */}
             {canSend && (
               <button
                 type="button"
