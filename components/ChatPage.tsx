@@ -571,7 +571,13 @@ async function send(textOverride?: string) {
                 </svg>
                 New
               </button>
-              <div className="hidden sm:block text-xs text-[color:var(--muted)]">AI Connected</div>
+              <div className="hidden sm:flex items-center gap-2 text-xs text-[color:var(--muted)]">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-[#D4A843] opacity-60 animate-ping" style={{ animationDuration: "2s" }} />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D4A843]" />
+                </span>
+                AI Connected
+              </div>
             </div>
           </div>
 
@@ -579,11 +585,45 @@ async function send(textOverride?: string) {
             ref={chatContainerRef}
             className="px-4 sm:px-6 py-6 h-[calc(100svh-380px)] min-h-[320px] sm:h-[560px] overflow-y-auto flex flex-col gap-6 relative"
           >
+            {messages.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-full gap-8 text-center">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.30em] text-white/20 mb-3">AI Gold Trading Coach</p>
+                  <p className="text-xl text-white/45" style={{ fontFamily: "var(--font-newsreader)", fontStyle: "italic" }}>
+                    What would you like to analyze?
+                  </p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-2 max-w-sm">
+                  {suggestions.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => send(s)}
+                      style={{
+                        padding: "7px 16px",
+                        borderRadius: "20px",
+                        border: "0.5px solid rgba(212,175,55,0.15)",
+                        fontSize: "11px",
+                        color: "rgba(255,255,255,0.35)",
+                        background: "transparent",
+                        cursor: "pointer",
+                        transition: "border-color 0.15s, color 0.15s",
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(212,175,55,0.45)"; e.currentTarget.style.color = "rgba(212,175,55,0.8)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(212,175,55,0.15)"; e.currentTarget.style.color = "rgba(255,255,255,0.35)"; }}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {messages.map((m, i) => (
               <div key={i} className="animate-fade-in-fast">
                 {m.role === "user" ? (
                   <div className="flex justify-end">
-                    <div className="max-w-[72%]">
+                    <div className="max-w-[72%] border-r-2 border-white/[0.08] pr-4 text-right">
                       {m.imagePreview && (
                         <div className="mb-2 flex justify-end">
                           <img
@@ -593,30 +633,32 @@ async function send(textOverride?: string) {
                           />
                         </div>
                       )}
-                      <div className="inline-block rounded-2xl rounded-tr-sm px-4 py-2.5 text-[13px] leading-[1.65] bg-[rgba(109,40,217,0.16)] border border-[rgba(109,40,217,0.40)] text-white/85 break-words">
+                      <p className="text-[13px] leading-[1.65] text-white/55 break-words">
                         {m.content}
-                      </div>
+                      </p>
                     </div>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="h-1 w-1 rounded-full bg-[rgba(200,162,74,0.7)] shrink-0" />
+                      <span className="h-1 w-1 rounded-full bg-[rgba(212,168,67,0.7)] shrink-0" />
                       <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/25">
                         Bullion Desk
                       </span>
                     </div>
-                    <div className="pl-3 border-l border-white/[0.06]">
-                      <MarkdownMessage content={m.content} />
-                      {(isStreaming || isTypewriting) && i === messages.length - 1 && m.role === "assistant" && (
-                        <span className="typing-cursor" />
-                      )}
+                    <div className="pl-4 border-l-2 border-[rgba(212,168,67,0.35)]">
+                      <div style={{ fontFamily: "var(--font-newsreader)" }}>
+                        <MarkdownMessage content={m.content} />
+                        {(isStreaming || isTypewriting) && i === messages.length - 1 && m.role === "assistant" && (
+                          <span className="typing-cursor" />
+                        )}
+                      </div>
                     </div>
-                    <div className="pl-3">
+                    <div className="pl-4">
                       <ShareSignalButton text={m.content} />
                     </div>
                     {!loading && !isStreaming && i === messages.length - 1 && (
-                      <div className="pl-3 flex flex-wrap gap-2 mt-1">
+                      <div className="pl-4 flex flex-wrap gap-2 mt-1">
                         {suggestions.map((suggestion) => (
                           <button
                             key={suggestion}
@@ -648,7 +690,7 @@ async function send(textOverride?: string) {
                       </div>
                     )}
                     {m.trade_id && !respondedTradeIds.has(m.trade_id) && (
-                      <div className="pl-3 flex flex-wrap gap-2 mt-1">
+                      <div className="pl-4 flex flex-wrap gap-2 mt-1">
                         {[
                           { result: "tp1_hit", label: "✅ TP1 Hit" },
                           { result: "tp2_hit", label: "🎯 TP2 Hit" },
@@ -674,12 +716,12 @@ async function send(textOverride?: string) {
             {loading && !isStreaming && (
               <div className="animate-fade-in-fast flex flex-col gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="h-1 w-1 rounded-full bg-[rgba(200,162,74,0.5)] shrink-0" />
+                  <span className="h-1 w-1 rounded-full bg-[rgba(212,168,67,0.7)] shrink-0" />
                   <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/25">
                     Bullion Desk
                   </span>
                 </div>
-                <div className="pl-3 border-l border-white/[0.06] flex items-center gap-1.5 py-2">
+                <div className="pl-4 border-l-2 border-[rgba(212,168,67,0.35)] flex items-center gap-1.5 py-2">
                   {[0, 0.2, 0.4].map((delay) => (
                     <span
                       key={delay}

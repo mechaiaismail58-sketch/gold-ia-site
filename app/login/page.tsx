@@ -73,11 +73,11 @@ function LoginForm() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <style>{`
         @keyframes auth-form-in {
-          from { opacity: 0; transform: translateY(20px); }
-          to   { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: scale(0.92); filter: blur(6px); }
+          to   { opacity: 1; transform: scale(1);    filter: blur(0px); }
         }
         .auth-form-in {
-          animation: auth-form-in 500ms ease-out both;
+          animation: auth-form-in 700ms cubic-bezier(0.16,1,0.3,1) both;
         }
         .auth-input:focus-visible {
           outline: none;
@@ -118,14 +118,14 @@ function LoginForm() {
           >
             <div
               className="h-[420px] w-[420px] rounded-full"
-              style={{ background: "radial-gradient(circle, rgba(212,168,67,0.10) 0%, transparent 70%)" }}
+              style={{ background: "radial-gradient(circle, rgba(212,168,67,0.15) 0%, transparent 70%)" }}
             />
           </div>
 
           <div className="rounded-2xl border border-white/5 bg-[rgba(17,17,17,0.6)] backdrop-blur-xl p-8 max-w-md">
             <div className="mb-6">
               <h1 className="text-2xl font-extrabold text-white">Welcome back</h1>
-              <p className="mt-1.5 text-sm text-[#A1A1AA]">Sign in to your AI trading coach</p>
+              <p className="mt-1.5 text-sm text-[#A1A1AA]">Your AI trading coach is waiting.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>

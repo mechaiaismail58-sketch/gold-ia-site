@@ -236,39 +236,33 @@ export default function DemoChat() {
             {messages.map((msg, i) => (
               <div
                 key={i}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start items-start gap-0"}`}
               >
-                {msg.role === "assistant" && (
-                  <span className="mt-1 mr-2 shrink-0 h-6 w-6 rounded-full border border-[rgba(212,175,55,0.35)] bg-[rgba(212,175,55,0.08)] flex items-center justify-center text-[9px] tracking-wider text-[color:var(--gold)] font-medium">
-                    AI
-                  </span>
+                {msg.role === "user" ? (
+                  <div className="max-w-[75%] border-r-2 border-white/[0.08] pr-3.5 text-right">
+                    <p className="text-sm text-white/55 leading-relaxed break-words">{msg.content}</p>
+                  </div>
+                ) : (
+                  <div className="flex-1 pl-3.5 border-l-2 border-[rgba(212,168,67,0.35)]">
+                    <div style={{ fontFamily: "var(--font-newsreader)", fontSize: "0.875rem", lineHeight: "1.7", color: "rgba(255,255,255,0.82)" }}>
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ children }) => <p className="mb-1.5 last:mb-0">{children}</p>,
+                          strong: ({ children }) => <span className="font-semibold" style={{ color: "rgba(212,168,67,0.85)" }}>{children}</span>,
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
                 )}
-                <div
-                  className={
-                    msg.role === "user"
-                      ? "max-w-[75%] rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-sm text-white bg-[rgba(212,175,55,0.10)] border border-[rgba(212,175,55,0.2)]"
-                      : "max-w-[82%] rounded-2xl rounded-tl-sm px-3.5 py-2.5 text-sm text-white/85 bg-white/[0.04] border border-white/[0.07] leading-relaxed"
-                  }
-                >
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
-                      strong: ({ children }) => <span className="font-semibold text-amber-200">{children}</span>,
-                    }}
-                  >
-                    {msg.content}
-                  </ReactMarkdown>
-                </div>
               </div>
             ))}
 
             {loading && (
               <div className="flex justify-start">
-                <span className="mt-1 mr-2 shrink-0 h-6 w-6 rounded-full border border-[rgba(212,175,55,0.35)] bg-[rgba(212,175,55,0.08)] flex items-center justify-center text-[9px] tracking-wider text-[color:var(--gold)] font-medium">
-                  AI
-                </span>
-                <div className="rounded-2xl rounded-tl-sm px-3.5 py-3 bg-white/[0.04] border border-white/[0.07]">
+                <div className="pl-3.5 border-l-2 border-[rgba(212,168,67,0.35)] py-2">
                   <Spinner />
                 </div>
               </div>

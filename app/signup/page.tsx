@@ -90,11 +90,11 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <style>{`
         @keyframes auth-form-in {
-          from { opacity: 0; transform: translateY(20px); }
-          to   { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: scale(0.92); filter: blur(6px); }
+          to   { opacity: 1; transform: scale(1);    filter: blur(0px); }
         }
         .auth-form-in {
-          animation: auth-form-in 500ms ease-out both;
+          animation: auth-form-in 700ms cubic-bezier(0.16,1,0.3,1) both;
         }
         .auth-input:focus-visible {
           outline: none;
@@ -280,8 +280,8 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <p className="mt-4 text-center text-xs text-[#666]">
-            🔒 Beta price ends soon. Standard: $39.99/mo
+          <p className="mt-4 text-center text-xs" style={{ color: "#71717A" }}>
+            Standard price after beta: $39.99/mo
           </p>
         </div>
       </div>
