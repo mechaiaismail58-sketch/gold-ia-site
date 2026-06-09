@@ -11,7 +11,7 @@ const WELCOME_MESSAGE =
 
 const MAX_FREE_MESSAGES = 3;
 
-type AuthStatus = "loading" | "unauthenticated" | "paid" | "unpaid";
+type AuthStatus = "unauthenticated" | "paid" | "unpaid";
 
 interface Message {
   role: "assistant" | "user";
@@ -66,7 +66,9 @@ function AuthCard({ children }: { children: React.ReactNode }) {
 }
 
 export default function DemoChat() {
-  const [authStatus, setAuthStatus] = useState<AuthStatus>("loading");
+  // Start as "unauthenticated" so demo renders immediately for all visitors.
+  // Auth check runs in the background and upgrades state only if a session exists.
+  const [authStatus, setAuthStatus] = useState<AuthStatus>("unauthenticated");
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: WELCOME_MESSAGE },
   ]);
@@ -81,21 +83,32 @@ export default function DemoChat() {
 
   const limitReached = userCount >= MAX_FREE_MESSAGES;
 
-  // Auth check on mount
+  // Non-blocking auth check — only upgrades state when a real session exists.
+  // Falls back gracefully on timeout or error so anonymous visitors are never blocked.
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session) {
-        setAuthStatus("unauthenticated");
-        return;
+    let cancelled = false;
+    const timeout = setTimeout(() => { cancelled = true; }, 2000);
+
+    (async () => {
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (cancelled || !session) return;
+        const { data } = await supabase
+          .from("users")
+          .select("has_paid")
+          .eq("id", session.user.id)
+          .single();
+        if (!cancelled) setAuthStatus(data?.has_paid ? "paid" : "unpaid");
+      } catch {
+        // Auth check failed — stay on demo (safe fallback)
       }
-      const { data } = await supabase
-        .from("users")
-        .select("has_paid")
-        .eq("id", session.user.id)
-        .single();
-      setAuthStatus(data?.has_paid ? "paid" : "unpaid");
-    });
+    })();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
   }, []);
 
   // Scroll to bottom on new messages / loading state changes
@@ -160,14 +173,6 @@ export default function DemoChat() {
   }
 
   // ── Auth-gated renders ────────────────────────────────────────────────────
-
-  if (authStatus === "loading") {
-    return (
-      <AuthCard>
-        <div className="h-5 w-5 rounded-full border-2 border-[#D4A843] border-t-transparent animate-spin" />
-      </AuthCard>
-    );
-  }
 
   if (authStatus === "unpaid") {
     return (
