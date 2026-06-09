@@ -249,7 +249,7 @@ export default function DemoChat() {
                   </div>
                 ) : (
                   <div className="flex-1 pl-3.5 border-l-2 border-[rgba(212,168,67,0.35)]">
-                    <div style={{ fontFamily: "var(--font-newsreader)", fontSize: "0.875rem", lineHeight: "1.7", color: "rgba(255,255,255,0.82)" }}>
+                    <div style={{ fontFamily: "var(--font-geist)", fontSize: "0.9375rem", lineHeight: "1.8", letterSpacing: "0.01em", fontWeight: 300, color: "rgba(229,229,229,0.95)" }}>
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{

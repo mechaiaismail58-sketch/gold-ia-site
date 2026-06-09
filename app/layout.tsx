@@ -1,17 +1,16 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
-import { Newsreader } from "next/font/google";
+import { Geist } from "next/font/google";
 import ConditionalHeader from "../components/ConditionalHeader";
 import SiteFooter from "../components/SiteFooter";
 import PushManager from "../components/PushManager";
 import NavigationProgress from "../components/NavigationProgress";
 import { ChatProvider } from "@/context/ChatContext";
 
-const newsreader = Newsreader({
+const geist = Geist({
   subsets: ["latin"],
-  weight: ["400", "500"],
-  style: ["normal", "italic"],
-  variable: "--font-newsreader",
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-geist",
   display: "swap",
 });
 
@@ -47,7 +46,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`min-h-screen bg-[#07060b] text-white ${newsreader.variable}`}>
+      <body className={`min-h-screen bg-[#07060b] text-white ${geist.variable}`}>
         {/* Background glows */}
         <div className="pointer-events-none fixed inset-0 -z-10">
           <div className="blob-drift-1 absolute -top-24 left-[-140px] h-[520px] w-[520px] rounded-full bg-[rgba(109,40,217,0.22)] blur-[110px]" />

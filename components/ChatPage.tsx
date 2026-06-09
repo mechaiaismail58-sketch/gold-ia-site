@@ -118,10 +118,10 @@ export default function ChatPage() {
   }
 
   const [suggestions, setSuggestions] = useState<string[]>([
-    "What's the current gold structure?",
-    "Is gold tradable today? Give me the full picture.",
-    "What macro factors are driving gold right now?",
-    "Review my trade idea on XAUUSD",
+    "What's the structure on gold right now?",
+    "I'm about to enter a trade — check it",
+    "My prop firm challenge status",
+    "Full XAUUSD analysis",
   ]);
 
   function fetchSuggestions() {
@@ -496,44 +496,72 @@ export default function ChatPage() {
       )}
       <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
 
-      {/* ── Chat header ── */}
-      <header className="flex-none bg-[#0A0A0A] border-b border-white/[0.06]">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center">
-            <span className="w-2 h-2 rounded-full bg-[#D4A843] animate-pulse inline-block" />
-            <span className="text-sm font-semibold text-white ml-2">BullionDesk</span>
-            <span className="text-xs text-[#71717A] ml-3">XAUUSD</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowHistory(true)}
-              className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#71717A] hover:text-white border border-white/[0.08] rounded-lg px-3 py-1.5 hover:border-white/20 transition-all"
-              title="Conversation history"
-            >
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.1"/>
-                <path d="M6 3.5V6l2 1.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              History
-            </button>
-            <button
-              type="button"
-              onClick={startNewChat}
-              className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#71717A] hover:text-white border border-white/[0.08] rounded-lg px-3 py-1.5 hover:border-white/20 transition-all"
-              title="Start new analysis"
-            >
-              <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
-                <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-              </svg>
-              New
-            </button>
+      {/* ── Trading desk header ── */}
+      <header className="flex-none bg-white/[0.02] border-b border-white/[0.06]">
+        <div className="max-w-5xl mx-auto px-6 md:px-10 py-4">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-6">
+
+            {/* Left: brand */}
+            <div className="flex flex-col gap-0.5 shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#D4A843] animate-pulse inline-block shrink-0" />
+                <span className="text-sm font-semibold text-white">BullionDesk</span>
+              </div>
+              <span className="text-[10px] text-[#71717A] uppercase tracking-wider pl-4">
+                AI Gold Trading Coach · XAUUSD
+              </span>
+            </div>
+
+            {/* Center: the anchor — always visible */}
+            <div className="bg-[#D4A843]/[0.08] border border-[#D4A843]/20 rounded-xl px-4 py-2.5 flex-1 max-w-md">
+              <p className="text-sm text-[#D4A843] font-medium text-center leading-snug">
+                ⚡ Don&apos;t take any trade before checking with the AI.
+              </p>
+            </div>
+
+            {/* Right: controls */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowHistory(true)}
+                className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#71717A] hover:text-white border border-white/[0.08] rounded-lg px-3 py-1.5 hover:border-white/20 transition-all"
+                title="Conversation history"
+              >
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                  <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.1"/>
+                  <path d="M6 3.5V6l2 1.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                History
+              </button>
+              <button
+                type="button"
+                onClick={startNewChat}
+                className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#71717A] hover:text-white border border-white/[0.08] rounded-lg px-3 py-1.5 hover:border-white/20 transition-all"
+                title="Start new analysis"
+              >
+                <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
+                  <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+                </svg>
+                New
+              </button>
+              <span className="text-[9px] uppercase bg-[#D4A843]/20 text-[#D4A843] px-2 py-0.5 rounded-full font-medium tracking-wide">
+                Beta
+              </span>
+            </div>
           </div>
         </div>
-        <p className="text-[10px] text-[#71717A]/50 text-center py-1 border-t border-white/[0.03]">
-          Not investment advice · No signals · Trade at your own risk
-        </p>
       </header>
+
+      {/* ── Quick stats bar ── */}
+      <div className="flex-none bg-white/[0.015] border-b border-white/[0.06] px-6 md:px-10 py-2 overflow-x-auto">
+        <div className="max-w-5xl mx-auto flex items-center gap-6 text-xs whitespace-nowrap">
+          <span className="text-[#D4A843]/60 font-mono tracking-wider">XAUUSD</span>
+          <span className="text-white/[0.08]">·</span>
+          <span className="text-[#71717A]">Live data connected</span>
+          <span className="text-white/[0.08]">·</span>
+          <span className="text-[#71717A]">Not investment advice · No signals · Trade at your own risk</span>
+        </div>
+      </div>
 
       {/* ── Messages area ── */}
       <div
@@ -547,7 +575,7 @@ export default function ChatPage() {
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
                 <p className="text-xl font-medium text-white/60 mb-6">
-                  What&apos;s happening on gold?
+                  Before your next trade — let&apos;s check the full picture.
                 </p>
                 <div className="flex flex-wrap justify-center gap-2 max-w-lg">
                   {suggestions.map((s) => (
@@ -591,8 +619,8 @@ export default function ChatPage() {
                     </p>
                     <div className="border-l-2 border-[#D4A843]/20 pl-5 max-w-[85%]">
                       <div
-                        style={{ fontFamily: "var(--font-newsreader)" }}
-                        className="text-base font-light text-[#E5E5E5] leading-relaxed"
+                        className="text-[15px] font-light leading-[1.8] tracking-[0.01em] text-[#E5E5E5]"
+                        style={{ fontFamily: "var(--font-geist)" }}
                       >
                         <MarkdownMessage content={m.content} />
                         {(isStreaming || isTypewriting) && i === messages.length - 1 && m.role === "assistant" && (
