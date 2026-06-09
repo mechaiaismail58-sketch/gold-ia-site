@@ -1,9 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import AccountDashboard from "@/components/AccountDashboard";
-import MarketDashboard from "@/components/MarketDashboard";
-import TradeTracker from "@/components/TradeTracker";
 import OnboardingModal from "@/components/OnboardingModal";
 import ShareSignalButton from "@/components/ShareSignalButton";
 import HistoryPanel from "@/components/HistoryPanel";
@@ -49,7 +46,6 @@ export default function ChatPage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
-  // Base64 dataURL — used both as preview and as payload sent to the API
   const [selectedImageBase64, setSelectedImageBase64] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -58,7 +54,6 @@ export default function ChatPage() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isTypewriting, setIsTypewriting] = useState(false);
 
-  // Typewriter effect refs
   const typewriterQueueRef     = useRef<string>("");
   const typewriterDisplayedRef = useRef<string>("");
   const typewriterTimerRef     = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -77,7 +72,6 @@ export default function ChatPage() {
         }
         return;
       }
-      // Process 1 word normally, more words if backlog is large (catch-up)
       const wordsPerTick = queue.length > 500 ? 4 : queue.length > 200 ? 2 : 1;
       let chunk = "";
       let remaining = queue;
@@ -123,22 +117,20 @@ export default function ChatPage() {
     setIsTypewriting(false);
   }
 
-  // Dynamic contextual suggestions
   const [suggestions, setSuggestions] = useState<string[]>([
-    "Analyse XAUUSD — marché et biais",
-    "Analyse EURUSD — structure H4",
-    "Brief rapide sur le NAS100",
-    "Contexte macro actuel",
+    "What's the current gold structure?",
+    "Is gold tradable today? Give me the full picture.",
+    "What macro factors are driving gold right now?",
+    "Review my trade idea on XAUUSD",
   ]);
 
   function fetchSuggestions() {
     fetch("/api/suggestions")
       .then(r => r.json())
       .then(data => { if (Array.isArray(data.suggestions)) setSuggestions(data.suggestions); })
-      .catch(() => {}); // keep defaults on failure
+      .catch(() => {});
   }
 
-  // Abort controller for stop-generating
   const abortControllerRef = useRef<AbortController | null>(null);
 
   function stopGeneration() {
@@ -146,7 +138,6 @@ export default function ChatPage() {
     flushTypewriterQueue();
   }
 
-  // Smart scroll
   const chatContainerRef  = useRef<HTMLDivElement | null>(null);
   const userScrolledUpRef = useRef(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -156,19 +147,15 @@ export default function ChatPage() {
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
-      console.log("[chat] image attached via FileReader, size:", result.length, "type:", file.type);
       setSelectedImageBase64(result);
     };
     reader.readAsDataURL(file);
   }
 
-  const PLACEHOLDER_TEXT = "Ask about XAUUSD — structure, context, risk…";
+  const fileInputRef  = useRef<HTMLInputElement | null>(null);
+  const chatInputRef  = useRef<HTMLInputElement | null>(null);
+  const bottomRef     = useRef<HTMLDivElement | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const chatInputRef = useRef<HTMLInputElement | null>(null);
-  const bottomRef = useRef<HTMLDivElement | null>(null);
-
-  // Smart scroll — uses ref so the check is never stale during streaming
   function scrollToBottom(force = false) {
     const c = chatContainerRef.current;
     if (!c) return;
@@ -181,7 +168,6 @@ export default function ChatPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
-  // Show scroll-to-bottom button whenever user has scrolled up (not just during streaming)
   useEffect(() => {
     const c = chatContainerRef.current;
     if (!c) return;
@@ -195,9 +181,8 @@ export default function ChatPage() {
     return () => c.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Fetch contextual suggestions on mount and whenever chat becomes empty
   useEffect(() => {
-    if (messages.length <= 1) fetchSuggestions(); // ≤1 = only initial message
+    if (messages.length <= 1) fetchSuggestions();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages.length]);
 
@@ -235,10 +220,8 @@ export default function ChatPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [setAnalysisMode]);
 
-  // Clipboard paste — document-level listener + async Clipboard API fallback
   useEffect(() => {
     async function handlePaste(e: ClipboardEvent) {
-      // Primary: synchronous clipboardData (works in most cases)
       if (e.clipboardData?.items) {
         for (const item of Array.from(e.clipboardData.items)) {
           if (item.kind === "file" && item.type.startsWith("image/")) {
@@ -251,8 +234,6 @@ export default function ChatPage() {
           }
         }
       }
-      // Fallback: async Clipboard API — more reliable on Windows/Chrome when
-      // clipboardData.items is empty or getAsFile() returns null
       try {
         const clips = await navigator.clipboard.read();
         for (const clip of clips) {
@@ -271,7 +252,6 @@ export default function ChatPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Also on the input element directly
   function handleInputPaste(e: React.ClipboardEvent<HTMLInputElement>) {
     if (!e.clipboardData) return;
     for (const item of Array.from(e.clipboardData.items)) {
@@ -324,7 +304,7 @@ export default function ChatPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-async function send(textOverride?: string) {
+  async function send(textOverride?: string) {
     const isSuggestion = textOverride !== undefined;
     const userText = isSuggestion ? textOverride.trim() : input.trim();
     const imageBase64ToSend = isSuggestion ? null : selectedImageBase64;
@@ -342,7 +322,7 @@ async function send(textOverride?: string) {
     }
 
     setLoading(true);
-    userScrolledUpRef.current = false; // reset so the new response auto-scrolls
+    userScrolledUpRef.current = false;
 
     setMessages((m) => [
       ...m,
@@ -370,7 +350,6 @@ async function send(textOverride?: string) {
         signal: abortControllerRef.current.signal,
       });
 
-      // Pre-stream error (JSON response)
       if (!r.ok) {
         const text = await r.text();
         let errorMsg = `Request failed (${r.status})`;
@@ -433,9 +412,8 @@ async function send(textOverride?: string) {
 
       setIsStreaming(false);
       setShowScrollBtn(false);
-      fetchSuggestions(); // refresh after each AI response
+      fetchSuggestions();
 
-      // Update with trade_id metadata
       if (tradeId && messageAdded) {
         setMessages((m) => {
           const updated = [...m];
@@ -460,7 +438,6 @@ async function send(textOverride?: string) {
         }).catch(() => {});
       }
     } catch (err) {
-      // AbortError = user clicked Stop — flush typewriter queue, keep whatever streamed
       if (err instanceof Error && err.name === "AbortError") {
         flushTypewriterQueue();
         setIsStreaming(false);
@@ -475,7 +452,6 @@ async function send(textOverride?: string) {
         ]);
       }
     } finally {
-      // Flush any remaining typewriter content if timer still running
       if (typewriterTimerRef.current !== null) flushTypewriterQueue();
       setLoading(false);
       setIsStreaming(false);
@@ -509,108 +485,77 @@ async function send(textOverride?: string) {
   }
 
   return (
-    <main>
+    <div
+      className="fixed inset-0 bg-[#0A0A0A] flex flex-col z-50"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       {showOnboarding && (
         <OnboardingModal onComplete={() => setShowOnboarding(false)} />
       )}
-
       <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
 
-      <section className="card rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/10 shadow-[0_18px_80px_rgba(109,40,217,0.18)]">
-        <div className="flex flex-col gap-4">
-          <h1 className="text-[28px] sm:text-[34px] leading-[1.15] tracking-[-0.02em]">
-            Your AI Gold Trading Coach. Institutional-grade XAUUSD intelligence.
-          </h1>
-
-          <p className="text-[color:var(--muted)] max-w-[60ch] leading-6 text-[14px] sm:text-base">
-            BullionDesk analyzes gold market structure, macro context, and tradability conditions. Built for serious traders and prop firm accounts.
-          </p>
-
-          <div className="flex gap-3 flex-wrap mt-2">
-            <div className="rounded-2xl px-3 py-1 text-xs card border-[rgba(109,40,217,0.5)]">
-              XAUUSD
-            </div>
-            <div className="rounded-2xl px-3 py-1 text-xs card border-[rgba(200,162,74,0.35)]">
-              Prop Firm Ready
-            </div>
+      {/* ── Chat header ── */}
+      <header className="flex-none bg-[#0A0A0A] border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center">
+            <span className="w-2 h-2 rounded-full bg-[#D4A843] animate-pulse inline-block" />
+            <span className="text-sm font-semibold text-white ml-2">BullionDesk</span>
+            <span className="text-xs text-[#71717A] ml-3">XAUUSD</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowHistory(true)}
+              className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#71717A] hover:text-white border border-white/[0.08] rounded-lg px-3 py-1.5 hover:border-white/20 transition-all"
+              title="Conversation history"
+            >
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.1"/>
+                <path d="M6 3.5V6l2 1.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              History
+            </button>
+            <button
+              type="button"
+              onClick={startNewChat}
+              className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#71717A] hover:text-white border border-white/[0.08] rounded-lg px-3 py-1.5 hover:border-white/20 transition-all"
+              title="Start new analysis"
+            >
+              <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
+                <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+              </svg>
+              New
+            </button>
           </div>
         </div>
-      </section>
+        <p className="text-[10px] text-[#71717A]/50 text-center py-1 border-t border-white/[0.03]">
+          Not investment advice · No signals · Trade at your own risk
+        </p>
+      </header>
 
-      <AccountDashboard />
+      {/* ── Messages area ── */}
+      <div
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto py-6"
+      >
+        <div className="px-6 md:px-16 lg:px-24">
+          <div className="max-w-3xl mx-auto">
 
-      <TradeTracker />
-
-      <section className="mt-8">
-        <div className="card rounded-2xl sm:rounded-3xl p-0 overflow-hidden border border-white/10 shadow-[0_18px_90px_rgba(109,40,217,0.14)]">
-          <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-[color:var(--border)]">
-            <div className="text-sm uppercase tracking-widest text-[color:var(--muted)]">
-              Trading Intelligence Console
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setShowHistory(true)}
-                className="rounded-xl border border-white/10 px-3 py-1.5 min-h-[36px] text-[11px] uppercase tracking-[0.10em] text-[color:var(--muted)] hover:border-white/20 hover:text-white/70 transition flex items-center gap-1.5"
-                title="Conversation history"
-              >
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.1"/>
-                  <path d="M6 3.5V6l2 1.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                History
-              </button>
-              <button
-                type="button"
-                onClick={startNewChat}
-                className="rounded-xl border border-white/10 px-3 py-1.5 min-h-[36px] text-[11px] uppercase tracking-[0.10em] text-[color:var(--muted)] hover:border-[rgba(109,40,217,0.5)] hover:text-white/70 transition flex items-center gap-1.5"
-                title="Start new analysis"
-              >
-                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                  <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-                </svg>
-                New
-              </button>
-              <div className="hidden sm:flex items-center gap-2 text-xs text-[color:var(--muted)]">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-[#D4A843] opacity-60 animate-ping" style={{ animationDuration: "2s" }} />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D4A843]" />
-                </span>
-                AI Connected
-              </div>
-            </div>
-          </div>
-
-          <div
-            ref={chatContainerRef}
-            className="px-4 sm:px-6 py-6 h-[calc(100svh-380px)] min-h-[320px] sm:h-[560px] overflow-y-auto flex flex-col gap-6 relative"
-          >
+            {/* Empty state */}
             {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-full gap-8 text-center">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.30em] text-white/20 mb-3">AI Gold Trading Coach</p>
-                  <p className="text-xl text-white/45" style={{ fontFamily: "var(--font-newsreader)", fontStyle: "italic" }}>
-                    What would you like to analyze?
-                  </p>
-                </div>
-                <div className="flex flex-wrap justify-center gap-2 max-w-sm">
+              <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+                <p className="text-xl font-medium text-white/60 mb-6">
+                  What&apos;s happening on gold?
+                </p>
+                <div className="flex flex-wrap justify-center gap-2 max-w-lg">
                   {suggestions.map((s) => (
                     <button
                       key={s}
                       type="button"
                       onClick={() => send(s)}
-                      style={{
-                        padding: "7px 16px",
-                        borderRadius: "20px",
-                        border: "0.5px solid rgba(212,175,55,0.15)",
-                        fontSize: "11px",
-                        color: "rgba(255,255,255,0.35)",
-                        background: "transparent",
-                        cursor: "pointer",
-                        transition: "border-color 0.15s, color 0.15s",
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(212,175,55,0.45)"; e.currentTarget.style.color = "rgba(212,175,55,0.8)"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(212,175,55,0.15)"; e.currentTarget.style.color = "rgba(255,255,255,0.35)"; }}
+                      className="bg-white/[0.03] border border-white/[0.07] rounded-full px-4 py-2 text-sm text-[#A1A1AA] hover:border-[#D4A843]/30 hover:text-white cursor-pointer transition-all duration-300"
                     >
                       {s}
                     </button>
@@ -619,13 +564,14 @@ async function send(textOverride?: string) {
               </div>
             )}
 
+            {/* Messages */}
             {messages.map((m, i) => (
               <div key={i} className="animate-fade-in-fast">
                 {m.role === "user" ? (
-                  <div className="flex justify-end">
-                    <div className="max-w-[72%] border-r-2 border-white/[0.08] pr-4 text-right">
+                  <div className="flex justify-end mb-6">
+                    <div className="max-w-[75%] bg-white/[0.05] border border-white/[0.06] rounded-2xl rounded-br-md px-5 py-3">
                       {m.imagePreview && (
-                        <div className="mb-2 flex justify-end">
+                        <div className="mb-2">
                           <img
                             src={m.imagePreview}
                             alt="Attached chart"
@@ -633,56 +579,38 @@ async function send(textOverride?: string) {
                           />
                         </div>
                       )}
-                      <p className="text-[13px] leading-[1.65] text-white/55 break-words">
+                      <p className="text-sm text-white/90 font-normal break-words">
                         {m.content}
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="h-1 w-1 rounded-full bg-[rgba(212,168,67,0.7)] shrink-0" />
-                      <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/25">
-                        Bullion Desk
-                      </span>
-                    </div>
-                    <div className="pl-4 border-l-2 border-[rgba(212,168,67,0.35)]">
-                      <div style={{ fontFamily: "var(--font-newsreader)" }}>
+                  <div className="mb-8">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-[#D4A843]/60 mb-2">
+                      BullionDesk
+                    </p>
+                    <div className="border-l-2 border-[#D4A843]/20 pl-5 max-w-[85%]">
+                      <div
+                        style={{ fontFamily: "var(--font-newsreader)" }}
+                        className="text-base font-light text-[#E5E5E5] leading-relaxed"
+                      >
                         <MarkdownMessage content={m.content} />
                         {(isStreaming || isTypewriting) && i === messages.length - 1 && m.role === "assistant" && (
                           <span className="typing-cursor" />
                         )}
                       </div>
                     </div>
-                    <div className="pl-4">
+                    <div className="pl-5 mt-2">
                       <ShareSignalButton text={m.content} />
                     </div>
                     {!loading && !isStreaming && i === messages.length - 1 && (
-                      <div className="pl-4 flex flex-wrap gap-2 mt-1">
+                      <div className="pl-5 flex flex-wrap gap-2 mt-3">
                         {suggestions.map((suggestion) => (
                           <button
                             key={suggestion}
                             type="button"
                             onClick={() => send(suggestion)}
-                            style={{
-                              padding: "6px 14px",
-                              borderRadius: "16px",
-                              border: "0.5px solid rgba(212,175,55,0.12)",
-                              fontSize: "11px",
-                              fontFamily: "var(--font-mono, monospace)",
-                              color: "rgba(255,255,255,0.35)",
-                              background: "transparent",
-                              cursor: "pointer",
-                              transition: "border-color 0.15s, color 0.15s",
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.borderColor = "rgba(212,175,55,0.4)";
-                              e.currentTarget.style.color = "rgba(212,175,55,0.8)";
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.borderColor = "rgba(212,175,55,0.12)";
-                              e.currentTarget.style.color = "rgba(255,255,255,0.35)";
-                            }}
+                            className="bg-white/[0.03] border border-white/[0.07] rounded-full px-4 py-2 text-sm text-[#A1A1AA] hover:border-[#D4A843]/30 hover:text-white cursor-pointer transition-all duration-300"
                           >
                             {suggestion}
                           </button>
@@ -690,11 +618,11 @@ async function send(textOverride?: string) {
                       </div>
                     )}
                     {m.trade_id && !respondedTradeIds.has(m.trade_id) && (
-                      <div className="pl-4 flex flex-wrap gap-2 mt-1">
+                      <div className="pl-5 flex flex-wrap gap-2 mt-3">
                         {[
-                          { result: "tp1_hit", label: "✅ TP1 Hit" },
-                          { result: "tp2_hit", label: "🎯 TP2 Hit" },
-                          { result: "sl_hit",  label: "❌ SL Hit" },
+                          { result: "tp1_hit",   label: "✅ TP1 Hit" },
+                          { result: "tp2_hit",   label: "🎯 TP2 Hit" },
+                          { result: "sl_hit",    label: "❌ SL Hit" },
                           { result: "breakeven", label: "➡️ Breakeven" },
                         ].map(({ result, label }) => (
                           <button
@@ -713,31 +641,30 @@ async function send(textOverride?: string) {
               </div>
             ))}
 
+            {/* Loading dots — shown while waiting for first token */}
             {loading && !isStreaming && (
-              <div className="animate-fade-in-fast flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="h-1 w-1 rounded-full bg-[rgba(212,168,67,0.7)] shrink-0" />
-                  <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/25">
-                    Bullion Desk
-                  </span>
-                </div>
-                <div className="pl-4 border-l-2 border-[rgba(212,168,67,0.35)] flex items-center gap-1.5 py-2">
+              <div className="mb-8 animate-fade-in-fast">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#D4A843]/60 mb-2">
+                  BullionDesk
+                </p>
+                <div className="border-l-2 border-[#D4A843]/20 pl-5 flex items-center gap-1.5 py-2">
                   {[0, 0.2, 0.4].map((delay) => (
                     <span
                       key={delay}
-                      className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"
-                      style={{ animation: `dot-bounce 1.2s ease-in-out infinite`, animationDelay: `${delay}s` }}
+                      className="w-1.5 h-1.5 rounded-full bg-[#D4A843]"
+                      style={{ animation: "dot-bounce 1.2s ease-in-out infinite", animationDelay: `${delay}s` }}
                     />
                   ))}
                 </div>
               </div>
             )}
 
+            {/* Scroll-to-bottom button */}
             {showScrollBtn && (
               <button
                 type="button"
                 onClick={() => scrollToBottom(true)}
-                className="sticky bottom-2 self-center rounded-full border border-[rgba(212,175,55,0.35)] bg-[rgba(7,6,11,0.85)] backdrop-blur-sm px-3 py-1.5 text-[11px] text-[rgba(212,175,55,0.8)] hover:border-[rgba(212,175,55,0.7)] hover:text-[rgba(212,175,55,1)] transition flex items-center gap-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
+                className="sticky bottom-2 mx-auto flex items-center gap-1.5 rounded-full border border-[rgba(212,175,55,0.35)] bg-[rgba(7,6,11,0.85)] backdrop-blur-sm px-3 py-1.5 text-[11px] text-[rgba(212,175,55,0.8)] hover:border-[rgba(212,175,55,0.7)] hover:text-[rgba(212,175,55,1)] transition shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
               >
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                   <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
@@ -745,132 +672,110 @@ async function send(textOverride?: string) {
                 Scroll to bottom
               </button>
             )}
+
             <div ref={bottomRef} />
           </div>
+        </div>
+      </div>
 
-          {/* ── Stop generating button ── */}
-          {isStreaming && (
-            <div className="flex justify-center py-2 border-t border-[color:var(--border)]">
+      {/* ── Stop generating ── */}
+      {isStreaming && (
+        <div className="flex-none flex justify-center py-2 border-t border-white/[0.06] bg-[#0A0A0A]">
+          <button
+            type="button"
+            onClick={stopGeneration}
+            className="flex items-center gap-2 rounded-xl border border-white/[0.08] px-4 py-1.5 text-[11px] uppercase tracking-[0.08em] text-white/40 hover:border-red-500/30 hover:text-red-400/75 transition"
+          >
+            <span className="h-2 w-2 rounded-sm bg-current shrink-0" />
+            Stop generating
+          </button>
+        </div>
+      )}
+
+      {/* ── Input area ── */}
+      <div className={cn(
+        "flex-none bg-[#0A0A0A] border-t border-white/[0.06] px-6 md:px-16 lg:px-24 py-4 transition",
+        isDragging && "bg-[rgba(109,40,217,0.04)] border-t-[rgba(109,40,217,0.3)]"
+      )}>
+        <div className="max-w-3xl mx-auto">
+
+          {/* Image preview */}
+          {selectedImageBase64 && (
+            <div className="mb-3 flex items-center gap-3 rounded-2xl border border-[rgba(109,40,217,0.25)] bg-[rgba(109,40,217,0.05)] p-3">
+              <img
+                src={selectedImageBase64}
+                alt="Selected chart preview"
+                className="h-16 w-24 rounded-lg object-cover border border-white/10"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-white/80 truncate">Chart attached</span>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-[rgba(109,40,217,0.8)] border border-[rgba(109,40,217,0.3)] rounded-md px-1.5 py-0.5 shrink-0">
+                    Ready
+                  </span>
+                </div>
+              </div>
               <button
                 type="button"
-                onClick={stopGeneration}
-                className="flex items-center gap-2 rounded-xl border border-white/12 px-4 py-1.5 text-[11px] uppercase tracking-[0.08em] text-white/40 hover:border-red-500/30 hover:text-red-400/75 transition"
+                onClick={clearSelectedImage}
+                className="rounded-xl border border-white/10 px-3 py-2 text-xs text-white/40 hover:border-white/20 shrink-0 transition"
               >
-                <span className="h-2 w-2 rounded-sm bg-current shrink-0" />
-                Stop generating
+                ✕
               </button>
             </div>
           )}
 
-          <div
-            className={cn(
-              "px-4 sm:px-6 py-4 border-t border-[color:var(--border)] transition",
-              isDragging && "bg-[rgba(109,40,217,0.06)] border-t-[rgba(109,40,217,0.4)]"
-            )}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            {selectedImageBase64 ? (
-              <div className="mb-3 flex items-center gap-3 rounded-2xl border border-[rgba(109,40,217,0.25)] bg-[rgba(109,40,217,0.05)] p-3">
-                <img
-                  src={selectedImageBase64}
-                  alt="Selected chart preview"
-                  className="h-16 w-24 rounded-lg object-cover border border-white/10"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-white/80 truncate">Chart attached</span>
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-[rgba(109,40,217,0.8)] border border-[rgba(109,40,217,0.3)] rounded-md px-1.5 py-0.5 shrink-0">
-                        Ready
-                      </span>
-                  </div>
-                  <div className="text-xs text-[color:var(--muted)] mt-0.5">
-                    Chart ready to send
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={clearSelectedImage}
-                  className="rounded-xl border border-white/10 px-3 py-2 text-xs text-[color:var(--muted)] hover:border-white/20 shrink-0"
-                >
-                  ✕
-                </button>
-              </div>
-            ) : null}
+          {/* Input row */}
+          <div className="relative flex items-center">
+            <input
+              ref={chatInputRef}
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-5 py-3.5 text-white text-sm placeholder-[#525252] focus:border-[#D4A843]/30 focus:shadow-[0_0_20px_rgba(212,168,67,0.06)] focus:outline-none transition pr-24"
+              placeholder="Ask about gold, your trade, or your strategy..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") send(); }}
+              onPaste={handleInputPaste}
+            />
 
-            <div className="flex gap-3 items-center">
-              <div className="relative flex-1">
-                {!input && (
-                  <span
-                    className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-[color:var(--muted)] text-[13px] whitespace-nowrap overflow-hidden"
-                  >
-                    {PLACEHOLDER_TEXT}
-                  </span>
-                )}
-                <input
-                  ref={chatInputRef}
-                  className="w-full rounded-2xl px-4 py-3 pr-14 bg-transparent border border-[color:var(--border)] focus:outline-none focus:border-[rgba(109,40,217,0.75)]"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") send(); }}
-                  onPaste={handleInputPaste}
-                />
-
-                <button
-                  type="button"
-                  onClick={openFilePicker}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl border border-white/10 flex items-center justify-center hover:border-[rgba(109,40,217,0.75)] hover:bg-[rgba(109,40,217,0.10)] transition"
-                  title="Attach chart screenshot"
-                >
-                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-white/40">
-                    <rect x="0.5" y="9.5" width="2" height="5" rx="0.5" fill="currentColor"/>
-                    <rect x="3.5" y="6.5" width="2" height="8" rx="0.5" fill="currentColor"/>
-                    <rect x="6.5" y="3.5" width="2" height="11" rx="0.5" fill="currentColor"/>
-                    <rect x="9.5" y="0.5" width="2" height="14" rx="0.5" fill="currentColor"/>
-                    <path d="M1.5 9L4.5 5.5L7.5 7L12 1" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-              </div>
-
-              <button
-                className={cn(
-                  "rounded-2xl px-5 py-3 border transition min-h-[44px] min-w-[64px] text-[14px] sm:text-[13px]",
-                  canSend
-                    ? "border-[rgba(109,40,217,0.55)] hover:border-[rgba(109,40,217,0.95)] hover:bg-[rgba(109,40,217,0.10)]"
-                    : "border-white/10 opacity-50 cursor-not-allowed"
-                )}
-                onClick={() => send()}
-                disabled={!canSend}
-              >
-                Send
-              </button>
-            </div>
-
-            <div className="mt-2 flex items-center gap-1.5 text-[12px] sm:text-[11px] text-white/20">
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" className="shrink-0">
-                <path d="M2 10V7.5M5 10V4.5M8 10V2M11 10V5.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+            {/* Attach chart button */}
+            <button
+              type="button"
+              onClick={openFilePicker}
+              className="absolute right-12 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-white/25 hover:text-white/50 transition"
+              title="Attach chart screenshot"
+            >
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                <rect x="0.5" y="9.5" width="2" height="5" rx="0.5" fill="currentColor"/>
+                <rect x="3.5" y="6.5" width="2" height="8" rx="0.5" fill="currentColor"/>
+                <rect x="6.5" y="3.5" width="2" height="11" rx="0.5" fill="currentColor"/>
+                <rect x="9.5" y="0.5" width="2" height="14" rx="0.5" fill="currentColor"/>
+                <path d="M1.5 9L4.5 5.5L7.5 7L12 1" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              Attach your chart to improve analysis accuracy.
-            </div>
-            <div className="mt-2 text-[12px] text-[color:var(--muted)]">
-              Not investment advice. No signals. Trade at your own risk.
-            </div>
+            </button>
+
+            {/* Send button — visible when there is content to send */}
+            {canSend && (
+              <button
+                type="button"
+                onClick={() => send()}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#D4A843] hover:bg-[#D4A843]/90 rounded-lg p-2 transition"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-black">
+                  <path d="M7 11V3M3 7L7 3L11 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleImageChange}
+            />
           </div>
         </div>
-      </section>
-
-      <footer className="mt-8 text-xs text-[color:var(--muted)]">
-        © {new Date().getFullYear()} Bullion Desk
-      </footer>
-    </main>
+      </div>
+    </div>
   );
 }
