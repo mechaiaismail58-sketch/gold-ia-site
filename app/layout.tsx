@@ -1,11 +1,10 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
-import ConditionalHeader from "../components/ConditionalHeader";
-import SiteFooter from "../components/SiteFooter";
 import PushManager from "../components/PushManager";
 import NavigationProgress from "../components/NavigationProgress";
 import { ChatProvider } from "@/context/ChatContext";
+import PathAwareWrapper from "../components/PathAwareWrapper";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -56,16 +55,10 @@ export default function RootLayout({
 
         <NavigationProgress />
         <ChatProvider>
-          {/* Navbar row */}
-          <div className="mx-auto max-w-[1400px] px-4 sm:px-6 md:px-10 lg:px-16 xl:px-20">
-            <PushManager />
-            <ConditionalHeader initialEmail={null} initialAvatarUrl={null} />
-          </div>
-          {/* Page content */}
-          <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10 lg:px-16 xl:px-20">
-            <main className="pt-10 pb-16 animate-fade-in">{children}</main>
-          </div>
-          <SiteFooter />
+          <PushManager />
+          <PathAwareWrapper>
+            {children}
+          </PathAwareWrapper>
         </ChatProvider>
       </body>
     </html>

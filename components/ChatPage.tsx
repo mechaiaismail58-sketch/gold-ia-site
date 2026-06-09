@@ -29,6 +29,19 @@ async function saveConversation(params: {
   }
 }
 
+interface TraderProfile {
+  prop_firm: string;
+  account_size: string;
+  challenge_phase: string;
+  current_drawdown: string;
+}
+
+const PROFILE_KEY = "bulliondesk_trader_profile";
+
+const PROP_FIRMS = ["FTMO", "The5ers", "Apex", "E8", "FundedNext", "Blue Guardian", "Alpha Capital", "Other", "None"];
+const ACCOUNT_SIZES = ["$10K", "$25K", "$50K", "$100K", "$200K"];
+const CHALLENGE_PHASES = ["Phase 1", "Phase 2", "Funded", "Not in a challenge"];
+
 export default function ChatPage() {
   const {
     messages,
@@ -53,6 +66,16 @@ export default function ChatPage() {
 
   const [isStreaming, setIsStreaming] = useState(false);
   const [isTypewriting, setIsTypewriting] = useState(false);
+
+  // Trader profile state
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [traderProfile, setTraderProfile] = useState<TraderProfile>({
+    prop_firm: "",
+    account_size: "",
+    challenge_phase: "",
+    current_drawdown: "",
+  });
+  const [savedProfile, setSavedProfile] = useState<TraderProfile | null>(null);
 
   const typewriterQueueRef     = useRef<string>("");
   const typewriterDisplayedRef = useRef<string>("");
@@ -162,6 +185,24 @@ export default function ChatPage() {
     if (!force && userScrolledUpRef.current) return;
     c.scrollTo({ top: c.scrollHeight, behavior: "smooth" });
   }
+
+  // Lock body scroll while chat is mounted
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  // Load trader profile from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(PROFILE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as TraderProfile;
+        setTraderProfile(parsed);
+        setSavedProfile(parsed);
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -304,6 +345,22 @@ export default function ChatPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
+  function saveProfile() {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(traderProfile));
+    setSavedProfile({ ...traderProfile });
+    setProfileOpen(false);
+  }
+
+  function profileSummary(): string | null {
+    if (!savedProfile) return null;
+    const parts: string[] = [];
+    if (savedProfile.prop_firm && savedProfile.prop_firm !== "None") parts.push(savedProfile.prop_firm);
+    if (savedProfile.account_size) parts.push(savedProfile.account_size);
+    if (savedProfile.challenge_phase && savedProfile.challenge_phase !== "Not in a challenge") parts.push(savedProfile.challenge_phase);
+    if (savedProfile.current_drawdown) parts.push(`DD: ${savedProfile.current_drawdown}`);
+    return parts.length > 0 ? parts.join(" · ") : null;
+  }
+
   async function send(textOverride?: string) {
     const isSuggestion = textOverride !== undefined;
     const userText = isSuggestion ? textOverride.trim() : input.trim();
@@ -341,6 +398,17 @@ export default function ChatPage() {
       };
       if (previousResponseId) body.previous_response_id = previousResponseId;
       if (imageBase64ToSend) body.chartImageBase64 = imageBase64ToSend;
+
+      // Inject trader profile if set
+      try {
+        const stored = localStorage.getItem(PROFILE_KEY);
+        if (stored) {
+          const prof = JSON.parse(stored) as TraderProfile;
+          if (prof.prop_firm || prof.account_size || prof.challenge_phase || prof.current_drawdown) {
+            body.traderProfile = prof;
+          }
+        }
+      } catch { /* non-critical */ }
 
       abortControllerRef.current = new AbortController();
       const r = await fetch("/api/chat", {
@@ -484,9 +552,11 @@ export default function ChatPage() {
     }
   }
 
+  const summary = profileSummary();
+
   return (
     <div
-      className="fixed inset-0 bg-[#0A0A0A] flex flex-col z-50"
+      className="h-screen flex flex-col bg-[#0A0A0A] overflow-hidden"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -497,7 +567,7 @@ export default function ChatPage() {
       <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
 
       {/* ── Trading desk header ── */}
-      <header className="flex-none bg-white/[0.02] border-b border-white/[0.06]">
+      <header className="flex-none bg-white/[0.02] border-b border-white/[0.06] chat-header-enter">
         <div className="max-w-5xl mx-auto px-6 md:px-10 py-4">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-6">
 
@@ -512,8 +582,8 @@ export default function ChatPage() {
               </span>
             </div>
 
-            {/* Center: the anchor — always visible */}
-            <div className="bg-[#D4A843]/[0.08] border border-[#D4A843]/20 rounded-xl px-4 py-2.5 flex-1 max-w-md">
+            {/* Center: always-visible anchor */}
+            <div className="chat-anchor-pulse bg-[#D4A843]/[0.08] border border-[#D4A843]/20 rounded-xl px-4 py-2.5 flex-1 max-w-md">
               <p className="text-sm text-[#D4A843] font-medium text-center leading-snug">
                 ⚡ Don&apos;t take any trade before checking with the AI.
               </p>
@@ -563,147 +633,254 @@ export default function ChatPage() {
         </div>
       </div>
 
+      {/* ── Trader profile bar ── */}
+      <div className="flex-none border-b border-white/[0.06]">
+        <button
+          type="button"
+          onClick={() => setProfileOpen(o => !o)}
+          className="w-full flex items-center justify-between px-6 md:px-10 py-2 text-xs text-[#71717A] hover:text-white/70 hover:bg-white/[0.02] transition-all"
+        >
+          <span className="flex items-center gap-2">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" className="shrink-0 opacity-60">
+              <circle cx="6" cy="4" r="2.5" stroke="currentColor" strokeWidth="1.1"/>
+              <path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
+            </svg>
+            {summary
+              ? <span className="text-[#A1A1AA]">📊 {summary}</span>
+              : <span>Set up your trader profile for personalised coaching →</span>
+            }
+          </span>
+          <svg
+            width="10" height="10" viewBox="0 0 10 10" fill="none"
+            className={cn("transition-transform duration-300", profileOpen && "rotate-180")}
+          >
+            <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+
+        {/* Expandable profile form */}
+        <div
+          style={{
+            maxHeight: profileOpen ? "480px" : "0",
+            overflow: "hidden",
+            transition: "max-height 400ms ease",
+          }}
+        >
+          {profileOpen && (
+            <div className="px-6 md:px-10 pb-4 pt-1 profile-content-enter">
+              <div className="max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Prop Firm */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] uppercase tracking-wider text-[#71717A]">Prop Firm</label>
+                  <select
+                    value={traderProfile.prop_firm}
+                    onChange={e => setTraderProfile(p => ({ ...p, prop_firm: e.target.value }))}
+                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:outline-none transition appearance-none cursor-pointer"
+                  >
+                    <option value="" className="bg-[#111]">Select firm…</option>
+                    {PROP_FIRMS.map(f => <option key={f} value={f} className="bg-[#111]">{f}</option>)}
+                  </select>
+                </div>
+
+                {/* Account Size */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] uppercase tracking-wider text-[#71717A]">Account Size</label>
+                  <select
+                    value={traderProfile.account_size}
+                    onChange={e => setTraderProfile(p => ({ ...p, account_size: e.target.value }))}
+                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:outline-none transition appearance-none cursor-pointer"
+                  >
+                    <option value="" className="bg-[#111]">Select size…</option>
+                    {ACCOUNT_SIZES.map(s => <option key={s} value={s} className="bg-[#111]">{s}</option>)}
+                  </select>
+                </div>
+
+                {/* Challenge Phase */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] uppercase tracking-wider text-[#71717A]">Challenge Phase</label>
+                  <select
+                    value={traderProfile.challenge_phase}
+                    onChange={e => setTraderProfile(p => ({ ...p, challenge_phase: e.target.value }))}
+                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:outline-none transition appearance-none cursor-pointer"
+                  >
+                    <option value="" className="bg-[#111]">Select phase…</option>
+                    {CHALLENGE_PHASES.map(ph => <option key={ph} value={ph} className="bg-[#111]">{ph}</option>)}
+                  </select>
+                </div>
+
+                {/* Current Drawdown */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] uppercase tracking-wider text-[#71717A]">Current Drawdown %</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 2.5%"
+                    value={traderProfile.current_drawdown}
+                    onChange={e => setTraderProfile(p => ({ ...p, current_drawdown: e.target.value }))}
+                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-[#525252] focus:border-[#D4A843]/30 focus:outline-none transition"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={saveProfile}
+                className="mt-3 flex items-center gap-2 rounded-lg border border-[#D4A843]/30 bg-[#D4A843]/[0.08] px-4 py-2 text-xs text-[#D4A843] hover:bg-[#D4A843]/[0.14] transition"
+              >
+                Save profile
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* ── Messages area ── */}
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto py-6"
+        className="flex-1 overflow-y-auto relative"
       >
-        <div className="px-6 md:px-16 lg:px-24">
-          <div className="max-w-3xl mx-auto">
+        {/* Empty state — absolutely centred in the scrollable area */}
+        {messages.length === 0 && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 empty-state-enter">
+            <p className="text-xl font-medium text-white/50 mb-8 text-center leading-snug">
+              Before your next trade —<br className="hidden sm:block" /> let&apos;s check the full picture.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+              {suggestions.map((s, i) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => send(s)}
+                  className="chip-enter bg-white/[0.04] border border-white/[0.07] rounded-xl px-5 py-3.5 text-sm text-[#A1A1AA] hover:border-[#D4A843]/30 hover:text-white cursor-pointer transition-all duration-300 text-left"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <p className="text-[11px] text-[#52525B] mt-6 text-center">
+              Powered by institutional-grade analysis · 22 data sources
+            </p>
+          </div>
+        )}
 
-            {/* Empty state */}
-            {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
-                <p className="text-xl font-medium text-white/60 mb-6">
-                  Before your next trade — let&apos;s check the full picture.
-                </p>
-                <div className="flex flex-wrap justify-center gap-2 max-w-lg">
-                  {suggestions.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => send(s)}
-                      className="bg-white/[0.03] border border-white/[0.07] rounded-full px-4 py-2 text-sm text-[#A1A1AA] hover:border-[#D4A843]/30 hover:text-white cursor-pointer transition-all duration-300"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Messages */}
-            {messages.map((m, i) => (
-              <div key={i} className="animate-fade-in-fast">
-                {m.role === "user" ? (
-                  <div className="flex justify-end mb-6">
-                    <div className="max-w-[75%] bg-white/[0.05] border border-white/[0.06] rounded-2xl rounded-br-md px-5 py-3">
-                      {m.imagePreview && (
-                        <div className="mb-2">
-                          <img
-                            src={m.imagePreview}
-                            alt="Attached chart"
-                            className="max-h-48 rounded-xl border border-white/10"
-                          />
+        {/* Messages */}
+        {messages.length > 0 && (
+          <div className="py-6 px-6 md:px-16 lg:px-24">
+            <div className="max-w-3xl mx-auto">
+              {messages.map((m, i) => (
+                <div key={i} className="animate-fade-in-fast">
+                  {m.role === "user" ? (
+                    <div className="flex justify-end mb-6">
+                      <div className="max-w-[75%] bg-white/[0.05] border border-white/[0.06] rounded-2xl rounded-br-md px-5 py-3">
+                        {m.imagePreview && (
+                          <div className="mb-2">
+                            <img
+                              src={m.imagePreview}
+                              alt="Attached chart"
+                              className="max-h-48 rounded-xl border border-white/10"
+                            />
+                          </div>
+                        )}
+                        <p className="text-sm text-white/90 font-normal break-words">
+                          {m.content}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mb-8">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-[#D4A843]/60 mb-2">
+                        BullionDesk
+                      </p>
+                      <div className="border-l-2 border-[#D4A843]/20 pl-5 max-w-[85%]">
+                        <div
+                          className="text-[15px] font-light leading-[1.8] tracking-[0.01em] text-[#E5E5E5]"
+                          style={{ fontFamily: "var(--font-geist)" }}
+                        >
+                          <MarkdownMessage content={m.content} />
+                          {(isStreaming || isTypewriting) && i === messages.length - 1 && m.role === "assistant" && (
+                            <span className="typing-cursor" />
+                          )}
+                        </div>
+                      </div>
+                      <div className="pl-5 mt-2">
+                        <ShareSignalButton text={m.content} />
+                      </div>
+                      {!loading && !isStreaming && i === messages.length - 1 && (
+                        <div className="pl-5 grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 max-w-lg">
+                          {suggestions.map((suggestion) => (
+                            <button
+                              key={suggestion}
+                              type="button"
+                              onClick={() => send(suggestion)}
+                              className="bg-white/[0.04] border border-white/[0.07] rounded-xl px-5 py-3 text-sm text-[#A1A1AA] hover:border-[#D4A843]/30 hover:text-white cursor-pointer transition-all duration-300 text-left"
+                            >
+                              {suggestion}
+                            </button>
+                          ))}
                         </div>
                       )}
-                      <p className="text-sm text-white/90 font-normal break-words">
-                        {m.content}
-                      </p>
+                      {m.trade_id && !respondedTradeIds.has(m.trade_id) && (
+                        <div className="pl-5 flex flex-wrap gap-2 mt-3">
+                          {[
+                            { result: "tp1_hit",   label: "✅ TP1 Hit" },
+                            { result: "tp2_hit",   label: "🎯 TP2 Hit" },
+                            { result: "sl_hit",    label: "❌ SL Hit" },
+                            { result: "breakeven", label: "➡️ Breakeven" },
+                          ].map(({ result, label }) => (
+                            <button
+                              key={result}
+                              type="button"
+                              onClick={() => submitResult(m.trade_id!, result)}
+                              className="rounded-xl border border-white/10 px-3 py-1.5 text-[11px] text-white/50 hover:border-[rgba(109,40,217,0.5)] hover:text-white/80 transition"
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ) : (
-                  <div className="mb-8">
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-[#D4A843]/60 mb-2">
-                      BullionDesk
-                    </p>
-                    <div className="border-l-2 border-[#D4A843]/20 pl-5 max-w-[85%]">
-                      <div
-                        className="text-[15px] font-light leading-[1.8] tracking-[0.01em] text-[#E5E5E5]"
-                        style={{ fontFamily: "var(--font-geist)" }}
-                      >
-                        <MarkdownMessage content={m.content} />
-                        {(isStreaming || isTypewriting) && i === messages.length - 1 && m.role === "assistant" && (
-                          <span className="typing-cursor" />
-                        )}
-                      </div>
-                    </div>
-                    <div className="pl-5 mt-2">
-                      <ShareSignalButton text={m.content} />
-                    </div>
-                    {!loading && !isStreaming && i === messages.length - 1 && (
-                      <div className="pl-5 flex flex-wrap gap-2 mt-3">
-                        {suggestions.map((suggestion) => (
-                          <button
-                            key={suggestion}
-                            type="button"
-                            onClick={() => send(suggestion)}
-                            className="bg-white/[0.03] border border-white/[0.07] rounded-full px-4 py-2 text-sm text-[#A1A1AA] hover:border-[#D4A843]/30 hover:text-white cursor-pointer transition-all duration-300"
-                          >
-                            {suggestion}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {m.trade_id && !respondedTradeIds.has(m.trade_id) && (
-                      <div className="pl-5 flex flex-wrap gap-2 mt-3">
-                        {[
-                          { result: "tp1_hit",   label: "✅ TP1 Hit" },
-                          { result: "tp2_hit",   label: "🎯 TP2 Hit" },
-                          { result: "sl_hit",    label: "❌ SL Hit" },
-                          { result: "breakeven", label: "➡️ Breakeven" },
-                        ].map(({ result, label }) => (
-                          <button
-                            key={result}
-                            type="button"
-                            onClick={() => submitResult(m.trade_id!, result)}
-                            className="rounded-xl border border-white/10 px-3 py-1.5 text-[11px] text-white/50 hover:border-[rgba(109,40,217,0.5)] hover:text-white/80 transition"
-                          >
-                            {label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {/* Loading dots — shown while waiting for first token */}
-            {loading && !isStreaming && (
-              <div className="mb-8 animate-fade-in-fast">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[#D4A843]/60 mb-2">
-                  BullionDesk
-                </p>
-                <div className="border-l-2 border-[#D4A843]/20 pl-5 flex items-center gap-1.5 py-2">
-                  {[0, 0.2, 0.4].map((delay) => (
-                    <span
-                      key={delay}
-                      className="w-1.5 h-1.5 rounded-full bg-[#D4A843]"
-                      style={{ animation: "dot-bounce 1.2s ease-in-out infinite", animationDelay: `${delay}s` }}
-                    />
-                  ))}
+                  )}
                 </div>
-              </div>
-            )}
+              ))}
 
-            {/* Scroll-to-bottom button */}
-            {showScrollBtn && (
-              <button
-                type="button"
-                onClick={() => scrollToBottom(true)}
-                className="sticky bottom-2 mx-auto flex items-center gap-1.5 rounded-full border border-[rgba(212,175,55,0.35)] bg-[rgba(7,6,11,0.85)] backdrop-blur-sm px-3 py-1.5 text-[11px] text-[rgba(212,175,55,0.8)] hover:border-[rgba(212,175,55,0.7)] hover:text-[rgba(212,175,55,1)] transition shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
-              >
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                  <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Scroll to bottom
-              </button>
-            )}
+              {/* Loading dots */}
+              {loading && !isStreaming && (
+                <div className="mb-8 animate-fade-in-fast">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#D4A843]/60 mb-2">
+                    BullionDesk
+                  </p>
+                  <div className="border-l-2 border-[#D4A843]/20 pl-5 flex items-center gap-1.5 py-2">
+                    {[0, 0.2, 0.4].map((delay) => (
+                      <span
+                        key={delay}
+                        className="w-1.5 h-1.5 rounded-full bg-[#D4A843]"
+                        style={{ animation: "dot-bounce 1.2s ease-in-out infinite", animationDelay: `${delay}s` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-            <div ref={bottomRef} />
+              <div ref={bottomRef} />
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Scroll-to-bottom button */}
+        {showScrollBtn && (
+          <div className="sticky bottom-4 flex justify-center pointer-events-none">
+            <button
+              type="button"
+              onClick={() => scrollToBottom(true)}
+              className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-[rgba(212,175,55,0.35)] bg-[rgba(7,6,11,0.85)] backdrop-blur-sm px-3 py-1.5 text-[11px] text-[rgba(212,175,55,0.8)] hover:border-[rgba(212,175,55,0.7)] hover:text-[rgba(212,175,55,1)] transition shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Scroll to bottom
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Stop generating ── */}

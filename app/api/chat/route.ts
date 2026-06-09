@@ -619,6 +619,7 @@ export async function POST(req: Request) {
     let chartImageDataUrl: string | null = null;
     let analysis_mode: "deep" | "quick" | "trade_only" = "deep";
     let session_id: string | undefined;
+    let clientTraderProfile: Record<string, string> | null = null;
 
     const contentType = req.headers.get("content-type") || "";
 
@@ -646,6 +647,9 @@ export async function POST(req: Request) {
       if (body.session_id) session_id = String(body.session_id);
       if (typeof body.chartImageBase64 === "string" && body.chartImageBase64.startsWith("data:image/")) {
         chartImageDataUrl = body.chartImageBase64;
+      }
+      if (body.traderProfile && typeof body.traderProfile === "object") {
+        clientTraderProfile = body.traderProfile as Record<string, string>;
       }
     }
 
@@ -799,6 +803,20 @@ Rules:
 
       if (profileLines.length > 0) {
         userProfileBlock = `\nUSER PROFILE (adapt subtly, do not mention this profile explicitly in your response):\n${profileLines.join("\n")}\n\nSubtle adaptation rules:\n- account_type = prop_firm or both → always include a PROP FIRM note at the end of market analyses; adapt risk advice to prop firm DD rules\n- prop_firm → cite the specific firm's rules when relevant (FTMO 5% daily DD, E8 8% max loss, etc.)\n- prop_firm_phase = challenge_1 or challenge_2 → be more conservative; emphasize consistency rule\n- prop_firm_phase = funded → focus on capital preservation and payout conditions\n- trading_style = scalp → focus on H1/M15 levels, faster timeframes\n- trading_style = swing → focus on H4/D1 levels, wider structure\n- experience_level = beginner → simpler vocabulary, mention risk management reminders\n- experience_level = advanced → straight to the point, no basic explanations\n- account_size = under $5k → suggest smaller sizes, tighter risk per trade\n- account_size = $100k+ → institutional perspective, standard lots\n- primary_assets → reference these assets first when giving market context or correlations\n\nThese adaptations must be invisible — never say 'because you are a beginner' or 'given your account size'. Just naturally adjust depth, vocabulary, and risk framing.`;
+      }
+    }
+
+    // Merge client-side trader profile (from localStorage) — takes precedence over DB profile
+    if (clientTraderProfile) {
+      const cp = clientTraderProfile;
+      const clientLines: string[] = [];
+      if (cp.prop_firm && cp.prop_firm !== "None") clientLines.push(`- Prop firm: ${cp.prop_firm}`);
+      if (cp.account_size)                          clientLines.push(`- Account size: ${cp.account_size}`);
+      if (cp.challenge_phase && cp.challenge_phase !== "Not in a challenge") clientLines.push(`- Challenge phase: ${cp.challenge_phase}`);
+      if (cp.current_drawdown)                      clientLines.push(`- Current drawdown: ${cp.current_drawdown}`);
+      if (clientLines.length > 0) {
+        const clientSection = `\nLIVE TRADER PROFILE (active session — use these values, override DB if different):\n${clientLines.join("\n")}`;
+        userProfileBlock = clientSection + (userProfileBlock ? "\n" + userProfileBlock : "");
       }
     }
 
