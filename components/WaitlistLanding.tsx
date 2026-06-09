@@ -188,7 +188,7 @@ function PropFirmMarquee() {
                 alt={firm.name}
                 fill
                 sizes="140px"
-                className="object-contain prop-logo"
+                className={`object-contain ${firm.name === "FTMO" ? "prop-logo-ftmo" : "prop-logo-color"}`}
               />
             </div>
           ))}
@@ -259,12 +259,21 @@ export default function WaitlistLanding() {
         .badge-pulse {
           animation: badge-pulse 2s ease-in-out infinite;
         }
-        .prop-logo {
-          filter: grayscale(1) brightness(1.7) contrast(0.7) opacity(0.5);
-          transition: filter 300ms ease;
+        .prop-logo-ftmo {
+          filter: grayscale(1) brightness(1.7) contrast(0.7);
+          opacity: 0.85;
+          transition: opacity 300ms ease;
         }
-        .prop-logo:hover {
-          filter: grayscale(1) brightness(1.7) contrast(0.7) opacity(1);
+        .prop-logo-ftmo:hover {
+          opacity: 1;
+        }
+        .prop-logo-color {
+          opacity: 0.85;
+          transition: opacity 300ms ease, transform 300ms ease;
+        }
+        .prop-logo-color:hover {
+          opacity: 1;
+          transform: scale(1.05);
         }
         @keyframes cta-pulse {
           0%, 100% { transform: scale(1); }
