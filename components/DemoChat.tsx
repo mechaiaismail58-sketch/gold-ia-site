@@ -7,7 +7,7 @@ import remarkGfm from "remark-gfm";
 import { createClient } from "@/lib/supabase/client";
 
 const WELCOME_MESSAGE =
-  "Welcome to BullionDesk. I'm your AI Gold Trading Coach. Ask me anything about XAUUSD — structure, macro context, risk management, or prop firm strategy.";
+  "Gold just moved. Let me show you what the institutions are seeing right now. What's on your mind — structure, macro, or a specific trade idea?";
 
 const MAX_FREE_MESSAGES = 3;
 

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import DemoChat from "@/components/DemoChat";
+import ScrollReveal from "@/components/ScrollReveal";
 
 const HERO_HEADING_WORDS = ["Your", "AI", "Gold", "Trading", "Coach."];
 const HERO_HEADING_GOLD_WORDS = ["Always", "on."];
@@ -22,27 +23,25 @@ const TRACK_RECORD_STATS = [
 ];
 
 const PROP_FIRM_LOGOS = [
-  { name: "FTMO", src: "/logos/ftmo.png" },
   { name: "The 5%ers", src: "/logos/the5ers.png" },
   { name: "Apex Trader Funding", src: "/logos/apex.png" },
+  { name: "FTMO", src: "/logos/ftmo.png" },
   { name: "E8 Funding", src: "/logos/e8.png" },
   { name: "FundedNext", src: "/logos/fundednext.webp" },
   { name: "Blue Guardian", src: "/logos/blueguardian.jpeg" },
   { name: "Alpha Capital Group", src: "/logos/alphacapital.png" },
 ];
 
-/* Fade-in + slide-up reveal style — translateY(40px) → 0, opacity 0 → 1, 600ms ease-out */
 function revealStyle(inView: boolean, delayMs = 0): CSSProperties {
   return {
     opacity: inView ? 1 : 0,
     transform: inView ? "translateY(0)" : "translateY(40px)",
-    transition: `opacity 600ms ease-out ${delayMs}ms, transform 600ms ease-out ${delayMs}ms`,
+    transition: `opacity 700ms cubic-bezier(0.25,0.46,0.45,0.94) ${delayMs}ms, transform 700ms cubic-bezier(0.25,0.46,0.45,0.94) ${delayMs}ms`,
     willChange: "opacity, transform",
   };
 }
 
-/* ── Reveal-on-scroll via IntersectionObserver (AnimatedContent fallback) ── */
-function useInView<T extends HTMLElement>(threshold = 0.2) {
+function useInView<T extends HTMLElement>(threshold = 0.15) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
 
@@ -65,7 +64,6 @@ function useInView<T extends HTMLElement>(threshold = 0.2) {
   return { ref, inView };
 }
 
-/* ── Count-up for stat values like "431", "69%", "24/7", "9 mo." ── */
 function parseStat(raw: string) {
   const match = raw.match(/^(\d+(?:\.\d+)?)(.*)$/);
   if (!match) return null;
@@ -100,13 +98,12 @@ function useCountUp(raw: string, start: boolean, duration = 1200) {
   return parsed ? display : raw;
 }
 
-/* ── SplitText fallback — per-word fade + slide-up with stagger ── */
 function SplitWord({ word, index, ready }: { word: string; index: number; ready: boolean }) {
   return (
     <span className="inline-block overflow-hidden align-bottom pb-[0.08em]">
       <span
         className={`inline-block mr-[0.28em] ${ready ? "split-word-enter" : "opacity-0"}`}
-        style={{ animationDelay: `${index * 90}ms` }}
+        style={{ animationDelay: `${index * 120}ms` }}
       >
         {word}
       </span>
@@ -152,24 +149,21 @@ function TrackRecordCard({
 }) {
   const display = useCountUp(value, inView);
   return (
-    <div
-      className="glass-card rounded-2xl px-5 py-6 text-center"
-      style={revealStyle(inView, delay)}
-    >
-      <div className="text-[24px] sm:text-[28px] font-extrabold tracking-[-0.02em] text-[#D4A843] tabular-nums whitespace-nowrap">
-        {display}
+    <div style={revealStyle(inView, delay)}>
+      <div className="glass-card rounded-2xl px-5 py-6 text-center transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(212,168,67,0.08)]">
+        <div className="text-[24px] sm:text-[28px] font-extrabold tracking-[-0.02em] text-[#D4A843] tabular-nums whitespace-nowrap">
+          {display}
+        </div>
+        <div className="text-[10px] uppercase tracking-[0.16em] text-[#A1A1AA] mt-1.5">{label}</div>
       </div>
-      <div className="text-[10px] uppercase tracking-[0.16em] text-[#A1A1AA] mt-1.5">{label}</div>
     </div>
   );
 }
 
-/* Prop firm logo marquee — two duplicated rows translating by -50% for a seamless infinite loop.
-   Logos sit muted (grayscale + dimmed) until hovered, then light up — handled by the .prop-logo CSS class. */
 function PropFirmMarquee() {
   const track = [...PROP_FIRM_LOGOS, ...PROP_FIRM_LOGOS];
   return (
-    <div className="w-full mb-10">
+    <div className="w-full mb-12">
       <p className="text-center text-[12px] text-white/60 tracking-[0.06em] mb-5">
         Compatible with 7 major prop firms
       </p>
@@ -200,9 +194,7 @@ function PropFirmMarquee() {
 
 export default function WaitlistLanding() {
   const [heroReady, setHeroReady] = useState(false);
-  const demoSection = useInView<HTMLDivElement>(0.15);
   const trackSection = useInView<HTMLDivElement>(0.15);
-  const footerSection = useInView<HTMLDivElement>(0.15);
 
   const purpleBlobARef = useRef<HTMLDivElement | null>(null);
   const purpleBlobBRef = useRef<HTMLDivElement | null>(null);
@@ -215,13 +207,10 @@ export default function WaitlistLanding() {
       }
       window.scrollTo({ top: 0, behavior: "instant" });
     }, 0);
-    // Trigger hero load animation + stat count-up on first paint
     const id = requestAnimationFrame(() => setHeroReady(true));
     return () => cancelAnimationFrame(id);
   }, []);
 
-  // Subtle parallax on the purple blobs — they drift slower than the page scrolls.
-  // Plain transform writes via rAF throttle, no React re-renders, no layout shift.
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
@@ -246,7 +235,6 @@ export default function WaitlistLanding() {
   return (
     <div className="text-[#F5F5F5] flex flex-col items-center px-4 pt-10 animate-fade-in relative">
 
-      {/* Prop firm logo marquee — infinite scroll loop + grayscale-to-color hover reveal */}
       <style>{`
         @keyframes prop-marquee {
           from { transform: translateX(0); }
@@ -291,7 +279,7 @@ export default function WaitlistLanding() {
         }
         @keyframes chat-border-pulse {
           0%, 100% { opacity: 0.3; }
-          50%      { opacity: 0.65; }
+          50%      { opacity: 0.6; }
         }
         .chat-border-glow {
           position: relative;
@@ -307,15 +295,14 @@ export default function WaitlistLanding() {
           -webkit-mask-composite: xor;
           mask-composite: exclude;
           pointer-events: none;
-          animation: chat-border-pulse 4s ease-in-out infinite;
+          animation: chat-border-pulse 3s ease-in-out infinite;
         }
       `}</style>
 
       {/* Subtle noise texture */}
       <div className="pointer-events-none fixed inset-0 -z-30 noise-overlay" />
 
-      {/* Background glows — purple/violet signature blobs + gold counterpoint (Aurora fallback).
-          Float on the page background (no boxed container) and drift via parallax on scroll. */}
+      {/* Background globs */}
       <div className="pointer-events-none fixed inset-0 -z-30">
         <div
           ref={purpleBlobARef}
@@ -371,141 +358,155 @@ export default function WaitlistLanding() {
           </span>
         </div>
 
-        {/* ── Hero ── */}
-        <div className="text-center mb-10 relative">
-          {/* Subtle gold radial glow directly behind the heading, layered on top of the page-level blobs */}
+        {/* ── Hero — py-24 for breathing room ── */}
+        <div className="text-center pt-16 pb-12 relative">
           <div
             className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[340px] w-[480px] -z-10"
             style={{ background: "radial-gradient(ellipse at center, rgba(212,168,67,0.10) 0%, rgba(212,168,67,0) 65%)" }}
           />
 
-          <h1 className="text-[30px] sm:text-[44px] leading-[1.08] tracking-[-0.03em] font-extrabold mb-5">
+          <h1 className="text-[30px] sm:text-[44px] leading-[1.08] tracking-[-0.03em] font-extrabold mb-6">
             {HERO_HEADING_WORDS.map((w, i) => (
               <SplitWord key={`h-${i}`} word={w} index={i} ready={heroReady} />
             ))}
             <span className="text-[#D4A843] italic">
               {HERO_HEADING_GOLD_WORDS.map((w, i) => (
-                <SplitWord key={`g-${i}`} word={w} index={HERO_HEADING_WORDS.length + i} ready={heroReady} />
+                <SplitWord
+                  key={`g-${i}`}
+                  word={w}
+                  index={HERO_HEADING_WORDS.length + 2 + i}
+                  ready={heroReady}
+                />
               ))}
             </span>
           </h1>
+
           <p
             className={`text-[16px] text-[#A1A1AA] leading-[1.7] max-w-[46ch] mx-auto ${heroReady ? "hero-fade-in" : "opacity-0"}`}
             style={{ animationDelay: "400ms" }}
           >
             Institutional-grade gold analysis. Structure, macro, risk — everything you need to trade XAUUSD with clarity. Built for serious gold traders and prop firm candidates.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mt-6">
+
+          <div
+            className={`flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mt-8 ${heroReady ? "hero-fade-in" : "opacity-0"}`}
+            style={{ animationDelay: "600ms" }}
+          >
             {HERO_STATS.map((s, i) => (
-              <HeroStat key={s.label} value={s.value} label={s.label} start={heroReady} delay={700 + i * 200} />
+              <HeroStat key={s.label} value={s.value} label={s.label} start={heroReady} delay={700 + i * 150} />
             ))}
           </div>
         </div>
 
-        {/* ── Prop firm logo marquee — social proof, right after the hero stats ── */}
-        <PropFirmMarquee />
+        {/* ── Prop firm logos — scroll reveal ── */}
+        <ScrollReveal>
+          <PropFirmMarquee />
+        </ScrollReveal>
 
-        {/* ── CTAs — "Get Early Access" is the PRIMARY action; "Try the AI Coach" is secondary ── */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-3">
-          <Link
-            href="/signup"
-            className="cta-primary w-full sm:w-auto rounded-xl py-4 px-8 text-lg font-bold tracking-[0.02em] bg-[#D4A843] text-black flex items-center justify-center"
-          >
-            Get Early Access — $14.99
-          </Link>
-          <button
-            onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
-            className="w-full sm:w-auto rounded-xl px-5 py-2.5 text-[12px] tracking-[0.06em] font-medium border border-[#1A1A1A] text-[#A1A1AA] hover:border-[rgba(212,168,67,0.35)] hover:text-[#F5F5F5] transition min-h-[40px]"
-          >
-            Try the AI Coach — Free
-          </button>
-        </div>
-        <p className="text-center text-[11px] text-[#A1A1AA]/70 mb-2">
-          No signals · No BS · Just clarity
-        </p>
-        <div className="text-center mb-10">
-          <p className="text-sm font-medium" style={{ color: "#D4A843" }}>🔒 Pay $14.99 today. Lock $25/mo forever.</p>
-          <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>Standard price after beta: $39.99/mo</p>
-        </div>
+        {/* ── CTAs ── */}
+        <ScrollReveal delay={0}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-3">
+            <Link
+              href="/signup"
+              className="cta-primary w-full sm:w-auto rounded-xl py-4 px-8 text-lg font-bold tracking-[0.02em] bg-[#D4A843] text-black flex items-center justify-center"
+            >
+              Get Early Access — $14.99
+            </Link>
+            <button
+              onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
+              className="w-full sm:w-auto rounded-xl px-5 py-2.5 text-[12px] tracking-[0.06em] font-medium border border-[#1A1A1A] text-[#A1A1AA] hover:border-[rgba(212,168,67,0.35)] hover:text-[#F5F5F5] transition min-h-[40px]"
+            >
+              Try the AI Coach — Free
+            </button>
+          </div>
+          <p className="text-center text-[11px] text-[#A1A1AA]/70 mb-2">
+            No signals · No BS · Just clarity
+          </p>
+          <div className="text-center mb-16">
+            <p className="text-sm font-medium" style={{ color: "#D4A843" }}>🔒 Pay $14.99 today. Lock $25/mo forever.</p>
+            <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>Standard price after beta: $39.99/mo</p>
+          </div>
+        </ScrollReveal>
 
-        {/* ── Gradient divider — purple to gold, separates hero from demo ── */}
+        {/* ── Gradient divider ── */}
         <div
-          className="h-[1.5px] w-full max-w-[260px] mx-auto mb-10 rounded-full"
+          className="h-[1.5px] w-full max-w-[260px] mx-auto mb-24 rounded-full"
           style={{ background: "linear-gradient(to right, transparent, #7C3AED 35%, #D4A843 65%, transparent)" }}
         />
 
-        {/* ── Demo chat — front and centre ── */}
-        <div id="demo" ref={demoSection.ref} className="mb-8" style={revealStyle(demoSection.inView)}>
-          <div className="text-center mb-4">
-            <h2 className="text-[18px] font-extrabold tracking-[-0.01em] mb-2 gradient-text-gold inline-block">
-              Try it now
-            </h2>
-            <span className="flex items-center justify-center gap-1.5 mb-1">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 pulse-dot-green" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+        {/* ── Demo chat section ── */}
+        <ScrollReveal>
+          <div id="demo" className="mb-8">
+            <div className="text-center mb-4">
+              <h2 className="text-[18px] font-extrabold tracking-[-0.01em] mb-2 gradient-text-gold inline-block">
+                Try it now
+              </h2>
+              <span className="flex items-center justify-center gap-1.5 mb-1">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 pulse-dot-green" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                </span>
+                <span className="text-[10px] uppercase tracking-[0.16em] text-[#A1A1AA]">
+                  AI Coach — Online
+                </span>
               </span>
-              <span className="text-[10px] uppercase tracking-[0.16em] text-[#A1A1AA]">
-                AI Coach — Online
-              </span>
-            </span>
-            <p className="text-[12px] text-[#A1A1AA] tracking-[0.04em]">
-              3 free messages. See why traders are switching.
+              <p className="text-[12px] text-[#A1A1AA] tracking-[0.04em]">
+                3 free messages. See why traders are switching.
+              </p>
+            </div>
+            <div className="rounded-2xl chat-border-glow">
+              <div className="rounded-2xl chat-glow-mixed">
+                <DemoChat />
+              </div>
+            </div>
+            <p className="text-center mt-3">
+              <Link href="/signup" className="text-[12px] text-[#D4A843] hover:text-[#F5F5F5] transition">
+                Want unlimited access? →
+              </Link>
             </p>
           </div>
-          <div className="rounded-2xl chat-border-glow">
-            <div className="rounded-2xl chat-glow-mixed">
-              <DemoChat />
-            </div>
-          </div>
-          <p className="text-center mt-3">
-            <Link href="/signup" className="text-[12px] text-[#D4A843] hover:text-[#F5F5F5] transition">
-              Want unlimited access? →
-            </Link>
-          </p>
-        </div>
+        </ScrollReveal>
 
         {/* ── Track Record ── */}
-        <div
-          ref={trackSection.ref}
-          className="rounded-3xl border border-[#1A1A1A] bg-[#111111] overflow-hidden mb-4"
-          style={revealStyle(trackSection.inView)}
-        >
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,168,67,0.45)] to-transparent" />
-          <div className="p-6 sm:p-8">
-            <div className="text-center mb-6">
-              <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-[#D4A843] mb-2">
-                Research Track Record
-              </p>
-              <p className="text-[13px] text-[#A1A1AA] leading-relaxed">
-                Exposed analysis on XAUUSD — backtested, documented, transparent.
+        <ScrollReveal>
+          <div
+            ref={trackSection.ref}
+            className="rounded-3xl border border-[#1A1A1A] bg-[#111111] overflow-hidden mb-4 py-2"
+          >
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,168,67,0.45)] to-transparent" />
+            <div className="p-6 sm:p-10">
+              <div className="text-center mb-8">
+                <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-[#D4A843] mb-2">
+                  Research Track Record
+                </p>
+                <p className="text-[13px] text-[#A1A1AA] leading-relaxed">
+                  Exposed analysis on XAUUSD — backtested, documented, transparent.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                {TRACK_RECORD_STATS.map((s, i) => (
+                  <TrackRecordCard
+                    key={s.label}
+                    value={s.value}
+                    label={s.label}
+                    inView={trackSection.inView}
+                    delay={i * 150}
+                  />
+                ))}
+              </div>
+              <p className="text-center text-[11px] text-[#A1A1AA]/60 leading-relaxed">
+                Based on backtested research trades on XAUUSD. Past performance does not guarantee future results.
               </p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
-              {TRACK_RECORD_STATS.map((s, i) => (
-                <TrackRecordCard
-                  key={s.label}
-                  value={s.value}
-                  label={s.label}
-                  inView={trackSection.inView}
-                  delay={i * 150}
-                />
-              ))}
-            </div>
-            <p className="text-center text-[11px] text-[#A1A1AA]/60 leading-relaxed">
-              Based on backtested research trades on XAUUSD. Past performance does not guarantee future results.
-            </p>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* ── Footer ── */}
-        <p
-          ref={footerSection.ref}
-          className="text-center text-[11px] text-[#A1A1AA] mb-6"
-          style={revealStyle(footerSection.inView)}
-        >
-          Bullion Desk © 2026 · AI Gold Trading Coach · Not investment advice
-        </p>
+        <ScrollReveal>
+          <p className="text-center text-[11px] text-[#A1A1AA] mb-6 mt-8">
+            Bullion Desk © 2026 · AI Gold Trading Coach · Not investment advice
+          </p>
+        </ScrollReveal>
 
       </div>
     </div>

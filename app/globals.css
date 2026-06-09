@@ -317,12 +317,9 @@ textarea.text-xs {
   border: 1px solid rgba(212, 168, 67, 0.12);
 }
 
-/* Mixed gold + purple border glow around the demo chat */
+/* Mixed gold + purple border glow around the demo chat — pulsed via demoChatGlowPulse */
 .chat-glow-mixed {
-  box-shadow:
-    0 0 0 1px rgba(212, 168, 67, 0.20),
-    0 0 50px rgba(124, 58, 237, 0.16),
-    0 0 90px rgba(212, 168, 67, 0.07);
+  /* box-shadow is owned by demoChatGlowPulse keyframe in the blob drift section */
 }
 
 /* Subtle noise texture overlay */
@@ -369,6 +366,56 @@ a:not(.no-scale):active {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* ===== Background blob drift — slow continuous float ===== */
+
+@keyframes blobDrift1 {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(30px, -20px); }
+}
+@keyframes blobDrift2 {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(-25px, 22px); }
+}
+@keyframes blobDrift3 {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(18px, 28px); }
+}
+
+.blob-drift-1 { animation: blobDrift1 20s ease-in-out infinite alternate; }
+.blob-drift-2 { animation: blobDrift2 24s ease-in-out infinite alternate; }
+.blob-drift-3 { animation: blobDrift3 28s ease-in-out infinite alternate; }
+
+/* ===== Demo chat ambient glow pulse ===== */
+
+@keyframes demoChatGlowPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(212,168,67,0.20),
+      0 0 50px rgba(124,58,237,0.16),
+      0 0 90px rgba(212,168,67,0.07);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(212,168,67,0.50),
+      0 0 70px rgba(124,58,237,0.24),
+      0 0 130px rgba(212,168,67,0.14);
+  }
+}
+
+.chat-glow-mixed {
+  animation: demoChatGlowPulse 3s ease-in-out infinite;
+}
+
+/* ===== Gold shimmer — reveals with a glow that fades (about page) ===== */
+
+@keyframes goldShimmer {
+  0%   { opacity: 0; text-shadow: 0 0 0px rgba(212,168,67,0); }
+  15%  { opacity: 1; text-shadow: 0 0 20px rgba(212,168,67,0.3); }
+  100% { opacity: 1; text-shadow: 0 0 0px rgba(212,168,67,0); }
+}
+.gold-shimmer { animation: goldShimmer 1800ms cubic-bezier(0.16,1,0.3,1) forwards; }
+.gold-shimmer-hidden { opacity: 0; }
 
 /* ===== Accessible motion — respect system preference ===== */
 
