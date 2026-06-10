@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Avatar from "@/components/Avatar";
+import { HamburgerIcon, CloseIcon, ChevronIcon } from "@/components/NavIcons";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -12,52 +13,15 @@ const navItems = [
   { href: "/about", label: "About" },
 ];
 
-const chatNavItems = [
-  { href: "/chat/market", label: "Market" },
-  { href: "/chat", label: "Chat" },
-  { href: "/chat/news", label: "News" },
-  { href: "/chat/calendar", label: "Calendar" },
-];
-
-function HamburgerIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect y="3.5" width="18" height="1.5" rx="0.75" fill="currentColor" />
-      <rect y="8.25" width="18" height="1.5" rx="0.75" fill="currentColor" />
-      <rect y="13" width="18" height="1.5" rx="0.75" fill="currentColor" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path d="M3 3L15 15M15 3L3 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function ChevronIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      width="10" height="10" viewBox="0 0 10 10" fill="none"
-      className={`transition-transform duration-150 ${open ? "rotate-180" : ""}`}
-    >
-      <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-interface HeaderProps {
+interface NavbarPublicProps {
   initialEmail: string | null;
   initialAvatarUrl: string | null;
 }
 
-export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) {
+export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarPublicProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  // Initialise avec les valeurs serveur → zéro flash
   const [userEmail, setUserEmail] = useState<string | null>(initialEmail);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl);
   const [hasPaid, setHasPaid] = useState(false);
@@ -65,7 +29,6 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Initialise depuis le client + écoute les changements d'auth en temps réel
   useEffect(() => {
     const supabase = createClient();
 
@@ -80,7 +43,6 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
         .catch(() => setHasPaid(false));
     }
 
-    // Sync initial state from browser session (covers page reload)
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUserEmail(session?.user?.email ?? null);
       syncPaidStatus(Boolean(session?.user));
@@ -112,15 +74,16 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
   }, []);
 
   // Close menu on route change
-  useEffect(() => {
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     setMenuOpen(false);
     setDropdownOpen(false);
-  }, [pathname]);
+  }
 
   async function handleSignOut() {
     setSigningOut(true);
     setDropdownOpen(false);
-    // Clear local state immediately — no waiting for navigation
     setUserEmail(null);
     setAvatarUrl(null);
     setHasPaid(false);
@@ -136,13 +99,18 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
       ? "rounded-xl px-3 py-1.5 text-xs tracking-[0.08em] uppercase border border-[rgba(212,175,55,0.45)] bg-[rgba(212,175,55,0.07)] text-white"
       : "rounded-xl px-3 py-1.5 text-xs tracking-[0.08em] uppercase text-white/80 transition hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10";
 
-  const isChatLinkActive = (href: string) =>
-    href === "/chat" ? pathname === "/chat" : pathname.startsWith(href);
+  // CTA on the right depends on auth/paid status
+  const ctaLink = !userEmail
+    ? { href: "/signup", label: "Get Early Access — $14.99", mobileLabel: "Get Access" }
+    : !hasPaid
+    ? { href: "/upgrade", label: "Upgrade", mobileLabel: "Upgrade" }
+    : { href: "/chat", label: "Open Chat →", mobileLabel: "Open Chat" };
 
-  const chatNavLinkClass = (href: string) =>
-    `text-xs uppercase tracking-wider transition-colors ${
-      isChatLinkActive(href) ? "text-[#D4A843]" : "text-[#A1A1AA] hover:text-white"
-    }`;
+  const ctaClassDesktop =
+    "rounded-xl px-3 py-1.5 text-xs tracking-[0.08em] uppercase font-semibold bg-[color:var(--gold)] text-[#07060b] transition hover:opacity-90 whitespace-nowrap";
+
+  const ctaClassMobile =
+    "rounded-lg px-3 py-2 text-xs tracking-[0.08em] uppercase font-semibold bg-[color:var(--gold)] text-[#07060b] whitespace-nowrap";
 
   return (
     <header className="pt-6">
@@ -171,21 +139,14 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
                 {item.label}
               </Link>
             ))}
-            {userEmail && hasPaid && (
-              <>
-                <span className="w-px h-4 bg-white/10 mx-1" />
-                {chatNavItems.map((item) => (
-                  <Link key={item.href} href={item.href} className={chatNavLinkClass(item.href)}>
-                    {item.label.toUpperCase()}
-                  </Link>
-                ))}
-              </>
-            )}
           </nav>
 
           {/* Desktop right side */}
           <div className="hidden md:flex items-center gap-2 shrink-0">
-            {userEmail ? (
+            <Link href={ctaLink.href} className={ctaClassDesktop}>
+              {ctaLink.label}
+            </Link>
+            {userEmail && (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setDropdownOpen((v) => !v)}
@@ -215,40 +176,27 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
                   </div>
                 )}
               </div>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="rounded-xl px-3 py-1.5 text-xs tracking-[0.08em] uppercase text-white/80 transition hover:text-white hover:bg-white/5 border border-white/10"
-                >
-                  Log in
-                </Link>
-                <Link
-                  href="/signup"
-                  className="rounded-xl px-3 py-1.5 text-xs tracking-[0.08em] uppercase border border-[rgba(212,175,55,0.55)] text-[color:var(--gold)] transition hover:border-[rgba(212,175,55,0.95)] hover:bg-[rgba(212,175,55,0.08)]"
-                >
-                  Sign Up
-                </Link>
-              </>
+            )}
+            {!userEmail && (
+              <Link
+                href="/login"
+                className="rounded-xl px-3 py-1.5 text-xs tracking-[0.08em] uppercase text-white/80 transition hover:text-white hover:bg-white/5 border border-white/10"
+              >
+                Log in
+              </Link>
             )}
           </div>
 
           {/* Mobile right side */}
           <div className="flex md:hidden items-center gap-2 shrink-0">
+            <Link href={ctaLink.href} className={ctaClassMobile}>
+              {ctaLink.mobileLabel}
+            </Link>
             {userEmail ? (
               <Link href="/profile" className="flex items-center justify-center rounded-full border border-white/10 min-h-[44px] min-w-[44px]">
                 <Avatar src={avatarUrl} size={32} />
               </Link>
-            ) : (
-              <>
-                <Link href="/login" className="rounded-lg px-3 py-2 text-xs tracking-[0.08em] uppercase text-white/80 border border-white/10">
-                  Log in
-                </Link>
-                <Link href="/signup" className="rounded-lg px-3 py-2 text-xs tracking-[0.08em] uppercase border border-[rgba(212,175,55,0.55)] text-[color:var(--gold)]">
-                  Sign Up
-                </Link>
-              </>
-            )}
+            ) : null}
             <button
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
@@ -276,23 +224,10 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
                 {item.label}
               </Link>
             ))}
-            {userEmail && hasPaid && (
-              <>
-                <div className="h-px bg-white/[0.06] my-1" />
-                {chatNavItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={
-                      isChatLinkActive(item.href)
-                        ? "rounded-xl px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase border border-[rgba(212,168,67,0.45)] bg-[rgba(212,168,67,0.07)] text-[#D4A843]"
-                        : "rounded-xl px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-[#A1A1AA] border border-white/10 hover:border-white/20 hover:text-white transition"
-                    }
-                  >
-                    {item.label.toUpperCase()}
-                  </Link>
-                ))}
-              </>
+            {!userEmail && (
+              <Link href="/login" className="rounded-xl px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-white/80 border border-white/10 hover:border-white/20 hover:text-white transition">
+                Log in
+              </Link>
             )}
             {userEmail && (
               <>

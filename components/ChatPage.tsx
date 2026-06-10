@@ -571,28 +571,10 @@ export default function ChatPage() {
 
       {/* ── Trading desk header ── */}
       <header className="flex-none bg-white/[0.02] border-b border-white/[0.06] chat-header-enter">
-        <div className="max-w-5xl mx-auto px-6 md:px-10 py-4">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-6">
+        <div className="max-w-5xl mx-auto px-6 md:px-10 py-3">
+          <div className="flex items-center justify-end gap-3">
 
-            {/* Left: brand */}
-            <div className="flex flex-col gap-0.5 shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#D4A843] animate-pulse inline-block shrink-0" />
-                <span className="text-sm font-semibold text-white">BullionDesk</span>
-              </div>
-              <span className="text-xs text-[#71717A] uppercase tracking-[0.15em] font-medium pl-4">
-                AI Gold Trading Coach · XAUUSD
-              </span>
-            </div>
-
-            {/* Center: always-visible anchor */}
-            <div className="chat-anchor-pulse chat-banner-glow bg-[#D4A843]/[0.08] border border-[#D4A843]/20 rounded-xl px-4 py-2.5 flex-1 max-w-md">
-              <p className="text-sm text-[#D4A843] font-medium text-center leading-snug">
-                Don&apos;t take any trade before checking with the AI.
-              </p>
-            </div>
-
-            {/* Right: controls */}
+            {/* Controls */}
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
