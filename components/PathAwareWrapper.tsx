@@ -7,8 +7,15 @@ import SiteFooter from "./SiteFooter";
 export default function PathAwareWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  if (pathname === "/chat") {
-    return <>{children}</>;
+  if (pathname.startsWith("/chat")) {
+    return (
+      <div className="h-screen flex flex-col overflow-hidden">
+        <div className="flex-none px-4 sm:px-6 md:px-10 lg:px-16 xl:px-20">
+          <ConditionalHeader initialEmail={null} initialAvatarUrl={null} />
+        </div>
+        <div className="flex-1 min-h-0">{children}</div>
+      </div>
+    );
   }
 
   return (

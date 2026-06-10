@@ -1,0 +1,2172 @@
+{
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/gsap/scripts/extract-audio-data.py": {
+    "mtime": 1780771375.317467,
+    "ast_hash": "49ce619731a46416e458be1c37e34ae8",
+    "semantic_hash": "49ce619731a46416e458be1c37e34ae8"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/scripts/animation-map.mjs": {
+    "mtime": 1780771375.4405465,
+    "ast_hash": "f1ec5cc156f247c19d64ddf21b338d3c",
+    "semantic_hash": "f1ec5cc156f247c19d64ddf21b338d3c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/scripts/contrast-report.mjs": {
+    "mtime": 1780771375.4406486,
+    "ast_hash": "2e10ad6c3dd2de2268d55f78701ebc34",
+    "semantic_hash": "2e10ad6c3dd2de2268d55f78701ebc34"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/scripts/package-loader.mjs": {
+    "mtime": 1780771375.4407527,
+    "ast_hash": "926cd9e8c23abb1423f45b2b685b63aa",
+    "semantic_hash": "926cd9e8c23abb1423f45b2b685b63aa"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/run.sh": {
+    "mtime": 1780771375.5805964,
+    "ast_hash": "d177c083018aa7d183f4748afbf5ef4c",
+    "semantic_hash": "d177c083018aa7d183f4748afbf5ef4c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/expected.json": {
+    "mtime": 1780771375.581102,
+    "ast_hash": "5b27a67a697364bee573aa9090a66f99",
+    "semantic_hash": "5b27a67a697364bee573aa9090a66f99"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/package.json": {
+    "mtime": 1780771375.5808024,
+    "ast_hash": "6dee464d12c38b43f8c92fd0f5f2380f",
+    "semantic_hash": "6dee464d12c38b43f8c92fd0f5f2380f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/remotion.config.ts": {
+    "mtime": 1780771375.5811758,
+    "ast_hash": "9cc0c60c9dab50ac91a6304cb8dcd57f",
+    "semantic_hash": "9cc0c60c9dab50ac91a6304cb8dcd57f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/Root.tsx": {
+    "mtime": 1780771375.5812664,
+    "ast_hash": "f8e598874b57902cb175c62783d6e7a0",
+    "semantic_hash": "f8e598874b57902cb175c62783d6e7a0"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/TitleCard.tsx": {
+    "mtime": 1780771375.5816407,
+    "ast_hash": "ac8f0ee52587c5d5b00eec5203279eba",
+    "semantic_hash": "ac8f0ee52587c5d5b00eec5203279eba"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/index.ts": {
+    "mtime": 1780771375.5814974,
+    "ast_hash": "d92d9dee1ab16aa44a75ae7fbfb843ca",
+    "semantic_hash": "d92d9dee1ab16aa44a75ae7fbfb843ca"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/tsconfig.json": {
+    "mtime": 1780771375.5818048,
+    "ast_hash": "8b377a3d366d82d8552b3148a1a73f48",
+    "semantic_hash": "8b377a3d366d82d8552b3148a1a73f48"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/expected.json": {
+    "mtime": 1780771375.5815673,
+    "ast_hash": "66f461ed00b84698555081b8064657ec",
+    "semantic_hash": "66f461ed00b84698555081b8064657ec"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/package.json": {
+    "mtime": 1780771375.5819662,
+    "ast_hash": "62b70bee932ef563bd4867d7a4a7ecc2",
+    "semantic_hash": "62b70bee932ef563bd4867d7a4a7ecc2"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/remotion.config.ts": {
+    "mtime": 1780771375.5817287,
+    "ast_hash": "9cc0c60c9dab50ac91a6304cb8dcd57f",
+    "semantic_hash": "9cc0c60c9dab50ac91a6304cb8dcd57f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/MultiScene.tsx": {
+    "mtime": 1780771375.5820558,
+    "ast_hash": "9ef9c4ead276d2832344038819204e6c",
+    "semantic_hash": "9ef9c4ead276d2832344038819204e6c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/Root.tsx": {
+    "mtime": 1780771375.5821307,
+    "ast_hash": "57d8089ac3a021609befb7f16091b8d1",
+    "semantic_hash": "57d8089ac3a021609befb7f16091b8d1"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/index.ts": {
+    "mtime": 1780771375.5822792,
+    "ast_hash": "d92d9dee1ab16aa44a75ae7fbfb843ca",
+    "semantic_hash": "d92d9dee1ab16aa44a75ae7fbfb843ca"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/tsconfig.json": {
+    "mtime": 1780771375.582351,
+    "ast_hash": "8b377a3d366d82d8552b3148a1a73f48",
+    "semantic_hash": "8b377a3d366d82d8552b3148a1a73f48"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/setup.sh": {
+    "mtime": 1780771375.5824993,
+    "ast_hash": "ab59f1d1faf8fe06799131accbf3dd61",
+    "semantic_hash": "ab59f1d1faf8fe06799131accbf3dd61"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/expected.json": {
+    "mtime": 1780771375.582427,
+    "ast_hash": "8365371b6bb77a24121b46ac238afed1",
+    "semantic_hash": "8365371b6bb77a24121b46ac238afed1"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/package.json": {
+    "mtime": 1780771375.5826583,
+    "ast_hash": "2f646d5c5e01f54f866efbe1fb44f124",
+    "semantic_hash": "2f646d5c5e01f54f866efbe1fb44f124"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/remotion.config.ts": {
+    "mtime": 1780771375.5828543,
+    "ast_hash": "9cc0c60c9dab50ac91a6304cb8dcd57f",
+    "semantic_hash": "9cc0c60c9dab50ac91a6304cb8dcd57f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/Root.tsx": {
+    "mtime": 1780771375.5831897,
+    "ast_hash": "90a78cdaf98e15d0577d8833c3967c71",
+    "semantic_hash": "90a78cdaf98e15d0577d8833c3967c71"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/Stargazed.tsx": {
+    "mtime": 1780771375.5830483,
+    "ast_hash": "07245048eb69f3e3f684d3ec464591aa",
+    "semantic_hash": "07245048eb69f3e3f684d3ec464591aa"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/AnimatedNumber.tsx": {
+    "mtime": 1780771375.58298,
+    "ast_hash": "66447bcda6d76ef7e8543802eb1d7d19",
+    "semantic_hash": "66447bcda6d76ef7e8543802eb1d7d19"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/StatCard.tsx": {
+    "mtime": 1780771375.5835395,
+    "ast_hash": "b6d35fab864e858ceded8ef5ebfef06a",
+    "semantic_hash": "b6d35fab864e858ceded8ef5ebfef06a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/UnderlinedText.tsx": {
+    "mtime": 1780771375.5831196,
+    "ast_hash": "d1e05ae763260c33e8a0bdb034524d52",
+    "semantic_hash": "d1e05ae763260c33e8a0bdb034524d52"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/index.ts": {
+    "mtime": 1780771375.5833647,
+    "ast_hash": "d92d9dee1ab16aa44a75ae7fbfb843ca",
+    "semantic_hash": "d92d9dee1ab16aa44a75ae7fbfb843ca"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/OutroScene.tsx": {
+    "mtime": 1780771375.5832791,
+    "ast_hash": "5a066af9d2aae0cdcdd35e564a602a94",
+    "semantic_hash": "5a066af9d2aae0cdcdd35e564a602a94"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/StatsScene.tsx": {
+    "mtime": 1780771375.5834575,
+    "ast_hash": "7c3678b61271b9acd5fa0eb1a7f7bc1d",
+    "semantic_hash": "7c3678b61271b9acd5fa0eb1a7f7bc1d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/TitleScene.tsx": {
+    "mtime": 1780771375.5836155,
+    "ast_hash": "31dc3c4d855daabf0dcbfdf6024a75c7",
+    "semantic_hash": "31dc3c4d855daabf0dcbfdf6024a75c7"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/tsconfig.json": {
+    "mtime": 1780771375.5837102,
+    "ast_hash": "8b377a3d366d82d8552b3148a1a73f48",
+    "semantic_hash": "8b377a3d366d82d8552b3148a1a73f48"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/01-use-state.tsx": {
+    "mtime": 1780771375.58395,
+    "ast_hash": "8b79f5a0bbfe776ebadd43472f4107ac",
+    "semantic_hash": "8b79f5a0bbfe776ebadd43472f4107ac"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/02-use-effect-deps.tsx": {
+    "mtime": 1780771375.5840404,
+    "ast_hash": "6eae76f669d33cc582e64257bf53dee4",
+    "semantic_hash": "6eae76f669d33cc582e64257bf53dee4"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/03-async-metadata.tsx": {
+    "mtime": 1780771375.584133,
+    "ast_hash": "9cf81c0e9501263c0443f1844d7388f5",
+    "semantic_hash": "9cf81c0e9501263c0443f1844d7388f5"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/04-third-party-react.tsx": {
+    "mtime": 1780771375.5842168,
+    "ast_hash": "414e95300ecc47aa50cfa2d8d2c8c123",
+    "semantic_hash": "414e95300ecc47aa50cfa2d8d2c8c123"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/05-lambda-config.tsx": {
+    "mtime": 1780771375.5845892,
+    "ast_hash": "b538d61c221534bd515c083b28aee641",
+    "semantic_hash": "b538d61c221534bd515c083b28aee641"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/06-warnings-only.tsx": {
+    "mtime": 1780771375.5844953,
+    "ast_hash": "11d6bdcf81dfa3233be3b6e552434130",
+    "semantic_hash": "11d6bdcf81dfa3233be3b6e552434130"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/07-custom-hook.tsx": {
+    "mtime": 1780771375.5843015,
+    "ast_hash": "dab577f1b4d4ae89ff1e2bbba0f563ec",
+    "semantic_hash": "dab577f1b4d4ae89ff1e2bbba0f563ec"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/08-mixed.tsx": {
+    "mtime": 1780771375.5843966,
+    "ast_hash": "1897a4a60b23f8d9f2da6d6ef20c40f2",
+    "semantic_hash": "1897a4a60b23f8d9f2da6d6ef20c40f2"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/expected.json": {
+    "mtime": 1780771375.5846734,
+    "ast_hash": "dab10f40a9637be0a1be65c36a75cf76",
+    "semantic_hash": "dab10f40a9637be0a1be65c36a75cf76"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/validate.sh": {
+    "mtime": 1780771375.5849106,
+    "ast_hash": "84b532519b2e0905e4f5c6dc8d3774a6",
+    "semantic_hash": "84b532519b2e0905e4f5c6dc8d3774a6"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/scripts/frame_strip.sh": {
+    "mtime": 1780771375.5863926,
+    "ast_hash": "1c89ad3d0e9f63fc784555065466d2de",
+    "semantic_hash": "1c89ad3d0e9f63fc784555065466d2de"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/scripts/lint_source.py": {
+    "mtime": 1780771375.586306,
+    "ast_hash": "4ceddfb0047cbef4aee3ebe8b9042563",
+    "semantic_hash": "4ceddfb0047cbef4aee3ebe8b9042563"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/scripts/render_diff.sh": {
+    "mtime": 1780771375.5861275,
+    "ast_hash": "d64a77db2316b059c48df9c6f5835080",
+    "semantic_hash": "d64a77db2316b059c48df9c6f5835080"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/scripts/tests/fixtures/blocker.tsx": {
+    "mtime": 1780771375.5860353,
+    "ast_hash": "019446987b785bc46312f1e543ed0015",
+    "semantic_hash": "019446987b785bc46312f1e543ed0015"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/scripts/tests/fixtures/clean.tsx": {
+    "mtime": 1780771375.5864813,
+    "ast_hash": "4db8ee6dbeb7570ef5c2272f6dae87fb",
+    "semantic_hash": "4db8ee6dbeb7570ef5c2272f6dae87fb"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/scripts/tests/smoke.sh": {
+    "mtime": 1780771375.5865688,
+    "ast_hash": "0a89fe036a81b4629723851e8a1a5bc1",
+    "semantic_hash": "0a89fe036a81b4629723851e8a1a5bc1"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/website-to-hyperframes/assets/sfx/manifest.json": {
+    "mtime": 1780771375.6422265,
+    "ast_hash": "1241c9373e673785cd2e403ff501d07e",
+    "semantic_hash": "1241c9373e673785cd2e403ff501d07e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/website-to-hyperframes/scripts/w2h-verify.mjs": {
+    "mtime": 1780771375.6431928,
+    "ast_hash": "6d2f005ed7d5c167f1c1df3fd5c5a223",
+    "semantic_hash": "6d2f005ed7d5c167f1c1df3fd5c5a223"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/settings.local.json": {
+    "mtime": 1780193331.012118,
+    "ast_hash": "574425ee7b08edf53ea3764c7282ae59",
+    "semantic_hash": "574425ee7b08edf53ea3764c7282ae59"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/cleanup-deprecated.mjs": {
+    "mtime": 1780758747.2558043,
+    "ast_hash": "fddcc885ed5305df37d966ba654e0eae",
+    "semantic_hash": "fddcc885ed5305df37d966ba654e0eae"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/command-metadata.json": {
+    "mtime": 1780758747.250534,
+    "ast_hash": "883d1962f87b23b4a0f6229e1aadd484",
+    "semantic_hash": "883d1962f87b23b4a0f6229e1aadd484"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/context-signals.mjs": {
+    "mtime": 1780758747.250205,
+    "ast_hash": "962c9d4a7608582b1839223eccde1889",
+    "semantic_hash": "962c9d4a7608582b1839223eccde1889"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/context.mjs": {
+    "mtime": 1780758747.2503376,
+    "ast_hash": "5db7930910705545dc776e946c320be9",
+    "semantic_hash": "5db7930910705545dc776e946c320be9"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/critique-storage.mjs": {
+    "mtime": 1780758747.25199,
+    "ast_hash": "2609dfc633db44ef5990ec2376069ce5",
+    "semantic_hash": "2609dfc633db44ef5990ec2376069ce5"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/design-parser.mjs": {
+    "mtime": 1780758747.251349,
+    "ast_hash": "77bbd8593cdea6e08a0b3e7870e93fc8",
+    "semantic_hash": "77bbd8593cdea6e08a0b3e7870e93fc8"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detect-csp.mjs": {
+    "mtime": 1780758747.2506275,
+    "ast_hash": "02c5a9a8ad69f87d23af72bf580fd3f4",
+    "semantic_hash": "02c5a9a8ad69f87d23af72bf580fd3f4"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detect.mjs": {
+    "mtime": 1780758747.255895,
+    "ast_hash": "11dbeb9341477d06d1a24c3ad1f37ac9",
+    "semantic_hash": "11dbeb9341477d06d1a24c3ad1f37ac9"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/browser/injected/index.mjs": {
+    "mtime": 1780758747.2530725,
+    "ast_hash": "9b3db8af5aadf21ecf3395b74b02200a",
+    "semantic_hash": "9b3db8af5aadf21ecf3395b74b02200a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/cli/main.mjs": {
+    "mtime": 1780758747.2527697,
+    "ast_hash": "5208183c07f839d8ff178d4614b0a5e8",
+    "semantic_hash": "5208183c07f839d8ff178d4614b0a5e8"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/detect-antipatterns-browser.js": {
+    "mtime": 1780758747.2545054,
+    "ast_hash": "bfa43a8ce0ff23b90cf5d649ffc6d33b",
+    "semantic_hash": "bfa43a8ce0ff23b90cf5d649ffc6d33b"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/detect-antipatterns.mjs": {
+    "mtime": 1780758747.2522454,
+    "ast_hash": "1ee45163c27e086f43af1a3bb6b76504",
+    "semantic_hash": "1ee45163c27e086f43af1a3bb6b76504"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/engines/browser/detect-url.mjs": {
+    "mtime": 1780758747.2536252,
+    "ast_hash": "f9a37e92021f13b178b860eb52a33f98",
+    "semantic_hash": "f9a37e92021f13b178b860eb52a33f98"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/engines/regex/detect-text.mjs": {
+    "mtime": 1780758747.253444,
+    "ast_hash": "f99d96047b51dbe3dd24ca272d009a09",
+    "semantic_hash": "f99d96047b51dbe3dd24ca272d009a09"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/engines/static-html/css-cascade.mjs": {
+    "mtime": 1780758747.2540464,
+    "ast_hash": "248b84788b792dc75c8a18058a9a6a46",
+    "semantic_hash": "248b84788b792dc75c8a18058a9a6a46"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/engines/static-html/detect-html.mjs": {
+    "mtime": 1780758747.253945,
+    "ast_hash": "48549abcbb3e1fee4f93f07661d77ac0",
+    "semantic_hash": "48549abcbb3e1fee4f93f07661d77ac0"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/engines/visual/screenshot-contrast.mjs": {
+    "mtime": 1780758747.2537713,
+    "ast_hash": "6312c6dbc048c4445f50e69f167a297d",
+    "semantic_hash": "6312c6dbc048c4445f50e69f167a297d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/findings.mjs": {
+    "mtime": 1780758747.2521524,
+    "ast_hash": "f7f3de6f00121150c4762809df00df9f",
+    "semantic_hash": "f7f3de6f00121150c4762809df00df9f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/node/file-system.mjs": {
+    "mtime": 1780758747.2546532,
+    "ast_hash": "310714c7a308e35e386034999479ff84",
+    "semantic_hash": "310714c7a308e35e386034999479ff84"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/profile/profiler.mjs": {
+    "mtime": 1780758747.253231,
+    "ast_hash": "88c5d2027852842be578edf349a0f9c8",
+    "semantic_hash": "88c5d2027852842be578edf349a0f9c8"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/registry/antipatterns.mjs": {
+    "mtime": 1780758747.254212,
+    "ast_hash": "30ed4f1a91098bf96a2dd2e0582a8162",
+    "semantic_hash": "30ed4f1a91098bf96a2dd2e0582a8162"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/rules/checks.mjs": {
+    "mtime": 1780758747.2543802,
+    "ast_hash": "6fce30f2d923b97a37bb54272773c600",
+    "semantic_hash": "6fce30f2d923b97a37bb54272773c600"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/shared/color.mjs": {
+    "mtime": 1780758747.2524881,
+    "ast_hash": "2363d500ccf490f9ff285119b613276d",
+    "semantic_hash": "2363d500ccf490f9ff285119b613276d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/shared/constants.mjs": {
+    "mtime": 1780758747.2523913,
+    "ast_hash": "5700477c8a86d876b90de9d6eb63f191",
+    "semantic_hash": "5700477c8a86d876b90de9d6eb63f191"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/detector/shared/page.mjs": {
+    "mtime": 1780758747.2525878,
+    "ast_hash": "ab3a243b690b4f70c4ef639cdf970d82",
+    "semantic_hash": "ab3a243b690b4f70c4ef639cdf970d82"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/impeccable-paths.mjs": {
+    "mtime": 1780758747.2515714,
+    "ast_hash": "2dd4310d900b4e7678f8b3620e634687",
+    "semantic_hash": "2dd4310d900b4e7678f8b3620e634687"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/is-generated.mjs": {
+    "mtime": 1780758747.2518694,
+    "ast_hash": "edd718b1a4737edbf9631ff7f6f512ef",
+    "semantic_hash": "edd718b1a4737edbf9631ff7f6f512ef"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-accept.mjs": {
+    "mtime": 1780758747.2504373,
+    "ast_hash": "c17aa7eb3d9aa7d7903e1dbd8cb49f68",
+    "semantic_hash": "c17aa7eb3d9aa7d7903e1dbd8cb49f68"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-browser-session.js": {
+    "mtime": 1780758747.2559886,
+    "ast_hash": "5dec3dae6158050d69762fb79facaf48",
+    "semantic_hash": "5dec3dae6158050d69762fb79facaf48"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-browser.js": {
+    "mtime": 1780758747.2550843,
+    "ast_hash": "0425706002b1f064292b5607f29dea7e",
+    "semantic_hash": "0425706002b1f064292b5607f29dea7e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-commit-manual-edits.mjs": {
+    "mtime": 1780758747.2500753,
+    "ast_hash": "fc32b152d40668abfedeb77c6deb2515",
+    "semantic_hash": "fc32b152d40668abfedeb77c6deb2515"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-complete.mjs": {
+    "mtime": 1780758747.2508085,
+    "ast_hash": "ac0ba59701ad5fa70d0dea5b05dc1ac7",
+    "semantic_hash": "ac0ba59701ad5fa70d0dea5b05dc1ac7"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-completion.mjs": {
+    "mtime": 1780758747.2517803,
+    "ast_hash": "77185bc6cced6322e6892af8e05839f0",
+    "semantic_hash": "77185bc6cced6322e6892af8e05839f0"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-copy-edit-agent.mjs": {
+    "mtime": 1780758747.2555923,
+    "ast_hash": "1c4926b56d5442775dab0138bf71a790",
+    "semantic_hash": "1c4926b56d5442775dab0138bf71a790"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-discard-manual-edits.mjs": {
+    "mtime": 1780758747.2568107,
+    "ast_hash": "0efb77b3a97cf2140bff04db767c2b2e",
+    "semantic_hash": "0efb77b3a97cf2140bff04db767c2b2e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-event-validation.mjs": {
+    "mtime": 1780758747.2554011,
+    "ast_hash": "d793088931b8bfc0f908e4366875284d",
+    "semantic_hash": "d793088931b8bfc0f908e4366875284d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-inject.mjs": {
+    "mtime": 1780758747.2561774,
+    "ast_hash": "3e835768ddaa32b5f64ea7cf0eb56551",
+    "semantic_hash": "3e835768ddaa32b5f64ea7cf0eb56551"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-insert-ui.mjs": {
+    "mtime": 1780758747.256498,
+    "ast_hash": "b6c5c82e14218c0c1b1e66f0851bff3f",
+    "semantic_hash": "b6c5c82e14218c0c1b1e66f0851bff3f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-insert.mjs": {
+    "mtime": 1780758747.2563887,
+    "ast_hash": "606ec6eae7e2fd645a069457979bee2a",
+    "semantic_hash": "606ec6eae7e2fd645a069457979bee2a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-manual-edit-evidence.mjs": {
+    "mtime": 1780758747.2552075,
+    "ast_hash": "0a5b4c8cadb7f1d9d86a9d481d4a8223",
+    "semantic_hash": "0a5b4c8cadb7f1d9d86a9d481d4a8223"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-manual-edits-buffer.mjs": {
+    "mtime": 1780758747.2560785,
+    "ast_hash": "97db5c92eed8b17e5431a1b0ccd87f01",
+    "semantic_hash": "97db5c92eed8b17e5431a1b0ccd87f01"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-poll.mjs": {
+    "mtime": 1780758747.250924,
+    "ast_hash": "38ecad4a14df6651ccc8e4c7a9d61de1",
+    "semantic_hash": "38ecad4a14df6651ccc8e4c7a9d61de1"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-resume.mjs": {
+    "mtime": 1780758747.2553048,
+    "ast_hash": "42d7b6774ee440e057bfc6e0b93a3d7e",
+    "semantic_hash": "42d7b6774ee440e057bfc6e0b93a3d7e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-server.mjs": {
+    "mtime": 1780758747.2567222,
+    "ast_hash": "ee0b522e87f762f54b70db86b00c0afc",
+    "semantic_hash": "ee0b522e87f762f54b70db86b00c0afc"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-session-store.mjs": {
+    "mtime": 1780758747.2566159,
+    "ast_hash": "18373d8bcbbbdc462efc0281f5cbd548",
+    "semantic_hash": "18373d8bcbbbdc462efc0281f5cbd548"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-status.mjs": {
+    "mtime": 1780758747.2511404,
+    "ast_hash": "ef654aa3bfb5c204fd0b9ae8613179d3",
+    "semantic_hash": "ef654aa3bfb5c204fd0b9ae8613179d3"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-svelte-component.mjs": {
+    "mtime": 1780758747.2516792,
+    "ast_hash": "b23495379a1527dbb9c7c3171041819e",
+    "semantic_hash": "b23495379a1527dbb9c7c3171041819e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-sveltekit-adapter.mjs": {
+    "mtime": 1780758747.251051,
+    "ast_hash": "66e07d2c07827af6099ce81a442bd66e",
+    "semantic_hash": "66e07d2c07827af6099ce81a442bd66e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-ui-core.mjs": {
+    "mtime": 1780758747.2554994,
+    "ast_hash": "b3d7c78852285bb1b6a26aef4872482d",
+    "semantic_hash": "b3d7c78852285bb1b6a26aef4872482d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-vocabulary.mjs": {
+    "mtime": 1780758747.2507203,
+    "ast_hash": "b01045bb30462ef9c792098c768ba160",
+    "semantic_hash": "b01045bb30462ef9c792098c768ba160"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live-wrap.mjs": {
+    "mtime": 1780758747.251247,
+    "ast_hash": "623ab8ca3a284bb9e573ec6d01b74641",
+    "semantic_hash": "623ab8ca3a284bb9e573ec6d01b74641"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/live.mjs": {
+    "mtime": 1780758747.251471,
+    "ast_hash": "292ae3ec6df11d04939ed36755ce8350",
+    "semantic_hash": "292ae3ec6df11d04939ed36755ce8350"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/modern-screenshot.umd.js": {
+    "mtime": 1780758747.2562735,
+    "ast_hash": "4fe5f9e490ab4f107afc707d7eafc819",
+    "semantic_hash": "4fe5f9e490ab4f107afc707d7eafc819"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/palette.mjs": {
+    "mtime": 1780758747.2549307,
+    "ast_hash": "adbc82e1e9021b4948901b21563277a2",
+    "semantic_hash": "adbc82e1e9021b4948901b21563277a2"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/scripts/pin.mjs": {
+    "mtime": 1780758747.2556837,
+    "ast_hash": "867ca7fdded9987e84a128a3b4fb6bab",
+    "semantic_hash": "867ca7fdded9987e84a128a3b4fb6bab"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/(waitlist)/layout.tsx": {
+    "mtime": 1780193331.0123422,
+    "ast_hash": "49a85d38090f527e0af8ae3cc7a25d01",
+    "semantic_hash": "49a85d38090f527e0af8ae3cc7a25d01"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/about/page.tsx": {
+    "mtime": 1780995859.201479,
+    "ast_hash": "bf1c3eb283d22702d8af12d40727993b",
+    "semantic_hash": "bf1c3eb283d22702d8af12d40727993b"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/admin/page.tsx": {
+    "mtime": 1780440211.8073995,
+    "ast_hash": "23c982cd0f143a81b3d2aac4048ab14f",
+    "semantic_hash": "23c982cd0f143a81b3d2aac4048ab14f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/account/snapshot/route.ts": {
+    "mtime": 1780345508.0042367,
+    "ast_hash": "56ce7c89a020f09dea23ebd82e9850dc",
+    "semantic_hash": "56ce7c89a020f09dea23ebd82e9850dc"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/admin/outcomes/route.ts": {
+    "mtime": 1780193331.0126872,
+    "ast_hash": "9bae48e08757c1f28440993d72bdd3b1",
+    "semantic_hash": "9bae48e08757c1f28440993d72bdd3b1"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/alerts/acknowledge/route.ts": {
+    "mtime": 1780193331.0128236,
+    "ast_hash": "02f385bc2527f6a8f79087ac2c023eaf",
+    "semantic_hash": "02f385bc2527f6a8f79087ac2c023eaf"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/alerts/route.ts": {
+    "mtime": 1780193331.0128686,
+    "ast_hash": "27f9445e996a22af997ebff934415044",
+    "semantic_hash": "27f9445e996a22af997ebff934415044"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/analyses/route.ts": {
+    "mtime": 1780193331.0129642,
+    "ast_hash": "3ab0e43b2796c0fe2e7dd3490ba800d2",
+    "semantic_hash": "3ab0e43b2796c0fe2e7dd3490ba800d2"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/auth/delete-account/route.ts": {
+    "mtime": 1780193331.0130796,
+    "ast_hash": "c28526cb1d894d04cd0f9b2e343d46bd",
+    "semantic_hash": "c28526cb1d894d04cd0f9b2e343d46bd"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/auth/forgot-password/route.ts": {
+    "mtime": 1780193331.0131576,
+    "ast_hash": "ec7c4cac04503d7dc0bb21da741b89c7",
+    "semantic_hash": "ec7c4cac04503d7dc0bb21da741b89c7"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/auth/login/route.ts": {
+    "mtime": 1780507015.262526,
+    "ast_hash": "b3a01e3ec5706290ff8df332a1912f62",
+    "semantic_hash": "b3a01e3ec5706290ff8df332a1912f62"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/auth/logout/route.ts": {
+    "mtime": 1780608908.2982886,
+    "ast_hash": "5b7879f5b0d5dd15808c7f54125ea6cb",
+    "semantic_hash": "5b7879f5b0d5dd15808c7f54125ea6cb"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/auth/payment-status/route.ts": {
+    "mtime": 1780193331.0134356,
+    "ast_hash": "86213bb72b458c3ea1f403a35eaf516c",
+    "semantic_hash": "86213bb72b458c3ea1f403a35eaf516c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/auth/signup/route.ts": {
+    "mtime": 1780193331.013521,
+    "ast_hash": "e39d10b4275abb599d6efad3f561831e",
+    "semantic_hash": "e39d10b4275abb599d6efad3f561831e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/backtest/route.ts": {
+    "mtime": 1780193331.0136108,
+    "ast_hash": "a98cee0f87d57a0480d84d4fdda5058c",
+    "semantic_hash": "a98cee0f87d57a0480d84d4fdda5058c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/calendar/route.ts": {
+    "mtime": 1780193331.0136998,
+    "ast_hash": "419c5f54d34d4e9759b893d7d840affa",
+    "semantic_hash": "419c5f54d34d4e9759b893d7d840affa"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/chat/route.ts": {
+    "mtime": 1781013487.7168195,
+    "ast_hash": "d1f3ebfe12236b0d7b9ed76fe3d30808",
+    "semantic_hash": "d1f3ebfe12236b0d7b9ed76fe3d30808"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/conversations/route.ts": {
+    "mtime": 1780193331.0140204,
+    "ast_hash": "e304f9f72f3db982f06edbe03dfa1b49",
+    "semantic_hash": "e304f9f72f3db982f06edbe03dfa1b49"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/cron/morning-briefing/route.ts": {
+    "mtime": 1780193331.0141423,
+    "ast_hash": "513d69adcab1c4a8d5da1188ced86278",
+    "semantic_hash": "513d69adcab1c4a8d5da1188ced86278"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/cron/premarket/route.ts": {
+    "mtime": 1780193331.01423,
+    "ast_hash": "a86d072af35920e9448cfd5be3622341",
+    "semantic_hash": "a86d072af35920e9448cfd5be3622341"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/cron/scalp/route.ts": {
+    "mtime": 1780193331.0143034,
+    "ast_hash": "58bbb8320e0f7e08c8d15b7682dd1103",
+    "semantic_hash": "58bbb8320e0f7e08c8d15b7682dd1103"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/cron/scanner/route.ts": {
+    "mtime": 1780193331.014415,
+    "ast_hash": "9327cba1310fbb2b9612495e7dcebd1c",
+    "semantic_hash": "9327cba1310fbb2b9612495e7dcebd1c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/cron/swing/route.ts": {
+    "mtime": 1780193331.01449,
+    "ast_hash": "a526e51172c69a1f01539978d426fa82",
+    "semantic_hash": "a526e51172c69a1f01539978d426fa82"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/dashboard/data/route.ts": {
+    "mtime": 1780193331.0146315,
+    "ast_hash": "f465d2e97f0f43148da32b4417ab59e6",
+    "semantic_hash": "f465d2e97f0f43148da32b4417ab59e6"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/dashboard/route.ts": {
+    "mtime": 1780193331.0147207,
+    "ast_hash": "1dfefc7797cb29077028d0abb7938137",
+    "semantic_hash": "1dfefc7797cb29077028d0abb7938137"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/demo-chat/route.ts": {
+    "mtime": 1780996821.9854558,
+    "ast_hash": "3951e2b24e2ba9d02346c103a3f5bb91",
+    "semantic_hash": "3951e2b24e2ba9d02346c103a3f5bb91"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/emails/launch/route.ts": {
+    "mtime": 1780193331.0148618,
+    "ast_hash": "d32a0ffa6bcfd2af7b030cff1cdc11e6",
+    "semantic_hash": "d32a0ffa6bcfd2af7b030cff1cdc11e6"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/gold/route.ts": {
+    "mtime": 1780193331.01496,
+    "ast_hash": "17c7d5c4cb28e5a448897611600cefc0",
+    "semantic_hash": "17c7d5c4cb28e5a448897611600cefc0"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/market/pulse/route.ts": {
+    "mtime": 1780193331.0150864,
+    "ast_hash": "71f9421356edb946953ff15fc58a93fe",
+    "semantic_hash": "71f9421356edb946953ff15fc58a93fe"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/news/route.ts": {
+    "mtime": 1780193331.015201,
+    "ast_hash": "66fe84b422c1a0b0fe4eda195c6d094f",
+    "semantic_hash": "66fe84b422c1a0b0fe4eda195c6d094f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/onboarding/route.ts": {
+    "mtime": 1780345508.004734,
+    "ast_hash": "14e1d436fcc175a3eca486558357ae46",
+    "semantic_hash": "14e1d436fcc175a3eca486558357ae46"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/partners/apply/route.ts": {
+    "mtime": 1780494099.4851649,
+    "ast_hash": "aaa0911f395a7f6f1ec012ce2208b84a",
+    "semantic_hash": "aaa0911f395a7f6f1ec012ce2208b84a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/profile/avatar/route.ts": {
+    "mtime": 1780193331.0155911,
+    "ast_hash": "3b77c460173a0bb347c9a86974c65dcd",
+    "semantic_hash": "3b77c460173a0bb347c9a86974c65dcd"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/profile/route.ts": {
+    "mtime": 1780193331.0156498,
+    "ast_hash": "e40bd14c2eabdaab07ad0af00aefc982",
+    "semantic_hash": "e40bd14c2eabdaab07ad0af00aefc982"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/push/subscribe/route.ts": {
+    "mtime": 1780193331.015783,
+    "ast_hash": "dddda40cd50a5c5f9dabbf0120922059",
+    "semantic_hash": "dddda40cd50a5c5f9dabbf0120922059"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/stripe/beta-spots/route.ts": {
+    "mtime": 1780193331.015934,
+    "ast_hash": "b5a0c678cf734da5bb6e88b0dba9e7d8",
+    "semantic_hash": "b5a0c678cf734da5bb6e88b0dba9e7d8"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/stripe/create-checkout/route.ts": {
+    "mtime": 1780193331.0160131,
+    "ast_hash": "260fead14b947a1554b929a278d622d4",
+    "semantic_hash": "260fead14b947a1554b929a278d622d4"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/stripe/verify-payment/route.ts": {
+    "mtime": 1780193331.0161157,
+    "ast_hash": "1da4bbbde492a9d44e3b8b703911436d",
+    "semantic_hash": "1da4bbbde492a9d44e3b8b703911436d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/stripe/webhook/route.ts": {
+    "mtime": 1780193331.0162177,
+    "ast_hash": "9ec0503395e4c83b3ae749b774d9303b",
+    "semantic_hash": "9ec0503395e4c83b3ae749b774d9303b"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/suggestions/route.ts": {
+    "mtime": 1780345889.7343664,
+    "ast_hash": "9a0b95675dccd4a5f931cb273e19e8bc",
+    "semantic_hash": "9a0b95675dccd4a5f931cb273e19e8bc"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/test-claude/route.ts": {
+    "mtime": 1780495547.5099013,
+    "ast_hash": "72180a8567421daacc42a2b449bbc51a",
+    "semantic_hash": "72180a8567421daacc42a2b449bbc51a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/ticker/route.ts": {
+    "mtime": 1780193331.0165439,
+    "ast_hash": "e5052e25d3431140e23360e9244c0b41",
+    "semantic_hash": "e5052e25d3431140e23360e9244c0b41"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/trades/history/route.ts": {
+    "mtime": 1780193331.0166767,
+    "ast_hash": "80cb38c745ffc7356d235869fdeea316",
+    "semantic_hash": "80cb38c745ffc7356d235869fdeea316"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/trades/log/route.ts": {
+    "mtime": 1780193331.0167902,
+    "ast_hash": "6a45b4bf578c1ae25f35b6f76541ed18",
+    "semantic_hash": "6a45b4bf578c1ae25f35b6f76541ed18"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/trades/result/route.ts": {
+    "mtime": 1780193331.016921,
+    "ast_hash": "be5f9b4168419525498b1fa5816c3160",
+    "semantic_hash": "be5f9b4168419525498b1fa5816c3160"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/api/waitlist/route.ts": {
+    "mtime": 1780193331.017021,
+    "ast_hash": "2d00d81dc357581e30fae5f9b9b12e0d",
+    "semantic_hash": "2d00d81dc357581e30fae5f9b9b12e0d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/auth/callback/route.ts": {
+    "mtime": 1780193331.0171843,
+    "ast_hash": "879e87da031b0c75d7888c54f12701a1",
+    "semantic_hash": "879e87da031b0c75d7888c54f12701a1"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/backtest/PerformanceChart.tsx": {
+    "mtime": 1780345508.0048242,
+    "ast_hash": "f2cc329bcbc15da98da501658a5d3092",
+    "semantic_hash": "f2cc329bcbc15da98da501658a5d3092"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/backtest/PerformanceChartClient.tsx": {
+    "mtime": 1780608945.1714036,
+    "ast_hash": "1fc111557a80e6afd091fe5ab4f8c4a2",
+    "semantic_hash": "1fc111557a80e6afd091fe5ab4f8c4a2"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/backtest/error.tsx": {
+    "mtime": 1780193331.0173728,
+    "ast_hash": "10ac3d4f445d1fb7a16a819282f93af7",
+    "semantic_hash": "10ac3d4f445d1fb7a16a819282f93af7"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/backtest/loading.tsx": {
+    "mtime": 1780193331.017433,
+    "ast_hash": "5699e718d7f91f13d342ac84334a56a6",
+    "semantic_hash": "5699e718d7f91f13d342ac84334a56a6"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/backtest/page.tsx": {
+    "mtime": 1780608940.764448,
+    "ast_hash": "8c98a8f30d96c898f3fa85eb92a1b517",
+    "semantic_hash": "8c98a8f30d96c898f3fa85eb92a1b517"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/calendar/page.tsx": {
+    "mtime": 1780193331.0176618,
+    "ast_hash": "830e2d9325a94ba2c96bf36313b8e82d",
+    "semantic_hash": "830e2d9325a94ba2c96bf36313b8e82d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/chat/calendar/page.tsx": {
+    "mtime": 1781033487.5606346,
+    "ast_hash": "b59293a97c4a64f7d43ef8de6f5a1b0a",
+    "semantic_hash": "b59293a97c4a64f7d43ef8de6f5a1b0a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/chat/layout.tsx": {
+    "mtime": 1781033448.0264015,
+    "ast_hash": "7bd29bbc2381e07f3d7a84cc66eefcd9",
+    "semantic_hash": "7bd29bbc2381e07f3d7a84cc66eefcd9"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/chat/market/page.tsx": {
+    "mtime": 1781033464.9828982,
+    "ast_hash": "2e449e6f04d9d659a813a1a0b41c03fe",
+    "semantic_hash": "2e449e6f04d9d659a813a1a0b41c03fe"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/chat/news/page.tsx": {
+    "mtime": 1781033476.6748104,
+    "ast_hash": "87915cfb1060b511c41a59b4ad98347d",
+    "semantic_hash": "87915cfb1060b511c41a59b4ad98347d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/chat/page.tsx": {
+    "mtime": 1781011405.9498267,
+    "ast_hash": "7313d5c1d2ccfcb0c0466db906148439",
+    "semantic_hash": "7313d5c1d2ccfcb0c0466db906148439"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/error.tsx": {
+    "mtime": 1780193331.0178044,
+    "ast_hash": "a126ecc2212cb2db88e0ce6305677b49",
+    "semantic_hash": "a126ecc2212cb2db88e0ce6305677b49"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/layout.tsx": {
+    "mtime": 1781013453.626873,
+    "ast_hash": "4ef07579f1cc2e5aec5b018a8978fbdf",
+    "semantic_hash": "4ef07579f1cc2e5aec5b018a8978fbdf"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/loading.tsx": {
+    "mtime": 1780193331.0181155,
+    "ast_hash": "9b364bb139a61d25e5d216229db6aaf6",
+    "semantic_hash": "9b364bb139a61d25e5d216229db6aaf6"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/login/page.tsx": {
+    "mtime": 1780996696.6960344,
+    "ast_hash": "58ea4a05733b18a7c407b680195773b1",
+    "semantic_hash": "58ea4a05733b18a7c407b680195773b1"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/market/loading.tsx": {
+    "mtime": 1780193331.0183098,
+    "ast_hash": "5645e146f7dc452cc5462ec9e906e181",
+    "semantic_hash": "5645e146f7dc452cc5462ec9e906e181"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/market/page.tsx": {
+    "mtime": 1780353533.5429428,
+    "ast_hash": "758fdaab8d60883d00fae1dc340ab47a",
+    "semantic_hash": "758fdaab8d60883d00fae1dc340ab47a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/methodology/page.tsx": {
+    "mtime": 1780994179.26824,
+    "ast_hash": "696102da1d71964b1c3a639914ff6e80",
+    "semantic_hash": "696102da1d71964b1c3a639914ff6e80"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/not-found.tsx": {
+    "mtime": 1780193331.0185368,
+    "ast_hash": "f06f7f05953e24c560dc21b74d5496df",
+    "semantic_hash": "f06f7f05953e24c560dc21b74d5496df"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/page.tsx": {
+    "mtime": 1780609830.1524682,
+    "ast_hash": "ee096ab0353034895237afbe5d564b04",
+    "semantic_hash": "ee096ab0353034895237afbe5d564b04"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/partners/page.tsx": {
+    "mtime": 1780193331.0187309,
+    "ast_hash": "77ca6fe658269c4cc4a0b12e2883d7fa",
+    "semantic_hash": "77ca6fe658269c4cc4a0b12e2883d7fa"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/payment-success/page.tsx": {
+    "mtime": 1780491892.6094167,
+    "ast_hash": "bd9304227c80123102f13ccfeb37fb5b",
+    "semantic_hash": "bd9304227c80123102f13ccfeb37fb5b"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/privacy/page.tsx": {
+    "mtime": 1780609849.1528306,
+    "ast_hash": "9db86299c082738ab854f447732a8ddd",
+    "semantic_hash": "9db86299c082738ab854f447732a8ddd"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/profile/ProfileClient.tsx": {
+    "mtime": 1780347315.4483366,
+    "ast_hash": "417ddfc5bcfacbb85cce8ad406b5a811",
+    "semantic_hash": "417ddfc5bcfacbb85cce8ad406b5a811"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/profile/loading.tsx": {
+    "mtime": 1780193331.0190098,
+    "ast_hash": "d8a9999383b0432511572bddbd0ed3ab",
+    "semantic_hash": "d8a9999383b0432511572bddbd0ed3ab"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/profile/page.tsx": {
+    "mtime": 1780193331.0190582,
+    "ast_hash": "dae47261f748652f0b899914751d86ea",
+    "semantic_hash": "dae47261f748652f0b899914751d86ea"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/reset-password/page.tsx": {
+    "mtime": 1780193331.0191617,
+    "ast_hash": "eb80b449fda38afe47feb5d778bf22c8",
+    "semantic_hash": "eb80b449fda38afe47feb5d778bf22c8"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/signup/page.tsx": {
+    "mtime": 1780996708.43962,
+    "ast_hash": "d6e4ccaed0ec3dd7bca27915bb8e7c54",
+    "semantic_hash": "d6e4ccaed0ec3dd7bca27915bb8e7c54"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/sitemap.ts": {
+    "mtime": 1780357358.8268518,
+    "ast_hash": "3fd65f898ca124254150263545693b25",
+    "semantic_hash": "3fd65f898ca124254150263545693b25"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/terms/page.tsx": {
+    "mtime": 1780609845.7416098,
+    "ast_hash": "405d6927be5a0cf443e4679f02fff50e",
+    "semantic_hash": "405d6927be5a0cf443e4679f02fff50e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/app/upgrade/page.tsx": {
+    "mtime": 1780990821.4068613,
+    "ast_hash": "39cf5330b1ae3121dfe54704000ac664",
+    "semantic_hash": "39cf5330b1ae3121dfe54704000ac664"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/bulliondesk-video-1/hyperframes.json": {
+    "mtime": 1780771486.4606564,
+    "ast_hash": "c577e1703920c6b439dc845c86caa040",
+    "semantic_hash": "c577e1703920c6b439dc845c86caa040"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/bulliondesk-video-1/meta.json": {
+    "mtime": 1780771486.460568,
+    "ast_hash": "0add107e63c3a40e27d052825edbcff5",
+    "semantic_hash": "0add107e63c3a40e27d052825edbcff5"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/bulliondesk-video-1/package.json": {
+    "mtime": 1780771486.4608202,
+    "ast_hash": "c307a0953e2923ed9aaa5069be95cee6",
+    "semantic_hash": "c307a0953e2923ed9aaa5069be95cee6"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/check_preferences_columns.sql": {
+    "mtime": 1780193331.0218148,
+    "ast_hash": "aaf9958c897456773513db66fc987731",
+    "semantic_hash": "aaf9958c897456773513db66fc987731"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/AccountDashboard.tsx": {
+    "mtime": 1780568310.5417206,
+    "ast_hash": "bc14d783eaa0df5c28ff276be12c8b96",
+    "semantic_hash": "bc14d783eaa0df5c28ff276be12c8b96"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/AppMain.tsx": {
+    "mtime": 1780345508.0054412,
+    "ast_hash": "021b7fa98df4c37c331871a84404c2e0",
+    "semantic_hash": "021b7fa98df4c37c331871a84404c2e0"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/AppRail.tsx": {
+    "mtime": 1780193331.022119,
+    "ast_hash": "c04c2f100259c297efabfbeb74af7f1f",
+    "semantic_hash": "c04c2f100259c297efabfbeb74af7f1f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/AppSidebar.tsx": {
+    "mtime": 1780345508.0055969,
+    "ast_hash": "3598e63626b6f87afcc1c7694ba71cd7",
+    "semantic_hash": "3598e63626b6f87afcc1c7694ba71cd7"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/Avatar.tsx": {
+    "mtime": 1780193331.0222611,
+    "ast_hash": "a458d9e1389acccadf5992bf1690ef72",
+    "semantic_hash": "a458d9e1389acccadf5992bf1690ef72"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/ChatOverlay.tsx": {
+    "mtime": 1780345508.0056875,
+    "ast_hash": "a9ded7bf084f7c69758a19ee302ba44d",
+    "semantic_hash": "a9ded7bf084f7c69758a19ee302ba44d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/ChatPage.tsx": {
+    "mtime": 1781033647.0349152,
+    "ast_hash": "c5f50c3eb1be7aad73933fa7a8a225a5",
+    "semantic_hash": "c5f50c3eb1be7aad73933fa7a8a225a5"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/ChatSidebar.tsx": {
+    "mtime": 1781033443.749406,
+    "ast_hash": "baafb9efe33762bea9fc33edd4e1ebe3",
+    "semantic_hash": "baafb9efe33762bea9fc33edd4e1ebe3"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/ConditionalHeader.tsx": {
+    "mtime": 1780491585.2459862,
+    "ast_hash": "89c01e6e925b7100745ea54d4973a9d9",
+    "semantic_hash": "89c01e6e925b7100745ea54d4973a9d9"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/DemoChat.tsx": {
+    "mtime": 1781012460.1294565,
+    "ast_hash": "53ef028a021035eeac2800a243339d93",
+    "semantic_hash": "53ef028a021035eeac2800a243339d93"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/GoldLwcChart.tsx": {
+    "mtime": 1780193331.022633,
+    "ast_hash": "77602fe3a48108674024262ac3f6b06c",
+    "semantic_hash": "77602fe3a48108674024262ac3f6b06c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/GoldPriceTicker.tsx": {
+    "mtime": 1780193331.0226922,
+    "ast_hash": "389b9b3957a6a0ebdd1f35db4ce847b0",
+    "semantic_hash": "389b9b3957a6a0ebdd1f35db4ce847b0"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/GoldTradingViewChart.tsx": {
+    "mtime": 1780193331.0227754,
+    "ast_hash": "a5b4acd2abcbb4348d032ce7a916f55e",
+    "semantic_hash": "a5b4acd2abcbb4348d032ce7a916f55e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/Header.tsx": {
+    "mtime": 1780502766.939636,
+    "ast_hash": "171cb6730dc08a2c19329b1cba00f3b7",
+    "semantic_hash": "171cb6730dc08a2c19329b1cba00f3b7"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/HistoryPanel.tsx": {
+    "mtime": 1780193331.022952,
+    "ast_hash": "8275bccca2630ece4e49c8b7e7e665e2",
+    "semantic_hash": "8275bccca2630ece4e49c8b7e7e665e2"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/InstitutionalDashboard.tsx": {
+    "mtime": 1780193331.023056,
+    "ast_hash": "123ea537078c2e24721da7bab6efb082",
+    "semantic_hash": "123ea537078c2e24721da7bab6efb082"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/LiveTicker.tsx": {
+    "mtime": 1780193331.0231361,
+    "ast_hash": "b3a778e1be0cbc1f74db9b23fa9d075d",
+    "semantic_hash": "b3a778e1be0cbc1f74db9b23fa9d075d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/MarkdownMessage.tsx": {
+    "mtime": 1780193331.023234,
+    "ast_hash": "1662d1fa3fd91e662fc90231083d1c75",
+    "semantic_hash": "1662d1fa3fd91e662fc90231083d1c75"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/MarketDashboard.tsx": {
+    "mtime": 1780193331.0233493,
+    "ast_hash": "ddb1af716081eca8d22eb83a97221b69",
+    "semantic_hash": "ddb1af716081eca8d22eb83a97221b69"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/NavigationProgress.tsx": {
+    "mtime": 1780193331.0234377,
+    "ast_hash": "3397313279d42f8a18f15598bbf1c7f6",
+    "semantic_hash": "3397313279d42f8a18f15598bbf1c7f6"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/NewsFeed.tsx": {
+    "mtime": 1780193331.0235052,
+    "ast_hash": "954c90f177ce7eb82fdd7d5dbc60c6a4",
+    "semantic_hash": "954c90f177ce7eb82fdd7d5dbc60c6a4"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/OnboardingModal.tsx": {
+    "mtime": 1780345508.0061443,
+    "ast_hash": "b2d09964ab5bcef859d614e441e4c856",
+    "semantic_hash": "b2d09964ab5bcef859d614e441e4c856"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/PathAwareWrapper.tsx": {
+    "mtime": 1781013439.9211347,
+    "ast_hash": "73381ee1a46799049d4e66712ce35128",
+    "semantic_hash": "73381ee1a46799049d4e66712ce35128"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/PushManager.tsx": {
+    "mtime": 1780193331.0236342,
+    "ast_hash": "61a0977cd0eeadbc98215c66c383e0ad",
+    "semantic_hash": "61a0977cd0eeadbc98215c66c383e0ad"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/ResizableSplit.tsx": {
+    "mtime": 1780193331.02371,
+    "ast_hash": "232286f4c64ba9737dc3e4bf0e199a6f",
+    "semantic_hash": "232286f4c64ba9737dc3e4bf0e199a6f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/ScrollReveal.tsx": {
+    "mtime": 1780994129.592905,
+    "ast_hash": "be5d9f23b745afa7ccd58f1a3a280c6c",
+    "semantic_hash": "be5d9f23b745afa7ccd58f1a3a280c6c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/ShareSignalButton.tsx": {
+    "mtime": 1780345508.0062284,
+    "ast_hash": "9626daf83bb2276793e9d2dc09d2f018",
+    "semantic_hash": "9626daf83bb2276793e9d2dc09d2f018"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/SiteFooter.tsx": {
+    "mtime": 1780503018.4528253,
+    "ast_hash": "78f0334aab7cbfb6cd015abbb7c018a6",
+    "semantic_hash": "78f0334aab7cbfb6cd015abbb7c018a6"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/StructureChart.tsx": {
+    "mtime": 1780193331.0238905,
+    "ast_hash": "6a3bcc68603c5c39b3bceec003164dcd",
+    "semantic_hash": "6a3bcc68603c5c39b3bceec003164dcd"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/ThinkingBlock.tsx": {
+    "mtime": 1780193331.023962,
+    "ast_hash": "930c54fd1acae7b49e4b388611f68407",
+    "semantic_hash": "930c54fd1acae7b49e4b388611f68407"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/TradeTracker.tsx": {
+    "mtime": 1780345508.0062945,
+    "ast_hash": "5e0703c495c0a2e4a636f249ca36645d",
+    "semantic_hash": "5e0703c495c0a2e4a636f249ca36645d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/components/WaitlistLanding.tsx": {
+    "mtime": 1780994117.426175,
+    "ast_hash": "780ee19fec2bfe79deb08217c4571f35",
+    "semantic_hash": "780ee19fec2bfe79deb08217c4571f35"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/context/ChatContext.tsx": {
+    "mtime": 1780345888.2716796,
+    "ast_hash": "9b885620a53c8d14a02273b8242d4d7e",
+    "semantic_hash": "9b885620a53c8d14a02273b8242d4d7e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/create_trades_table.sql": {
+    "mtime": 1780193331.0242612,
+    "ast_hash": "b4661a04df8e07059167559d5c6a35cd",
+    "semantic_hash": "b4661a04df8e07059167559d5c6a35cd"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/create_waitlist_table.sql": {
+    "mtime": 1780193331.0243237,
+    "ast_hash": "9a701f05478711572a4153bc8df8503b",
+    "semantic_hash": "9a701f05478711572a4153bc8df8503b"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/eslint.config.mjs": {
+    "mtime": 1780193331.0243785,
+    "ast_hash": "dfa1f5f6a7037bf39dc510f30b180002",
+    "semantic_hash": "dfa1f5f6a7037bf39dc510f30b180002"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/fix_haspaid_migration.sql": {
+    "mtime": 1780193331.024436,
+    "ast_hash": "94c12dd8056f2ba93a7e1e4136892ae6",
+    "semantic_hash": "94c12dd8056f2ba93a7e1e4136892ae6"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/fix_trigger.sql": {
+    "mtime": 1780193331.0244908,
+    "ast_hash": "e94814b0718984004f196575bf449063",
+    "semantic_hash": "e94814b0718984004f196575bf449063"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/fix_trigger_migration.sql": {
+    "mtime": 1780193331.0245466,
+    "ast_hash": "8c0e295d3f45bc41940f72ac8bc4ea51",
+    "semantic_hash": "8c0e295d3f45bc41940f72ac8bc4ea51"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/anthropic.ts": {
+    "mtime": 1780193331.0246456,
+    "ast_hash": "2f769e3ff08483213100a5704168a932",
+    "semantic_hash": "2f769e3ff08483213100a5704168a932"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/cronAnalysis.ts": {
+    "mtime": 1780193331.0247104,
+    "ast_hash": "0974ce07dc40dd4d6170668a049b2fe3",
+    "semantic_hash": "0974ce07dc40dd4d6170668a049b2fe3"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/email.ts": {
+    "mtime": 1780193331.0247784,
+    "ast_hash": "756bacbd9658afd9762584b45c41f817",
+    "semantic_hash": "756bacbd9658afd9762584b45c41f817"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/emails/templates.ts": {
+    "mtime": 1780193331.0248795,
+    "ast_hash": "79504c65c7494b08893b1ea0d9f175ed",
+    "semantic_hash": "79504c65c7494b08893b1ea0d9f175ed"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/goldenExamples.ts": {
+    "mtime": 1780193331.0249434,
+    "ast_hash": "52e21aaa189c16a55586c4aa537b8441",
+    "semantic_hash": "52e21aaa189c16a55586c4aa537b8441"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/prompts.ts": {
+    "mtime": 1781012451.731196,
+    "ast_hash": "418e5b3b7834fed4f0c6b080f078c8ac",
+    "semantic_hash": "418e5b3b7834fed4f0c6b080f078c8ac"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/pushNotifications.ts": {
+    "mtime": 1780193331.025174,
+    "ast_hash": "c7b4d4785c0653e95512a26fe8d1113d",
+    "semantic_hash": "c7b4d4785c0653e95512a26fe8d1113d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/rate-limit.ts": {
+    "mtime": 1780501721.49571,
+    "ast_hash": "d0a9571bd0a3730d2e80b513c8c1206d",
+    "semantic_hash": "d0a9571bd0a3730d2e80b513c8c1206d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/buildNarrativeContext.ts": {
+    "mtime": 1780193331.0252683,
+    "ast_hash": "a6616f38278c902848d7022cdd1b5a3f",
+    "semantic_hash": "a6616f38278c902848d7022cdd1b5a3f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/buildResearchContext.ts": {
+    "mtime": 1780474014.4124594,
+    "ast_hash": "24ef56b587f0182c98c968da0a9434d0",
+    "semantic_hash": "24ef56b587f0182c98c968da0a9434d0"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getAlphaVantageContext.ts": {
+    "mtime": 1780193331.0254636,
+    "ast_hash": "0b9f17228c4c644322fd048038c58e08",
+    "semantic_hash": "0b9f17228c4c644322fd048038c58e08"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getCOTContext.ts": {
+    "mtime": 1780193331.025536,
+    "ast_hash": "744e78542f09fcfaa0c12ed241cb34f1",
+    "semantic_hash": "744e78542f09fcfaa0c12ed241cb34f1"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getCentralBankContext.ts": {
+    "mtime": 1780193331.025601,
+    "ast_hash": "5cfedd68d5e8aeb1d2d86ceed4a47dcf",
+    "semantic_hash": "5cfedd68d5e8aeb1d2d86ceed4a47dcf"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getETFFlowsContext.ts": {
+    "mtime": 1780193331.025669,
+    "ast_hash": "6873ad307bf97e117e7dc2a20b3f4313",
+    "semantic_hash": "6873ad307bf97e117e7dc2a20b3f4313"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getFedWatchContext.ts": {
+    "mtime": 1780193331.0257215,
+    "ast_hash": "4264413c29a954036572a6223097800a",
+    "semantic_hash": "4264413c29a954036572a6223097800a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getFredSeries.ts": {
+    "mtime": 1780193331.025773,
+    "ast_hash": "dbb00a5ecc9f9da77b1f7a1a33432ef7",
+    "semantic_hash": "dbb00a5ecc9f9da77b1f7a1a33432ef7"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getIndicatorContext.ts": {
+    "mtime": 1780193331.0258427,
+    "ast_hash": "56618c82155cd50115dfcff0a395678a",
+    "semantic_hash": "56618c82155cd50115dfcff0a395678a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getMarketContext.ts": {
+    "mtime": 1780193331.025906,
+    "ast_hash": "34715b597434b74cc9bba5bd7be8612b",
+    "semantic_hash": "34715b597434b74cc9bba5bd7be8612b"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getMarketRegime.ts": {
+    "mtime": 1780193331.0259688,
+    "ast_hash": "55a897ad05e2437d688f0781b149fc18",
+    "semantic_hash": "55a897ad05e2437d688f0781b149fc18"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getNewsContext.ts": {
+    "mtime": 1780193331.0260396,
+    "ast_hash": "97d76f041d5a94504f204c1573f5107e",
+    "semantic_hash": "97d76f041d5a94504f204c1573f5107e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getOrderFlowContext.ts": {
+    "mtime": 1780193331.026108,
+    "ast_hash": "18f839f36232ec2c97bfc165564ecee9",
+    "semantic_hash": "18f839f36232ec2c97bfc165564ecee9"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getPerformancePattern.ts": {
+    "mtime": 1780193331.0261636,
+    "ast_hash": "953bedadfffe986f67a8edf188d21502",
+    "semantic_hash": "953bedadfffe986f67a8edf188d21502"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getPolygonOrderFlow.ts": {
+    "mtime": 1780193331.0262132,
+    "ast_hash": "ffb017968caa1c321a62c9a668a98787",
+    "semantic_hash": "ffb017968caa1c321a62c9a668a98787"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getPriceContext.ts": {
+    "mtime": 1780193331.0262654,
+    "ast_hash": "46a84b4259102278ccffe765818790a5",
+    "semantic_hash": "46a84b4259102278ccffe765818790a5"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getScanHistory.ts": {
+    "mtime": 1780193331.0263245,
+    "ast_hash": "bbd9dadf10ae3c709f2e23049ef36212",
+    "semantic_hash": "bbd9dadf10ae3c709f2e23049ef36212"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getSentimentContext.ts": {
+    "mtime": 1780193331.0263786,
+    "ast_hash": "1f2da34d5ef7915aefe0510986421e3b",
+    "semantic_hash": "1f2da34d5ef7915aefe0510986421e3b"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getTechnicalContext.ts": {
+    "mtime": 1780193331.0264466,
+    "ast_hash": "92496bc2e983f952687e50c238426594",
+    "semantic_hash": "92496bc2e983f952687e50c238426594"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getTradeMemory.ts": {
+    "mtime": 1780193331.026516,
+    "ast_hash": "8116b121433b6c87bc617a9d76d5e77a",
+    "semantic_hash": "8116b121433b6c87bc617a9d76d5e77a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getTradesContext.ts": {
+    "mtime": 1780193331.0265856,
+    "ast_hash": "3ef98fd3b58642b924d920c56f9acac9",
+    "semantic_hash": "3ef98fd3b58642b924d920c56f9acac9"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getUpcomingEvents.ts": {
+    "mtime": 1780193331.026659,
+    "ast_hash": "afb01016c32cfd8a5f00b5fa6f0097d7",
+    "semantic_hash": "afb01016c32cfd8a5f00b5fa6f0097d7"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/getYahooFinanceContext.ts": {
+    "mtime": 1780193331.0267117,
+    "ast_hash": "30177d659896c73c83830a4e10a19ec8",
+    "semantic_hash": "30177d659896c73c83830a4e10a19ec8"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/research/types.ts": {
+    "mtime": 1780193331.0267622,
+    "ast_hash": "cdb5787b757655a6e73a8107b2105b2c",
+    "semantic_hash": "cdb5787b757655a6e73a8107b2105b2c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/resend.ts": {
+    "mtime": 1780193331.0268111,
+    "ast_hash": "aa9464e6c12237ad9aa9b41caf7cfa5a",
+    "semantic_hash": "aa9464e6c12237ad9aa9b41caf7cfa5a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/styleMemory.ts": {
+    "mtime": 1780193331.0268617,
+    "ast_hash": "022ba8ec5427ac80d3df6ba3fc359dc8",
+    "semantic_hash": "022ba8ec5427ac80d3df6ba3fc359dc8"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/supabase/client.ts": {
+    "mtime": 1780193331.0269346,
+    "ast_hash": "5453d99289cf630306e5030428c0fc33",
+    "semantic_hash": "5453d99289cf630306e5030428c0fc33"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/supabase/server.ts": {
+    "mtime": 1780193331.026987,
+    "ast_hash": "a83a5eb1edc5beba9812a7d8367c2493",
+    "semantic_hash": "a83a5eb1edc5beba9812a7d8367c2493"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/lib/systemPrompt.ts": {
+    "mtime": 1780193331.0270627,
+    "ast_hash": "eadfdd8fb06be957b9349d2345118daf",
+    "semantic_hash": "eadfdd8fb06be957b9349d2345118daf"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/middleware.ts": {
+    "mtime": 1780608895.4028964,
+    "ast_hash": "69fec996b91e5ed5c3af78b851b913ac",
+    "semantic_hash": "69fec996b91e5ed5c3af78b851b913ac"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/next.config.ts": {
+    "mtime": 1780516464.0155902,
+    "ast_hash": "2bdfbe994e58114f6fb0f3fc6561eb70",
+    "semantic_hash": "2bdfbe994e58114f6fb0f3fc6561eb70"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/package.json": {
+    "mtime": 1780910167.3543591,
+    "ast_hash": "672f7d969bcf36d27c95bbf61e4f53b8",
+    "semantic_hash": "672f7d969bcf36d27c95bbf61e4f53b8"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/postcss.config.mjs": {
+    "mtime": 1780193331.0277696,
+    "ast_hash": "d3fd1d29b05a09ff76b595a70e1e7d50",
+    "semantic_hash": "d3fd1d29b05a09ff76b595a70e1e7d50"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/sw.js": {
+    "mtime": 1780193331.0280006,
+    "ast_hash": "1a503484ff6df98c45ac960d5014ea36",
+    "semantic_hash": "1a503484ff6df98c45ac960d5014ea36"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/scripts/gen-favicon.mjs": {
+    "mtime": 1780515750.5067391,
+    "ast_hash": "1a59df02287925380fb9c80780f06efe",
+    "semantic_hash": "1a59df02287925380fb9c80780f06efe"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/skills-lock.json": {
+    "mtime": 1780771375.6461375,
+    "ast_hash": "2118210e1dcde2eacc406f14ba1da010",
+    "semantic_hash": "2118210e1dcde2eacc406f14ba1da010"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/supabase/market_scans_schema.sql": {
+    "mtime": 1780193331.0281963,
+    "ast_hash": "da59d639ffd19f6e95e132b2abe22f8d",
+    "semantic_hash": "da59d639ffd19f6e95e132b2abe22f8d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/supabase/schema.sql": {
+    "mtime": 1780193331.0282555,
+    "ast_hash": "0c7c54dacfd025e774b77edbed4d688c",
+    "semantic_hash": "0c7c54dacfd025e774b77edbed4d688c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/supabase/trade_outcomes_schema.sql": {
+    "mtime": 1780193331.0283093,
+    "ast_hash": "0d736dd4a51a5288ed9e5e757b2d4477",
+    "semantic_hash": "0d736dd4a51a5288ed9e5e757b2d4477"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/supabase_account_migration.sql": {
+    "mtime": 1780345508.0065386,
+    "ast_hash": "bd0a61329409e7fd2c6c8a7bb31de5b7",
+    "semantic_hash": "bd0a61329409e7fd2c6c8a7bb31de5b7"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/supabase_conversations_migration.sql": {
+    "mtime": 1780193331.0283706,
+    "ast_hash": "fffbf0fcce257c4346e0fddad52216c9",
+    "semantic_hash": "fffbf0fcce257c4346e0fddad52216c9"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/supabase_migration.sql": {
+    "mtime": 1780193331.0284338,
+    "ast_hash": "b1efcf1d30ab9d6f7d6bf7e4f281f952",
+    "semantic_hash": "b1efcf1d30ab9d6f7d6bf7e4f281f952"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/supabase_onboarding_migration.sql": {
+    "mtime": 1780193331.02849,
+    "ast_hash": "a64246f2c89a2b9f3f5e253471d071cb",
+    "semantic_hash": "a64246f2c89a2b9f3f5e253471d071cb"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/supabase_paywall_migration.sql": {
+    "mtime": 1780193331.0285509,
+    "ast_hash": "d1b465abe498fb1be9ecb016b7aa404c",
+    "semantic_hash": "d1b465abe498fb1be9ecb016b7aa404c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/supabase_universal_migration.sql": {
+    "mtime": 1780345508.0065825,
+    "ast_hash": "386ddc3e26ac54e62793c4ed57f58cde",
+    "semantic_hash": "386ddc3e26ac54e62793c4ed57f58cde"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/tailwind.config.js": {
+    "mtime": 1780193331.0286462,
+    "ast_hash": "ebd283f1a23d548bd7340ebd797e2821",
+    "semantic_hash": "ebd283f1a23d548bd7340ebd797e2821"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/tsconfig.json": {
+    "mtime": 1780193331.0287025,
+    "ast_hash": "02fc19ad21338c2ab820a70136310db4",
+    "semantic_hash": "02fc19ad21338c2ab820a70136310db4"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/vercel.json": {
+    "mtime": 1780193331.028757,
+    "ast_hash": "d0b463eb8f15f2beb5dcf623d105006e",
+    "semantic_hash": "d0b463eb8f15f2beb5dcf623d105006e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/animejs/SKILL.md": {
+    "mtime": 1780771375.2779167,
+    "ast_hash": "681b65dbbd289fff665c46529d82ef0a",
+    "semantic_hash": "681b65dbbd289fff665c46529d82ef0a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/contribute-catalog/SKILL.md": {
+    "mtime": 1780771375.2919648,
+    "ast_hash": "79a95edcc895af989083ed4fdd7a1cce",
+    "semantic_hash": "79a95edcc895af989083ed4fdd7a1cce"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/contribute-catalog/templates.md": {
+    "mtime": 1780771375.2921593,
+    "ast_hash": "afaa2ca939c98e7b0ecc340cb140ed9d",
+    "semantic_hash": "afaa2ca939c98e7b0ecc340cb140ed9d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/css-animations/SKILL.md": {
+    "mtime": 1780771375.2996461,
+    "ast_hash": "ca9fc7e3898ee1ef60196721a50ed44a",
+    "semantic_hash": "ca9fc7e3898ee1ef60196721a50ed44a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/gsap/SKILL.md": {
+    "mtime": 1780771375.3173318,
+    "ast_hash": "e5c5e7b18f100f14ab57238631c4ff3f",
+    "semantic_hash": "e5c5e7b18f100f14ab57238631c4ff3f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/gsap/references/effects.md": {
+    "mtime": 1780771375.3176486,
+    "ast_hash": "42848c64603b3e5d989078abb1fc21a5",
+    "semantic_hash": "42848c64603b3e5d989078abb1fc21a5"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes-cli/SKILL.md": {
+    "mtime": 1780771375.324449,
+    "ast_hash": "29391601edc6a64100d7ffd1650fd2a7",
+    "semantic_hash": "29391601edc6a64100d7ffd1650fd2a7"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes-media/SKILL.md": {
+    "mtime": 1780771375.3302486,
+    "ast_hash": "691e77d9dea9525b9666dbec9ee40923",
+    "semantic_hash": "691e77d9dea9525b9666dbec9ee40923"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes-registry/SKILL.md": {
+    "mtime": 1780771375.349375,
+    "ast_hash": "a840b8fe9dc2fb5e64643ab4cf4436c0",
+    "semantic_hash": "a840b8fe9dc2fb5e64643ab4cf4436c0"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes-registry/examples/add-block.md": {
+    "mtime": 1780771375.3488216,
+    "ast_hash": "23eb91150351d5de8d8f3e91200404a4",
+    "semantic_hash": "23eb91150351d5de8d8f3e91200404a4"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes-registry/examples/add-component.md": {
+    "mtime": 1780771375.348899,
+    "ast_hash": "5bf0c76a45d29930b7bc49fdc10af2ca",
+    "semantic_hash": "5bf0c76a45d29930b7bc49fdc10af2ca"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes-registry/references/demo-html-pattern.md": {
+    "mtime": 1780771375.3489883,
+    "ast_hash": "2636b50564e61073783b5931305bd418",
+    "semantic_hash": "2636b50564e61073783b5931305bd418"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes-registry/references/discovery.md": {
+    "mtime": 1780771375.3490689,
+    "ast_hash": "5c9c0b443d1465cbb2bc0ec44e74496b",
+    "semantic_hash": "5c9c0b443d1465cbb2bc0ec44e74496b"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes-registry/references/install-locations.md": {
+    "mtime": 1780771375.34914,
+    "ast_hash": "2c34f30863689239717903ee3997a2ac",
+    "semantic_hash": "2c34f30863689239717903ee3997a2ac"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes-registry/references/wiring-blocks.md": {
+    "mtime": 1780771375.3492174,
+    "ast_hash": "685f361c0ba521164bb0ee564c4d4a02",
+    "semantic_hash": "685f361c0ba521164bb0ee564c4d4a02"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes-registry/references/wiring-components.md": {
+    "mtime": 1780771375.3493063,
+    "ast_hash": "0afa9cddd6b6b8c69968c16bf93b46f4",
+    "semantic_hash": "0afa9cddd6b6b8c69968c16bf93b46f4"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/SKILL.md": {
+    "mtime": 1780771375.4373,
+    "ast_hash": "3898ee7fba3be4e4bed6e74084391b65",
+    "semantic_hash": "3898ee7fba3be4e4bed6e74084391b65"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/data-in-motion.md": {
+    "mtime": 1780771375.4373698,
+    "ast_hash": "51c7633d20954812a4b01a853c8c4eb7",
+    "semantic_hash": "51c7633d20954812a4b01a853c8c4eb7"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/house-style.md": {
+    "mtime": 1780771375.4378414,
+    "ast_hash": "57448da2c75baf69f3a5f0f950d6cf42",
+    "semantic_hash": "57448da2c75baf69f3a5f0f950d6cf42"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/palettes/bold-energetic.md": {
+    "mtime": 1780771375.4375648,
+    "ast_hash": "616606d70204916d8c3cb97285ee3394",
+    "semantic_hash": "616606d70204916d8c3cb97285ee3394"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/palettes/clean-corporate.md": {
+    "mtime": 1780771375.43771,
+    "ast_hash": "67ca594cd48b0db43c74775fa53e7c6e",
+    "semantic_hash": "67ca594cd48b0db43c74775fa53e7c6e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/palettes/dark-premium.md": {
+    "mtime": 1780771375.4381325,
+    "ast_hash": "e71a253bf6e0f0e05da1d4effe7a4150",
+    "semantic_hash": "e71a253bf6e0f0e05da1d4effe7a4150"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/palettes/jewel-rich.md": {
+    "mtime": 1780771375.4376392,
+    "ast_hash": "92abdaae06dfb6edcfc68cb631550c9c",
+    "semantic_hash": "92abdaae06dfb6edcfc68cb631550c9c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/palettes/monochrome.md": {
+    "mtime": 1780771375.437474,
+    "ast_hash": "ce9620d338ce0b5ba7f6800714012f5a",
+    "semantic_hash": "ce9620d338ce0b5ba7f6800714012f5a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/palettes/nature-earth.md": {
+    "mtime": 1780771375.4377813,
+    "ast_hash": "96002478baa0fe96782a1c7d4b6ad0b1",
+    "semantic_hash": "96002478baa0fe96782a1c7d4b6ad0b1"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/palettes/neon-electric.md": {
+    "mtime": 1780771375.4379752,
+    "ast_hash": "7e8667e0d672d10f7aacb491852008ca",
+    "semantic_hash": "7e8667e0d672d10f7aacb491852008ca"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/palettes/pastel-soft.md": {
+    "mtime": 1780771375.438053,
+    "ast_hash": "b74f9bb4ac231c7d37dd496443fdbdeb",
+    "semantic_hash": "b74f9bb4ac231c7d37dd496443fdbdeb"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/palettes/warm-editorial.md": {
+    "mtime": 1780771375.4379113,
+    "ast_hash": "b8285bc4e1f0c5a7a20420bd1dc210a1",
+    "semantic_hash": "b8285bc4e1f0c5a7a20420bd1dc210a1"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/patterns.md": {
+    "mtime": 1780771375.4381993,
+    "ast_hash": "7908f5cd427a84bf5a390c1ff25fbd0e",
+    "semantic_hash": "7908f5cd427a84bf5a390c1ff25fbd0e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/audio-reactive.md": {
+    "mtime": 1780771375.4384317,
+    "ast_hash": "a846a440b8c922d129e40de17d1c684f",
+    "semantic_hash": "a846a440b8c922d129e40de17d1c684f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/beat-direction.md": {
+    "mtime": 1780771375.4383624,
+    "ast_hash": "ed463da2ca4f34049f46a468956f851d",
+    "semantic_hash": "ed463da2ca4f34049f46a468956f851d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/captions.md": {
+    "mtime": 1780771375.438288,
+    "ast_hash": "56ed28376a2ede6f6dc6423afdac2cb0",
+    "semantic_hash": "56ed28376a2ede6f6dc6423afdac2cb0"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/css-patterns.md": {
+    "mtime": 1780771375.4386086,
+    "ast_hash": "6e9f703076159fd0fa593c2731cd3163",
+    "semantic_hash": "6e9f703076159fd0fa593c2731cd3163"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/design-picker.md": {
+    "mtime": 1780771375.4389,
+    "ast_hash": "64abcd4cf7e8488c742944e66644abfc",
+    "semantic_hash": "64abcd4cf7e8488c742944e66644abfc"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/dynamic-techniques.md": {
+    "mtime": 1780771375.4389825,
+    "ast_hash": "d0068f3d068946842468c99a2597e2a4",
+    "semantic_hash": "d0068f3d068946842468c99a2597e2a4"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/motion-principles.md": {
+    "mtime": 1780771375.4387138,
+    "ast_hash": "33e047ae67b8a727cc2fd878c403bc9e",
+    "semantic_hash": "33e047ae67b8a727cc2fd878c403bc9e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/narration.md": {
+    "mtime": 1780771375.438504,
+    "ast_hash": "d9cf7be074d6d70f6942d6cd9f439547",
+    "semantic_hash": "d9cf7be074d6d70f6942d6cd9f439547"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/prompt-expansion.md": {
+    "mtime": 1780771375.4387872,
+    "ast_hash": "24692c1e79d340e8a36b4f43898c2284",
+    "semantic_hash": "24692c1e79d340e8a36b4f43898c2284"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/techniques.md": {
+    "mtime": 1780771375.4397776,
+    "ast_hash": "9945eecfbfd5d9f9fca4dc92c9e2d5f9",
+    "semantic_hash": "9945eecfbfd5d9f9fca4dc92c9e2d5f9"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transcript-guide.md": {
+    "mtime": 1780771375.439208,
+    "ast_hash": "5735366371ffbcbf8837e29c61775a53",
+    "semantic_hash": "5735366371ffbcbf8837e29c61775a53"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions.md": {
+    "mtime": 1780771375.4394555,
+    "ast_hash": "72116d342bab6a063847f10b01b6bebe",
+    "semantic_hash": "72116d342bab6a063847f10b01b6bebe"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/catalog.md": {
+    "mtime": 1780771375.4391334,
+    "ast_hash": "06805860008927fef0181cfc891bb262",
+    "semantic_hash": "06805860008927fef0181cfc891bb262"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/css-3d.md": {
+    "mtime": 1780771375.4390638,
+    "ast_hash": "2059336920cad226ef2552ea954c31aa",
+    "semantic_hash": "2059336920cad226ef2552ea954c31aa"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/css-blur.md": {
+    "mtime": 1780771375.4392765,
+    "ast_hash": "941e56f6d4f456497540796257172dba",
+    "semantic_hash": "941e56f6d4f456497540796257172dba"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/css-cover.md": {
+    "mtime": 1780771375.439352,
+    "ast_hash": "d8a11743997e7592bc3019f67566c6bb",
+    "semantic_hash": "d8a11743997e7592bc3019f67566c6bb"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/css-destruction.md": {
+    "mtime": 1780771375.4395287,
+    "ast_hash": "2296659ab062931df9b267f0d9e941ab",
+    "semantic_hash": "2296659ab062931df9b267f0d9e941ab"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/css-dissolve.md": {
+    "mtime": 1780771375.439667,
+    "ast_hash": "2383a376152d8a2aba04ddb2e451373c",
+    "semantic_hash": "2383a376152d8a2aba04ddb2e451373c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/css-distortion.md": {
+    "mtime": 1780771375.4395967,
+    "ast_hash": "e0e4d98acc862582b4ecfa707ce9f5f3",
+    "semantic_hash": "e0e4d98acc862582b4ecfa707ce9f5f3"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/css-grid.md": {
+    "mtime": 1780771375.439917,
+    "ast_hash": "f451818d25efbdea519083e14b4da2de",
+    "semantic_hash": "f451818d25efbdea519083e14b4da2de"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/css-light.md": {
+    "mtime": 1780771375.4404416,
+    "ast_hash": "e100d2db32e2f61160d231ed6dbae415",
+    "semantic_hash": "e100d2db32e2f61160d231ed6dbae415"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/css-mechanical.md": {
+    "mtime": 1780771375.4398508,
+    "ast_hash": "d29fffd4912e8e15b7120d7fc3858f8a",
+    "semantic_hash": "d29fffd4912e8e15b7120d7fc3858f8a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/css-other.md": {
+    "mtime": 1780771375.4401877,
+    "ast_hash": "9e75de3cbb224148bc6c124e1457ddd3",
+    "semantic_hash": "9e75de3cbb224148bc6c124e1457ddd3"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/css-push.md": {
+    "mtime": 1780771375.4402657,
+    "ast_hash": "9e8f75348d9fea5f8d72e85d6b3fa01a",
+    "semantic_hash": "9e8f75348d9fea5f8d72e85d6b3fa01a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/css-radial.md": {
+    "mtime": 1780771375.4400446,
+    "ast_hash": "d150318b42ceff493c9b84f4c5052c43",
+    "semantic_hash": "d150318b42ceff493c9b84f4c5052c43"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/transitions/css-scale.md": {
+    "mtime": 1780771375.4399827,
+    "ast_hash": "24e86c00ecab0c0f1f5acc8f0667faa9",
+    "semantic_hash": "24e86c00ecab0c0f1f5acc8f0667faa9"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/typography.md": {
+    "mtime": 1780771375.4403718,
+    "ast_hash": "964e9f6bb71758a326f76d025c0660c9",
+    "semantic_hash": "964e9f6bb71758a326f76d025c0660c9"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/references/video-composition.md": {
+    "mtime": 1780771375.4401171,
+    "ast_hash": "aa7a5b97404501d5bf50cb70a2fdef4f",
+    "semantic_hash": "aa7a5b97404501d5bf50cb70a2fdef4f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/templates/design-picker.html": {
+    "mtime": 1780771375.4408753,
+    "ast_hash": "e580b1304821c5ed0a71794ad6f18700",
+    "semantic_hash": "e580b1304821c5ed0a71794ad6f18700"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/hyperframes/visual-styles.md": {
+    "mtime": 1780771375.440972,
+    "ast_hash": "cdcd774bca050160d9dc432ec0c6d265",
+    "semantic_hash": "cdcd774bca050160d9dc432ec0c6d265"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/lottie/SKILL.md": {
+    "mtime": 1780771375.4451067,
+    "ast_hash": "1bbac730f8f32f78081c220ad304ec0b",
+    "semantic_hash": "1bbac730f8f32f78081c220ad304ec0b"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/SKILL.md": {
+    "mtime": 1780771375.5804024,
+    "ast_hash": "3798ba1e7162d7e9701b618e6e64a631",
+    "semantic_hash": "3798ba1e7162d7e9701b618e6e64a631"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/README.md": {
+    "mtime": 1780771375.5808723,
+    "ast_hash": "be686e8c39d4434931fcad8c934a6283",
+    "semantic_hash": "be686e8c39d4434931fcad8c934a6283"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/hf-src/index.html": {
+    "mtime": 1780771375.5807202,
+    "ast_hash": "709c9881a1030b6c3fe4f6e06acb6813",
+    "semantic_hash": "709c9881a1030b6c3fe4f6e06acb6813"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/README.md": {
+    "mtime": 1780771375.581354,
+    "ast_hash": "6277c79d28fa346bec68fe5962e96b0f",
+    "semantic_hash": "6277c79d28fa346bec68fe5962e96b0f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/hf-src/index.html": {
+    "mtime": 1780771375.5818942,
+    "ast_hash": "63fefd3af6fd7e269459014b21f5ba3d",
+    "semantic_hash": "63fefd3af6fd7e269459014b21f5ba3d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/README.md": {
+    "mtime": 1780771375.5825677,
+    "ast_hash": "e64b42e38fdfe05f2ce7f69f69d89b40",
+    "semantic_hash": "e64b42e38fdfe05f2ce7f69f69d89b40"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/hf-src/index.html": {
+    "mtime": 1780771375.5827804,
+    "ast_hash": "6122627ba34d68c3919ea031e875a35a",
+    "semantic_hash": "6122627ba34d68c3919ea031e875a35a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/README.md": {
+    "mtime": 1780771375.5838387,
+    "ast_hash": "1908386f0de7dd2232a860aecb9d0fe1",
+    "semantic_hash": "1908386f0de7dd2232a860aecb9d0fe1"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/references/api-map.md": {
+    "mtime": 1780771375.5848138,
+    "ast_hash": "77191567a51854d5ffd044bcbc9bcb03",
+    "semantic_hash": "77191567a51854d5ffd044bcbc9bcb03"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/references/escape-hatch.md": {
+    "mtime": 1780771375.5850055,
+    "ast_hash": "2ee6ad97429aa601c9adc1f2668ca859",
+    "semantic_hash": "2ee6ad97429aa601c9adc1f2668ca859"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/references/eval.md": {
+    "mtime": 1780771375.5853772,
+    "ast_hash": "74ea41ca14ffdeb2574c28d168a78990",
+    "semantic_hash": "74ea41ca14ffdeb2574c28d168a78990"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/references/fonts.md": {
+    "mtime": 1780771375.5850995,
+    "ast_hash": "89b7334ac99949e617880c24ef11b626",
+    "semantic_hash": "89b7334ac99949e617880c24ef11b626"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/references/limitations.md": {
+    "mtime": 1780771375.5855503,
+    "ast_hash": "df8341269563114318e90b6a3fcd1035",
+    "semantic_hash": "df8341269563114318e90b6a3fcd1035"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/references/lottie.md": {
+    "mtime": 1780771375.5851917,
+    "ast_hash": "1e4d957f2a7850d2645307ebed9fdd28",
+    "semantic_hash": "1e4d957f2a7850d2645307ebed9fdd28"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/references/media.md": {
+    "mtime": 1780771375.5852828,
+    "ast_hash": "fd19dc63d25b715338aa68bf3cd106a1",
+    "semantic_hash": "fd19dc63d25b715338aa68bf3cd106a1"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/references/parameters.md": {
+    "mtime": 1780771375.5854623,
+    "ast_hash": "7fa06aa926ffabb4ea0df1167f23dd00",
+    "semantic_hash": "7fa06aa926ffabb4ea0df1167f23dd00"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/references/sequencing.md": {
+    "mtime": 1780771375.585644,
+    "ast_hash": "b1d895ce3a174bd8a86ba4298d0c2e16",
+    "semantic_hash": "b1d895ce3a174bd8a86ba4298d0c2e16"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/references/timing.md": {
+    "mtime": 1780771375.5858355,
+    "ast_hash": "21f0e20b528b6afffe46c928b325040c",
+    "semantic_hash": "21f0e20b528b6afffe46c928b325040c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/remotion-to-hyperframes/references/transitions.md": {
+    "mtime": 1780771375.585748,
+    "ast_hash": "e7f682b5a5847a39fcda6271f4ba8ec8",
+    "semantic_hash": "e7f682b5a5847a39fcda6271f4ba8ec8"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/tailwind/SKILL.md": {
+    "mtime": 1780771375.5913112,
+    "ast_hash": "f901baa9336d31147df8747d20870b6e",
+    "semantic_hash": "f901baa9336d31147df8747d20870b6e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/three/SKILL.md": {
+    "mtime": 1780771375.5953412,
+    "ast_hash": "938af6bcebc503b99e517bc4f076b97b",
+    "semantic_hash": "938af6bcebc503b99e517bc4f076b97b"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/typegpu/SKILL.md": {
+    "mtime": 1780771375.599405,
+    "ast_hash": "79967caf7afcf3983071e363a8a34aae",
+    "semantic_hash": "79967caf7afcf3983071e363a8a34aae"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/waapi/SKILL.md": {
+    "mtime": 1780771375.6034405,
+    "ast_hash": "b3de77a4a7b70458ceefe7cb167a8a3b",
+    "semantic_hash": "b3de77a4a7b70458ceefe7cb167a8a3b"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/website-to-hyperframes/SKILL.md": {
+    "mtime": 1780771375.6420393,
+    "ast_hash": "987644f1af0a8de4965de25b8c9b574d",
+    "semantic_hash": "987644f1af0a8de4965de25b8c9b574d"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/website-to-hyperframes/assets/sfx/CREDITS.md": {
+    "mtime": 1780771375.6421554,
+    "ast_hash": "58e8dc66d16a0bb83f66e59e7bbff942",
+    "semantic_hash": "58e8dc66d16a0bb83f66e59e7bbff942"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/website-to-hyperframes/references/beat-builder-guide.md": {
+    "mtime": 1780771375.6426375,
+    "ast_hash": "404934f8918829f2b187589c3739e133",
+    "semantic_hash": "404934f8918829f2b187589c3739e133"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/website-to-hyperframes/references/capabilities.md": {
+    "mtime": 1780771375.64286,
+    "ast_hash": "2ea06c4c41338957cee250665ab35623",
+    "semantic_hash": "2ea06c4c41338957cee250665ab35623"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/website-to-hyperframes/references/step-0-capture.md": {
+    "mtime": 1780771375.6432712,
+    "ast_hash": "96342dee3f1874411f60e019a8b04a3c",
+    "semantic_hash": "96342dee3f1874411f60e019a8b04a3c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/website-to-hyperframes/references/step-1-design.md": {
+    "mtime": 1780771375.6425424,
+    "ast_hash": "e5658ea94bbb822fee1b95d98503e627",
+    "semantic_hash": "e5658ea94bbb822fee1b95d98503e627"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/website-to-hyperframes/references/step-2-brief.md": {
+    "mtime": 1780771375.6424499,
+    "ast_hash": "df84ca5abaf58b88b9c282e0e41d0208",
+    "semantic_hash": "df84ca5abaf58b88b9c282e0e41d0208"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/website-to-hyperframes/references/step-3-storyboard.md": {
+    "mtime": 1780771375.6429787,
+    "ast_hash": "148e44385a0e61ffe3cd87cec346daa5",
+    "semantic_hash": "148e44385a0e61ffe3cd87cec346daa5"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/website-to-hyperframes/references/step-4-vo.md": {
+    "mtime": 1780771375.642735,
+    "ast_hash": "b8e8564af247e2b490ac1ebf666ab873",
+    "semantic_hash": "b8e8564af247e2b490ac1ebf666ab873"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/website-to-hyperframes/references/step-5-build.md": {
+    "mtime": 1780771375.6423457,
+    "ast_hash": "4e33c0302b1c4a66d573c6884a1e00be",
+    "semantic_hash": "4e33c0302b1c4a66d573c6884a1e00be"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.agents/skills/website-to-hyperframes/references/step-6-validate.md": {
+    "mtime": 1780771375.6430848,
+    "ast_hash": "c6206ac02a68dbdccc80031e62838296",
+    "semantic_hash": "c6206ac02a68dbdccc80031e62838296"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/emil-design-eng/SKILL.md": {
+    "mtime": 1780758721.7901237,
+    "ast_hash": "fd025de68df6836a0c52564d7ac85e72",
+    "semantic_hash": "fd025de68df6836a0c52564d7ac85e72"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/SKILL.md": {
+    "mtime": 1780758747.256915,
+    "ast_hash": "ad2778d6dc1e1661b5e7e53a870e4d26",
+    "semantic_hash": "ad2778d6dc1e1661b5e7e53a870e4d26"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/adapt.md": {
+    "mtime": 1780758747.2574935,
+    "ast_hash": "677c79a3dfdb092d711e5e59c46b41bb",
+    "semantic_hash": "677c79a3dfdb092d711e5e59c46b41bb"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/animate.md": {
+    "mtime": 1780758747.2599113,
+    "ast_hash": "87e75f869b8289acb616dce325e1d008",
+    "semantic_hash": "87e75f869b8289acb616dce325e1d008"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/audit.md": {
+    "mtime": 1780758747.2590504,
+    "ast_hash": "fb3a1ab9b014ecc9fe0d22075616702a",
+    "semantic_hash": "fb3a1ab9b014ecc9fe0d22075616702a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/bolder.md": {
+    "mtime": 1780758747.2576857,
+    "ast_hash": "60c92579e8c0b55945bac5f3fbdd7746",
+    "semantic_hash": "60c92579e8c0b55945bac5f3fbdd7746"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/brand.md": {
+    "mtime": 1780758747.258057,
+    "ast_hash": "5e8f9b86533d7b855aa1b93bc0b9a311",
+    "semantic_hash": "5e8f9b86533d7b855aa1b93bc0b9a311"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/clarify.md": {
+    "mtime": 1780758747.259384,
+    "ast_hash": "59f37b001528ffa685aa9fc8b815ac0c",
+    "semantic_hash": "59f37b001528ffa685aa9fc8b815ac0c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/codex.md": {
+    "mtime": 1780758747.2595143,
+    "ast_hash": "6d97d559484916f05fa74f6b74f3da07",
+    "semantic_hash": "6d97d559484916f05fa74f6b74f3da07"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/colorize.md": {
+    "mtime": 1780758747.2588296,
+    "ast_hash": "69f597448e78f518d64617c0137bc533",
+    "semantic_hash": "69f597448e78f518d64617c0137bc533"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/craft.md": {
+    "mtime": 1780758747.259211,
+    "ast_hash": "30b636d36ebb80efb147c409fbd56ef0",
+    "semantic_hash": "30b636d36ebb80efb147c409fbd56ef0"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/critique.md": {
+    "mtime": 1780758747.2587066,
+    "ast_hash": "8f6903ba0a98fff1c229bfd091bb56fa",
+    "semantic_hash": "8f6903ba0a98fff1c229bfd091bb56fa"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/delight.md": {
+    "mtime": 1780758747.260247,
+    "ast_hash": "994a24c88a90cd4497831f73ad50e92c",
+    "semantic_hash": "994a24c88a90cd4497831f73ad50e92c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/distill.md": {
+    "mtime": 1780758747.2571692,
+    "ast_hash": "d47f1e82b6f7728ed0cad7e7ea0711b4",
+    "semantic_hash": "d47f1e82b6f7728ed0cad7e7ea0711b4"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/document.md": {
+    "mtime": 1780758747.2570798,
+    "ast_hash": "ae73c8b196b13f02a2616080f4db0709",
+    "semantic_hash": "ae73c8b196b13f02a2616080f4db0709"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/extract.md": {
+    "mtime": 1780758747.2579265,
+    "ast_hash": "85e31dfecff207358c2ac0e335085245",
+    "semantic_hash": "85e31dfecff207358c2ac0e335085245"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/harden.md": {
+    "mtime": 1780758747.2578263,
+    "ast_hash": "e87b0bff32be86e7825e7ff4c50157e3",
+    "semantic_hash": "e87b0bff32be86e7825e7ff4c50157e3"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/init.md": {
+    "mtime": 1780758747.2589407,
+    "ast_hash": "77ef1cf6a45cfcc629b1be3bc9469ea4",
+    "semantic_hash": "77ef1cf6a45cfcc629b1be3bc9469ea4"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/interaction-design.md": {
+    "mtime": 1780758747.2601163,
+    "ast_hash": "1dd83bb8a96d7e250914064aa7389f8b",
+    "semantic_hash": "1dd83bb8a96d7e250914064aa7389f8b"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/layout.md": {
+    "mtime": 1780758747.260367,
+    "ast_hash": "0df4b2064cadee109afe865ce7d20d1e",
+    "semantic_hash": "0df4b2064cadee109afe865ce7d20d1e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/live.md": {
+    "mtime": 1780758747.2575877,
+    "ast_hash": "6e4be1931ac0a93ccaf23a781f001ec0",
+    "semantic_hash": "6e4be1931ac0a93ccaf23a781f001ec0"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/onboard.md": {
+    "mtime": 1780758747.2596455,
+    "ast_hash": "7095aaea9e2994e37afb3cf1743bc092",
+    "semantic_hash": "7095aaea9e2994e37afb3cf1743bc092"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/optimize.md": {
+    "mtime": 1780758747.2597713,
+    "ast_hash": "d01f252b7e5cb35b8443d57eaad40b58",
+    "semantic_hash": "d01f252b7e5cb35b8443d57eaad40b58"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/overdrive.md": {
+    "mtime": 1780758747.260023,
+    "ast_hash": "dadd48faf8bc6dbb63196215a7195abb",
+    "semantic_hash": "dadd48faf8bc6dbb63196215a7195abb"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/polish.md": {
+    "mtime": 1780758747.2582676,
+    "ast_hash": "fe186b5a0d88279bc0675d0ba1c5213f",
+    "semantic_hash": "fe186b5a0d88279bc0675d0ba1c5213f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/product.md": {
+    "mtime": 1780758747.2573748,
+    "ast_hash": "6408a63ddbfe7003c732650381506860",
+    "semantic_hash": "6408a63ddbfe7003c732650381506860"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/quieter.md": {
+    "mtime": 1780758747.25849,
+    "ast_hash": "2f534f1c782f998a78ef17b34eedb0ce",
+    "semantic_hash": "2f534f1c782f998a78ef17b34eedb0ce"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/shape.md": {
+    "mtime": 1780758747.2572858,
+    "ast_hash": "328ad4e06423eed564fa9391985f834c",
+    "semantic_hash": "328ad4e06423eed564fa9391985f834c"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/.claude/skills/impeccable/reference/typeset.md": {
+    "mtime": 1780758747.2583895,
+    "ast_hash": "8e8e3a58858713ff62de8ffa1a740cc6",
+    "semantic_hash": "8e8e3a58858713ff62de8ffa1a740cc6"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/README.md": {
+    "mtime": 1780345508.0040386,
+    "ast_hash": "073adc543e7aadb5706c7e8d414d59ce",
+    "semantic_hash": "073adc543e7aadb5706c7e8d414d59ce"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/bulliondesk-video-1/AGENTS.md": {
+    "mtime": 1780771486.4610815,
+    "ast_hash": "7c8458c2c0a1d1c7ce48064689767c26",
+    "semantic_hash": "7c8458c2c0a1d1c7ce48064689767c26"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/bulliondesk-video-1/CLAUDE.md": {
+    "mtime": 1780771486.4612854,
+    "ast_hash": "8562192ba4feb6900697dbb77e093288",
+    "semantic_hash": "8562192ba4feb6900697dbb77e093288"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/bulliondesk-video-1/index.html": {
+    "mtime": 1780771696.248672,
+    "ast_hash": "6943b7ecf26bfc79d54a8b2a9311cf7e",
+    "semantic_hash": "6943b7ecf26bfc79d54a8b2a9311cf7e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/robots.txt": {
+    "mtime": 1780357356.7808523,
+    "ast_hash": "3fb57a8729d0028e3265f6c14062dc56",
+    "semantic_hash": "3fb57a8729d0028e3265f6c14062dc56"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/bulliondesk-video-1/.thumbnails/v4_v3_jpeg_index.html_1920x1080_1780771696249_9.00__stats_0.jpg": {
+    "mtime": 1780771737.7004077,
+    "ast_hash": "1faa002b2be2d666fe27e866eb8ddcaa",
+    "semantic_hash": "1faa002b2be2d666fe27e866eb8ddcaa"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/apple-touch-icon.png": {
+    "mtime": 1780577205.0224411,
+    "ast_hash": "57e5f3df9a74bd0cdab709204472d49a",
+    "semantic_hash": "57e5f3df9a74bd0cdab709204472d49a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/file.svg": {
+    "mtime": 1780193331.0278482,
+    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
+    "semantic_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/globe.svg": {
+    "mtime": 1780193331.0279002,
+    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
+    "semantic_hash": "2aaafa6a49b6563925fe440891e32717"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/icon-16.png": {
+    "mtime": 1780577205.0237417,
+    "ast_hash": "491d53a8846c61569ae8501adc85de21",
+    "semantic_hash": "491d53a8846c61569ae8501adc85de21"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/icon-180.png": {
+    "mtime": 1780577205.024184,
+    "ast_hash": "57e5f3df9a74bd0cdab709204472d49a",
+    "semantic_hash": "57e5f3df9a74bd0cdab709204472d49a"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/icon-192.png": {
+    "mtime": 1780577205.0262706,
+    "ast_hash": "432d444a58209cb39a23883c15b6389f",
+    "semantic_hash": "432d444a58209cb39a23883c15b6389f"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/icon-32.png": {
+    "mtime": 1780577205.026947,
+    "ast_hash": "69e6b97812a4d7b49e1962823a6c0c49",
+    "semantic_hash": "69e6b97812a4d7b49e1962823a6c0c49"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/icon-48.png": {
+    "mtime": 1780577205.0275924,
+    "ast_hash": "ceeaabc1a90152332217f3971bb4b252",
+    "semantic_hash": "ceeaabc1a90152332217f3971bb4b252"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/icon-512.png": {
+    "mtime": 1780577205.028369,
+    "ast_hash": "83cd850551c2fe72c65d05188200417e",
+    "semantic_hash": "83cd850551c2fe72c65d05188200417e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/icon.svg": {
+    "mtime": 1780577205.0288687,
+    "ast_hash": "2bd99df3e2389582481089472fd9c609",
+    "semantic_hash": "2bd99df3e2389582481089472fd9c609"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/logos/alphacapital.png": {
+    "mtime": 1780915774.774537,
+    "ast_hash": "77fbb71e8557b5b189967ea5cf90fb34",
+    "semantic_hash": "77fbb71e8557b5b189967ea5cf90fb34"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/logos/apex.png": {
+    "mtime": 1780915716.02072,
+    "ast_hash": "c8deacc6e519a70e808acd2f0e8368c8",
+    "semantic_hash": "c8deacc6e519a70e808acd2f0e8368c8"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/logos/blueguardian.jpeg": {
+    "mtime": 1780915761.965882,
+    "ast_hash": "0ebed1e315fb2d08dfe47b0da74819ec",
+    "semantic_hash": "0ebed1e315fb2d08dfe47b0da74819ec"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/logos/e8.png": {
+    "mtime": 1780915788.658057,
+    "ast_hash": "d0c18850e78ebf01fccef255ecf80f53",
+    "semantic_hash": "d0c18850e78ebf01fccef255ecf80f53"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/logos/ftmo.png": {
+    "mtime": 1780926833.716213,
+    "ast_hash": "b8b1d89a655e020414a53da66d556313",
+    "semantic_hash": "b8b1d89a655e020414a53da66d556313"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/logos/fundednext.png": {
+    "mtime": 1780915746.94091,
+    "ast_hash": "85a188b97b7ec1645f6667b77fdc31bb",
+    "semantic_hash": "85a188b97b7ec1645f6667b77fdc31bb"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/logos/fundednext.webp": {
+    "mtime": 1780925989.402532,
+    "ast_hash": "3c402931472f230709221832b58f7fe1",
+    "semantic_hash": "3c402931472f230709221832b58f7fe1"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/logos/the5ers.png": {
+    "mtime": 1780915698.069512,
+    "ast_hash": "4cc5c0a553bf24351c9afbb2df0a41eb",
+    "semantic_hash": "4cc5c0a553bf24351c9afbb2df0a41eb"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/next.svg": {
+    "mtime": 1780193331.0279493,
+    "ast_hash": "8e061864f388b47f33a1c3780831193e",
+    "semantic_hash": "8e061864f388b47f33a1c3780831193e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/vercel.svg": {
+    "mtime": 1780193331.0280547,
+    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
+    "semantic_hash": "c0af2f507b369b085b35ef4bbe3bcf1e"
+  },
+  "/Users/mechaia/Projects/gold-ia-site/public/window.svg": {
+    "mtime": 1780193331.02811,
+    "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": "a2760511c65806022ad20adf74370ff3"
+  }
+}

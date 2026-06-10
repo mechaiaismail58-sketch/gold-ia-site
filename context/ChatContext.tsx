@@ -21,15 +21,10 @@ type ChatContextValue = {
   loadHistorySession: (msgs: Msg[], sid: string) => void;
 };
 
-const INITIAL_MSG: Msg = {
-  role: "assistant",
-  content: "Bullion Desk ready. Ask me to analyze gold — structure, macro context, tradability, risk.",
-};
-
 const ChatContext = createContext<ChatContextValue | null>(null);
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
-  const [messages, setMessages] = useState<Msg[]>([INITIAL_MSG]);
+  const [messages, setMessages] = useState<Msg[]>([]);
   const [analysisMode, setAnalysisModeRaw] = useState<"deep" | "quick" | "trade_only">("deep");
   const [previousResponseId, setPreviousResponseId] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string>(() => crypto.randomUUID());
@@ -43,13 +38,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const startNewChat = useCallback(() => {
-    setMessages([INITIAL_MSG]);
+    setMessages([]);
     setPreviousResponseId(null);
     setSessionId(crypto.randomUUID());
   }, []);
 
   const loadHistorySession = useCallback((msgs: Msg[], sid: string) => {
-    setMessages(msgs.length > 0 ? msgs : [INITIAL_MSG]);
+    setMessages(msgs);
     setPreviousResponseId(null);
     setSessionId(sid);
   }, []);

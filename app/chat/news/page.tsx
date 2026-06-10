@@ -4,7 +4,7 @@ export default function ChatNewsPage() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-[#0A0A0A]">
       {/* Header */}
-      <header className="flex-none bg-white/[0.02] border-b border-white/[0.06]">
+      <header className="flex-none bg-white/[0.02] border-b border-white/[0.06] chat-header-enter">
         <div className="max-w-5xl mx-auto px-6 md:px-10 py-4">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-6">
             <div className="flex flex-col gap-0.5 shrink-0">
@@ -12,13 +12,13 @@ export default function ChatNewsPage() {
                 <span className="w-2 h-2 rounded-full bg-[#D4A843] animate-pulse inline-block shrink-0" />
                 <span className="text-sm font-semibold text-white">BullionDesk</span>
               </div>
-              <span className="text-[10px] text-[#71717A] uppercase tracking-wider pl-4">
+              <span className="text-xs text-[#71717A] uppercase tracking-[0.15em] font-medium pl-4">
                 AI Gold Trading Coach · XAUUSD
               </span>
             </div>
-            <div className="chat-anchor-pulse bg-[#D4A843]/[0.08] border border-[#D4A843]/20 rounded-xl px-4 py-2.5 flex-1 max-w-md">
+            <div className="chat-anchor-pulse chat-banner-glow bg-[#D4A843]/[0.08] border border-[#D4A843]/20 rounded-xl px-4 py-2.5 flex-1 max-w-md">
               <p className="text-sm text-[#D4A843] font-medium text-center leading-snug">
-                <span className="lightning-pulse">⚡</span> Don&apos;t take any trade before checking with the AI.
+                Don&apos;t take any trade before checking with the AI.
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">

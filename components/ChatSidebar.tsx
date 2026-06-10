@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -74,95 +73,6 @@ const NAV_ITEMS = [
     ),
   },
 ];
-
-export function DesktopChatSidebar() {
-  const [expanded, setExpanded] = useState(false);
-  const pathname = usePathname();
-
-  function isActive(href: string) {
-    if (href === "/chat") return pathname === "/chat";
-    return pathname.startsWith(href);
-  }
-
-  return (
-    <aside
-      className={cn(
-        "hidden md:flex flex-col flex-none h-full bg-white/[0.02] border-r border-white/[0.06] transition-[width] duration-300 ease-in-out overflow-hidden relative z-10",
-        expanded ? "w-56" : "w-16"
-      )}
-      onMouseEnter={() => setExpanded(true)}
-      onMouseLeave={() => setExpanded(false)}
-    >
-      {/* Nav items */}
-      <nav className="flex-1 flex flex-col pt-4 gap-1 px-2">
-        {NAV_ITEMS.map((item) => {
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              title={!expanded ? item.label : undefined}
-              className={cn(
-                "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200",
-                active
-                  ? "text-[#D4A843] bg-[#D4A843]/[0.06]"
-                  : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]"
-              )}
-            >
-              {active && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-[#D4A843] rounded-full" />
-              )}
-              <span className="shrink-0 pl-0.5">{item.icon}</span>
-              {expanded && (
-                <span className="text-[13px] font-medium whitespace-nowrap overflow-hidden">
-                  {item.label}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Bottom: logo + settings */}
-      <div className="flex flex-col gap-1 pb-5 px-2">
-        <div
-          className={cn(
-            "flex items-center gap-2 px-3 py-2",
-            expanded ? "justify-start" : "justify-center"
-          )}
-        >
-          <div className="w-6 h-6 rounded-md bg-[#D4A843]/20 flex items-center justify-center shrink-0">
-            <span className="text-[10px] font-bold text-[#D4A843]">BD</span>
-          </div>
-          {expanded && (
-            <span className="text-[12px] text-white/30 font-medium whitespace-nowrap">
-              BullionDesk
-            </span>
-          )}
-        </div>
-        <button
-          type="button"
-          className={cn(
-            "flex items-center gap-2 px-3 py-2 w-full rounded-lg text-white/25 hover:text-white/50 hover:bg-white/[0.04] transition-all",
-            expanded ? "justify-start" : "justify-center"
-          )}
-          title="Settings"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
-            <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.2" />
-            <path
-              d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"
-              stroke="currentColor"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-            />
-          </svg>
-          {expanded && <span className="text-[13px] whitespace-nowrap">Settings</span>}
-        </button>
-      </div>
-    </aside>
-  );
-}
 
 export function MobileChatTabs() {
   const pathname = usePathname();

@@ -12,10 +12,12 @@ const navItems = [
   { href: "/about", label: "About" },
 ];
 
-// TODO: réactiver quand les pages seront prêtes
-// { href: "/backtest", label: "Our Research" },
-// { href: "/market", label: "Market" },
-// { href: "/calendar", label: "Calendar" },
+const chatNavItems = [
+  { href: "/chat/market", label: "Market" },
+  { href: "/chat", label: "Chat" },
+  { href: "/chat/news", label: "News" },
+  { href: "/chat/calendar", label: "Calendar" },
+];
 
 function HamburgerIcon() {
   return (
@@ -58,6 +60,7 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
   // Initialise avec les valeurs serveur → zéro flash
   const [userEmail, setUserEmail] = useState<string | null>(initialEmail);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl);
+  const [hasPaid, setHasPaid] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -66,13 +69,26 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
   useEffect(() => {
     const supabase = createClient();
 
+    function syncPaidStatus(loggedIn: boolean) {
+      if (!loggedIn) {
+        setHasPaid(false);
+        return;
+      }
+      fetch("/api/auth/payment-status")
+        .then((r) => r.json())
+        .then((data) => setHasPaid(Boolean(data?.has_paid)))
+        .catch(() => setHasPaid(false));
+    }
+
     // Sync initial state from browser session (covers page reload)
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUserEmail(session?.user?.email ?? null);
+      syncPaidStatus(Boolean(session?.user));
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUserEmail(session?.user?.email ?? null);
+      syncPaidStatus(Boolean(session?.user));
       if (session?.user) {
         const { data } = await supabase.from("users").select("avatar_url").eq("id", session.user.id).single();
         setAvatarUrl(data?.avatar_url ?? null);
@@ -107,6 +123,7 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
     // Clear local state immediately — no waiting for navigation
     setUserEmail(null);
     setAvatarUrl(null);
+    setHasPaid(false);
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
@@ -118,6 +135,14 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
     pathname === href
       ? "rounded-xl px-3 py-1.5 text-xs tracking-[0.08em] uppercase border border-[rgba(212,175,55,0.45)] bg-[rgba(212,175,55,0.07)] text-white"
       : "rounded-xl px-3 py-1.5 text-xs tracking-[0.08em] uppercase text-white/80 transition hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10";
+
+  const isChatLinkActive = (href: string) =>
+    href === "/chat" ? pathname === "/chat" : pathname.startsWith(href);
+
+  const chatNavLinkClass = (href: string) =>
+    `text-xs uppercase tracking-wider transition-colors ${
+      isChatLinkActive(href) ? "text-[#D4A843]" : "text-[#A1A1AA] hover:text-white"
+    }`;
 
   return (
     <header className="pt-6">
@@ -146,6 +171,16 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
                 {item.label}
               </Link>
             ))}
+            {userEmail && hasPaid && (
+              <>
+                <span className="w-px h-4 bg-white/10 mx-1" />
+                {chatNavItems.map((item) => (
+                  <Link key={item.href} href={item.href} className={chatNavLinkClass(item.href)}>
+                    {item.label.toUpperCase()}
+                  </Link>
+                ))}
+              </>
+            )}
           </nav>
 
           {/* Desktop right side */}
@@ -241,6 +276,24 @@ export default function Header({ initialEmail, initialAvatarUrl }: HeaderProps) 
                 {item.label}
               </Link>
             ))}
+            {userEmail && hasPaid && (
+              <>
+                <div className="h-px bg-white/[0.06] my-1" />
+                {chatNavItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={
+                      isChatLinkActive(item.href)
+                        ? "rounded-xl px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase border border-[rgba(212,168,67,0.45)] bg-[rgba(212,168,67,0.07)] text-[#D4A843]"
+                        : "rounded-xl px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-[#A1A1AA] border border-white/10 hover:border-white/20 hover:text-white transition"
+                    }
+                  >
+                    {item.label.toUpperCase()}
+                  </Link>
+                ))}
+              </>
+            )}
             {userEmail && (
               <>
                 <div className="h-px bg-white/[0.06] my-1" />

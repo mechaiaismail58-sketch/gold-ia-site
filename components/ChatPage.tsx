@@ -560,7 +560,7 @@ export default function ChatPage() {
     >
       {/* Slow-moving purple background blob */}
       <div
-        className="pointer-events-none absolute w-[500px] h-[500px] rounded-full bg-[#7C3AED] opacity-[0.015] blur-[150px] purple-blob-drift"
+        className="pointer-events-none absolute w-[600px] h-[500px] rounded-full bg-[#7C3AED] opacity-[0.012] blur-[180px] purple-blob-drift"
         style={{ top: "20%", left: "25%" }}
       />
 
@@ -580,15 +580,15 @@ export default function ChatPage() {
                 <span className="w-2 h-2 rounded-full bg-[#D4A843] animate-pulse inline-block shrink-0" />
                 <span className="text-sm font-semibold text-white">BullionDesk</span>
               </div>
-              <span className="text-[10px] text-[#71717A] uppercase tracking-wider pl-4">
+              <span className="text-xs text-[#71717A] uppercase tracking-[0.15em] font-medium pl-4">
                 AI Gold Trading Coach · XAUUSD
               </span>
             </div>
 
             {/* Center: always-visible anchor */}
-            <div className="chat-anchor-pulse bg-[#D4A843]/[0.08] border border-[#D4A843]/20 rounded-xl px-4 py-2.5 flex-1 max-w-md">
+            <div className="chat-anchor-pulse chat-banner-glow bg-[#D4A843]/[0.08] border border-[#D4A843]/20 rounded-xl px-4 py-2.5 flex-1 max-w-md">
               <p className="text-sm text-[#D4A843] font-medium text-center leading-snug">
-                <span className="lightning-pulse">⚡</span> Don&apos;t take any trade before checking with the AI.
+                Don&apos;t take any trade before checking with the AI.
               </p>
             </div>
 
@@ -597,7 +597,7 @@ export default function ChatPage() {
               <button
                 type="button"
                 onClick={() => setShowHistory(true)}
-                className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#71717A] hover:text-white border border-white/[0.08] rounded-lg px-3 py-1.5 hover:border-white/20 transition-all"
+                className="flex items-center gap-1.5 text-xs uppercase tracking-[0.15em] font-medium text-[#71717A] hover:text-white border border-white/[0.08] rounded-lg px-3 py-1.5 hover:border-white/20 transition-all"
                 title="Conversation history"
               >
                 <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
@@ -609,7 +609,7 @@ export default function ChatPage() {
               <button
                 type="button"
                 onClick={startNewChat}
-                className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#71717A] hover:text-white border border-white/[0.08] rounded-lg px-3 py-1.5 hover:border-white/20 transition-all"
+                className="flex items-center gap-1.5 text-xs uppercase tracking-[0.15em] font-medium text-[#71717A] hover:text-white border border-white/[0.08] rounded-lg px-3 py-1.5 hover:border-white/20 transition-all"
                 title="Start new analysis"
               >
                 <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
@@ -629,9 +629,9 @@ export default function ChatPage() {
       <div className="h-px bg-gradient-to-r from-transparent via-[#D4A843]/30 to-transparent flex-none" />
 
       {/* ── Quick stats bar ── */}
-      <div className="flex-none bg-white/[0.015] border-b border-white/[0.06] px-6 md:px-10 py-2 overflow-x-auto">
-        <div className="max-w-5xl mx-auto flex items-center gap-3 text-xs whitespace-nowrap">
-          <span className="text-[#D4A843] font-semibold font-mono tracking-wider">XAUUSD</span>
+      <div className="flex-none bg-white/[0.015] border-b border-white/[0.06] px-6 md:px-10 py-2 overflow-x-auto chat-stats-enter">
+        <div className="max-w-5xl mx-auto flex items-center gap-3 text-xs font-normal whitespace-nowrap">
+          <span className="text-[#D4A843] tracking-wider">XAUUSD</span>
           <span className="w-px h-3 bg-white/10 shrink-0" />
           <span className="flex items-center gap-1.5 text-[#71717A]">
             <span className="relative flex h-1.5 w-1.5 shrink-0">
@@ -673,9 +673,10 @@ export default function ChatPage() {
         {/* Expandable profile form */}
         <div
           style={{
-            maxHeight: profileOpen ? "480px" : "0",
+            maxHeight: profileOpen ? "400px" : "0",
+            opacity: profileOpen ? 1 : 0,
             overflow: "hidden",
-            transition: "max-height 400ms ease",
+            transition: "max-height 350ms ease, opacity 350ms ease",
           }}
         >
           {profileOpen && (
@@ -683,7 +684,7 @@ export default function ChatPage() {
               <div className="max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Prop Firm */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] uppercase tracking-wider text-[#71717A]">Prop Firm</label>
+                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Prop Firm</label>
                   <select
                     value={traderProfile.prop_firm}
                     onChange={e => setTraderProfile(p => ({ ...p, prop_firm: e.target.value }))}
@@ -696,7 +697,7 @@ export default function ChatPage() {
 
                 {/* Account Size */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] uppercase tracking-wider text-[#71717A]">Account Size</label>
+                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Account Size</label>
                   <select
                     value={traderProfile.account_size}
                     onChange={e => setTraderProfile(p => ({ ...p, account_size: e.target.value }))}
@@ -709,7 +710,7 @@ export default function ChatPage() {
 
                 {/* Challenge Phase */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] uppercase tracking-wider text-[#71717A]">Challenge Phase</label>
+                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Challenge Phase</label>
                   <select
                     value={traderProfile.challenge_phase}
                     onChange={e => setTraderProfile(p => ({ ...p, challenge_phase: e.target.value }))}
@@ -722,7 +723,7 @@ export default function ChatPage() {
 
                 {/* Current Drawdown */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] uppercase tracking-wider text-[#71717A]">Current Drawdown %</label>
+                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Current Drawdown %</label>
                   <input
                     type="text"
                     placeholder="e.g. 2.5%"
@@ -756,13 +757,13 @@ export default function ChatPage() {
         {/* Empty state */}
         {messages.length === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center px-6 empty-state-enter">
-            <p className="text-2xl font-medium text-white/50 mb-2 text-center leading-snug">
-              Before your next trade — let&apos;s talk.
+            <p className="text-2xl font-medium text-white/40 mb-2 text-center">
+              Before your next trade.
             </p>
-            <p className="text-sm text-[#71717A] mb-8 text-center">
-              Ask anything about XAUUSD.
+            <p className="text-sm text-[#525252] mb-10 text-center">
+              Let&apos;s check the full picture on XAUUSD.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+            <div className="grid grid-cols-2 gap-3 w-full max-w-lg">
               {suggestions.map((s, i) => (
                 <button
                   key={s}
@@ -799,21 +800,18 @@ export default function ChatPage() {
                             />
                           </div>
                         )}
-                        <p className="text-sm text-white/90 font-normal break-words">
+                        <p className="font-sans text-sm font-normal text-white/90 break-words">
                           {m.content}
                         </p>
                       </div>
                     </div>
                   ) : (
                     <div className="mb-8">
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-[#D4A843]/60 mb-2">
+                      <p className="text-xs uppercase tracking-[0.15em] font-medium text-[#D4A843]/60 mb-2">
                         BullionDesk
                       </p>
                       <div className="border-l-[3px] border-[#D4A843]/20 pl-5 max-w-[85%]">
-                        <div
-                          className="text-[15px] font-light leading-[1.8] tracking-[0.01em] text-[#E5E5E5]"
-                          style={{ fontFamily: "var(--font-geist)" }}
-                        >
+                        <div className="font-sans text-[15px] leading-[1.75] tracking-normal font-normal text-[#E8E8E8]">
                           <MarkdownMessage content={m.content} />
                           {(isStreaming || isTypewriting) && i === messages.length - 1 && m.role === "assistant" && (
                             <span className="typing-cursor" />
@@ -864,7 +862,7 @@ export default function ChatPage() {
               {/* Loading dots */}
               {loading && !isStreaming && (
                 <div className="mb-8 animate-fade-in-fast">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#D4A843]/60 mb-2">
+                  <p className="text-xs uppercase tracking-[0.15em] font-medium text-[#D4A843]/60 mb-2">
                     BullionDesk
                   </p>
                   <div className="border-l-[3px] border-[#D4A843]/20 pl-5 flex items-center gap-1.5 py-2">

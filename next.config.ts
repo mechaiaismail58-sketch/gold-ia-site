@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
       "img-src 'self' data: blob: https://wegvgmovhcwxjqnqqjat.supabase.co",
       "font-src 'self'",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.twelvedata.com https://api.stlouisfed.org https://newsdata.io https://api.anthropic.com",
-      "frame-src https://js.stripe.com https://hooks.stripe.com",
+      "frame-src https://js.stripe.com https://hooks.stripe.com https://s.tradingview.com https://www.tradingview.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
