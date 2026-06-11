@@ -50,7 +50,7 @@ const FRAMEWORK = [
     label: "Market Structure",
     title: "Reading the structure before the move.",
     desc: "Higher timeframe bias. Key levels. Orderblocks. Fair Value Gaps. Every analysis starts with structure — we map the battlefield before we look for entries.",
-    glowColor: "rgba(212,168,67,0.03)",
+    glowColor: "rgba(212,168,67,0.08)",
     glowPos: "top-0 right-0",
     numSide: "right",
   },
@@ -59,7 +59,7 @@ const FRAMEWORK = [
     label: "Macro Analysis",
     title: "Why gold moves. And where it stops.",
     desc: "DXY. Real yields. Fed policy. ETF flows. Intermarket correlations. Macro tells us WHY gold is moving. Structure tells us WHERE.",
-    glowColor: "rgba(124,58,237,0.04)",
+    glowColor: "rgba(124,58,237,0.10)",
     glowPos: "bottom-0 left-0",
     numSide: "left",
   },
@@ -68,7 +68,7 @@ const FRAMEWORK = [
     label: "Risk Management",
     title: "Risk is math, not emotion.",
     desc: "Position sizing tied to structure. R-multiple tracking. Drawdown limits that don't bend. Risk is math, not emotion — and the AI enforces it on every response.",
-    glowColor: "rgba(212,168,67,0.03)",
+    glowColor: "rgba(212,168,67,0.08)",
     glowPos: "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
     numSide: "right",
   },
@@ -77,7 +77,7 @@ const FRAMEWORK = [
     label: "Psychology & Discipline",
     title: "The AI that says wait.",
     desc: "Bias detection. Overtrading alerts. Consistency scoring. The AI says 'wait' more often than it says 'go' — and that's the point.",
-    glowColor: "rgba(124,58,237,0.03)",
+    glowColor: "rgba(124,58,237,0.08)",
     glowPos: "top-0 left-0",
     numSide: "left",
   },
@@ -128,7 +128,7 @@ function FrameworkSection({ item, index }: { item: typeof FRAMEWORK[number]; ind
   };
 
   return (
-    <section className="min-h-[80vh] flex items-center relative overflow-hidden py-20 md:py-0">
+    <section className="min-h-[80vh] flex items-center relative z-10 overflow-hidden py-20 md:py-0">
       {/* Glow — fades in with section */}
       <div
         className={`absolute ${item.glowPos} w-[480px] h-[480px] rounded-full blur-[150px] pointer-events-none`}
@@ -222,8 +222,39 @@ export default function MethodologyPage() {
   return (
     <main className="text-white">
 
+      {/* Persistent background blobs — matches landing page */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
+        <div style={{
+          position: "absolute", top: "-10%", left: "-5%",
+          width: "500px", height: "500px", borderRadius: "50%",
+          background: "radial-gradient(ellipse, rgba(123,79,212,0.18) 0%, transparent 70%)",
+          filter: "blur(80px)",
+          animation: "blobA 12s ease-in-out infinite alternate",
+        }} />
+        <div style={{
+          position: "absolute", bottom: "-10%", right: "-5%",
+          width: "400px", height: "400px", borderRadius: "50%",
+          background: "radial-gradient(ellipse, rgba(212,168,67,0.12) 0%, transparent 70%)",
+          filter: "blur(100px)",
+          animation: "blobB 15s ease-in-out infinite alternate",
+        }} />
+        <div style={{
+          position: "absolute", top: "40%", right: "10%",
+          width: "300px", height: "300px", borderRadius: "50%",
+          background: "radial-gradient(ellipse, rgba(123,79,212,0.10) 0%, transparent 70%)",
+          filter: "blur(60px)",
+          animation: "blobC 18s ease-in-out infinite alternate",
+        }} />
+      </div>
+
+      <style>{`
+        @keyframes blobA { from { transform: translate(0,0) scale(1); } to { transform: translate(40px,60px) scale(1.1); } }
+        @keyframes blobB { from { transform: translate(0,0) scale(1); } to { transform: translate(-50px,-40px) scale(1.08); } }
+        @keyframes blobC { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,-50px) scale(1.05); } }
+      `}</style>
+
       {/* ── Hero ── */}
-      <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      <section className="min-h-screen flex items-center justify-center relative z-10 overflow-hidden">
         <div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full pointer-events-none"
           style={{ background: "radial-gradient(ellipse at center, rgba(212,168,67,0.04) 0%, transparent 70%)", filter: "blur(120px)" }}
@@ -252,7 +283,7 @@ export default function MethodologyPage() {
 
       {/* ── Stats bar ── */}
       <section
-        className="border-y py-16 md:py-20"
+        className="border-y py-16 md:py-20 relative z-10"
         style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.06)" }}
       >
         <div className="max-w-5xl mx-auto px-6">
@@ -267,7 +298,7 @@ export default function MethodologyPage() {
       <AnimatedDivider />
 
       {/* ── Bottom CTA ── */}
-      <section className="min-h-[50vh] flex items-center justify-center flex-col px-6 py-24">
+      <section className="min-h-[50vh] flex items-center justify-center flex-col px-6 py-24 relative z-10">
         <div ref={ctaReveal.ref} style={zoomStyle(ctaReveal.visible)} className="text-center">
           <h2 className="text-4xl font-bold text-white mb-8">See it for yourself.</h2>
           <Link

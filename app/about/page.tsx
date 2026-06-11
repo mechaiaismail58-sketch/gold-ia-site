@@ -68,7 +68,7 @@ const CHAPTERS = [
     title: "The problem every gold trader knows.",
     goldLine: "Two traders. Countless hours analyzing XAUUSD.",
     body: " Too many indicators, too much noise, not enough discipline. Like most retail traders, they lost before they won — chasing signals, ignoring structure, letting emotion drive decisions.",
-    glowColor: "rgba(212,168,67,0.03)",
+    glowColor: "rgba(212,168,67,0.08)",
     glowPos: "top-0 right-0",
     align: "center" as const,
     variant: "zoom" as const,
@@ -78,7 +78,7 @@ const CHAPTERS = [
     title: "What changed everything.",
     goldLine: "What changed everything was institutional analysis.",
     body: " ICT, Wyckoff, order flow, macro reading. The best traders in the world don't watch RSI. They watch structure, positioning, and flow. But accessing that level of analysis demanded hours of work every day — and a discipline few retail traders can maintain alone.",
-    glowColor: "rgba(124,58,237,0.04)",
+    glowColor: "rgba(124,58,237,0.10)",
     glowPos: "bottom-0 left-0",
     align: "right" as const,
     variant: "slide-left" as const,
@@ -88,7 +88,7 @@ const CHAPTERS = [
     title: "So we built it.",
     goldLine: "BullionDesk was built to do that work automatically.",
     body: " An intelligence engine that reads 22+ data sources, applies institutional frameworks, and delivers clear analysis with iron discipline. Not a signal service. Not another indicator. A real trading coach that says no when conditions don't warrant a trade.",
-    glowColor: "rgba(212,168,67,0.03)",
+    glowColor: "rgba(212,168,67,0.08)",
     glowPos: "top-0 right-0",
     align: "center" as const,
     variant: "zoom" as const,
@@ -151,7 +151,7 @@ function Chapter({ chapter }: { chapter: typeof CHAPTERS[number] }) {
   };
 
   return (
-    <section className="min-h-[85vh] flex items-center relative overflow-hidden py-24 md:py-0">
+    <section className="min-h-[85vh] flex items-center relative z-10 overflow-hidden py-24 md:py-0">
       {/* Glow fades in with content */}
       <div
         className={`absolute ${chapter.glowPos} w-[480px] h-[480px] rounded-full blur-[150px] pointer-events-none`}
@@ -219,7 +219,7 @@ function IsCard({
 
   return (
     <div ref={ref} style={cardStyle}>
-      <div className="p-8 rounded-2xl h-full relative overflow-hidden" style={{ background: "rgba(255,255,255,0.03)" }}>
+      <div className="p-8 rounded-2xl h-full relative overflow-hidden" style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.08)" }}>
         {/* Animated left border — draws downward */}
         <div
           className="absolute left-0 top-0 w-[3px]"
@@ -277,8 +277,39 @@ export default function AboutPage() {
   return (
     <div className="text-white">
 
+      {/* Persistent background blobs — matches landing page */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
+        <div style={{
+          position: "absolute", top: "-10%", left: "-5%",
+          width: "500px", height: "500px", borderRadius: "50%",
+          background: "radial-gradient(ellipse, rgba(123,79,212,0.18) 0%, transparent 70%)",
+          filter: "blur(80px)",
+          animation: "blobA 12s ease-in-out infinite alternate",
+        }} />
+        <div style={{
+          position: "absolute", bottom: "-10%", right: "-5%",
+          width: "400px", height: "400px", borderRadius: "50%",
+          background: "radial-gradient(ellipse, rgba(212,168,67,0.12) 0%, transparent 70%)",
+          filter: "blur(100px)",
+          animation: "blobB 15s ease-in-out infinite alternate",
+        }} />
+        <div style={{
+          position: "absolute", top: "40%", right: "10%",
+          width: "300px", height: "300px", borderRadius: "50%",
+          background: "radial-gradient(ellipse, rgba(123,79,212,0.10) 0%, transparent 70%)",
+          filter: "blur(60px)",
+          animation: "blobC 18s ease-in-out infinite alternate",
+        }} />
+      </div>
+
+      <style>{`
+        @keyframes blobA { from { transform: translate(0,0) scale(1); } to { transform: translate(40px,60px) scale(1.1); } }
+        @keyframes blobB { from { transform: translate(0,0) scale(1); } to { transform: translate(-50px,-40px) scale(1.08); } }
+        @keyframes blobC { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,-50px) scale(1.05); } }
+      `}</style>
+
       {/* ── Hero ── */}
-      <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      <section className="min-h-screen flex items-center justify-center relative z-10 overflow-hidden">
         <div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full pointer-events-none"
           style={{ background: "radial-gradient(ellipse at center, rgba(212,168,67,0.04) 0%, transparent 70%)", filter: "blur(120px)" }}
@@ -306,7 +337,7 @@ export default function AboutPage() {
       <AnimatedDivider />
 
       {/* ── IS / IS NOT ── */}
-      <section className="py-24 px-6">
+      <section className="py-24 px-6 relative z-10">
         <div ref={sectionTitleReveal.ref} style={zoomStyle(sectionTitleReveal.visible)}>
           <h2 className="text-2xl font-bold text-white text-center mb-12">
             What we are. What we&apos;re not.
@@ -339,7 +370,7 @@ export default function AboutPage() {
       <AnimatedDivider />
 
       {/* ── Bottom CTA ── */}
-      <section className="min-h-[50vh] flex items-center justify-center flex-col px-6 py-24">
+      <section className="min-h-[50vh] flex items-center justify-center flex-col px-6 py-24 relative z-10">
         <div ref={ctaReveal.ref} style={zoomStyle(ctaReveal.visible)} className="text-center">
           <h2 className="text-4xl font-bold text-white mb-8">See it for yourself.</h2>
           <Link

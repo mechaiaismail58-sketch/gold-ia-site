@@ -24,9 +24,14 @@ export default function ChatMarketPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="flex-1"
+        className="flex-1 p-4 md:p-6"
       >
-        <GoldTradingViewChart />
+        <div
+          className="h-full overflow-hidden"
+          style={{ borderRadius: "16px", border: "1px solid rgba(255,255,255,0.08)" }}
+        >
+          <GoldTradingViewChart theme="light" />
+        </div>
       </motion.div>
     </div>
   );

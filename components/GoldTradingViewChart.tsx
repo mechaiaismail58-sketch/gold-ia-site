@@ -22,7 +22,12 @@ const INTERVALS: Array<{ label: string; tv: string }> = [
 
 const CONTAINER_ID = "bullion-tv-chart";
 
-export default function GoldTradingViewChart() {
+interface GoldTradingViewChartProps {
+  /** Chart color theme — "dark" matches the trading-desk UI, "light" gives a Bloomberg-style institutional look. */
+  theme?: "dark" | "light";
+}
+
+export default function GoldTradingViewChart({ theme = "dark" }: GoldTradingViewChartProps) {
   const scriptRef  = useRef<HTMLScriptElement | null>(null);
   const widgetRef  = useRef<unknown>(null);
   const [interval, setInterval] = useState("15");
@@ -34,16 +39,17 @@ export default function GoldTradingViewChart() {
     if (el) el.innerHTML = "";
 
     const chartHeight = typeof window !== "undefined" && window.innerWidth < 640 ? 420 : 680;
+    const isLight = theme === "light";
 
     widgetRef.current = new window.TradingView.widget({
       container_id:       CONTAINER_ID,
       symbol:             "OANDA:XAUUSD",
       interval:           iv,
       timezone:           "Etc/UTC",
-      theme:              "dark",
+      theme:              isLight ? "light" : "dark",
       style:              "1",           // candlestick
       locale:             "en",
-      toolbar_bg:         "#0d0c14",
+      toolbar_bg:         isLight ? "#f8f8f8" : "#0d0c14",
       enable_publishing:  false,
       allow_symbol_change: false,
       hide_side_toolbar:  false,
@@ -51,8 +57,8 @@ export default function GoldTradingViewChart() {
       save_image:         false,
       height:             chartHeight,
       width:              "100%",
-      backgroundColor:    "rgba(7,6,11,1)",
-      gridColor:          "rgba(255,255,255,0.04)",
+      backgroundColor:    isLight ? "rgba(248, 248, 248, 1)" : "rgba(7,6,11,1)",
+      gridColor:          isLight ? "rgba(0, 0, 0, 0.04)" : "rgba(255,255,255,0.04)",
       no_referral_id:     true,
       disabled_features: ["volume_force_overlay", "create_volume_indicator_by_default"],
       studies_overrides: {
@@ -61,8 +67,23 @@ export default function GoldTradingViewChart() {
         "volume.volume ma.visible": false,
         "volume.show ma":           false,
       },
-      overrides: {
-        // Institutional candle palette
+      overrides: isLight ? {
+        // Institutional blue/red candle palette — light theme
+        "mainSeriesProperties.candleStyle.upColor":         "#2962FF",
+        "mainSeriesProperties.candleStyle.downColor":       "#E53935",
+        "mainSeriesProperties.candleStyle.borderUpColor":   "#2962FF",
+        "mainSeriesProperties.candleStyle.borderDownColor": "#E53935",
+        "mainSeriesProperties.candleStyle.wickUpColor":     "rgba(41, 98, 255, 0.5)",
+        "mainSeriesProperties.candleStyle.wickDownColor":   "rgba(229, 57, 53, 0.5)",
+        // Background & grid
+        "paneProperties.background":                        "#FAFAFA",
+        "paneProperties.backgroundType":                    "solid",
+        "paneProperties.vertGridProperties.color":          "rgba(0,0,0,0.06)",
+        "paneProperties.horzGridProperties.color":          "rgba(0,0,0,0.06)",
+        // Crosshair
+        "paneProperties.crossHairProperties.color":         "rgba(41,98,255,0.5)",
+      } : {
+        // Institutional candle palette — dark theme
         "mainSeriesProperties.candleStyle.upColor":         "#4CAF89",
         "mainSeriesProperties.candleStyle.downColor":       "#F06449",
         "mainSeriesProperties.candleStyle.borderUpColor":   "#4CAF89",
@@ -100,11 +121,11 @@ export default function GoldTradingViewChart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Rebuild widget when interval changes (after script is loaded)
+  // Rebuild widget when interval or theme changes (after script is loaded)
   useEffect(() => {
     if (window.TradingView) buildWidget(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [interval]);
+  }, [interval, theme]);
 
   return (
     <div className="w-full">

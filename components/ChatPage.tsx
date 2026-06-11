@@ -642,106 +642,73 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* ── Trader profile bar ── */}
-      <div className="flex-none border-b border-white/[0.06]">
-        <button
-          type="button"
-          onClick={() => setProfileOpen(o => !o)}
-          className="w-full flex items-center justify-between px-6 md:px-10 py-2 text-xs text-[#71717A] hover:text-white/70 hover:bg-white/[0.02] transition-all"
-        >
-          <span className="flex items-center gap-2">
-            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" className="shrink-0 opacity-60">
-              <circle cx="6" cy="4" r="2.5" stroke="currentColor" strokeWidth="1.1"/>
-              <path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-            </svg>
-            {summary
-              ? <span className="text-[#A1A1AA]">📊 {summary}</span>
-              : <span>Set up your trader profile for personalised coaching →</span>
-            }
-          </span>
-          <svg
-            width="10" height="10" viewBox="0 0 10 10" fill="none"
-            className={cn("transition-transform duration-300", profileOpen && "rotate-180")}
-          >
-            <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-
-        {/* Expandable profile form */}
-        <div
-          style={{
-            maxHeight: profileOpen ? "400px" : "0",
-            opacity: profileOpen ? 1 : 0,
-            overflow: "hidden",
-            transition: "max-height 350ms ease, opacity 350ms ease",
-          }}
-        >
-          {profileOpen && (
-            <div className="px-6 md:px-10 pb-4 pt-1 profile-content-enter bg-white/[0.03] border-t border-[#D4A843]/10">
-              <div className="max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Prop Firm */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Prop Firm</label>
-                  <select
-                    value={traderProfile.prop_firm}
-                    onChange={e => setTraderProfile(p => ({ ...p, prop_firm: e.target.value }))}
-                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
-                  >
-                    <option value="" className="bg-[#111]">Select firm…</option>
-                    {PROP_FIRMS.map(f => <option key={f} value={f} className="bg-[#111]">{f}</option>)}
-                  </select>
-                </div>
-
-                {/* Account Size */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Account Size</label>
-                  <select
-                    value={traderProfile.account_size}
-                    onChange={e => setTraderProfile(p => ({ ...p, account_size: e.target.value }))}
-                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
-                  >
-                    <option value="" className="bg-[#111]">Select size…</option>
-                    {ACCOUNT_SIZES.map(s => <option key={s} value={s} className="bg-[#111]">{s}</option>)}
-                  </select>
-                </div>
-
-                {/* Challenge Phase */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Challenge Phase</label>
-                  <select
-                    value={traderProfile.challenge_phase}
-                    onChange={e => setTraderProfile(p => ({ ...p, challenge_phase: e.target.value }))}
-                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
-                  >
-                    <option value="" className="bg-[#111]">Select phase…</option>
-                    {CHALLENGE_PHASES.map(ph => <option key={ph} value={ph} className="bg-[#111]">{ph}</option>)}
-                  </select>
-                </div>
-
-                {/* Current Drawdown */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Current Drawdown %</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 2.5%"
-                    value={traderProfile.current_drawdown}
-                    onChange={e => setTraderProfile(p => ({ ...p, current_drawdown: e.target.value }))}
-                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-[#525252] focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition"
-                  />
-                </div>
+      {/* ── Trader profile setup form — opened via banner CTA ── */}
+      {profileOpen && (
+        <div className="flex-none border-b border-white/[0.06] bg-white/[0.03]">
+          <div className="px-6 md:px-10 py-4 profile-content-enter">
+            <div className="max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Prop Firm */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Prop Firm</label>
+                <select
+                  value={traderProfile.prop_firm}
+                  onChange={e => setTraderProfile(p => ({ ...p, prop_firm: e.target.value }))}
+                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
+                >
+                  <option value="" className="bg-[#111]">Select firm…</option>
+                  {PROP_FIRMS.map(f => <option key={f} value={f} className="bg-[#111]">{f}</option>)}
+                </select>
               </div>
 
-              <button
-                type="button"
-                onClick={saveProfile}
-                className="mt-3 flex items-center gap-2 rounded-lg border border-[#D4A843]/30 bg-[#D4A843]/[0.08] px-4 py-2 text-xs text-[#D4A843] hover:bg-[#D4A843]/[0.14] hover:shadow-[0_0_20px_rgba(212,168,67,0.2)] transition"
-              >
-                Save profile
-              </button>
+              {/* Account Size */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Account Size</label>
+                <select
+                  value={traderProfile.account_size}
+                  onChange={e => setTraderProfile(p => ({ ...p, account_size: e.target.value }))}
+                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
+                >
+                  <option value="" className="bg-[#111]">Select size…</option>
+                  {ACCOUNT_SIZES.map(s => <option key={s} value={s} className="bg-[#111]">{s}</option>)}
+                </select>
+              </div>
+
+              {/* Challenge Phase */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Challenge Phase</label>
+                <select
+                  value={traderProfile.challenge_phase}
+                  onChange={e => setTraderProfile(p => ({ ...p, challenge_phase: e.target.value }))}
+                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
+                >
+                  <option value="" className="bg-[#111]">Select phase…</option>
+                  {CHALLENGE_PHASES.map(ph => <option key={ph} value={ph} className="bg-[#111]">{ph}</option>)}
+                </select>
+              </div>
+
+              {/* Current Drawdown */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Current Drawdown %</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 2.5%"
+                  value={traderProfile.current_drawdown}
+                  onChange={e => setTraderProfile(p => ({ ...p, current_drawdown: e.target.value }))}
+                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-[#525252] focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition"
+                />
+              </div>
             </div>
-          )}
+
+            <button
+              type="button"
+              onClick={saveProfile}
+              className="mt-3 flex items-center gap-2 rounded-lg border border-[#D4A843]/30 bg-[#D4A843]/[0.08] px-4 py-2 text-xs text-[#D4A843] hover:bg-[#D4A843]/[0.14] hover:shadow-[0_0_20px_rgba(212,168,67,0.2)] transition"
+            >
+              Save profile
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Trader profile banner — unmissable onboarding nudge ── */}
       <AnimatePresence>
@@ -751,10 +718,18 @@ export default function ChatPage() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="flex-none mx-6 md:mx-10 mt-4 rounded-2xl p-px shrink-0"
-            style={{ background: "linear-gradient(135deg, #7B4FD4, #D4A843)" }}
+            className="flex-none mx-6 md:mx-10 mt-4 rounded-[17px] p-px shrink-0"
+            style={{ background: "linear-gradient(135deg, rgba(123,79,212,0.5), rgba(212,168,67,0.5))" }}
           >
-            <div className="rounded-2xl bg-white/[0.04] backdrop-blur-xl px-5 py-4 sm:px-6 sm:py-5 flex items-start sm:items-center justify-between gap-4">
+            <div
+              className="rounded-2xl px-5 py-4 sm:px-6 sm:py-5 flex items-start sm:items-center justify-between gap-4"
+              style={{
+                background: "rgba(123, 79, 212, 0.08)",
+                border: "1px solid rgba(123, 79, 212, 0.35)",
+                backdropFilter: "blur(12px)",
+                borderRadius: "16px",
+              }}
+            >
               <div>
                 <p className="text-base sm:text-lg font-semibold text-white mb-1">
                   Complete your trader profile
@@ -774,7 +749,7 @@ export default function ChatPage() {
                 type="button"
                 onClick={dismissProfileBanner}
                 aria-label="Dismiss"
-                className="shrink-0 h-8 w-8 flex items-center justify-center rounded-lg text-black/40 hover:text-black/70 hover:bg-black/10 transition"
+                className="shrink-0 h-8 w-8 flex items-center justify-center rounded-lg text-white/40 hover:text-white/70 hover:bg-white/10 transition"
               >
                 ✕
               </button>
