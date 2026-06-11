@@ -99,22 +99,6 @@ function UpgradeContent() {
         </button>
       </div>
 
-      {/* Background glows — purple/violet + gold counterpoint, matching the landing page */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div
-          className="absolute -top-28 right-[-180px] h-[520px] w-[520px] rounded-full blur-[120px]"
-          style={{ background: "radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%)" }}
-        />
-        <div
-          className="absolute top-[60px] left-[-200px] h-[480px] w-[480px] rounded-full blur-[120px]"
-          style={{ background: "radial-gradient(circle, rgba(109,40,217,0.16) 0%, transparent 70%)" }}
-        />
-        <div
-          className="absolute bottom-[-220px] left-[18%] h-[520px] w-[520px] rounded-full blur-[130px]"
-          style={{ background: "radial-gradient(circle, rgba(212,168,67,0.09) 0%, transparent 70%)" }}
-        />
-      </div>
-
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="text-center mb-10">

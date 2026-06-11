@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import GlassCard from "@/components/design-system/GlassCard";
 
 function LoginForm() {
   const router = useRouter();
@@ -84,22 +85,6 @@ function LoginForm() {
         }
       `}</style>
 
-      {/* Background glows — purple/violet + gold counterpoint, matching the landing page */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div
-          className="absolute -top-28 right-[-180px] h-[520px] w-[520px] rounded-full blur-[120px]"
-          style={{ background: "radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%)" }}
-        />
-        <div
-          className="absolute top-[60px] left-[-200px] h-[480px] w-[480px] rounded-full blur-[120px]"
-          style={{ background: "radial-gradient(circle, rgba(109,40,217,0.16) 0%, transparent 70%)" }}
-        />
-        <div
-          className="absolute bottom-[-220px] left-[18%] h-[520px] w-[520px] rounded-full blur-[130px]"
-          style={{ background: "radial-gradient(circle, rgba(212,168,67,0.09) 0%, transparent 70%)" }}
-        />
-      </div>
-
       <div className="relative w-full max-w-md auth-form-in">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block text-[16px] tracking-[0.22em] uppercase text-white">
@@ -122,7 +107,7 @@ function LoginForm() {
             />
           </div>
 
-          <div className="rounded-2xl border border-white/5 bg-[rgba(17,17,17,0.6)] backdrop-blur-xl p-8 max-w-md">
+          <GlassCard className="p-8 max-w-md">
             <div className="mb-6">
               <h1 className="text-2xl font-extrabold text-white">Welcome back</h1>
               <p className="mt-1.5 text-sm text-[#A1A1AA]">Your AI trading coach is waiting.</p>
@@ -214,7 +199,7 @@ function LoginForm() {
                 Sign up
               </Link>
             </div>
-          </div>
+          </GlassCard>
         </div>
       </div>
     </div>
