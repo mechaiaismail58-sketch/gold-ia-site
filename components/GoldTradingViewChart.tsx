@@ -22,12 +22,7 @@ const INTERVALS: Array<{ label: string; tv: string }> = [
 
 const CONTAINER_ID = "bullion-tv-chart";
 
-interface GoldTradingViewChartProps {
-  /** Chart color theme — "dark" matches the public /market page, "purple-gold" is BullionDesk's branded chart identity used in /chat/market. */
-  theme?: "dark" | "purple-gold";
-}
-
-export default function GoldTradingViewChart({ theme = "dark" }: GoldTradingViewChartProps) {
+export default function GoldTradingViewChart() {
   const scriptRef  = useRef<HTMLScriptElement | null>(null);
   const widgetRef  = useRef<unknown>(null);
   const [interval, setInterval] = useState("15");
@@ -39,7 +34,6 @@ export default function GoldTradingViewChart({ theme = "dark" }: GoldTradingView
     if (el) el.innerHTML = "";
 
     const chartHeight = typeof window !== "undefined" && window.innerWidth < 640 ? 420 : 680;
-    const isPurpleGold = theme === "purple-gold";
 
     widgetRef.current = new window.TradingView.widget({
       container_id:       CONTAINER_ID,
@@ -49,7 +43,8 @@ export default function GoldTradingViewChart({ theme = "dark" }: GoldTradingView
       theme:              "dark",
       style:              "1",           // candlestick
       locale:             "en",
-      toolbar_bg:         isPurpleGold ? "#0A0814" : "#0d0c14",
+      toolbar_bg:         "#0D0D0D",
+      hide_top_toolbar:   false,
       enable_publishing:  false,
       allow_symbol_change: false,
       hide_side_toolbar:  false,
@@ -57,8 +52,8 @@ export default function GoldTradingViewChart({ theme = "dark" }: GoldTradingView
       save_image:         false,
       height:             chartHeight,
       width:              "100%",
-      backgroundColor:    isPurpleGold ? "rgba(10, 8, 20, 1)" : "rgba(7,6,11,1)",
-      gridColor:          isPurpleGold ? "rgba(123, 79, 212, 0.08)" : "rgba(255,255,255,0.04)",
+      backgroundColor:    "#0D0D0D",
+      gridColor:          "rgba(255,255,255,0.04)",
       no_referral_id:     true,
       disabled_features: ["volume_force_overlay", "create_volume_indicator_by_default"],
       studies_overrides: {
@@ -66,37 +61,6 @@ export default function GoldTradingViewChart({ theme = "dark" }: GoldTradingView
         "volume.volume.color.1":   "rgba(0,0,0,0)",
         "volume.volume ma.visible": false,
         "volume.show ma":           false,
-      },
-      overrides: isPurpleGold ? {
-        // BullionDesk purple/gold candle palette — chat market chart
-        "mainSeriesProperties.candleStyle.upColor":         "#7B4FD4",
-        "mainSeriesProperties.candleStyle.downColor":       "#D4A843",
-        "mainSeriesProperties.candleStyle.borderUpColor":   "#7B4FD4",
-        "mainSeriesProperties.candleStyle.borderDownColor": "#D4A843",
-        "mainSeriesProperties.candleStyle.wickUpColor":     "rgba(123,79,212,0.6)",
-        "mainSeriesProperties.candleStyle.wickDownColor":   "rgba(212,168,67,0.6)",
-        // Background & grid
-        "paneProperties.background":                        "#0A0814",
-        "paneProperties.backgroundType":                    "solid",
-        "paneProperties.vertGridProperties.color":          "rgba(123,79,212,0.08)",
-        "paneProperties.horzGridProperties.color":          "rgba(123,79,212,0.08)",
-        // Crosshair
-        "paneProperties.crossHairProperties.color":         "rgba(212,168,67,0.4)",
-      } : {
-        // Institutional candle palette — dark theme
-        "mainSeriesProperties.candleStyle.upColor":         "#4CAF89",
-        "mainSeriesProperties.candleStyle.downColor":       "#F06449",
-        "mainSeriesProperties.candleStyle.borderUpColor":   "#4CAF89",
-        "mainSeriesProperties.candleStyle.borderDownColor": "#F06449",
-        "mainSeriesProperties.candleStyle.wickUpColor":     "rgba(76, 175, 137, 0.6)",
-        "mainSeriesProperties.candleStyle.wickDownColor":   "rgba(240, 100, 73, 0.6)",
-        // Background & grid
-        "paneProperties.background":                        "#07060b",
-        "paneProperties.backgroundType":                    "solid",
-        "paneProperties.vertGridProperties.color":          "rgba(255,255,255,0.04)",
-        "paneProperties.horzGridProperties.color":          "rgba(255,255,255,0.04)",
-        // Crosshair
-        "paneProperties.crossHairProperties.color":         "rgba(139,92,246,0.5)",
       },
     });
   }
@@ -121,11 +85,10 @@ export default function GoldTradingViewChart({ theme = "dark" }: GoldTradingView
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Rebuild widget when interval or theme changes (after script is loaded)
+  // Rebuild widget when interval changes (after script is loaded)
   useEffect(() => {
     if (window.TradingView) buildWidget(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [interval, theme]);
+  }, [interval]);
 
   return (
     <div className="w-full">

@@ -29,13 +29,12 @@ export default function ChatMarketPage() {
         <div
           className="h-full overflow-hidden"
           style={{
-            background: "#0A0814",
-            border: "1px solid rgba(123,79,212,0.2)",
-            borderRadius: "16px",
-            boxShadow: "0 0 40px rgba(123,79,212,0.08)",
+            background: "#0D0D0D",
+            border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: "12px",
           }}
         >
-          <GoldTradingViewChart theme="purple-gold" />
+          <GoldTradingViewChart />
         </div>
       </motion.div>
     </div>

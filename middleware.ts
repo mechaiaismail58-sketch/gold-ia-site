@@ -51,7 +51,9 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/api/")) return NextResponse.next();
 
   // ── Public pages ──────────────────────────────────────────────────────────
-  if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
+  // "/" is excluded here — paid users hitting "/" get redirected to /chat below,
+  // so it needs the auth/has_paid check before passing through.
+  if (pathname !== "/" && PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 
   // ── /admin bypass ─────────────────────────────────────────────────────────
   const adminSecret  = process.env.ADMIN_SECRET;
@@ -127,6 +129,17 @@ export async function middleware(request: NextRequest) {
       res.cookies.set(name, value)
     );
     return res;
+  }
+
+  // ── Landing page ───────────────────────────────────────────────────────────
+  // Paid users land in /chat instead of seeing the marketing landing page.
+  // Unauthenticated and unpaid users see "/" normally.
+  if (pathname === "/") {
+    if (user) {
+      const hasPaid = await getHasPaid(user.id);
+      if (hasPaid) return redirect("/chat");
+    }
+    return supabaseResponse;
   }
 
   // ── Auth pages (/login, /signup) ──────────────────────────────────────────
