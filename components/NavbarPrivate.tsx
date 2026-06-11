@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Avatar from "@/components/Avatar";
 import { ChevronIcon } from "@/components/NavIcons";
@@ -21,7 +21,6 @@ export default function NavbarPrivate() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const pathname = usePathname();
-  const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -65,11 +64,8 @@ export default function NavbarPrivate() {
     setDropdownOpen(false);
     setUserEmail(null);
     setAvatarUrl(null);
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
-    setSigningOut(false);
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/";
   }
 
   const isActive = (href: string) =>

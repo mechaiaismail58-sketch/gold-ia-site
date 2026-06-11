@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Avatar from "@/components/Avatar";
 import { HamburgerIcon, CloseIcon, ChevronIcon } from "@/components/NavIcons";
@@ -26,7 +26,6 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl);
   const [hasPaid, setHasPaid] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -87,11 +86,8 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
     setUserEmail(null);
     setAvatarUrl(null);
     setHasPaid(false);
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
-    setSigningOut(false);
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/";
   }
 
   const navLinkClass = (href: string) =>

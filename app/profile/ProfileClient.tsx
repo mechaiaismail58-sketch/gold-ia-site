@@ -62,8 +62,7 @@ export default function ProfileClient({ email, tradingHorizon, avatarUrl }: Prop
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
-    router.refresh();
+    window.location.href = "/";
   }
 
   async function saveAlerts(scalp: boolean, swing: boolean) {

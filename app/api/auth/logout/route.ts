@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   // Redirect server-side so the cleared-cookie Set-Cookie headers travel
   // with the 303 response even if client JS fails.
   const origin = request.nextUrl.origin;
-  const res = NextResponse.redirect(`${origin}/login`, { status: 303 });
+  const res = NextResponse.redirect(`${origin}/`, { status: 303 });
 
   // Explicitly expire any remaining Supabase session cookies on the response
   for (const cookie of request.cookies.getAll()) {

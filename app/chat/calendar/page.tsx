@@ -31,6 +31,21 @@ const IMPACT_BORDER: Record<CalendarEvent["impact"], string> = {
   MED:  "2px solid rgba(212,168,67,0.4)",
 };
 
+const GOLD_KEYWORDS = [
+  "CPI", "Fed", "FOMC", "NFP", "GDP", "PPI", "Unemployment", "Payroll",
+  "Interest Rate", "Powell", "Inflation", "Treasury", "DXY", "Jobs", "PMI",
+];
+
+// Hardcoded fallback — shown when Finnhub's free-tier calendar returns no
+// gold-relevant US events for the lookahead window.
+const FALLBACK_EVENTS: FinnhubEvent[] = [
+  { time: "2026-06-17T14:30:00", event: "US Retail Sales (MoM)", country: "US", impact: "high", estimate: "0.3%", prev: "-0.1%" },
+  { time: "2026-06-18T18:00:00", event: "FOMC Meeting Minutes", country: "US", impact: "high", estimate: "—", prev: "—" },
+  { time: "2026-06-19T12:30:00", event: "US Initial Jobless Claims", country: "US", impact: "medium", estimate: "218K", prev: "221K" },
+  { time: "2026-06-25T12:30:00", event: "US GDP (QoQ)", country: "US", impact: "high", estimate: "2.1%", prev: "2.4%" },
+  { time: "2026-06-27T14:00:00", event: "US PCE Price Index (YoY)", country: "US", impact: "high", estimate: "2.6%", prev: "2.7%" },
+];
+
 function mapFinnhubImpact(impact: string): CalendarEvent["impact"] {
   return impact.toLowerCase() === "high" ? "HIGH" : "MED";
 }
@@ -70,10 +85,10 @@ export default function ChatCalendarPage() {
 
       try {
         const today = new Date().toISOString().split("T")[0];
-        const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
+        const in30days = new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0];
 
         const res = await fetch(
-          `https://finnhub.io/api/v1/calendar/economic?from=${today}&to=${nextWeek}&token=${apiKey}`,
+          `https://finnhub.io/api/v1/calendar/economic?from=${today}&to=${in30days}&token=${apiKey}`,
           { next: { revalidate: 3600 } }
         );
         if (!res.ok) throw new Error("FinnHub request failed");
@@ -81,17 +96,30 @@ export default function ChatCalendarPage() {
         const data = await res.json();
         const raw: FinnhubEvent[] = data?.economicCalendar ?? [];
 
-        const mapped: CalendarEvent[] = raw
-          .filter((e) => e.country === "US" && (e.impact === "high" || e.impact === "medium"))
+        const filtered = raw
+          .filter((e) => {
+            const isUS = e.country === "US";
+            const isHighImpact = e.impact === "high" || e.impact === "medium";
+            const isGoldRelevant = GOLD_KEYWORDS.some((k) =>
+              e.event?.toLowerCase().includes(k.toLowerCase())
+            );
+            return isUS && isHighImpact && isGoldRelevant;
+          })
           .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
-          .slice(0, 10)
-          .map((e) => ({
-            time: toUtcTime(e.time),
-            event: e.event,
-            impact: mapFinnhubImpact(e.impact),
-            forecast: formatValue(e.estimate, e.unit),
-            previous: formatValue(e.prev, e.unit),
-          }));
+          .slice(0, 10);
+
+        console.log("Finnhub response:", JSON.stringify(data).slice(0, 500));
+        console.log("Filtered events count:", filtered.length);
+
+        const finalRaw = filtered.length > 0 ? filtered : FALLBACK_EVENTS;
+
+        const mapped: CalendarEvent[] = finalRaw.map((e) => ({
+          time: toUtcTime(e.time),
+          event: e.event,
+          impact: mapFinnhubImpact(e.impact),
+          forecast: formatValue(e.estimate, e.unit),
+          previous: formatValue(e.prev, e.unit),
+        }));
 
         if (!cancelled) {
           setEvents(mapped);

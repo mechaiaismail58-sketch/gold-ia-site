@@ -3,9 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
 import { Suspense } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 const FEATURES = [
   {
@@ -48,7 +46,6 @@ function UpgradeContent() {
   const searchParams = useSearchParams();
   const reason = searchParams.get("reason");
   const exhausted = reason === "exhausted";
-  const router = useRouter();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -56,9 +53,8 @@ function UpgradeContent() {
 
   async function handleLogout() {
     setLoggingOut(true);
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/";
   }
 
   async function handleCheckout() {
