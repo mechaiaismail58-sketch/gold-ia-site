@@ -7,13 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Avatar from "@/components/Avatar";
 import { ChevronIcon } from "@/components/NavIcons";
-
-const chatNavItems = [
-  { href: "/chat", label: "Chat" },
-  { href: "/chat/market", label: "Market" },
-  { href: "/chat/news", label: "News" },
-  { href: "/chat/calendar", label: "Calendar" },
-];
+import { NavShell } from "@/components/design-system/Navbar";
 
 export default function NavbarPrivate() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -73,37 +67,20 @@ export default function NavbarPrivate() {
     router.refresh();
   }
 
-  const isActive = (href: string) =>
-    href === "/chat" ? pathname === "/chat" : pathname.startsWith(href);
-
-  const navLinkClass = (href: string) =>
-    `text-xs uppercase tracking-wider transition-colors ${
-      isActive(href) ? "text-[#D4A843]" : "text-[#A1A1AA] hover:text-white"
-    }`;
-
   return (
     <motion.header
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="flex-none bg-white/[0.02] border-b border-white/[0.06]"
+      className="flex-none"
     >
-      <div className="px-4 sm:px-6 md:px-10 py-3 flex items-center justify-between gap-4">
+      <NavShell variant="bar" className="flex items-center justify-between gap-4">
 
         {/* Logo */}
         <Link href="/chat" className="flex items-center gap-2 shrink-0">
           <span className="w-2 h-2 rounded-full bg-[#D4A843] animate-pulse inline-block shrink-0" />
           <span className="text-sm font-semibold text-white">BullionDesk</span>
         </Link>
-
-        {/* Center nav — desktop only */}
-        <nav className="hidden md:flex items-center gap-6">
-          {chatNavItems.map((item) => (
-            <Link key={item.href} href={item.href} className={navLinkClass(item.href)}>
-              {item.label.toUpperCase()}
-            </Link>
-          ))}
-        </nav>
 
         {/* Account dropdown — desktop */}
         <div className="hidden md:block relative shrink-0" ref={dropdownRef}>
@@ -153,7 +130,7 @@ export default function NavbarPrivate() {
             <Avatar src={avatarUrl} size={28} />
           )}
         </Link>
-      </div>
+      </NavShell>
     </motion.header>
   );
 }

@@ -6,6 +6,7 @@ import OnboardingModal from "@/components/OnboardingModal";
 import ShareSignalButton from "@/components/ShareSignalButton";
 import HistoryPanel from "@/components/HistoryPanel";
 import MarkdownMessage from "@/components/MarkdownMessage";
+import GlassCard from "@/components/design-system/GlassCard";
 import { useChatContext } from "@/context/ChatContext";
 
 function cn(...classes: (string | false | null | undefined)[]) {
@@ -573,12 +574,6 @@ export default function ChatPage() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* Slow-moving purple background blob */}
-      <div
-        className="pointer-events-none absolute w-[600px] h-[500px] rounded-full bg-[#7C3AED] opacity-[0.012] blur-[180px] purple-blob-drift"
-        style={{ top: "20%", left: "25%" }}
-      />
-
       {showOnboarding && (
         <OnboardingModal onComplete={() => setShowOnboarding(false)} />
       )}
@@ -718,18 +713,9 @@ export default function ChatPage() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="flex-none mx-6 md:mx-10 mt-4 rounded-[17px] p-px shrink-0"
-            style={{ background: "linear-gradient(135deg, rgba(123,79,212,0.5), rgba(212,168,67,0.5))" }}
+            className="flex-none mx-6 md:mx-10 mt-4 shrink-0"
           >
-            <div
-              className="rounded-2xl px-5 py-4 sm:px-6 sm:py-5 flex items-start sm:items-center justify-between gap-4"
-              style={{
-                background: "rgba(123, 79, 212, 0.08)",
-                border: "1px solid rgba(123, 79, 212, 0.35)",
-                backdropFilter: "blur(12px)",
-                borderRadius: "16px",
-              }}
-            >
+            <GlassCard variant="purple-border" className="px-5 py-4 sm:px-6 sm:py-5 flex items-start sm:items-center justify-between gap-4">
               <div>
                 <p className="text-base sm:text-lg font-semibold text-white mb-1">
                   Complete your trader profile
@@ -753,7 +739,7 @@ export default function ChatPage() {
               >
                 ✕
               </button>
-            </div>
+            </GlassCard>
           </motion.div>
         )}
       </AnimatePresence>
@@ -784,19 +770,7 @@ export default function ChatPage() {
                   transition={{ duration: 0.3, delay: i * 0.05, ease: "easeOut" }}
                   type="button"
                   onClick={() => send(s)}
-                  className="rounded-xl px-5 py-3.5 text-sm text-[#A1A1AA] hover:text-white cursor-pointer transition-all duration-300 text-left"
-                  style={{
-                    background: "rgba(123,79,212,0.15)",
-                    border: "1px solid rgba(123,79,212,0.3)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(123,79,212,0.3)";
-                    e.currentTarget.style.borderColor = "rgba(212,168,67,0.4)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "rgba(123,79,212,0.15)";
-                    e.currentTarget.style.borderColor = "rgba(123,79,212,0.3)";
-                  }}
+                  className="rounded-xl px-5 py-3.5 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl transition-all duration-300 hover:bg-[rgba(123,79,212,0.12)] hover:border-[rgba(123,79,212,0.4)] hover:shadow-[0_0_20px_rgba(123,79,212,0.25)]"
                 >
                   {s}
                 </motion.button>
@@ -857,6 +831,7 @@ export default function ChatPage() {
                         style={{
                           background: "rgba(255,255,255,0.04)",
                           border: "1px solid rgba(255,255,255,0.08)",
+                          borderTop: "2px solid rgba(212,168,67,0.3)",
                           borderRadius: "18px 18px 18px 4px",
                         }}
                       >
@@ -880,19 +855,7 @@ export default function ChatPage() {
                               transition={{ duration: 0.3, delay: si * 0.05, ease: "easeOut" }}
                               type="button"
                               onClick={() => send(suggestion)}
-                              className="rounded-xl px-5 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer transition-all duration-300 text-left"
-                              style={{
-                                background: "rgba(123,79,212,0.15)",
-                                border: "1px solid rgba(123,79,212,0.3)",
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.background = "rgba(123,79,212,0.3)";
-                                e.currentTarget.style.borderColor = "rgba(212,168,67,0.4)";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background = "rgba(123,79,212,0.15)";
-                                e.currentTarget.style.borderColor = "rgba(123,79,212,0.3)";
-                              }}
+                              className="rounded-xl px-5 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl transition-all duration-300 hover:bg-[rgba(123,79,212,0.12)] hover:border-[rgba(123,79,212,0.4)] hover:shadow-[0_0_20px_rgba(123,79,212,0.25)]"
                             >
                               {suggestion}
                             </motion.button>

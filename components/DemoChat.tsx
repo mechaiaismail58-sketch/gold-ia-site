@@ -5,6 +5,7 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { createClient } from "@/lib/supabase/client";
+import { PRICING } from "@/lib/pricing";
 
 const WELCOME_MESSAGE =
   "Gold just moved. Let me show you what the institutions are seeing right now. What's on your mind — structure, macro, or a specific trade idea?";
@@ -181,9 +182,9 @@ export default function DemoChat() {
         <p className="text-sm text-zinc-400 mb-8 max-w-xs leading-relaxed">
           You&apos;ve seen what the AI coach can do. Unlock your full access.
         </p>
-        <GoldCTAButton href="/upgrade">Get Early Access — $14.99</GoldCTAButton>
+        <GoldCTAButton href="/upgrade">{`Get Early Access — $${PRICING.beta}`}</GoldCTAButton>
         <p className="text-xs mt-3" style={{ color: "#D4A843" }}>
-          🔒 Pay $14.99 today. Lock $25/mo forever.
+          🔒 {PRICING.betaLine}
         </p>
       </AuthCard>
     );
@@ -315,13 +316,13 @@ export default function DemoChat() {
                   3,400+ gold analyses. Prop firm coaching. Risk management.
                 </p>
                 <div className="mt-6">
-                  <GoldCTAButton href="/signup">Unlock Full Access — $14.99</GoldCTAButton>
+                  <GoldCTAButton href="/signup">{`Unlock Full Access — $${PRICING.beta}`}</GoldCTAButton>
                 </div>
                 <p className="text-xs mt-3" style={{ color: "#D4A843" }}>
-                  🔒 Pay $14.99 today. Lock $25/mo forever.
+                  🔒 {PRICING.betaLine}
                 </p>
                 <p className="text-xs mt-1" style={{ color: "#71717A" }}>
-                  Standard price after beta: $39.99/mo
+                  {PRICING.urgencyLine}
                 </p>
               </div>
             </div>

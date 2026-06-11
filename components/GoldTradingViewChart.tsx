@@ -92,8 +92,8 @@ export default function GoldTradingViewChart() {
 
   return (
     <div className="w-full">
-      {/* Timeframe bar — same style as original chart */}
-      <div className="border-b border-white/10 px-4 py-3 sm:px-6">
+      {/* Timeframe bar */}
+      <div className="border-b border-white/[0.08] px-4 py-3 sm:px-6">
         <div className="flex flex-wrap gap-2">
           {INTERVALS.map((tf) => {
             const active = interval === tf.tv;
@@ -103,8 +103,8 @@ export default function GoldTradingViewChart() {
                 onClick={() => setInterval(tf.tv)}
                 className={
                   active
-                    ? "rounded-xl border border-[rgba(109,40,217,0.65)] bg-[rgba(109,40,217,0.14)] px-3 py-2 text-xs uppercase tracking-[0.08em] text-white"
-                    : "rounded-xl border border-white/10 px-3 py-2 text-xs uppercase tracking-[0.08em] text-white/70 transition hover:border-white/20 hover:text-white"
+                    ? "rounded-xl px-3 py-2 text-xs uppercase tracking-[0.08em] text-white bg-gradient-to-r from-[#7B4FD4] to-[#9B6FE8] shadow-[0_0_16px_rgba(123,79,212,0.35)]"
+                    : "rounded-xl px-3 py-2 text-xs uppercase tracking-[0.08em] text-white/60 bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl transition hover:border-white/20 hover:text-white"
                 }
               >
                 {tf.label}

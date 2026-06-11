@@ -1,0 +1,54 @@
+<svg width="480" height="100" viewBox="0 0 480 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bdf-bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1C1428"/>
+      <stop offset="1" stop-color="#08060D"/>
+    </linearGradient>
+    <linearGradient id="bdf-front" x1="22" y1="36" x2="78" y2="76" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7B4FD4"/>
+      <stop offset="0.55" stop-color="#A87DAA"/>
+      <stop offset="1" stop-color="#D4A843"/>
+    </linearGradient>
+    <linearGradient id="bdf-top" x1="32" y1="24" x2="84" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A083EC"/>
+      <stop offset="1" stop-color="#EFCD7E"/>
+    </linearGradient>
+    <linearGradient id="bdf-side" x1="68" y1="24" x2="92" y2="76" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4B2E94"/>
+      <stop offset="1" stop-color="#9C7B30"/>
+    </linearGradient>
+    <radialGradient id="bdf-aura" cx="50%" cy="48%" r="55%">
+      <stop offset="0%" stop-color="#9D6BE0" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#9D6BE0" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="bdf-soft" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <filter id="bdf-glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="1.5" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- icon -->
+  <g>
+    <rect width="100" height="100" rx="22" fill="url(#bdf-bg)"/>
+    <circle cx="50" cy="50" r="40" fill="url(#bdf-aura)" filter="url(#bdf-soft)"/>
+
+    <polygon points="68,38 82,24 90,60 76,74" fill="url(#bdf-side)"/>
+    <polygon points="32,38 68,38 82,24 46,24" fill="url(#bdf-top)"/>
+    <polygon points="24,74 32,38 68,38 76,74" fill="url(#bdf-front)"/>
+
+    <path d="M32,38 L46,24" stroke="#FFFFFF" stroke-width="0.6" stroke-linecap="round" opacity="0.35"/>
+    <path d="M32,38 L68,38" stroke="#FFFFFF" stroke-width="0.6" stroke-linecap="round" opacity="0.25"/>
+
+    <polyline points="10,84 30,70 42,77 58,50 72,58 95,16" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#bdf-glow)"/>
+    <circle cx="95" cy="16" r="3" fill="#FFFFFF" filter="url(#bdf-glow)"/>
+  </g>
+
+  <!-- wordmark -->
+  <text x="128" y="62" fill="#FFFFFF" font-family="'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="700" letter-spacing="7">BULLION DESK</text>
+</svg>

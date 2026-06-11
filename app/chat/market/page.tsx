@@ -14,7 +14,10 @@ export default function ChatMarketPage() {
           XAUUSD — Live Market
         </h1>
         <div className="flex items-center gap-2 text-xs uppercase tracking-[0.1em] text-[#D4A843]">
-          <span className="h-2 w-2 rounded-full pulse-dot-gold inline-block shrink-0" />
+          <span className="relative flex h-2 w-2 shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4A843] opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full pulse-dot-gold" />
+          </span>
           Live
         </div>
       </div>
@@ -27,11 +30,10 @@ export default function ChatMarketPage() {
         className="flex-1 p-4 md:p-6"
       >
         <div
-          className="h-full overflow-hidden"
+          className="h-full overflow-hidden border border-white/[0.08] rounded-xl"
           style={{
             background: "#0D0D0D",
-            border: "1px solid rgba(255,255,255,0.06)",
-            borderRadius: "12px",
+            boxShadow: "0 0 60px rgba(123,79,212,0.15)",
           }}
         >
           <GoldTradingViewChart />

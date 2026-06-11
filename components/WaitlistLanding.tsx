@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import DemoChat from "@/components/DemoChat";
 import ScrollReveal from "@/components/ScrollReveal";
+import { PRICING } from "@/lib/pricing";
 
 const HERO_HEADING_WORDS = ["Most", "traders", "blow", "their", "funded", "account", "in", "the", "first", "2", "weeks."];
 const HERO_HEADING_GOLD_WORDS = ["Ours", "don't."];
@@ -73,14 +74,16 @@ function parseStat(raw: string) {
 
 function useCountUp(raw: string, start: boolean, duration = 1200) {
   const parsed = parseStat(raw);
-  const [display, setDisplay] = useState(() =>
-    parsed ? `${(0).toFixed(parsed.decimals)}${parsed.suffix}` : raw
-  );
+  // Initial render (SSR + first paint) always shows the final value, so
+  // crawlers and no-JS clients see real numbers instead of "0".
+  const [display, setDisplay] = useState(raw);
   const startedRef = useRef(false);
 
   useEffect(() => {
     if (!start || startedRef.current || !parsed) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     startedRef.current = true;
+    setDisplay(`${(0).toFixed(parsed.decimals)}${parsed.suffix}`);
     const startTime = performance.now();
     let frame: number;
 
@@ -95,7 +98,7 @@ function useCountUp(raw: string, start: boolean, duration = 1200) {
     return () => cancelAnimationFrame(frame);
   }, [start, duration]);
 
-  return parsed ? display : raw;
+  return display;
 }
 
 function SplitWord({
@@ -208,9 +211,6 @@ export default function WaitlistLanding() {
   const [heroReady, setHeroReady] = useState(false);
   const trackSection = useInView<HTMLDivElement>(0.15);
 
-  const purpleBlobARef = useRef<HTMLDivElement | null>(null);
-  const purpleBlobBRef = useRef<HTMLDivElement | null>(null);
-
   useEffect(() => {
     setTimeout(() => {
       if (window.location.hash) {
@@ -221,27 +221,6 @@ export default function WaitlistLanding() {
     }, 0);
     const id = requestAnimationFrame(() => setHeroReady(true));
     return () => cancelAnimationFrame(id);
-  }, []);
-
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let frame = 0;
-    function applyParallax() {
-      const y = window.scrollY;
-      if (purpleBlobARef.current) purpleBlobARef.current.style.transform = `translate3d(0, ${y * 0.12}px, 0)`;
-      if (purpleBlobBRef.current) purpleBlobBRef.current.style.transform = `translate3d(0, ${y * 0.07}px, 0)`;
-      frame = 0;
-    }
-    function onScroll() {
-      if (frame) return;
-      frame = requestAnimationFrame(applyParallax);
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (frame) cancelAnimationFrame(frame);
-    };
   }, []);
 
   return (
@@ -289,48 +268,10 @@ export default function WaitlistLanding() {
           transform: scale(1.03);
           box-shadow: 0 0 25px rgba(212,168,67,0.5);
         }
-        @keyframes chat-border-pulse {
-          0%, 100% { opacity: 0.3; }
-          50%      { opacity: 0.6; }
-        }
-        .chat-border-glow {
-          position: relative;
-        }
-        .chat-border-glow::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          border-radius: inherit;
-          padding: 1px;
-          background: linear-gradient(135deg, rgba(212,168,67,0.6), rgba(124,58,237,0.6), rgba(212,168,67,0.6));
-          -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-          pointer-events: none;
-          animation: chat-border-pulse 3s ease-in-out infinite;
-        }
       `}</style>
 
       {/* Subtle noise texture */}
       <div className="pointer-events-none fixed inset-0 -z-30 noise-overlay" />
-
-      {/* Background globs */}
-      <div className="pointer-events-none fixed inset-0 -z-30">
-        <div
-          ref={purpleBlobARef}
-          className="absolute -top-28 right-[-180px] h-[560px] w-[560px] rounded-full blur-[120px]"
-          style={{ background: "radial-gradient(circle, rgba(124,58,237,0.26) 0%, transparent 70%)" }}
-        />
-        <div
-          ref={purpleBlobBRef}
-          className="absolute top-[80px] left-[-200px] h-[480px] w-[480px] rounded-full blur-[120px]"
-          style={{ background: "radial-gradient(circle, rgba(109,40,217,0.20) 0%, transparent 70%)" }}
-        />
-        <div
-          className="absolute bottom-[-240px] left-[18%] h-[560px] w-[560px] rounded-full blur-[130px]"
-          style={{ background: "radial-gradient(circle, rgba(212,168,67,0.09) 0%, transparent 70%)" }}
-        />
-      </div>
 
       <div className="w-full max-w-lg">
 
@@ -377,20 +318,25 @@ export default function WaitlistLanding() {
             style={{ background: "radial-gradient(ellipse at center, rgba(212,168,67,0.10) 0%, rgba(212,168,67,0) 65%)" }}
           />
 
-          <h1 className="text-[30px] sm:text-[44px] leading-[1.08] tracking-[-0.03em] font-extrabold mb-6">
-            {HERO_HEADING_WORDS.map((w, i) => (
-              <SplitWord key={`h-${i}`} word={w} index={i} ready={heroReady} />
-            ))}
-            <span className="text-[#D4A843] italic">
-              {HERO_HEADING_GOLD_WORDS.map((w, i) => (
-                <SplitWord
-                  key={`g-${i}`}
-                  word={w}
-                  index={HERO_HEADING_WORDS.length + 2 + i}
-                  ready={heroReady}
-                  italic
-                />
+          <h1
+            className="text-[30px] sm:text-[44px] leading-[1.08] tracking-[-0.03em] font-extrabold mb-6"
+            aria-label="Most traders blow their funded account in the first 2 weeks. Ours don't."
+          >
+            <span aria-hidden="true">
+              {HERO_HEADING_WORDS.map((w, i) => (
+                <SplitWord key={`h-${i}`} word={w} index={i} ready={heroReady} />
               ))}
+              <span className="text-[#D4A843] italic">
+                {HERO_HEADING_GOLD_WORDS.map((w, i) => (
+                  <SplitWord
+                    key={`g-${i}`}
+                    word={w}
+                    index={HERO_HEADING_WORDS.length + 2 + i}
+                    ready={heroReady}
+                    italic
+                  />
+                ))}
+              </span>
             </span>
           </h1>
 
@@ -436,8 +382,8 @@ export default function WaitlistLanding() {
             No signals · No BS · Just clarity
           </p>
           <div className="text-center mb-16">
-            <p className="text-sm font-medium" style={{ color: "#D4A843" }}>Early access — $14.99/month, locked in for life.</p>
-            <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>Price goes to $39.99 soon.</p>
+            <p className="text-sm font-medium" style={{ color: "#D4A843" }}>{PRICING.betaLine}</p>
+            <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>{PRICING.urgencyLine}</p>
           </div>
         </ScrollReveal>
 

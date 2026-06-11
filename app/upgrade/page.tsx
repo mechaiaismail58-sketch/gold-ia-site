@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { PRICING } from "@/lib/pricing";
 
 const FEATURES = [
   {
@@ -183,7 +184,7 @@ function UpgradeContent() {
               {/* Pricing */}
               <div className="rounded-2xl border border-[rgba(212,175,55,0.20)] bg-[rgba(212,175,55,0.04)] p-5 mb-7">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[36px] font-semibold tracking-tight text-white">$14.99</span>
+                  <span className="text-[36px] font-semibold tracking-tight text-white">{`$${PRICING.beta}`}</span>
                   <span className="text-[#A1A1AA] text-sm">one-time · early access</span>
                 </div>
                 <p className="text-[12px] text-white/30 mt-1.5">Lock your beta price before it&apos;s gone.</p>
@@ -208,13 +209,13 @@ function UpgradeContent() {
                     Redirecting to checkout…
                   </span>
                 ) : (
-                  "Get Early Access — $14.99"
+                  `Get Early Access — $${PRICING.beta}`
                 )}
               </button>
 
               <div className="mt-3 text-center">
-                <p className="text-sm font-medium" style={{ color: "#D4A843" }}>🔒 Pay $14.99 today. Lock $25/mo forever.</p>
-                <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>Standard price after beta: $39.99/mo</p>
+                <p className="text-sm font-medium" style={{ color: "#D4A843" }}>🔒 {PRICING.betaLine}</p>
+                <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>{PRICING.urgencyLine}</p>
               </div>
 
               <p className="mt-3 text-[11px] text-white/20 text-center">

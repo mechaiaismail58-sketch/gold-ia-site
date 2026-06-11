@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Eyebrow from "@/components/design-system/Eyebrow";
+import GlassCard from "@/components/design-system/GlassCard";
 
 interface CalendarEvent {
   time: string;
@@ -150,6 +152,7 @@ export default function ChatCalendarPage() {
       <div className="w-full max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
+          <Eyebrow className="text-center mb-3">Macro Calendar</Eyebrow>
           <h1 className="text-3xl sm:text-4xl font-semibold text-white mb-3">Economic Calendar</h1>
           <p className="text-sm text-[#A1A1AA] mb-3">
             Gold-relevant macro events. Know what moves the market before it moves.
@@ -161,14 +164,7 @@ export default function ChatCalendarPage() {
         </div>
 
         {/* Table */}
-        <div
-          className="overflow-hidden"
-          style={{
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.06)",
-            borderRadius: "12px",
-          }}
-        >
+        <GlassCard className="overflow-hidden">
           {showEmpty ? (
             <div style={{ textAlign: "center", color: "rgba(255,255,255,0.3)", padding: "48px 0" }}>
               <p>No major events found for this period.</p>
@@ -217,7 +213,8 @@ export default function ChatCalendarPage() {
                         initial={{ y: 10, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ duration: 0.3, delay: i * 0.05, ease: "easeOut" }}
-                        className="transition-colors duration-200 hover:bg-[rgba(123,79,212,0.08)]"
+                        className="transition-colors duration-200 hover:bg-[rgba(123,79,212,0.06)]"
+                        style={{ background: ev.impact === "HIGH" ? "rgba(212,168,67,0.03)" : undefined }}
                       >
                         <td
                           className="px-4 py-3 text-white/80 font-mono"
@@ -241,7 +238,7 @@ export default function ChatCalendarPage() {
               </tbody>
             </table>
           )}
-        </div>
+        </GlassCard>
 
         {/* Footer note */}
         <p className="text-xs text-[#52525B] text-center mt-6">

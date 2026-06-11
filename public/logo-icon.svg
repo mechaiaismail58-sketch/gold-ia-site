@@ -1,0 +1,37 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bd-front" x1="22" y1="36" x2="78" y2="76" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7B4FD4"/>
+      <stop offset="0.55" stop-color="#A87DAA"/>
+      <stop offset="1" stop-color="#D4A843"/>
+    </linearGradient>
+    <linearGradient id="bd-top" x1="32" y1="24" x2="84" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A083EC"/>
+      <stop offset="1" stop-color="#EFCD7E"/>
+    </linearGradient>
+    <linearGradient id="bd-side" x1="68" y1="24" x2="92" y2="76" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4B2E94"/>
+      <stop offset="1" stop-color="#9C7B30"/>
+    </linearGradient>
+    <filter id="bd-glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="1.5" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- ingot, seen at a slight angle -->
+  <polygon points="68,38 82,24 90,60 76,74" fill="url(#bd-side)"/>
+  <polygon points="32,38 68,38 82,24 46,24" fill="url(#bd-top)"/>
+  <polygon points="24,74 32,38 68,38 76,74" fill="url(#bd-front)"/>
+
+  <!-- edge highlights -->
+  <path d="M32,38 L46,24" stroke="#FFFFFF" stroke-width="0.6" stroke-linecap="round" opacity="0.35"/>
+  <path d="M32,38 L68,38" stroke="#FFFFFF" stroke-width="0.6" stroke-linecap="round" opacity="0.25"/>
+
+  <!-- price chart line cutting through -->
+  <polyline points="10,84 30,70 42,77 58,50 72,58 95,16" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#bd-glow)"/>
+  <circle cx="95" cy="16" r="3" fill="#FFFFFF" filter="url(#bd-glow)"/>
+</svg>

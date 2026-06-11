@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Avatar from "@/components/Avatar";
 import { HamburgerIcon, CloseIcon, ChevronIcon } from "@/components/NavIcons";
+import { NavShell } from "@/components/design-system/Navbar";
+import { PRICING } from "@/lib/pricing";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -97,7 +99,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
 
   // CTA on the right depends on auth/paid status
   const ctaLink = !userEmail
-    ? { href: "/signup", label: "Get Early Access — $14.99", mobileLabel: "Get Access" }
+    ? { href: "/signup", label: `Get Early Access — $${PRICING.beta}`, mobileLabel: "Get Access" }
     : !hasPaid
     ? { href: "/upgrade", label: "Upgrade", mobileLabel: "Upgrade" }
     : { href: "/chat", label: "Open Chat →", mobileLabel: "Open Chat" };
@@ -116,7 +118,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
         style={{ background: "rgba(7,6,11,0.75)", backdropFilter: "blur(4px)" }}
         onClick={() => setMenuOpen(false)}
       />
-      <div className="card border border-white/10 rounded-2xl px-5 py-4 shadow-[0_12px_50px_rgba(0,0,0,0.28)] relative z-40">
+      <NavShell variant="floating">
 
         {/* ── Main row ── */}
         <div className="flex items-center justify-between gap-4">
@@ -245,7 +247,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
             )}
           </nav>
         </div>
-      </div>
+      </NavShell>
     </header>
   );
 }

@@ -7,7 +7,7 @@ function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-const NAV_ITEMS = [
+export const NAV_ITEMS = [
   {
     href: "/chat",
     label: "AI Coach",
