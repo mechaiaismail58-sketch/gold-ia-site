@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Avatar from "@/components/Avatar";
 import { ChevronIcon } from "@/components/NavIcons";
@@ -20,7 +20,9 @@ export default function NavbarPrivate() {
   const [signingOut, setSigningOut] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,6 +30,7 @@ export default function NavbarPrivate() {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUserEmail(session?.user?.email ?? null);
+      setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -38,6 +41,7 @@ export default function NavbarPrivate() {
       } else {
         setAvatarUrl(null);
       }
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -65,7 +69,8 @@ export default function NavbarPrivate() {
     setUserEmail(null);
     setAvatarUrl(null);
     await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/";
+    router.push("/");
+    router.refresh();
   }
 
   const isActive = (href: string) =>
@@ -106,8 +111,17 @@ export default function NavbarPrivate() {
             onClick={() => setDropdownOpen((v) => !v)}
             className="flex items-center gap-2 rounded-xl border border-white/10 px-2 py-1.5 text-xs text-white/80 hover:border-white/20 hover:text-white transition max-w-[220px]"
           >
-            <Avatar src={avatarUrl} size={22} />
-            <span className="truncate">{userEmail}</span>
+            {loading ? (
+              <>
+                <div className="h-[22px] w-[22px] rounded-full bg-white/10 animate-pulse" />
+                <div className="h-3 w-20 rounded bg-white/10 animate-pulse" />
+              </>
+            ) : userEmail ? (
+              <>
+                <Avatar src={avatarUrl} size={22} />
+                <span className="truncate">{userEmail}</span>
+              </>
+            ) : null}
             <ChevronIcon open={dropdownOpen} />
           </button>
 
@@ -133,7 +147,11 @@ export default function NavbarPrivate() {
 
         {/* Mobile: avatar links to profile — bottom tabs handle navigation */}
         <Link href="/profile" className="md:hidden flex items-center justify-center rounded-full border border-white/10 min-h-[36px] min-w-[36px]">
-          <Avatar src={avatarUrl} size={28} />
+          {loading ? (
+            <div className="h-7 w-7 rounded-full bg-white/10 animate-pulse" />
+          ) : (
+            <Avatar src={avatarUrl} size={28} />
+          )}
         </Link>
       </div>
     </motion.header>
