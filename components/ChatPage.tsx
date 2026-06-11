@@ -77,7 +77,7 @@ export default function ChatPage() {
     current_drawdown: "",
   });
   const [savedProfile, setSavedProfile] = useState<TraderProfile | null>(null);
-  const [bannerDismissed, setBannerDismissed] = useState(true);
+  const [bannerDismissed, setBannerDismissed] = useState<boolean | null>(null);
 
   const typewriterQueueRef     = useRef<string>("");
   const typewriterDisplayedRef = useRef<string>("");
@@ -712,7 +712,7 @@ export default function ChatPage() {
 
       {/* ── Trader profile banner — unmissable onboarding nudge ── */}
       <AnimatePresence>
-        {!bannerDismissed && !summary && (
+        {bannerDismissed === false && !summary && (
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
