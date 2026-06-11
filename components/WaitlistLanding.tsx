@@ -6,8 +6,8 @@ import Link from "next/link";
 import DemoChat from "@/components/DemoChat";
 import ScrollReveal from "@/components/ScrollReveal";
 
-const HERO_HEADING_WORDS = ["Your", "AI", "Gold", "Trading", "Coach."];
-const HERO_HEADING_GOLD_WORDS = ["Always", "on."];
+const HERO_HEADING_WORDS = ["Most", "traders", "blow", "their", "funded", "account", "in", "the", "first", "2", "weeks."];
+const HERO_HEADING_GOLD_WORDS = ["Ours", "don't."];
 
 const HERO_STATS = [
   { value: "431", label: "Research trades" },
@@ -98,9 +98,21 @@ function useCountUp(raw: string, start: boolean, duration = 1200) {
   return parsed ? display : raw;
 }
 
-function SplitWord({ word, index, ready }: { word: string; index: number; ready: boolean }) {
+function SplitWord({
+  word,
+  index,
+  ready,
+  italic = false,
+}: {
+  word: string;
+  index: number;
+  ready: boolean;
+  italic?: boolean;
+}) {
   return (
-    <span className="inline-block overflow-hidden align-bottom pb-[0.08em]">
+    <span
+      className={`inline-block overflow-hidden align-bottom pb-[0.08em] ${italic ? "pl-[0.14em] -ml-[0.14em]" : ""}`}
+    >
       <span
         className={`inline-block mr-[0.28em] ${ready ? "split-word-enter" : "opacity-0"}`}
         style={{ animationDelay: `${index * 120}ms` }}
@@ -376,6 +388,7 @@ export default function WaitlistLanding() {
                   word={w}
                   index={HERO_HEADING_WORDS.length + 2 + i}
                   ready={heroReady}
+                  italic
                 />
               ))}
             </span>
@@ -385,7 +398,7 @@ export default function WaitlistLanding() {
             className={`text-[16px] text-[#A1A1AA] leading-[1.7] max-w-[46ch] mx-auto ${heroReady ? "hero-fade-in" : "opacity-0"}`}
             style={{ animationDelay: "400ms" }}
           >
-            Institutional-grade gold analysis. Structure, macro, risk — everything you need to trade XAUUSD with clarity. Built for serious gold traders and prop firm candidates.
+            You know the pattern. One bad session turns into revenge trades, your stop losses get wider, and by Friday your funded account is gone. BullionDesk watches your trading in real time and tells you when you’re about to do it again — before the drawdown hits.
           </p>
 
           <div
@@ -410,7 +423,7 @@ export default function WaitlistLanding() {
               href="/signup"
               className="cta-primary w-full sm:w-auto rounded-xl py-4 px-8 text-lg font-bold tracking-[0.02em] bg-[#D4A843] text-black flex items-center justify-center"
             >
-              Get Early Access — $14.99
+              Stop Blowing Funded Accounts
             </Link>
             <button
               onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
@@ -423,8 +436,8 @@ export default function WaitlistLanding() {
             No signals · No BS · Just clarity
           </p>
           <div className="text-center mb-16">
-            <p className="text-sm font-medium" style={{ color: "#D4A843" }}>🔒 Pay $14.99 today. Lock $25/mo forever.</p>
-            <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>Standard price after beta: $39.99/mo</p>
+            <p className="text-sm font-medium" style={{ color: "#D4A843" }}>Early access — $14.99/month, locked in for life.</p>
+            <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>Price goes to $39.99 soon.</p>
           </div>
         </ScrollReveal>
 
@@ -439,7 +452,7 @@ export default function WaitlistLanding() {
           <div id="demo" className="mb-8">
             <div className="text-center mb-4">
               <h2 className="text-[18px] font-extrabold tracking-[-0.01em] mb-2 gradient-text-gold inline-block">
-                Try it now
+                Ask it before you take the trade
               </h2>
               <span className="flex items-center justify-center gap-1.5 mb-1">
                 <span className="relative flex h-2 w-2">
@@ -451,7 +464,7 @@ export default function WaitlistLanding() {
                 </span>
               </span>
               <p className="text-[12px] text-[#A1A1AA] tracking-[0.04em]">
-                3 free messages. See why traders are switching.
+                3 free messages. Find out what your last blown account would’ve heard.
               </p>
             </div>
             <div className="rounded-2xl chat-border-glow">
@@ -477,10 +490,10 @@ export default function WaitlistLanding() {
             <div className="p-6 sm:p-10">
               <div className="text-center mb-8">
                 <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-[#D4A843] mb-2">
-                  Research Track Record
+                  The Track Record We Don’t Hide
                 </p>
                 <p className="text-[13px] text-[#A1A1AA] leading-relaxed">
-                  Exposed analysis on XAUUSD — backtested, documented, transparent.
+                  Every call on XAUUSD — wins and losses — backtested and documented. No cherry-picking, no deleted screenshots.
                 </p>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">

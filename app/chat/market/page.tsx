@@ -1,16 +1,33 @@
 "use client";
 
+import { motion } from "framer-motion";
+import GoldTradingViewChart from "@/components/GoldTradingViewChart";
+
 export const dynamic = "force-dynamic";
 
 export default function ChatMarketPage() {
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-[#0A0A0A]">
-      <iframe
-        src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_xauusd&symbol=OANDA%3AXAUUSD&interval=60&hidesidetoolbar=0&hidetoptoolbar=0&symboledit=0&saveimage=1&toolbarbg=0A0A0A&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&locale=en"
-        style={{ width: "100%", height: "100%", border: "none", display: "block" }}
-        title="XAUUSD Live Chart"
-        allowFullScreen
-      />
+    <div className="flex-1 flex flex-col overflow-y-auto bg-[#0A0A0A]">
+      {/* ── Header ── */}
+      <div className="flex-none flex items-center justify-between px-6 md:px-10 py-4 border-b border-white/[0.06]">
+        <h1 className="text-sm font-semibold uppercase text-white" style={{ letterSpacing: "0.1em" }}>
+          XAUUSD — Live Market
+        </h1>
+        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.1em] text-[#D4A843]">
+          <span className="h-2 w-2 rounded-full pulse-dot-gold inline-block shrink-0" />
+          Live
+        </div>
+      </div>
+
+      {/* ── Chart ── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="flex-1"
+      >
+        <GoldTradingViewChart />
+      </motion.div>
     </div>
   );
 }

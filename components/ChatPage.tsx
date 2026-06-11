@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import OnboardingModal from "@/components/OnboardingModal";
 import ShareSignalButton from "@/components/ShareSignalButton";
 import HistoryPanel from "@/components/HistoryPanel";
@@ -76,6 +77,7 @@ export default function ChatPage() {
     current_drawdown: "",
   });
   const [savedProfile, setSavedProfile] = useState<TraderProfile | null>(null);
+  const [bannerDismissed, setBannerDismissed] = useState(true);
 
   const typewriterQueueRef     = useRef<string>("");
   const typewriterDisplayedRef = useRef<string>("");
@@ -141,10 +143,12 @@ export default function ChatPage() {
   }
 
   const [suggestions, setSuggestions] = useState<string[]>([
-    "What's the structure on gold right now?",
-    "I'm about to enter a trade — check it",
-    "My prop firm challenge status",
-    "Full XAUUSD analysis",
+    "Should I trade gold right now?",
+    "Am I revenge trading?",
+    "Review my FTMO drawdown",
+    "What's the gold bias today?",
+    "Is my position size too large?",
+    "Help me pass my prop firm challenge",
   ]);
 
   function fetchSuggestions() {
@@ -199,8 +203,16 @@ export default function ChatPage() {
         setTraderProfile(parsed);
         setSavedProfile(parsed);
       }
+      setBannerDismissed(localStorage.getItem("profile_banner_dismissed") === "true");
     } catch { /* ignore */ }
   }, []);
+
+  function dismissProfileBanner() {
+    try {
+      localStorage.setItem("profile_banner_dismissed", "true");
+    } catch { /* ignore */ }
+    setBannerDismissed(true);
+  }
 
   useEffect(() => {
     scrollToBottom();
@@ -221,7 +233,7 @@ export default function ChatPage() {
   }, []);
 
   useEffect(() => {
-    if (messages.length <= 1) fetchSuggestions();
+    if (messages.length === 1) fetchSuggestions();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages.length]);
 
@@ -552,7 +564,10 @@ export default function ChatPage() {
   const summary = profileSummary();
 
   return (
-    <div
+    <motion.div
+      initial={{ y: 10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut", delay: 0.15 }}
       className="flex-1 flex flex-col bg-[#0A0A0A] overflow-hidden relative"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -728,6 +743,46 @@ export default function ChatPage() {
         </div>
       </div>
 
+      {/* ── Trader profile banner — unmissable onboarding nudge ── */}
+      <AnimatePresence>
+        {!bannerDismissed && !summary && (
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="flex-none mx-6 md:mx-10 mt-4 rounded-2xl p-px shrink-0"
+            style={{ background: "linear-gradient(135deg, #7B4FD4, #D4A843)" }}
+          >
+            <div className="rounded-2xl bg-white/[0.04] backdrop-blur-xl px-5 py-4 sm:px-6 sm:py-5 flex items-start sm:items-center justify-between gap-4">
+              <div>
+                <p className="text-base sm:text-lg font-semibold text-white mb-1">
+                  Complete your trader profile
+                </p>
+                <p className="text-sm text-[#A1A1AA] max-w-md">
+                  Tell BullionDesk your prop firm, account size, and trading style. Your AI coach adapts to you.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setProfileOpen(true)}
+                  className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#D4A843] hover:text-[#e8c574] transition"
+                >
+                  Set up now →
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={dismissProfileBanner}
+                aria-label="Dismiss"
+                className="shrink-0 h-8 w-8 flex items-center justify-center rounded-lg text-black/40 hover:text-black/70 hover:bg-black/10 transition"
+              >
+                ✕
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── Messages area ── */}
       <div
         ref={chatContainerRef}
@@ -747,15 +802,29 @@ export default function ChatPage() {
             </p>
             <div className="grid grid-cols-2 gap-3 w-full max-w-lg">
               {suggestions.map((s, i) => (
-                <button
+                <motion.button
                   key={s}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.05, ease: "easeOut" }}
                   type="button"
                   onClick={() => send(s)}
-                  className="chip-enter bg-white/[0.04] border border-l-2 border-white/[0.07] border-l-transparent rounded-xl px-5 py-3.5 text-sm text-[#A1A1AA] hover:border-[#D4A843]/20 hover:border-l-[#D4A843] hover:text-white cursor-pointer transition-all duration-300 text-left"
-                  style={{ animationDelay: `${i * 100}ms` }}
+                  className="rounded-xl px-5 py-3.5 text-sm text-[#A1A1AA] hover:text-white cursor-pointer transition-all duration-300 text-left"
+                  style={{
+                    background: "rgba(123,79,212,0.15)",
+                    border: "1px solid rgba(123,79,212,0.3)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(123,79,212,0.3)";
+                    e.currentTarget.style.borderColor = "rgba(212,168,67,0.4)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "rgba(123,79,212,0.15)";
+                    e.currentTarget.style.borderColor = "rgba(123,79,212,0.3)";
+                  }}
                 >
                   {s}
-                </button>
+                </motion.button>
               ))}
             </div>
             <p className="text-[11px] text-[#52525B] mt-6 text-center">
@@ -769,10 +838,22 @@ export default function ChatPage() {
           <div className="py-6 px-6 md:px-16 lg:px-24">
             <div className="max-w-3xl mx-auto">
               {messages.map((m, i) => (
-                <div key={i} className={m.role === "user" ? "animate-fade-in-fast" : "chat-msg-enter"}>
+                <div key={i} className="mb-8">
                   {m.role === "user" ? (
-                    <div className="flex justify-end mb-8">
-                      <div className="max-w-[75%] bg-white/[0.05] border border-white/[0.06] rounded-2xl rounded-br-md px-5 py-3">
+                    <motion.div
+                      initial={{ x: 20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      className="flex justify-end"
+                    >
+                      <div
+                        className="max-w-[75%] px-5 py-3 text-white"
+                        style={{
+                          background: "linear-gradient(135deg, #7B4FD4 20%, #5a35a8)",
+                          borderRadius: "18px 18px 4px 18px",
+                          boxShadow: "0 4px 20px rgba(123,79,212,0.3)",
+                        }}
+                      >
                         {m.imagePreview && (
                           <div className="mb-2">
                             <img
@@ -782,17 +863,28 @@ export default function ChatPage() {
                             />
                           </div>
                         )}
-                        <p className="font-sans text-sm font-normal text-white/90 break-words">
+                        <p className="font-sans text-sm font-normal break-words">
                           {m.content}
                         </p>
                       </div>
-                    </div>
+                    </motion.div>
                   ) : (
-                    <div className="mb-8">
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                    >
                       <p className="text-xs uppercase tracking-[0.15em] font-medium text-[#D4A843]/60 mb-2">
                         BullionDesk
                       </p>
-                      <div className="border-l-[3px] border-[#D4A843]/20 pl-5 max-w-[85%]">
+                      <div
+                        className="max-w-[85%] px-5 py-4"
+                        style={{
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          borderRadius: "18px 18px 18px 4px",
+                        }}
+                      >
                         <div className="font-sans text-[15px] leading-[1.75] tracking-normal font-normal text-[#E8E8E8]">
                           <MarkdownMessage content={m.content} />
                           {(isStreaming || isTypewriting) && i === messages.length - 1 && m.role === "assistant" && (
@@ -800,25 +892,40 @@ export default function ChatPage() {
                           )}
                         </div>
                       </div>
-                      <div className="pl-5 mt-2">
+                      <div className="mt-2">
                         <ShareSignalButton text={m.content} />
                       </div>
                       {!loading && !isStreaming && i === messages.length - 1 && (
-                        <div className="pl-5 grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 max-w-lg">
-                          {suggestions.map((suggestion) => (
-                            <button
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 max-w-lg">
+                          {suggestions.map((suggestion, si) => (
+                            <motion.button
                               key={suggestion}
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3, delay: si * 0.05, ease: "easeOut" }}
                               type="button"
                               onClick={() => send(suggestion)}
-                              className="bg-white/[0.04] border border-white/[0.07] rounded-xl px-5 py-3 text-sm text-[#A1A1AA] hover:border-[#D4A843]/30 hover:text-white cursor-pointer transition-all duration-300 text-left"
+                              className="rounded-xl px-5 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer transition-all duration-300 text-left"
+                              style={{
+                                background: "rgba(123,79,212,0.15)",
+                                border: "1px solid rgba(123,79,212,0.3)",
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = "rgba(123,79,212,0.3)";
+                                e.currentTarget.style.borderColor = "rgba(212,168,67,0.4)";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = "rgba(123,79,212,0.15)";
+                                e.currentTarget.style.borderColor = "rgba(123,79,212,0.3)";
+                              }}
                             >
                               {suggestion}
-                            </button>
+                            </motion.button>
                           ))}
                         </div>
                       )}
                       {m.trade_id && !respondedTradeIds.has(m.trade_id) && (
-                        <div className="pl-5 flex flex-wrap gap-2 mt-3">
+                        <div className="flex flex-wrap gap-2 mt-3">
                           {[
                             { result: "tp1_hit",   label: "✅ TP1 Hit" },
                             { result: "tp2_hit",   label: "🎯 TP2 Hit" },
@@ -836,18 +943,30 @@ export default function ChatPage() {
                           ))}
                         </div>
                       )}
-                    </div>
+                    </motion.div>
                   )}
                 </div>
               ))}
 
               {/* Loading dots */}
               {loading && !isStreaming && (
-                <div className="mb-8 animate-fade-in-fast">
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="mb-8"
+                >
                   <p className="text-xs uppercase tracking-[0.15em] font-medium text-[#D4A843]/60 mb-2">
                     BullionDesk
                   </p>
-                  <div className="border-l-[3px] border-[#D4A843]/20 pl-5 flex items-center gap-1.5 py-2">
+                  <div
+                    className="flex items-center gap-1.5 px-5 py-3.5 max-w-[85%]"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      borderRadius: "18px 18px 18px 4px",
+                    }}
+                  >
                     {[0, 0.2, 0.4].map((delay) => (
                       <span
                         key={delay}
@@ -856,7 +975,7 @@ export default function ChatPage() {
                       />
                     ))}
                   </div>
-                </div>
+                </motion.div>
               )}
 
               <div ref={bottomRef} />
@@ -899,10 +1018,15 @@ export default function ChatPage() {
       <div className="h-px bg-gradient-to-r from-transparent via-[#D4A843]/20 to-transparent flex-none" />
 
       {/* ── Input area ── */}
-      <div className={cn(
-        "flex-none bg-[#0A0A0A] px-6 md:px-16 lg:px-24 py-4 transition",
-        isDragging && "bg-[rgba(109,40,217,0.04)]"
-      )}>
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut", delay: 0.3 }}
+        className={cn(
+          "flex-none bg-[#0A0A0A] px-6 md:px-16 lg:px-24 py-4 transition",
+          isDragging && "bg-[rgba(109,40,217,0.04)]"
+        )}
+      >
         <div className="max-w-3xl mx-auto">
 
           {/* Image preview */}
@@ -944,8 +1068,8 @@ export default function ChatPage() {
             )}
             <input
               ref={chatInputRef}
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-5 py-3.5 text-white text-sm placeholder-[#525252] focus:border-[#D4A843]/30 focus:shadow-[0_0_20px_rgba(212,168,67,0.06)] focus:outline-none transition pr-24"
-              placeholder="Ask about gold, your trade, or your strategy..."
+              className="w-full min-h-[52px] bg-white/[0.04] border border-white/[0.08] rounded-xl px-5 py-3.5 text-white text-sm placeholder-[#525252] focus:border-[#D4A843] focus:shadow-[0_0_0_2px_rgba(212,168,67,0.15)] focus:outline-none transition pr-24"
+              placeholder="Ask your AI gold coach anything..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") send(); }}
@@ -977,15 +1101,17 @@ export default function ChatPage() {
 
             {/* Send button */}
             {canSend && (
-              <button
+              <motion.button
+                whileTap={{ scale: 0.95 }}
                 type="button"
                 onClick={() => send()}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#D4A843] hover:bg-[#D4A843]/90 rounded-lg p-2 transition"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 transition"
+                style={{ background: "linear-gradient(135deg, #F0D27A, #D4A843)" }}
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-black">
                   <path d="M7 11V3M3 7L7 3L11 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-              </button>
+              </motion.button>
             )}
 
             <input
@@ -997,7 +1123,7 @@ export default function ChatPage() {
             />
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

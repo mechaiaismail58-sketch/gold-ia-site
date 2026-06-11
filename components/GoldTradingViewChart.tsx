@@ -62,13 +62,13 @@ export default function GoldTradingViewChart() {
         "volume.show ma":           false,
       },
       overrides: {
-        // Bullish candles → purple  |  Bearish candles → white
-        "mainSeriesProperties.candleStyle.upColor":         "#8b5cf6",
-        "mainSeriesProperties.candleStyle.downColor":       "#ffffff",
-        "mainSeriesProperties.candleStyle.borderUpColor":   "#8b5cf6",
-        "mainSeriesProperties.candleStyle.borderDownColor": "#ffffff",
-        "mainSeriesProperties.candleStyle.wickUpColor":     "#8b5cf6",
-        "mainSeriesProperties.candleStyle.wickDownColor":   "#ffffff",
+        // Institutional candle palette
+        "mainSeriesProperties.candleStyle.upColor":         "#4CAF89",
+        "mainSeriesProperties.candleStyle.downColor":       "#F06449",
+        "mainSeriesProperties.candleStyle.borderUpColor":   "#4CAF89",
+        "mainSeriesProperties.candleStyle.borderDownColor": "#F06449",
+        "mainSeriesProperties.candleStyle.wickUpColor":     "rgba(76, 175, 137, 0.6)",
+        "mainSeriesProperties.candleStyle.wickDownColor":   "rgba(240, 100, 73, 0.6)",
         // Background & grid
         "paneProperties.background":                        "#07060b",
         "paneProperties.backgroundType":                    "solid",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -80,7 +81,12 @@ export default function NavbarPrivate() {
     }`;
 
   return (
-    <header className="flex-none bg-white/[0.02] border-b border-white/[0.06] chat-header-enter">
+    <motion.header
+      initial={{ x: -20, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="flex-none bg-white/[0.02] border-b border-white/[0.06]"
+    >
       <div className="px-4 sm:px-6 md:px-10 py-3 flex items-center justify-between gap-4">
 
         {/* Logo */}
@@ -134,6 +140,6 @@ export default function NavbarPrivate() {
           <Avatar src={avatarUrl} size={28} />
         </Link>
       </div>
-    </header>
+    </motion.header>
   );
 }

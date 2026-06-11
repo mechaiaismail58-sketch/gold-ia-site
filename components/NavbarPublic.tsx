@@ -116,7 +116,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
     <header className="pt-6">
       {/* Mobile menu backdrop */}
       <div
-        className={`fixed inset-0 z-30 md:hidden transition-opacity duration-300 ${menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        className={`fixed inset-0 z-30 lg:hidden transition-opacity duration-300 ${menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
         style={{ background: "rgba(7,6,11,0.75)", backdropFilter: "blur(4px)" }}
         onClick={() => setMenuOpen(false)}
       />
@@ -133,7 +133,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-2">
+          <nav className="hidden lg:flex items-center gap-2">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href} className={navLinkClass(item.href)}>
                 {item.label}
@@ -142,7 +142,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
           </nav>
 
           {/* Desktop right side */}
-          <div className="hidden md:flex items-center gap-2 shrink-0">
+          <div className="hidden lg:flex items-center gap-2 shrink-0">
             <Link href={ctaLink.href} className={ctaClassDesktop}>
               {ctaLink.label}
             </Link>
@@ -188,7 +188,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
           </div>
 
           {/* Mobile right side */}
-          <div className="flex md:hidden items-center gap-2 shrink-0">
+          <div className="flex lg:hidden items-center gap-2 shrink-0">
             <Link href={ctaLink.href} className={ctaClassMobile}>
               {ctaLink.mobileLabel}
             </Link>
@@ -209,7 +209,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
         </div>
 
         {/* ── Mobile dropdown nav — animated ── */}
-        <div className={`transition-[max-height] duration-300 ease-in-out overflow-hidden md:hidden ${menuOpen ? "max-h-[500px]" : "max-h-0"}`}>
+        <div className={`transition-[max-height] duration-300 ease-in-out overflow-hidden lg:hidden ${menuOpen ? "max-h-[500px]" : "max-h-0"}`}>
           <nav className="mt-4 flex flex-col gap-1.5 pb-1">
             {navItems.map((item) => (
               <Link

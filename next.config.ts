@@ -51,7 +51,7 @@ const nextConfig: NextConfig = {
     const csp = [
       "default-src 'self'",
       // Next.js App Router requires unsafe-inline for its runtime hydration scripts
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://s3.tradingview.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://wegvgmovhcwxjqnqqjat.supabase.co",
       "font-src 'self'",
