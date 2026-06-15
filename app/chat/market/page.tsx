@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default function ChatMarketPage() {
   return (
-    <div data-lenis-prevent className="flex-1 flex flex-col overflow-y-auto bg-[#0A0A0A]">
+    <div data-lenis-prevent className="flex-1 flex flex-col overflow-y-auto bg-transparent">
       {/* ── Header ── */}
       <div className="flex-none flex items-center justify-between px-6 md:px-10 py-4 border-b border-white/[0.06]">
         <h1 className="text-sm font-semibold uppercase text-white" style={{ letterSpacing: "0.1em" }}>

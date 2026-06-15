@@ -1,13 +1,17 @@
 "use client";
 
+import { ReactLenis } from "lenis/react";
 import EconomicCalendar from "@/components/EconomicCalendar";
 
 export const dynamic = "force-dynamic";
 
 export default function ChatCalendarPage() {
   return (
-    <div data-lenis-prevent className="flex-1 overflow-y-auto bg-[#0A0A0A] px-4 sm:px-6 py-8">
+    <ReactLenis
+      className="flex-1 overflow-y-auto px-4 sm:px-6 py-8"
+      options={{ lerp: 0.1, duration: 1.2, smoothWheel: true }}
+    >
       <EconomicCalendar />
-    </div>
+    </ReactLenis>
   );
 }

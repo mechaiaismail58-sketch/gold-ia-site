@@ -94,7 +94,7 @@ const IMPACT = {
   },
   low: {
     border: "border-white/[0.08]",
-    borderHover: "hover:border-white/20",
+    borderHover: "hover:border-white/[0.12]",
     glow: "",
     badge: "bg-white/5 text-white/35 border border-white/10",
     dot: "bg-white/25",
@@ -117,13 +117,12 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
       transition={{ duration: 0.4, ease: "easeOut", delay: reduce ? 0 : index * 0.06 }}
       whileHover={reduce ? undefined : { scale: 1.015, boxShadow: "0 8px 32px rgba(0,0,0,0.2)" }}
       className={cn(
-        "group border transition-[border-color] duration-200 ease-out",
+        "group border transition-all duration-300 ease-out bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.06)]",
         style.border,
         style.borderHover,
         isPast && "opacity-35"
       )}
       style={{
-        background: "rgba(255,255,255,0.02)",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
         borderRadius: "16px",

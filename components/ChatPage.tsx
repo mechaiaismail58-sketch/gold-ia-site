@@ -631,7 +631,7 @@ export default function ChatPage() {
       initial={{ y: 10, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut", delay: 0.15 }}
-      className="flex-1 flex flex-col bg-[#0A0A0A] overflow-hidden relative"
+      className="flex-1 flex flex-col bg-transparent overflow-hidden relative"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
