@@ -45,20 +45,6 @@ const BANNER_DISMISS_KEY = "profile_banner_dismissed_v2";
 const PROP_FIRMS = ["FTMO", "The5ers", "Apex", "E8", "FundedNext", "Blue Guardian", "Alpha Capital"];
 const TRADING_STYLES = ["Scalper", "Day Trader", "Swing Trader"];
 
-// Leading icon per suggestion chip. Falls back to a chart glyph for any
-// dynamically-fetched suggestion not in this map.
-const SUGGESTION_ICONS: Record<string, string> = {
-  "Should I trade gold right now?": "📊",
-  "Am I revenge trading?": "🛑",
-  "Review my FTMO drawdown": "📉",
-  "What's the gold bias today?": "🧭",
-  "Is my position size too large?": "⚖️",
-  "Help me pass my prop firm challenge": "🏆",
-};
-function suggestionIcon(s: string): string {
-  return SUGGESTION_ICONS[s] ?? "📊";
-}
-
 export default function ChatPage() {
   const {
     messages,
@@ -951,10 +937,9 @@ export default function ChatPage() {
                   transition={{ duration: 0.3, delay: i * 0.05, ease: "easeOut" }}
                   type="button"
                   onClick={() => send(s)}
-                  className="flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left backdrop-blur-xl transition-all duration-200 bg-[rgba(123,79,212,0.10)] border border-[rgba(123,79,212,0.30)] hover:-translate-y-px hover:bg-[rgba(123,79,212,0.20)] hover:border-[rgba(123,79,212,0.5)] hover:shadow-[0_6px_20px_rgba(123,79,212,0.25)]"
+                  className="rounded-xl px-4 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left backdrop-blur-xl transition-all duration-200 bg-[rgba(123,79,212,0.10)] border border-[rgba(123,79,212,0.30)] hover:-translate-y-px hover:bg-[rgba(123,79,212,0.20)] hover:border-[rgba(123,79,212,0.5)] hover:shadow-[0_6px_20px_rgba(123,79,212,0.25)]"
                 >
-                  <span className="shrink-0 text-base leading-none" aria-hidden>{suggestionIcon(s)}</span>
-                  <span>{s}</span>
+                  {s}
                 </motion.button>
               ))}
             </div>
@@ -1037,10 +1022,9 @@ export default function ChatPage() {
                               transition={{ duration: 0.3, delay: si * 0.05, ease: "easeOut" }}
                               type="button"
                               onClick={() => send(suggestion)}
-                              className="flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left backdrop-blur-xl transition-all duration-200 bg-[rgba(123,79,212,0.10)] border border-[rgba(123,79,212,0.30)] hover:-translate-y-px hover:bg-[rgba(123,79,212,0.20)] hover:border-[rgba(123,79,212,0.5)] hover:shadow-[0_6px_20px_rgba(123,79,212,0.25)]"
+                              className="rounded-xl px-4 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left backdrop-blur-xl transition-all duration-200 bg-[rgba(123,79,212,0.10)] border border-[rgba(123,79,212,0.30)] hover:-translate-y-px hover:bg-[rgba(123,79,212,0.20)] hover:border-[rgba(123,79,212,0.5)] hover:shadow-[0_6px_20px_rgba(123,79,212,0.25)]"
                             >
-                              <span className="shrink-0 text-base leading-none" aria-hidden>{suggestionIcon(suggestion)}</span>
-                              <span>{suggestion}</span>
+                              {suggestion}
                             </motion.button>
                           ))}
                         </div>
