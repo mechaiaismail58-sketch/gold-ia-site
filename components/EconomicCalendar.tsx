@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 type CalendarEvent = {
   id: string;
@@ -77,6 +78,7 @@ function formatCountdown(target: Date, now: Date): string {
 const IMPACT = {
   high: {
     border: "border-[rgba(212,175,55,0.40)]",
+    borderHover: "hover:border-[rgba(212,175,55,0.75)]",
     glow: "shadow-[0_0_24px_rgba(212,175,55,0.06)]",
     badge: "bg-[rgba(212,175,55,0.10)] text-[#D4AF37] border border-[rgba(212,175,55,0.30)]",
     dot: "bg-[#D4AF37]",
@@ -84,6 +86,7 @@ const IMPACT = {
   },
   medium: {
     border: "border-[rgba(249,115,22,0.35)]",
+    borderHover: "hover:border-[rgba(249,115,22,0.65)]",
     glow: "shadow-[0_0_16px_rgba(249,115,22,0.04)]",
     badge: "bg-orange-500/10 text-orange-400 border border-orange-500/25",
     dot: "bg-orange-400",
@@ -91,6 +94,7 @@ const IMPACT = {
   },
   low: {
     border: "border-white/[0.08]",
+    borderHover: "hover:border-white/20",
     glow: "",
     badge: "bg-white/5 text-white/35 border border-white/10",
     dot: "bg-white/25",
@@ -98,7 +102,7 @@ const IMPACT = {
   },
 } as const;
 
-function EventCard({ event, now }: { event: CalendarEvent; now: Date }) {
+function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: Date; index: number; reduce: boolean }) {
   const target = new Date(event.date);
   const diff = target.getTime() - now.getTime();
   const isPast = diff < 0;
@@ -107,18 +111,24 @@ function EventCard({ event, now }: { event: CalendarEvent; now: Date }) {
   const countdown = formatCountdown(target, now);
 
   return (
-    <div
+    <motion.div
+      initial={reduce ? false : { y: 15, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.35, ease: "easeOut", delay: reduce ? 0 : index * 0.05 }}
+      whileHover={reduce ? undefined : { scale: 1.02 }}
       className={cn(
-        "card rounded-2xl p-4 border transition-all duration-300",
+        "group card rounded-2xl p-4 border backdrop-blur-sm transition-[border-color,box-shadow] duration-200",
         style.border,
+        style.borderHover,
         style.glow,
         isPast && "opacity-35"
       )}
+      style={{ background: "rgba(255,255,255,0.03)" }}
     >
       {/* INCOMING */}
       {isIncoming && (
         <div className="mb-2.5">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 border border-red-500/30 px-2.5 py-0.5 text-[10px] font-mono text-red-400 animate-pulse">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 border border-red-500/30 px-2.5 py-0.5 text-[10px] font-mono text-red-400 animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.2)]">
             <span className="h-1.5 w-1.5 rounded-full bg-red-400 shrink-0 animate-pulse" />
             INCOMING
           </span>
@@ -179,10 +189,10 @@ function EventCard({ event, now }: { event: CalendarEvent; now: Date }) {
         ) : isIncoming ? (
           <span className="text-red-400">{countdown} remaining</span>
         ) : (
-          <span className="text-white/30">{countdown}</span>
+          <span className="text-white/40">{countdown}</span>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -191,6 +201,7 @@ export default function EconomicCalendar() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(new Date());
+  const reduce = useReducedMotion() ?? false;
 
   useEffect(() => {
     fetch("/api/calendar")
@@ -217,6 +228,9 @@ export default function EconomicCalendar() {
   }
   const days = Object.keys(grouped).sort();
 
+  // Chronological order index → drives the cascade (stagger) of card mounts
+  const orderIndex = new Map(events.map((e, i) => [e.id, i]));
+
   // Warning banner: next High Impact event within 24 h
   const nextHigh = events
     .filter((e) => e.impact === "high" && new Date(e.date) > now)
@@ -237,27 +251,40 @@ export default function EconomicCalendar() {
 
   return (
     <div className="w-full max-w-6xl mx-auto">
+      {/* Subtle film-grain texture over the whole page */}
+      <div className="pointer-events-none fixed inset-0 noise-overlay" />
+
       {/* ── High impact warning banner ── */}
-      {showBanner && nextHigh && (
-        <div className="mb-5 rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(212,175,55,0.055)] px-5 py-3.5 flex items-start gap-3 shadow-[0_0_32px_rgba(212,175,55,0.05)]">
-          <span className="h-2 w-2 rounded-full bg-[#D4AF37] animate-pulse shrink-0 mt-0.5" />
-          <div className="text-[13px] leading-snug">
-            <span className="text-[#D4AF37] font-medium">
-              High Impact Event {hoursUntilHigh! < 1 ? "Imminent" : hoursUntilHigh! < 6 ? "Soon" : "Today"} —
-            </span>
-            <span className="text-white/55 ml-1.5">
-              {nextHigh.title} at {formatLocalTime(nextHigh.date)}
-              {" · "}{formatCountdown(new Date(nextHigh.date), now)} away — Trade with caution.
-            </span>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {showBanner && nextHigh && (
+          <motion.div
+            initial={reduce ? false : { y: -24, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -24, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 320, damping: 26 }}
+            className="mb-5 rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(212,175,55,0.055)] backdrop-blur-sm px-5 py-3.5 flex items-start gap-3 shadow-[0_0_32px_rgba(212,175,55,0.05)]"
+          >
+            <span className="h-2 w-2 rounded-full bg-[#D4AF37] animate-pulse shrink-0 mt-0.5" />
+            <div className="text-[13px] leading-snug">
+              <span className="text-[#D4AF37] font-medium">
+                High Impact Event {hoursUntilHigh! < 1 ? "Imminent" : hoursUntilHigh! < 6 ? "Soon" : "Today"} —
+              </span>
+              <span className="text-white/55 ml-1.5">
+                {nextHigh.title} at {formatLocalTime(nextHigh.date)}
+                {" · "}{formatCountdown(new Date(nextHigh.date), now)} away — Trade with caution.
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Page header ── */}
-      <section className="card rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/10 shadow-[0_18px_80px_rgba(109,40,217,0.12)] mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+      <section className="card relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/10 shadow-[0_18px_80px_rgba(109,40,217,0.12)] mb-6">
+        {/* Ambient purple blob */}
+        <div className="pointer-events-none absolute -top-16 -right-16 h-[200px] w-[200px] rounded-full bg-purple-500/5 blur-3xl" />
+        <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-[28px] sm:text-[34px] leading-[1.15] tracking-[-0.02em]">
+            <h1 className="text-[28px] sm:text-[34px] font-semibold leading-[1.15] tracking-[-0.02em]">
               Economic Calendar
             </h1>
             <p className="text-[color:var(--muted)] mt-2 max-w-[54ch] text-[14px] leading-6">
@@ -285,6 +312,9 @@ export default function EconomicCalendar() {
           </div>
         </div>
       </section>
+
+      {/* Divider between header and the day grid */}
+      <div className="h-px bg-white/5 mb-6" />
 
       {/* ── Content ── */}
       {loading ? (
@@ -317,24 +347,27 @@ export default function EconomicCalendar() {
               className="grid gap-4"
               style={{ gridTemplateColumns: `repeat(${days.length}, minmax(0, 1fr))` }}
             >
-              {days.map((day) => {
+              {days.map((day, colIndex) => {
                 const { weekday, monthDay } = formatDayHeader(day);
                 const isToday = isTodayKey(day);
                 return (
                   <div key={day}>
-                    {/* Day header */}
-                    <div
+                    {/* Day header — fades in left to right */}
+                    <motion.div
+                      initial={reduce ? false : { opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut", delay: reduce ? 0 : colIndex * 0.08 }}
                       className={cn(
                         "text-center pb-3 mb-3 border-b",
                         isToday ? "border-[rgba(212,175,55,0.22)]" : "border-white/[0.07]"
                       )}
                     >
-                      <div className="text-[10px] font-mono tracking-[0.22em] text-white/28 uppercase">
+                      <div className="text-[10px] tracking-[0.22em] text-white/28 uppercase">
                         {weekday}
                       </div>
                       <div
                         className={cn(
-                          "text-[16px] font-mono mt-0.5",
+                          "text-[16px] font-medium mt-0.5",
                           isToday ? "text-[#D4AF37]" : "text-white/50"
                         )}
                       >
@@ -343,12 +376,12 @@ export default function EconomicCalendar() {
                       {isToday && (
                         <div className="h-[2px] w-5 rounded-full bg-[rgba(212,175,55,0.55)] mx-auto mt-1.5" />
                       )}
-                    </div>
+                    </motion.div>
 
                     {/* Event cards */}
                     <div className="flex flex-col gap-3">
                       {grouped[day].map((ev) => (
-                        <EventCard key={ev.id} event={ev} now={now} />
+                        <EventCard key={ev.id} event={ev} now={now} index={orderIndex.get(ev.id) ?? 0} reduce={reduce} />
                       ))}
                     </div>
                   </div>
@@ -367,7 +400,7 @@ export default function EconomicCalendar() {
                   <div className="flex items-center gap-2 mb-3 px-1">
                     <span
                       className={cn(
-                        "text-[12px] font-mono font-semibold",
+                        "text-[13px] font-semibold tracking-[-0.01em]",
                         isToday ? "text-[#D4AF37]" : "text-white/38"
                       )}
                     >
@@ -382,7 +415,7 @@ export default function EconomicCalendar() {
 
                   <div className="flex flex-col gap-3">
                     {grouped[day].map((ev) => (
-                      <EventCard key={ev.id} event={ev} now={now} />
+                      <EventCard key={ev.id} event={ev} now={now} index={orderIndex.get(ev.id) ?? 0} reduce={reduce} />
                     ))}
                   </div>
 
@@ -394,7 +427,7 @@ export default function EconomicCalendar() {
         </>
       )}
 
-      <footer className="mt-8 text-xs text-[color:var(--muted)]">
+      <footer className="mt-8 text-xs text-white/15">
         © {new Date().getFullYear()} Bullion Desk · Data: Forex Factory
       </footer>
     </div>
