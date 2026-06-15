@@ -19,7 +19,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
           }}
         >
           <p
-            className="text-xs uppercase tracking-[0.25em] text-center"
+            className="text-xs uppercase tracking-[0.1em] text-center"
             style={{ color: "rgba(212,168,67,0.7)" }}
           >
             Don&apos;t take any trade before checking with the AI.

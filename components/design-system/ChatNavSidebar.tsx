@@ -21,9 +21,9 @@ export default function ChatNavSidebar() {
 
   return (
     <motion.aside
-      initial={reducedMotion ? false : { x: -24, opacity: 0 }}
+      initial={reducedMotion ? false : { x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 80, damping: 16 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       className="hidden md:flex flex-none w-56 flex-col gap-1 p-4 bg-white/[0.02] border-r border-white/[0.06] backdrop-blur-xl"
     >
       <Link href="/chat" className="flex items-center gap-2 px-2 py-3 mb-2">

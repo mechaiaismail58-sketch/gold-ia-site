@@ -715,21 +715,49 @@ export default function ChatPage() {
             transition={{ duration: 0.25, ease: "easeOut" }}
             className="flex-none mx-6 md:mx-10 mt-4 shrink-0"
           >
-            <GlassCard variant="purple-border" className="px-5 py-4 sm:px-6 sm:py-5 flex items-start sm:items-center justify-between gap-4">
-              <div>
-                <p className="text-base sm:text-lg font-semibold text-white mb-1">
-                  Complete your trader profile
-                </p>
-                <p className="text-sm text-[#A1A1AA] max-w-md">
-                  Tell BullionDesk your prop firm, account size, and trading style. Your AI coach adapts to you.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setProfileOpen(true)}
-                  className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#D4A843] hover:text-[#e8c574] transition"
+            <GlassCard variant="purple-border" className="px-5 py-4 sm:px-6 sm:py-5 flex items-start justify-between gap-4">
+              <div className="flex items-start gap-4">
+                {/* Gold shield icon */}
+                <div
+                  className="shrink-0 h-11 w-11 flex items-center justify-center rounded-xl"
+                  style={{
+                    background: "rgba(212,168,67,0.10)",
+                    border: "1px solid rgba(212,168,67,0.30)",
+                    boxShadow: "0 0 20px rgba(212,168,67,0.12)",
+                  }}
                 >
-                  Set up now →
-                </button>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 2.5l7 2.8v5.2c0 4.4-3 8.2-7 9.5-4-1.3-7-5.1-7-9.5V5.3l7-2.8z"
+                      stroke="#D4A843"
+                      strokeWidth="1.6"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M9 12l2 2 4-4.5"
+                      stroke="#D4A843"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-base sm:text-lg font-semibold text-white mb-1">
+                    Complete your trader profile
+                  </p>
+                  <p className="text-sm text-[#A1A1AA] max-w-md mb-3">
+                    Tell BullionDesk your prop firm, account size, and trading style. Your AI coach adapts to you.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setProfileOpen(true)}
+                    className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold text-black transition hover:shadow-[0_0_24px_rgba(212,168,67,0.4)] hover:brightness-105"
+                    style={{ background: "#D4A843" }}
+                  >
+                    Set up now →
+                  </button>
+                </div>
               </div>
               <button
                 type="button"
@@ -770,7 +798,7 @@ export default function ChatPage() {
                   transition={{ duration: 0.3, delay: i * 0.05, ease: "easeOut" }}
                   type="button"
                   onClick={() => send(s)}
-                  className="rounded-xl px-5 py-3.5 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl transition-all duration-300 hover:bg-[rgba(123,79,212,0.12)] hover:border-[rgba(123,79,212,0.4)] hover:shadow-[0_0_20px_rgba(123,79,212,0.25)]"
+                  className="rounded-xl px-4 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left backdrop-blur-xl transition-all duration-300 bg-[rgba(123,79,212,0.10)] border border-[rgba(123,79,212,0.30)] hover:bg-[rgba(123,79,212,0.20)] hover:border-[rgba(123,79,212,0.5)] hover:shadow-[0_0_20px_rgba(123,79,212,0.25)]"
                 >
                   {s}
                 </motion.button>
@@ -855,7 +883,7 @@ export default function ChatPage() {
                               transition={{ duration: 0.3, delay: si * 0.05, ease: "easeOut" }}
                               type="button"
                               onClick={() => send(suggestion)}
-                              className="rounded-xl px-5 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl transition-all duration-300 hover:bg-[rgba(123,79,212,0.12)] hover:border-[rgba(123,79,212,0.4)] hover:shadow-[0_0_20px_rgba(123,79,212,0.25)]"
+                              className="rounded-xl px-4 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left backdrop-blur-xl transition-all duration-300 bg-[rgba(123,79,212,0.10)] border border-[rgba(123,79,212,0.30)] hover:bg-[rgba(123,79,212,0.20)] hover:border-[rgba(123,79,212,0.5)] hover:shadow-[0_0_20px_rgba(123,79,212,0.25)]"
                             >
                               {suggestion}
                             </motion.button>
@@ -1006,7 +1034,7 @@ export default function ChatPage() {
             )}
             <input
               ref={chatInputRef}
-              className="w-full min-h-[52px] bg-white/[0.04] border border-white/[0.08] rounded-xl px-5 py-3.5 text-white text-sm placeholder-[#525252] focus:border-[#D4A843] focus:shadow-[0_0_0_2px_rgba(212,168,67,0.15)] focus:outline-none transition pr-24"
+              className="w-full min-h-[52px] bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-3.5 text-white text-sm placeholder-[#525252] backdrop-blur focus:border-[rgba(212,168,67,0.5)] focus:shadow-[0_0_0_2px_rgba(212,168,67,0.15)] focus:outline-none transition pr-24"
               placeholder="Ask your AI gold coach anything..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -1043,10 +1071,10 @@ export default function ChatPage() {
                 whileTap={{ scale: 0.95 }}
                 type="button"
                 onClick={() => send()}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 transition"
-                style={{ background: "linear-gradient(135deg, #F0D27A, #D4A843)" }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 transition hover:brightness-105 hover:shadow-[0_0_18px_rgba(212,168,67,0.4)]"
+                style={{ background: "#D4A843" }}
               >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-black">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-white">
                   <path d="M7 11V3M3 7L7 3L11 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </motion.button>
