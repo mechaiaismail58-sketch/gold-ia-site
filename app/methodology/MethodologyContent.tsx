@@ -3,10 +3,9 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Eyebrow from "@/components/design-system/Eyebrow";
 import GlassCard from "@/components/design-system/GlassCard";
-import SectionReveal from "@/components/design-system/SectionReveal";
+import ScrollZoom from "@/components/ScrollZoom";
 import CTABlock from "@/components/design-system/CTABlock";
 import TextReveal from "@/components/TextReveal";
-import Parallax from "@/components/Parallax";
 
 const SPRING = "cubic-bezier(0.16,1,0.3,1)";
 
@@ -92,38 +91,12 @@ function AnimatedDivider() {
   );
 }
 
-/* ── Framework section — watermark number + SectionReveal content ── */
+/* ── Framework section — watermark number + scroll-zoom content ── */
 function FrameworkSection({ item, index }: { item: typeof FRAMEWORK[number]; index: number }) {
-  const numStyle: CSSProperties = {
-    color: "#D4A843",
-    opacity: 0.06,
-    fontSize: "clamp(100px, 18vw, 180px)",
-    fontWeight: 700,
-    lineHeight: 1,
-  };
-
   return (
     <section className="min-h-[80vh] flex items-center relative z-10 overflow-hidden py-20 md:py-0">
-      {/* Glow */}
-      <div
-        className={`absolute ${item.glowPos} w-[480px] h-[480px] rounded-full blur-[150px] pointer-events-none`}
-        style={{ background: item.glowColor }}
-        aria-hidden
-      />
-      {/* Watermark number — drifts on scroll */}
-      <Parallax
-        speed={0.2}
-        className={`absolute select-none pointer-events-none ${
-          item.numSide === "right" ? "right-0 md:right-8" : "left-0 md:left-8"
-        } top-1/2 -translate-y-1/2`}
-      >
-        <div style={numStyle} aria-hidden>
-          {item.num}
-        </div>
-      </Parallax>
       {/* Content */}
-      <SectionReveal
-        delay={(index % 2) * 100}
+      <ScrollZoom
         className={`relative z-10 max-w-4xl mx-auto px-6 w-full ${
           index % 2 === 0 ? "md:pr-40" : "md:pl-40"
         }`}
@@ -136,7 +109,7 @@ function FrameworkSection({ item, index }: { item: typeof FRAMEWORK[number]; ind
         <p className="text-lg leading-relaxed max-w-2xl" style={{ color: "#A1A1AA" }}>
           {item.desc}
         </p>
-      </SectionReveal>
+      </ScrollZoom>
     </section>
   );
 }
@@ -212,7 +185,7 @@ export default function MethodologyContent() {
 
       {/* ── Stats bar ── */}
       <section className="py-24 px-6 relative z-10">
-        <SectionReveal>
+        <ScrollZoom>
           <GlassCard className="max-w-5xl mx-auto">
             <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06]">
               {STATS.map((s) => (
@@ -223,7 +196,7 @@ export default function MethodologyContent() {
               ))}
             </div>
           </GlassCard>
-        </SectionReveal>
+        </ScrollZoom>
       </section>
 
       <AnimatedDivider />

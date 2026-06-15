@@ -4,10 +4,9 @@ import { useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import Eyebrow from "@/components/design-system/Eyebrow";
 import GlassCard from "@/components/design-system/GlassCard";
-import SectionReveal from "@/components/design-system/SectionReveal";
+import ScrollZoom from "@/components/ScrollZoom";
 import CTABlock from "@/components/design-system/CTABlock";
 import TextReveal from "@/components/TextReveal";
-import Parallax from "@/components/Parallax";
 
 const SPRING = "cubic-bezier(0.16,1,0.3,1)";
 
@@ -52,18 +51,7 @@ function Chapter({ chapter, index }: { chapter: typeof CHAPTERS[number]; index: 
   const isEven = index % 2 === 0;
   return (
     <section className="relative min-h-[70vh] flex items-center overflow-hidden py-20 px-6">
-      <Parallax
-        speed={0.2}
-        className={`absolute top-1/2 -translate-y-1/2 select-none pointer-events-none ${
-          isEven ? "left-0 sm:left-4" : "right-0 sm:right-4"
-        }`}
-      >
-        <div className="text-[12rem] sm:text-[16rem] font-extrabold leading-none text-white/[0.04]" aria-hidden>
-          {chapter.num}
-        </div>
-      </Parallax>
-      <SectionReveal
-        x={isEven ? -60 : 60}
+      <ScrollZoom
         className={`relative z-10 max-w-2xl w-full mx-auto px-6 ${isEven ? "md:mr-auto md:ml-0 md:text-left" : "md:ml-auto md:mr-0 md:text-right"} text-center`}
       >
         <Eyebrow>{`Chapter ${chapter.num}`}</Eyebrow>
@@ -75,7 +63,7 @@ function Chapter({ chapter, index }: { chapter: typeof CHAPTERS[number]; index: 
           <span style={{ color: "rgba(212,168,67,0.80)" }}>{chapter.goldLine}</span>
           {chapter.body}
         </p>
-      </SectionReveal>
+      </ScrollZoom>
     </section>
   );
 }
@@ -169,14 +157,14 @@ export default function AboutContent() {
 
       {/* ── IS / IS NOT ── */}
       <section className="py-24 px-6 relative z-10">
-        <SectionReveal>
+        <ScrollZoom>
           <TextReveal
             text="What we are. What we're not."
             className="text-2xl font-bold text-white text-center mb-12 flex flex-wrap justify-center"
           />
-        </SectionReveal>
+        </ScrollZoom>
         <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-8">
-          <SectionReveal x={-40}>
+          <ScrollZoom className="h-full">
             <GlassCard variant="purple-border" className="h-full p-8 transition-transform duration-300 hover:-translate-y-1">
               <p className="text-lg font-semibold mb-6" style={{ color: "#D4A843" }}>What we are</p>
               <ul className="space-y-4">
@@ -188,8 +176,8 @@ export default function AboutContent() {
                 ))}
               </ul>
             </GlassCard>
-          </SectionReveal>
-          <SectionReveal x={40} delay={150}>
+          </ScrollZoom>
+          <ScrollZoom className="h-full">
             <GlassCard className="h-full p-8 transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.16]">
               <p className="text-lg font-semibold mb-6 text-white/70">What we&apos;re not</p>
               <ul className="space-y-4">
@@ -201,7 +189,7 @@ export default function AboutContent() {
                 ))}
               </ul>
             </GlassCard>
-          </SectionReveal>
+          </ScrollZoom>
         </div>
       </section>
 

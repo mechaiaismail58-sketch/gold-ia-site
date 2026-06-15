@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion, useScroll, useTransform } from "framer-motion";
 import DemoChat from "@/components/DemoChat";
-import ScrollReveal from "@/components/ScrollReveal";
+import ScrollZoom from "@/components/ScrollZoom";
+import ClipReveal from "@/components/ClipReveal";
 import { PRICING } from "@/lib/pricing";
 
 const HERO_HEADING_WORDS = ["Most", "traders", "blow", "their", "funded", "account", "in", "the", "first", "2", "weeks."];
@@ -190,7 +192,15 @@ function PropFirmMarquee() {
       >
         <div className="flex items-center gap-14 w-max" style={{ animation: "prop-marquee 30s linear infinite" }}>
           {track.map((firm, i) => (
-            <div key={`${firm.name}-${i}`} className="relative h-[50px] w-[140px] shrink-0 transition-transform duration-300 hover:scale-105">
+            <motion.div
+              key={`${firm.name}-${i}`}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.05 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+              className="relative h-[50px] w-[140px] shrink-0"
+            >
               <Image
                 src={firm.src}
                 alt={firm.name}
@@ -198,7 +208,7 @@ function PropFirmMarquee() {
                 sizes="140px"
                 className={`object-contain ${firm.name === "FTMO" ? "prop-logo-ftmo" : "prop-logo-color"}`}
               />
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -209,6 +219,10 @@ function PropFirmMarquee() {
 export default function WaitlistLanding() {
   const [heroReady, setHeroReady] = useState(false);
   const trackSection = useInView<HTMLDivElement>(0.15);
+
+  // Page-level parallax for decorative blobs (move slower than content).
+  const { scrollYProgress: blobScroll } = useScroll();
+  const blobY = useTransform(blobScroll, [0, 1], [0, -200]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -312,57 +326,68 @@ export default function WaitlistLanding() {
 
         {/* ── Hero — py-24 for breathing room ── */}
         <div className="text-center pt-16 pb-12 relative">
-          <div
-            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[340px] w-[480px] -z-10"
-            style={{ background: "radial-gradient(ellipse at center, rgba(212,168,67,0.10) 0%, rgba(212,168,67,0) 65%)" }}
+          <motion.div
+            className="pointer-events-none absolute left-1/2 top-1/2 -ml-[240px] -mt-[170px] h-[340px] w-[480px] -z-10"
+            style={{ y: blobY, background: "radial-gradient(ellipse at center, rgba(212,168,67,0.10) 0%, rgba(212,168,67,0) 65%)" }}
           />
 
-          <h1
-            className="text-[30px] sm:text-[44px] leading-[1.08] tracking-[-0.03em] font-extrabold mb-6"
-            aria-label="Most traders blow their funded account in the first 2 weeks. Ours don't."
+          <motion.div
+            initial={{ opacity: 0, y: 80, filter: "blur(10px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 1, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            <span aria-hidden="true">
-              {HERO_HEADING_WORDS.map((w, i) => (
-                <SplitWord key={`h-${i}`} word={w} index={i} ready={heroReady} />
-              ))}
-              <span className="text-[#D4A843] italic">
-                {HERO_HEADING_GOLD_WORDS.map((w, i) => (
-                  <SplitWord
-                    key={`g-${i}`}
-                    word={w}
-                    index={HERO_HEADING_WORDS.length + 2 + i}
-                    ready={heroReady}
-                    italic
-                  />
+            <h1
+              className="text-[30px] sm:text-[44px] leading-[1.08] tracking-[-0.03em] font-extrabold mb-6"
+              aria-label="Most traders blow their funded account in the first 2 weeks. Ours don't."
+            >
+              <span aria-hidden="true">
+                {HERO_HEADING_WORDS.map((w, i) => (
+                  <SplitWord key={`h-${i}`} word={w} index={i} ready={heroReady} />
                 ))}
+                <span className="text-[#D4A843] italic">
+                  {HERO_HEADING_GOLD_WORDS.map((w, i) => (
+                    <SplitWord
+                      key={`g-${i}`}
+                      word={w}
+                      index={HERO_HEADING_WORDS.length + 2 + i}
+                      ready={heroReady}
+                      italic
+                    />
+                  ))}
+                </span>
               </span>
-            </span>
-          </h1>
+            </h1>
+          </motion.div>
 
-          <p
-            className={`text-[16px] text-[#A1A1AA] leading-[1.7] max-w-[46ch] mx-auto ${heroReady ? "hero-fade-in" : "opacity-0"}`}
-            style={{ animationDelay: "400ms" }}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            You know the pattern. One bad session turns into revenge trades, your stop losses get wider, and by Friday your funded account is gone. BullionDesk watches your trading in real time and tells you when you’re about to do it again — before the drawdown hits.
-          </p>
+            <p className="text-[16px] text-[#A1A1AA] leading-[1.7] max-w-[46ch] mx-auto">
+              You know the pattern. One bad session turns into revenge trades, your stop losses get wider, and by Friday your funded account is gone. BullionDesk watches your trading in real time and tells you when you’re about to do it again — before the drawdown hits.
+            </p>
+          </motion.div>
 
-          <div
-            className={`flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mt-8 ${heroReady ? "hero-fade-in" : "opacity-0"}`}
-            style={{ animationDelay: "600ms" }}
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mt-8"
           >
             {HERO_STATS.map((s, i) => (
               <HeroStat key={s.label} value={s.value} label={s.label} start={heroReady} delay={700 + i * 150} />
             ))}
-          </div>
+          </motion.div>
         </div>
 
-        {/* ── Prop firm logos — scroll reveal ── */}
-        <ScrollReveal>
+        {/* ── Prop firm logos ── */}
+        <ScrollZoom>
           <PropFirmMarquee />
-        </ScrollReveal>
+        </ScrollZoom>
 
         {/* ── CTAs ── */}
-        <ScrollReveal delay={0}>
+        <ScrollZoom>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-3">
             <Link
               href="/signup"
@@ -384,7 +409,7 @@ export default function WaitlistLanding() {
             <p className="text-sm font-medium" style={{ color: "#D4A843" }}>{PRICING.betaLine}</p>
             <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>{PRICING.urgencyLine}</p>
           </div>
-        </ScrollReveal>
+        </ScrollZoom>
 
         {/* ── Gradient divider ── */}
         <div
@@ -392,8 +417,8 @@ export default function WaitlistLanding() {
           style={{ background: "linear-gradient(to right, transparent, #7C3AED 35%, #D4A843 65%, transparent)" }}
         />
 
-        {/* ── Demo chat section ── */}
-        <ScrollReveal>
+        {/* ── Demo chat section — clip-path reveal ── */}
+        <ClipReveal>
           <div id="demo" className="mb-8">
             <div className="text-center mb-4">
               <h2 className="text-[18px] font-extrabold tracking-[-0.01em] mb-2 gradient-text-gold inline-block">
@@ -423,13 +448,13 @@ export default function WaitlistLanding() {
               </Link>
             </p>
           </div>
-        </ScrollReveal>
+        </ClipReveal>
 
         {/* ── Section transition ── */}
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-16 sm:my-24" />
 
         {/* ── Track Record ── */}
-        <ScrollReveal>
+        <ScrollZoom>
           <div
             ref={trackSection.ref}
             className="rounded-3xl border border-[#1A1A1A] bg-[#111111] overflow-hidden mb-4 py-2"
@@ -460,14 +485,20 @@ export default function WaitlistLanding() {
               </p>
             </div>
           </div>
-        </ScrollReveal>
+        </ScrollZoom>
 
-        {/* ── Footer ── */}
-        <ScrollReveal>
+        {/* ── Footer (no negative viewport margin — it's the last element, so a
+             -100px inset would never trigger at the page bottom) ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 100 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+        >
           <p className="text-center text-[11px] text-[#A1A1AA] mb-6 mt-8">
             Bullion Desk © 2026 · AI Gold Trading Coach · Not investment advice
           </p>
-        </ScrollReveal>
+        </motion.section>
 
       </div>
     </div>
