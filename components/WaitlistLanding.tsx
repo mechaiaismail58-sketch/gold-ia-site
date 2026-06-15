@@ -20,7 +20,6 @@ const TRACK_RECORD_STATS = [
   { value: "431", label: "Research Trades" },
   { value: "69%", label: "Win Rate" },
   { value: "25", label: "Selected Trades" },
-  { value: "9 mo.", label: "Track Record" },
 ];
 
 const PROP_FIRM_LOGOS = [
@@ -442,7 +441,7 @@ export default function WaitlistLanding() {
                   Every call on XAUUSD — wins and losses — backtested and documented. No cherry-picking, no deleted screenshots.
                 </p>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+              <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
                 {TRACK_RECORD_STATS.map((s, i) => (
                   <TrackRecordCard
                     key={s.label}
