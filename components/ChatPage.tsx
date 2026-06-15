@@ -919,6 +919,7 @@ export default function ChatPage() {
       {/* ── Messages area ── */}
       <div
         ref={chatContainerRef}
+        data-lenis-prevent
         className="flex-1 overflow-y-auto relative"
       >
         {/* Fade gradient at top — messages scroll under this */}

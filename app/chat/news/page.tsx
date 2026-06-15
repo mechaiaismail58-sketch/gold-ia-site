@@ -12,16 +12,13 @@ const NEWS_CARDS = [
 
 export default function ChatNewsPage() {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-[#0A0A0A] overflow-y-auto">
+    <div data-lenis-prevent className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-[#0A0A0A] overflow-y-auto">
       <div className="w-full max-w-2xl text-center">
         <Eyebrow className="text-center">Gold News &amp; Sentiment</Eyebrow>
-        <h1
-          className="text-white font-light mt-4 mb-4"
-          style={{ fontSize: "clamp(48px, 8vw, 72px)", fontWeight: 300, lineHeight: 1.1 }}
-        >
+        <h1 className="text-white text-[32px] sm:text-[40px] font-semibold tracking-[-0.03em] leading-[1.1] mt-4 mb-4">
           Market Intelligence
         </h1>
-        <p className="text-sm sm:text-base text-[#A1A1AA] mb-12">
+        <p className="text-[14px] leading-relaxed text-white/40 mb-12">
           Real-time gold news, COT data, and institutional sentiment — launching soon.
         </p>
 

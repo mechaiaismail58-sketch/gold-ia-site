@@ -6,6 +6,7 @@ import NavigationProgress from "../components/NavigationProgress";
 import { ChatProvider } from "@/context/ChatContext";
 import PathAwareWrapper from "../components/PathAwareWrapper";
 import GradientBlobs from "@/components/design-system/GradientBlobs";
+import SmoothScroll from "@/components/SmoothScroll";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -46,17 +47,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`min-h-screen bg-[#07060b] text-white ${geist.variable}`}>
+      <body className={`min-h-screen bg-[#07060b] text-white grain-overlay ${geist.variable}`}>
         {/* Shared background — animated purple/gold blobs, all routes */}
         <GradientBlobs />
 
         <NavigationProgress />
-        <ChatProvider>
-          <PushManager />
-          <PathAwareWrapper>
-            {children}
-          </PathAwareWrapper>
-        </ChatProvider>
+        <SmoothScroll>
+          <ChatProvider>
+            <PushManager />
+            <PathAwareWrapper>
+              {children}
+            </PathAwareWrapper>
+          </ChatProvider>
+        </SmoothScroll>
       </body>
     </html>
   );

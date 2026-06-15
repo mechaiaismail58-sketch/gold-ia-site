@@ -112,18 +112,23 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
 
   return (
     <motion.div
-      initial={reduce ? false : { y: 15, opacity: 0 }}
+      initial={reduce ? false : { y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.35, ease: "easeOut", delay: reduce ? 0 : index * 0.05 }}
-      whileHover={reduce ? undefined : { scale: 1.02 }}
+      transition={{ duration: 0.4, ease: "easeOut", delay: reduce ? 0 : index * 0.06 }}
+      whileHover={reduce ? undefined : { scale: 1.015, boxShadow: "0 8px 32px rgba(0,0,0,0.2)" }}
       className={cn(
-        "group card rounded-2xl p-4 border backdrop-blur-sm transition-[border-color,box-shadow] duration-200",
+        "group border transition-[border-color] duration-200 ease-out",
         style.border,
         style.borderHover,
-        style.glow,
         isPast && "opacity-35"
       )}
-      style={{ background: "rgba(255,255,255,0.03)" }}
+      style={{
+        background: "rgba(255,255,255,0.02)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        borderRadius: "16px",
+        padding: "20px",
+      }}
     >
       {/* INCOMING */}
       {isIncoming && (
@@ -135,11 +140,11 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
         </div>
       )}
 
-      {/* Title */}
+      {/* Title — sans-serif, not mono */}
       <div
         className={cn(
-          "text-[13px] font-medium leading-snug",
-          isPast ? "line-through text-white/35" : "text-white/90"
+          "text-[14px] font-medium leading-snug",
+          isPast ? "line-through text-white/35" : "text-white/85"
         )}
       >
         {event.title}
@@ -160,7 +165,7 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
 
       {/* Time */}
       <div className="mt-3 space-y-0.5">
-        <div className="text-[12px] font-mono text-white/55">{formatLocalTime(event.date)}</div>
+        <div className="text-[11px] font-mono text-white/55">{formatLocalTime(event.date)}</div>
         <div className="text-[10px] font-mono text-white/22">{formatUtcTime(event.date)}</div>
       </div>
 
@@ -169,14 +174,14 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
         <div className="flex gap-5 mt-3">
           {event.forecast && (
             <div>
-              <div className="text-[9px] font-mono uppercase tracking-widest text-white/22">Forecast</div>
-              <div className="text-[12px] font-mono text-white/65 mt-0.5">{event.forecast}</div>
+              <div className="text-[8px] font-mono uppercase tracking-[0.15em] text-white/20">Forecast</div>
+              <div className="text-[13px] font-mono text-white/60 mt-0.5">{event.forecast}</div>
             </div>
           )}
           {event.previous && (
             <div>
-              <div className="text-[9px] font-mono uppercase tracking-widest text-white/22">Previous</div>
-              <div className="text-[12px] font-mono text-white/65 mt-0.5">{event.previous}</div>
+              <div className="text-[8px] font-mono uppercase tracking-[0.15em] text-white/20">Previous</div>
+              <div className="text-[13px] font-mono text-white/60 mt-0.5">{event.previous}</div>
             </div>
           )}
         </div>
@@ -189,7 +194,7 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
         ) : isIncoming ? (
           <span className="text-red-400">{countdown} remaining</span>
         ) : (
-          <span className="text-white/40">{countdown}</span>
+          <span className="text-white/25">{countdown}</span>
         )}
       </div>
     </motion.div>
@@ -251,9 +256,6 @@ export default function EconomicCalendar() {
 
   return (
     <div className="w-full max-w-6xl mx-auto">
-      {/* Subtle film-grain texture over the whole page */}
-      <div className="pointer-events-none fixed inset-0 noise-overlay" />
-
       {/* ── High impact warning banner ── */}
       <AnimatePresence>
         {showBanner && nextHigh && (
@@ -280,32 +282,42 @@ export default function EconomicCalendar() {
 
       {/* ── Page header ── */}
       <section className="card relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/10 shadow-[0_18px_80px_rgba(109,40,217,0.12)] mb-6">
-        {/* Ambient purple blob */}
-        <div className="pointer-events-none absolute -top-16 -right-16 h-[200px] w-[200px] rounded-full bg-purple-500/5 blur-3xl" />
+        {/* Decorative purple blob */}
+        <div
+          className="pointer-events-none absolute"
+          style={{
+            top: "-20px",
+            right: "-20px",
+            width: "200px",
+            height: "200px",
+            background: "radial-gradient(circle, rgba(123,79,212,0.08) 0%, transparent 70%)",
+            filter: "blur(40px)",
+          }}
+        />
         <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-[28px] sm:text-[34px] font-semibold leading-[1.15] tracking-[-0.02em]">
+            <h1 className="text-[32px] sm:text-[40px] font-semibold leading-[1.1] tracking-[-0.03em]">
               Economic Calendar
             </h1>
-            <p className="text-[color:var(--muted)] mt-2 max-w-[54ch] text-[14px] leading-6">
+            <p className="text-[14px] leading-relaxed text-white/40 mt-2 max-w-[54ch]">
               Gold-relevant macro events filtered for XAUUSD impact — CPI, NFP, FOMC, GDP, PCE and key USD data.
             </p>
             {weekLabel && (
-              <div className="mt-3 font-mono text-[11px] text-white/28 tracking-wide">{weekLabel}</div>
+              <div className="mt-3 font-mono text-[11px] text-white/28 tracking-[0.04em]">{weekLabel}</div>
             )}
           </div>
 
           {/* Legend */}
-          <div className="flex flex-wrap gap-2 shrink-0">
+          <div className="flex flex-wrap gap-1.5 shrink-0">
             {(["high", "medium", "low"] as const).map((lvl) => (
               <span
                 key={lvl}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-mono uppercase tracking-wide",
+                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.06em]",
                   IMPACT[lvl].badge
                 )}
               >
-                <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", IMPACT[lvl].dot)} />
+                <span className={cn("h-1 w-1 rounded-full shrink-0", IMPACT[lvl].dot)} />
                 {IMPACT[lvl].label}
               </span>
             ))}
@@ -358,16 +370,16 @@ export default function EconomicCalendar() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, ease: "easeOut", delay: reduce ? 0 : colIndex * 0.08 }}
                       className={cn(
-                        "text-center pb-3 mb-3 border-b",
+                        "text-center pb-3 mb-4 border-b",
                         isToday ? "border-[rgba(212,175,55,0.22)]" : "border-white/[0.07]"
                       )}
                     >
-                      <div className="text-[10px] tracking-[0.22em] text-white/28 uppercase">
+                      <div className="text-[11px] font-mono tracking-[0.2em] text-white/25 uppercase">
                         {weekday}
                       </div>
                       <div
                         className={cn(
-                          "text-[16px] font-medium mt-0.5",
+                          "text-[18px] font-semibold mt-0.5",
                           isToday ? "text-[#D4AF37]" : "text-white/50"
                         )}
                       >
@@ -380,8 +392,11 @@ export default function EconomicCalendar() {
 
                     {/* Event cards */}
                     <div className="flex flex-col gap-3">
-                      {grouped[day].map((ev) => (
-                        <EventCard key={ev.id} event={ev} now={now} index={orderIndex.get(ev.id) ?? 0} reduce={reduce} />
+                      {grouped[day].map((ev, ci) => (
+                        <div key={ev.id}>
+                          {ci > 0 && <div className="h-px bg-white/[0.04] mx-4 mb-3" />}
+                          <EventCard event={ev} now={now} index={orderIndex.get(ev.id) ?? 0} reduce={reduce} />
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -414,8 +429,11 @@ export default function EconomicCalendar() {
                   </div>
 
                   <div className="flex flex-col gap-3">
-                    {grouped[day].map((ev) => (
-                      <EventCard key={ev.id} event={ev} now={now} index={orderIndex.get(ev.id) ?? 0} reduce={reduce} />
+                    {grouped[day].map((ev, ci) => (
+                      <div key={ev.id}>
+                        {ci > 0 && <div className="h-px bg-white/[0.04] mx-4 mb-3" />}
+                        <EventCard event={ev} now={now} index={orderIndex.get(ev.id) ?? 0} reduce={reduce} />
+                      </div>
                     ))}
                   </div>
 
@@ -427,7 +445,7 @@ export default function EconomicCalendar() {
         </>
       )}
 
-      <footer className="mt-8 text-xs text-white/15">
+      <footer className="mt-12 text-[10px] font-mono text-white/10">
         © {new Date().getFullYear()} Bullion Desk · Data: Forex Factory
       </footer>
     </div>
