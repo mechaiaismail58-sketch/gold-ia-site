@@ -14,6 +14,13 @@ create table if not exists public.users (
   created_at        timestamptz not null default now()
 );
 
+-- Trader profile fields (added incrementally; safe to re-run).
+-- account_size / trading_style already added by earlier onboarding work.
+alter table public.users add column if not exists account_size text;
+alter table public.users add column if not exists trading_style text;
+alter table public.users add column if not exists prop_firm     text;
+alter table public.users add column if not exists max_drawdown  numeric;
+
 -- 2. AI analysis history
 create table if not exists public.ai_analyses (
   id            uuid        default gen_random_uuid() primary key,

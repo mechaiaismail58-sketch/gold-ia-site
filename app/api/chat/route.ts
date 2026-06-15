@@ -663,14 +663,31 @@ export async function POST(req: Request) {
     const mode = detectMode(userMessage || "analyse marché");
     const tradeHorizon = detectTradeHorizon(userMessage || "");
 
-    // Fetch user profile for context injection
+    // Fetch user profile for context injection.
+    // Resilient: the full select includes columns (prop_firm, max_drawdown)
+    // that only exist after supabase/trader_profile_migration.sql. If they are
+    // absent we fall back to the always-present columns so injection still works.
     const admin = createAdminClient();
     const dbClient = admin ?? supabase;
-    const { data: userProfile } = await (dbClient as typeof supabase)
-      .from("users")
-      .select("trading_horizon, trading_style, account_size, experience_level, risk_profile, account_type, prop_firm, prop_firm_phase, primary_assets")
-      .eq("id", user.id)
-      .single();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let userProfile: any = null;
+    {
+      const full = await (dbClient as typeof supabase)
+        .from("users")
+        .select("trading_horizon, trading_style, account_size, experience_level, risk_profile, prop_firm, max_drawdown")
+        .eq("id", user.id)
+        .single();
+      if (!full.error) {
+        userProfile = full.data;
+      } else {
+        const safe = await (dbClient as typeof supabase)
+          .from("users")
+          .select("trading_horizon, trading_style, account_size, experience_level, risk_profile")
+          .eq("id", user.id)
+          .single();
+        userProfile = safe.data ?? null;
+      }
+    }
     step("[3] user profile fetched");
 
     const [researchContext, tradeMemory, pendingTrades, performanceMemory, performancePattern, scanHistory, liveNews] = await Promise.all([
@@ -790,32 +807,30 @@ Rules:
     let userProfileBlock = "";
     if (userProfile) {
       const profileLines: string[] = [];
-      if (userProfile.account_type)     profileLines.push(`- Account type: ${userProfile.account_type}`);
       if (userProfile.prop_firm)        profileLines.push(`- Prop firm: ${userProfile.prop_firm}`);
-      if (userProfile.prop_firm_phase)  profileLines.push(`- Prop firm phase: ${userProfile.prop_firm_phase}`);
       if (userProfile.trading_style)    profileLines.push(`- Trading style: ${userProfile.trading_style}`);
       if (userProfile.experience_level) profileLines.push(`- Experience level: ${userProfile.experience_level}`);
       if (userProfile.account_size)     profileLines.push(`- Account size: ${userProfile.account_size}`);
+      if (userProfile.max_drawdown != null) profileLines.push(`- Max drawdown allowed: ${userProfile.max_drawdown}%`);
       if (userProfile.risk_profile)     profileLines.push(`- Risk profile: ${userProfile.risk_profile}`);
-      if (Array.isArray(userProfile.primary_assets) && userProfile.primary_assets.length > 0) {
-        profileLines.push(`- Primary assets: ${(userProfile.primary_assets as string[]).join(", ")}`);
-      }
 
       if (profileLines.length > 0) {
-        userProfileBlock = `\nUSER PROFILE (adapt subtly, do not mention this profile explicitly in your response):\n${profileLines.join("\n")}\n\nSubtle adaptation rules:\n- account_type = prop_firm or both → always include a PROP FIRM note at the end of market analyses; adapt risk advice to prop firm DD rules\n- prop_firm → cite the specific firm's rules when relevant (FTMO 5% daily DD, E8 8% max loss, etc.)\n- prop_firm_phase = challenge_1 or challenge_2 → be more conservative; emphasize consistency rule\n- prop_firm_phase = funded → focus on capital preservation and payout conditions\n- trading_style = scalp → focus on H1/M15 levels, faster timeframes\n- trading_style = swing → focus on H4/D1 levels, wider structure\n- experience_level = beginner → simpler vocabulary, mention risk management reminders\n- experience_level = advanced → straight to the point, no basic explanations\n- account_size = under $5k → suggest smaller sizes, tighter risk per trade\n- account_size = $100k+ → institutional perspective, standard lots\n- primary_assets → reference these assets first when giving market context or correlations\n\nThese adaptations must be invisible — never say 'because you are a beginner' or 'given your account size'. Just naturally adjust depth, vocabulary, and risk framing.`;
+        userProfileBlock = `\nUSER PROFILE (adapt subtly, do not mention this profile explicitly in your response):\n${profileLines.join("\n")}\n\nSubtle adaptation rules:\n- prop_firm → cite the specific firm's rules when relevant (FTMO 5% daily DD, E8 8% max loss, etc.)\n- max_drawdown → never propose a trade whose stop risk could breach this limit; factor it into position sizing and risk framing\n- trading_style = scalp → focus on H1/M15 levels, faster timeframes\n- trading_style = swing → focus on H4/D1 levels, wider structure\n- experience_level = beginner → simpler vocabulary, mention risk management reminders\n- experience_level = advanced → straight to the point, no basic explanations\n- account_size = under $5k → suggest smaller sizes, tighter risk per trade\n- account_size = $100k+ → institutional perspective, standard lots\n\nThese adaptations must be invisible — never say 'because you are a beginner' or 'given your account size'. Just naturally adjust depth, vocabulary, and risk framing.`;
       }
     }
 
-    // Merge client-side trader profile (from localStorage) — takes precedence over DB profile
+    // Merge client-side trader profile (from localStorage) — takes precedence over DB profile.
+    // This guarantees the AI sees the profile immediately, even before the DB migration runs.
     if (clientTraderProfile) {
       const cp = clientTraderProfile;
       const clientLines: string[] = [];
       if (cp.prop_firm && cp.prop_firm !== "None") clientLines.push(`- Prop firm: ${cp.prop_firm}`);
       if (cp.account_size)                          clientLines.push(`- Account size: ${cp.account_size}`);
-      if (cp.challenge_phase && cp.challenge_phase !== "Not in a challenge") clientLines.push(`- Challenge phase: ${cp.challenge_phase}`);
-      if (cp.current_drawdown)                      clientLines.push(`- Current drawdown: ${cp.current_drawdown}`);
+      if (cp.max_drawdown)                          clientLines.push(`- Max drawdown allowed: ${cp.max_drawdown}%`);
+      if (cp.trading_style)                         clientLines.push(`- Trading style: ${cp.trading_style}`);
       if (clientLines.length > 0) {
-        const clientSection = `\nLIVE TRADER PROFILE (active session — use these values, override DB if different):\n${clientLines.join("\n")}`;
+        const constraint = `The user trades on ${cp.prop_firm || "a prop firm"} with a ${cp.account_size || "funded"} account. Max drawdown allowed: ${cp.max_drawdown || "?"}%. Trading style: ${cp.trading_style || "unspecified"}. Always factor these constraints into your analysis.`;
+        const clientSection = `\nLIVE TRADER PROFILE (active session — use these values, override DB if different):\n${clientLines.join("\n")}\n${constraint}`;
         userProfileBlock = clientSection + (userProfileBlock ? "\n" + userProfileBlock : "");
       }
     }

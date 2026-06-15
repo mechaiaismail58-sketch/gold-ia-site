@@ -33,8 +33,7 @@ async function saveConversation(params: {
 interface TraderProfile {
   prop_firm: string;
   account_size: string;
-  challenge_phase: string;
-  current_drawdown: string;
+  max_drawdown: string;
   trading_style: string;
 }
 
@@ -43,10 +42,8 @@ const PROFILE_KEY = "bulliondesk_trader_profile";
 // (older "profile_banner_dismissed" flags no longer hide it).
 const BANNER_DISMISS_KEY = "profile_banner_dismissed_v2";
 
-const PROP_FIRMS = ["FTMO", "The5ers", "Apex", "E8", "FundedNext", "Blue Guardian", "Alpha Capital", "Other", "None"];
-const ACCOUNT_SIZES = ["$10K", "$25K", "$50K", "$100K", "$200K"];
-const CHALLENGE_PHASES = ["Phase 1", "Phase 2", "Funded", "Not in a challenge"];
-const TRADING_STYLES = ["Scalping", "Day trading", "Swing trading", "Position trading"];
+const PROP_FIRMS = ["FTMO", "The5ers", "Apex", "E8", "FundedNext", "Blue Guardian", "Alpha Capital"];
+const TRADING_STYLES = ["Scalper", "Day Trader", "Swing Trader"];
 
 export default function ChatPage() {
   const {
@@ -78,10 +75,10 @@ export default function ChatPage() {
   const [traderProfile, setTraderProfile] = useState<TraderProfile>({
     prop_firm: "",
     account_size: "",
-    challenge_phase: "",
-    current_drawdown: "",
+    max_drawdown: "",
     trading_style: "",
   });
+  const [savingProfile, setSavingProfile] = useState(false);
   const [savedProfile, setSavedProfile] = useState<TraderProfile | null>(null);
   const [bannerDismissed, setBannerDismissed] = useState<boolean | null>(null);
 
@@ -202,6 +199,7 @@ export default function ChatPage() {
   }, []);
 
   useEffect(() => {
+    // 1. Hydrate instantly from localStorage (offline-first, drives the badge).
     try {
       const stored = localStorage.getItem(PROFILE_KEY);
       if (stored) {
@@ -211,6 +209,29 @@ export default function ChatPage() {
       }
       setBannerDismissed(localStorage.getItem(BANNER_DISMISS_KEY) === "true");
     } catch { /* ignore */ }
+
+    // 2. Fetch the durable profile from Supabase (cross-device source of truth).
+    fetch("/api/trader-profile")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        const p = data?.profile;
+        if (!p) return;
+        // Only treat as a completed trader profile when a trader-specific field
+        // is present (prop_firm / max_drawdown) — bare onboarding account buckets
+        // ("5k_25k") should not masquerade as a finished profile.
+        const hasTraderFields = p.prop_firm || p.max_drawdown != null;
+        if (!hasTraderFields) return;
+        const merged: TraderProfile = {
+          prop_firm: p.prop_firm ?? "",
+          account_size: p.account_size != null ? String(p.account_size) : "",
+          max_drawdown: p.max_drawdown != null ? String(p.max_drawdown) : "",
+          trading_style: p.trading_style ?? "",
+        };
+        setTraderProfile(merged);
+        setSavedProfile(merged);
+        try { localStorage.setItem(PROFILE_KEY, JSON.stringify(merged)); } catch { /* ignore */ }
+      })
+      .catch(() => {});
   }, []);
 
   function dismissProfileBanner() {
@@ -361,21 +382,42 @@ export default function ChatPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  function saveProfile() {
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(traderProfile));
-    setSavedProfile({ ...traderProfile });
+  async function saveProfile() {
+    const snapshot = { ...traderProfile };
+    // Optimistic: persist locally + reflect immediately, then sync to Supabase.
+    try { localStorage.setItem(PROFILE_KEY, JSON.stringify(snapshot)); } catch { /* ignore */ }
+    setSavedProfile(snapshot);
     setProfileOpen(false);
+    setSavingProfile(true);
+    try {
+      await fetch("/api/trader-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(snapshot),
+      });
+    } catch (err) {
+      console.error("[saveProfile]", err);
+    } finally {
+      setSavingProfile(false);
+    }
   }
 
+  // Compact one-line badge, e.g. "FTMO · $100K · 5% max DD · Day Trader"
   function profileSummary(): string | null {
     if (!savedProfile) return null;
     const parts: string[] = [];
-    if (savedProfile.prop_firm && savedProfile.prop_firm !== "None") parts.push(savedProfile.prop_firm);
-    if (savedProfile.account_size) parts.push(savedProfile.account_size);
-    if (savedProfile.challenge_phase && savedProfile.challenge_phase !== "Not in a challenge") parts.push(savedProfile.challenge_phase);
-    if (savedProfile.current_drawdown) parts.push(`DD: ${savedProfile.current_drawdown}`);
+    if (savedProfile.prop_firm) parts.push(savedProfile.prop_firm);
+    if (savedProfile.account_size) parts.push(formatAccountSize(savedProfile.account_size));
+    if (savedProfile.max_drawdown) parts.push(`${savedProfile.max_drawdown}% max DD`);
     if (savedProfile.trading_style) parts.push(savedProfile.trading_style);
     return parts.length > 0 ? parts.join(" · ") : null;
+  }
+
+  function formatAccountSize(v: string): string {
+    const n = Number(String(v).replace(/[^0-9.]/g, ""));
+    if (!Number.isFinite(n) || n <= 0) return v; // leave legacy buckets like "5k_25k" as-is
+    if (n >= 1000) return `$${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}K`;
+    return `$${n}`;
   }
 
   async function send(textOverride?: string) {
@@ -420,7 +462,7 @@ export default function ChatPage() {
         const stored = localStorage.getItem(PROFILE_KEY);
         if (stored) {
           const prof = JSON.parse(stored) as TraderProfile;
-          if (prof.prop_firm || prof.account_size || prof.challenge_phase || prof.current_drawdown) {
+          if (prof.prop_firm || prof.account_size || prof.max_drawdown || prof.trading_style) {
             body.traderProfile = prof;
           }
         }
@@ -585,6 +627,123 @@ export default function ChatPage() {
       )}
       <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
 
+      {/* ── Trader profile modal ── */}
+      <AnimatePresence>
+        {profileOpen && (
+          <motion.div
+            key="profile-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.7)" }}
+            onClick={() => setProfileOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-lg rounded-2xl p-6 sm:p-7"
+              style={{
+                background: "rgba(20,18,28,0.85)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                border: "1px solid transparent",
+                borderImage: "linear-gradient(135deg, #7B4FD4, #D4A843) 1",
+                boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setProfileOpen(false)}
+                aria-label="Close"
+                className="absolute right-4 top-4 h-8 w-8 flex items-center justify-center rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition"
+              >
+                ✕
+              </button>
+
+              <h2 className="text-lg font-semibold text-white mb-1">Your Trading Profile</h2>
+              <p className="text-sm text-white/40 mb-6">
+                Your AI coach adapts every analysis to these constraints.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Prop Firm */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Prop Firm</label>
+                  <select
+                    value={traderProfile.prop_firm}
+                    onChange={(e) => setTraderProfile((p) => ({ ...p, prop_firm: e.target.value }))}
+                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white focus:border-[#D4A843]/50 focus:shadow-[0_0_15px_rgba(212,168,67,0.08)] focus:outline-none transition appearance-none cursor-pointer"
+                  >
+                    <option value="" className="bg-[#111]">Select firm…</option>
+                    {PROP_FIRMS.map((f) => <option key={f} value={f} className="bg-[#111]">{f}</option>)}
+                  </select>
+                </div>
+
+                {/* Account Size */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Account Size</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-white/40 pointer-events-none">$</span>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      placeholder="100000"
+                      value={traderProfile.account_size}
+                      onChange={(e) => setTraderProfile((p) => ({ ...p, account_size: e.target.value }))}
+                      className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-7 pr-3 py-2.5 text-sm text-white placeholder-[#525252] focus:border-[#D4A843]/50 focus:shadow-[0_0_15px_rgba(212,168,67,0.08)] focus:outline-none transition"
+                    />
+                  </div>
+                </div>
+
+                {/* Max Drawdown */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Max Drawdown %</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      placeholder="5"
+                      value={traderProfile.max_drawdown}
+                      onChange={(e) => setTraderProfile((p) => ({ ...p, max_drawdown: e.target.value }))}
+                      className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white placeholder-[#525252] focus:border-[#D4A843]/50 focus:shadow-[0_0_15px_rgba(212,168,67,0.08)] focus:outline-none transition"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-white/40 pointer-events-none">%</span>
+                  </div>
+                </div>
+
+                {/* Trading Style */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Trading Style</label>
+                  <select
+                    value={traderProfile.trading_style}
+                    onChange={(e) => setTraderProfile((p) => ({ ...p, trading_style: e.target.value }))}
+                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white focus:border-[#D4A843]/50 focus:shadow-[0_0_15px_rgba(212,168,67,0.08)] focus:outline-none transition appearance-none cursor-pointer"
+                  >
+                    <option value="" className="bg-[#111]">Select style…</option>
+                    {TRADING_STYLES.map((t) => <option key={t} value={t} className="bg-[#111]">{t}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={saveProfile}
+                disabled={savingProfile}
+                className="mt-6 w-full rounded-xl px-4 py-3 text-sm font-semibold text-black transition hover:brightness-105 hover:shadow-[0_0_24px_rgba(212,168,67,0.4)] disabled:opacity-60"
+                style={{ background: "#D4A843" }}
+              >
+                {savingProfile ? "Saving…" : "Save Profile"}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── Trading desk header ── */}
       <header className="flex-none bg-white/[0.02] border-b border-white/[0.06] chat-header-enter">
         <div className="max-w-5xl mx-auto px-6 md:px-10 py-3">
@@ -643,84 +802,18 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* ── Trader profile setup form — opened via banner CTA ── */}
-      {profileOpen && (
-        <div className="flex-none border-b border-white/[0.06] bg-white/[0.03]">
-          <div className="px-6 md:px-10 py-4 profile-content-enter">
-            <div className="max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Prop Firm */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Prop Firm</label>
-                <select
-                  value={traderProfile.prop_firm}
-                  onChange={e => setTraderProfile(p => ({ ...p, prop_firm: e.target.value }))}
-                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
-                >
-                  <option value="" className="bg-[#111]">Select firm…</option>
-                  {PROP_FIRMS.map(f => <option key={f} value={f} className="bg-[#111]">{f}</option>)}
-                </select>
-              </div>
-
-              {/* Account Size */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Account Size</label>
-                <select
-                  value={traderProfile.account_size}
-                  onChange={e => setTraderProfile(p => ({ ...p, account_size: e.target.value }))}
-                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
-                >
-                  <option value="" className="bg-[#111]">Select size…</option>
-                  {ACCOUNT_SIZES.map(s => <option key={s} value={s} className="bg-[#111]">{s}</option>)}
-                </select>
-              </div>
-
-              {/* Challenge Phase */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Challenge Phase</label>
-                <select
-                  value={traderProfile.challenge_phase}
-                  onChange={e => setTraderProfile(p => ({ ...p, challenge_phase: e.target.value }))}
-                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
-                >
-                  <option value="" className="bg-[#111]">Select phase…</option>
-                  {CHALLENGE_PHASES.map(ph => <option key={ph} value={ph} className="bg-[#111]">{ph}</option>)}
-                </select>
-              </div>
-
-              {/* Max Drawdown */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Max Drawdown %</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 2.5%"
-                  value={traderProfile.current_drawdown}
-                  onChange={e => setTraderProfile(p => ({ ...p, current_drawdown: e.target.value }))}
-                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-[#525252] focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition"
-                />
-              </div>
-
-              {/* Trading Style */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Trading Style</label>
-                <select
-                  value={traderProfile.trading_style}
-                  onChange={e => setTraderProfile(p => ({ ...p, trading_style: e.target.value }))}
-                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
-                >
-                  <option value="" className="bg-[#111]">Select style…</option>
-                  {TRADING_STYLES.map(t => <option key={t} value={t} className="bg-[#111]">{t}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={saveProfile}
-              className="mt-3 flex items-center gap-2 rounded-lg border border-[#D4A843]/30 bg-[#D4A843]/[0.08] px-4 py-2 text-xs text-[#D4A843] hover:bg-[#D4A843]/[0.14] hover:shadow-[0_0_20px_rgba(212,168,67,0.2)] transition"
-            >
-              Save profile
-            </button>
-          </div>
+      {/* ── Compact trader profile badge — shown once a profile exists ── */}
+      {summary && (
+        <div className="flex-none px-6 md:px-10 pt-2">
+          <button
+            type="button"
+            onClick={() => setProfileOpen(true)}
+            title="Edit trading profile"
+            className="inline-flex items-center gap-2 text-xs font-mono text-white/30 hover:text-white/60 transition"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-[#D4A843] shrink-0" />
+            {summary}
+          </button>
         </div>
       )}
 
@@ -810,25 +903,9 @@ export default function ChatPage() {
 
         {/* Empty state */}
         {messages.length === 0 && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pb-4 empty-state-enter">
-            {/* Pulsing gold chart icon */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
-              className="relative mb-5 flex items-center justify-center"
-            >
-              <span className="absolute h-16 w-16 rounded-full bg-[#D4A843]/10 animate-ping" />
-              <div
-                className="relative h-14 w-14 rounded-full flex items-center justify-center"
-                style={{ background: "rgba(212,168,67,0.08)", border: "1px solid rgba(212,168,67,0.30)" }}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M3 16l5-6 4 3 6-8" stroke="#D4A843" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M3 21h18" stroke="rgba(123,79,212,0.7)" strokeWidth="1.4" strokeLinecap="round" />
-                </svg>
-              </div>
-            </motion.div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 empty-state-enter">
+            {/* Pulsing gold dot */}
+            <span className="h-2.5 w-2.5 rounded-full bg-[#D4A843] animate-pulse mb-5" />
 
             <p className="text-xl font-medium text-white mb-2 text-center">
               Before your next trade.
