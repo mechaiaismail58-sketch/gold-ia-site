@@ -6,7 +6,6 @@ import OnboardingModal from "@/components/OnboardingModal";
 import ShareSignalButton from "@/components/ShareSignalButton";
 import HistoryPanel from "@/components/HistoryPanel";
 import MarkdownMessage from "@/components/MarkdownMessage";
-import GlassCard from "@/components/design-system/GlassCard";
 import { useChatContext } from "@/context/ChatContext";
 
 function cn(...classes: (string | false | null | undefined)[]) {
@@ -36,13 +35,18 @@ interface TraderProfile {
   account_size: string;
   challenge_phase: string;
   current_drawdown: string;
+  trading_style: string;
 }
 
 const PROFILE_KEY = "bulliondesk_trader_profile";
+// Bump this key to force the onboarding card to reappear for everyone
+// (older "profile_banner_dismissed" flags no longer hide it).
+const BANNER_DISMISS_KEY = "profile_banner_dismissed_v2";
 
 const PROP_FIRMS = ["FTMO", "The5ers", "Apex", "E8", "FundedNext", "Blue Guardian", "Alpha Capital", "Other", "None"];
 const ACCOUNT_SIZES = ["$10K", "$25K", "$50K", "$100K", "$200K"];
 const CHALLENGE_PHASES = ["Phase 1", "Phase 2", "Funded", "Not in a challenge"];
+const TRADING_STYLES = ["Scalping", "Day trading", "Swing trading", "Position trading"];
 
 export default function ChatPage() {
   const {
@@ -76,6 +80,7 @@ export default function ChatPage() {
     account_size: "",
     challenge_phase: "",
     current_drawdown: "",
+    trading_style: "",
   });
   const [savedProfile, setSavedProfile] = useState<TraderProfile | null>(null);
   const [bannerDismissed, setBannerDismissed] = useState<boolean | null>(null);
@@ -204,13 +209,13 @@ export default function ChatPage() {
         setTraderProfile(parsed);
         setSavedProfile(parsed);
       }
-      setBannerDismissed(localStorage.getItem("profile_banner_dismissed") === "true");
+      setBannerDismissed(localStorage.getItem(BANNER_DISMISS_KEY) === "true");
     } catch { /* ignore */ }
   }, []);
 
   function dismissProfileBanner() {
     try {
-      localStorage.setItem("profile_banner_dismissed", "true");
+      localStorage.setItem(BANNER_DISMISS_KEY, "true");
     } catch { /* ignore */ }
     setBannerDismissed(true);
   }
@@ -369,6 +374,7 @@ export default function ChatPage() {
     if (savedProfile.account_size) parts.push(savedProfile.account_size);
     if (savedProfile.challenge_phase && savedProfile.challenge_phase !== "Not in a challenge") parts.push(savedProfile.challenge_phase);
     if (savedProfile.current_drawdown) parts.push(`DD: ${savedProfile.current_drawdown}`);
+    if (savedProfile.trading_style) parts.push(savedProfile.trading_style);
     return parts.length > 0 ? parts.join(" · ") : null;
   }
 
@@ -681,9 +687,9 @@ export default function ChatPage() {
                 </select>
               </div>
 
-              {/* Current Drawdown */}
+              {/* Max Drawdown */}
               <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Current Drawdown %</label>
+                <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Max Drawdown %</label>
                 <input
                   type="text"
                   placeholder="e.g. 2.5%"
@@ -691,6 +697,19 @@ export default function ChatPage() {
                   onChange={e => setTraderProfile(p => ({ ...p, current_drawdown: e.target.value }))}
                   className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-[#525252] focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition"
                 />
+              </div>
+
+              {/* Trading Style */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Trading Style</label>
+                <select
+                  value={traderProfile.trading_style}
+                  onChange={e => setTraderProfile(p => ({ ...p, trading_style: e.target.value }))}
+                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:border-[#D4A843]/30 focus:shadow-[0_0_15px_rgba(212,168,67,0.06)] focus:outline-none transition appearance-none cursor-pointer"
+                >
+                  <option value="" className="bg-[#111]">Select style…</option>
+                  {TRADING_STYLES.map(t => <option key={t} value={t} className="bg-[#111]">{t}</option>)}
+                </select>
               </div>
             </div>
 
@@ -707,15 +726,24 @@ export default function ChatPage() {
 
       {/* ── Trader profile banner — unmissable onboarding nudge ── */}
       <AnimatePresence>
-        {bannerDismissed === false && !summary && (
+        {bannerDismissed !== true && !summary && !profileOpen && (
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="flex-none mx-6 md:mx-10 mt-4 shrink-0"
+            className="flex-none mx-4 md:mx-6 mt-3 shrink-0"
           >
-            <GlassCard variant="purple-border" className="px-5 py-4 sm:px-6 sm:py-5 flex items-start justify-between gap-4">
+            <div
+              className="px-5 py-4 sm:px-6 sm:py-5 flex items-start justify-between gap-4 rounded-2xl"
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                border: "1px solid transparent",
+                borderImage: "linear-gradient(to right, #7B4FD4, #D4A843) 1",
+              }}
+            >
               <div className="flex items-start gap-4">
                 {/* Gold shield icon */}
                 <div
@@ -746,7 +774,7 @@ export default function ChatPage() {
                   <p className="text-base sm:text-lg font-semibold text-white mb-1">
                     Complete your trader profile
                   </p>
-                  <p className="text-sm text-[#A1A1AA] max-w-md mb-3">
+                  <p className="text-sm text-white/50 max-w-md mb-3">
                     Tell BullionDesk your prop firm, account size, and trading style. Your AI coach adapts to you.
                   </p>
                   <button
@@ -767,7 +795,7 @@ export default function ChatPage() {
               >
                 ✕
               </button>
-            </GlassCard>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -782,11 +810,30 @@ export default function ChatPage() {
 
         {/* Empty state */}
         {messages.length === 0 && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 empty-state-enter">
-            <p className="text-2xl font-medium text-white/40 mb-2 text-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pb-4 empty-state-enter">
+            {/* Pulsing gold chart icon */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="relative mb-5 flex items-center justify-center"
+            >
+              <span className="absolute h-16 w-16 rounded-full bg-[#D4A843]/10 animate-ping" />
+              <div
+                className="relative h-14 w-14 rounded-full flex items-center justify-center"
+                style={{ background: "rgba(212,168,67,0.08)", border: "1px solid rgba(212,168,67,0.30)" }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 16l5-6 4 3 6-8" stroke="#D4A843" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M3 21h18" stroke="rgba(123,79,212,0.7)" strokeWidth="1.4" strokeLinecap="round" />
+                </svg>
+              </div>
+            </motion.div>
+
+            <p className="text-xl font-medium text-white mb-2 text-center">
               Before your next trade.
             </p>
-            <p className="text-sm text-[#525252] mb-10 text-center">
+            <p className="text-sm text-white/40 mb-8 text-center">
               Let&apos;s check the full picture on XAUUSD.
             </p>
             <div className="grid grid-cols-2 gap-3 w-full max-w-lg">
@@ -804,7 +851,7 @@ export default function ChatPage() {
                 </motion.button>
               ))}
             </div>
-            <p className="text-[11px] text-[#52525B] mt-6 text-center">
+            <p className="text-xs font-mono text-white/20 mt-6 text-center">
               Powered by institutional-grade analysis · 22 data sources
             </p>
           </div>
