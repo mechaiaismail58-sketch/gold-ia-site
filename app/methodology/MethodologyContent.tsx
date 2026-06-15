@@ -95,6 +95,16 @@ function AnimatedDivider() {
 function FrameworkSection({ item, index }: { item: typeof FRAMEWORK[number]; index: number }) {
   return (
     <section className="min-h-[80vh] flex items-center relative z-10 overflow-hidden py-20 md:py-0">
+      {/* Watermark number — plain white, near-invisible, no decoration */}
+      <div
+        className={`absolute select-none pointer-events-none top-1/2 -translate-y-1/2 font-bold leading-none text-white/[0.03] ${
+          item.numSide === "right" ? "right-0 md:right-8" : "left-0 md:left-8"
+        }`}
+        style={{ fontSize: "clamp(100px, 18vw, 180px)" }}
+        aria-hidden
+      >
+        {item.num}
+      </div>
       {/* Content */}
       <ScrollZoom
         className={`relative z-10 max-w-4xl mx-auto px-6 w-full ${

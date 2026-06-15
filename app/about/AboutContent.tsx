@@ -3,7 +3,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import Eyebrow from "@/components/design-system/Eyebrow";
-import GlassCard from "@/components/design-system/GlassCard";
 import ScrollZoom from "@/components/ScrollZoom";
 import CTABlock from "@/components/design-system/CTABlock";
 import TextReveal from "@/components/TextReveal";
@@ -51,6 +50,15 @@ function Chapter({ chapter, index }: { chapter: typeof CHAPTERS[number]; index: 
   const isEven = index % 2 === 0;
   return (
     <section className="relative min-h-[70vh] flex items-center overflow-hidden py-20 px-6">
+      {/* Watermark number — plain white, near-invisible, no decoration */}
+      <div
+        className={`absolute top-1/2 -translate-y-1/2 select-none pointer-events-none text-[12rem] sm:text-[16rem] font-extrabold leading-none text-white/[0.03] ${
+          isEven ? "left-0 sm:left-4" : "right-0 sm:right-4"
+        }`}
+        aria-hidden
+      >
+        {chapter.num}
+      </div>
       <ScrollZoom
         className={`relative z-10 max-w-2xl w-full mx-auto px-6 ${isEven ? "md:mr-auto md:ml-0 md:text-left" : "md:ml-auto md:mr-0 md:text-right"} text-center`}
       >
@@ -78,8 +86,8 @@ function CheckIcon() {
 
 function CrossIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0 mt-[3px]">
-      <path d="M3 3l10 10M13 3L3 13" stroke="rgba(255,255,255,0.35)" strokeWidth="1.8" strokeLinecap="round" />
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0 mt-[3px] text-red-400/60">
+      <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
@@ -163,10 +171,10 @@ export default function AboutContent() {
             className="text-2xl font-bold text-white text-center mb-12 flex flex-wrap justify-center"
           />
         </ScrollZoom>
-        <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-8">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 items-stretch gap-8">
           <ScrollZoom className="h-full">
-            <GlassCard variant="purple-border" className="h-full p-8 transition-transform duration-300 hover:-translate-y-1">
-              <p className="text-lg font-semibold mb-6" style={{ color: "#D4A843" }}>What we are</p>
+            <div className="h-full p-8 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] border-l-[3px] border-l-[#D4A843] transition-transform duration-300 hover:-translate-y-1">
+              <p className="text-lg font-semibold mb-6 text-[#D4A843]">What we are</p>
               <ul className="space-y-4">
                 {IS_LIST.map((item) => (
                   <li key={item} className="flex items-start gap-3">
@@ -175,11 +183,11 @@ export default function AboutContent() {
                   </li>
                 ))}
               </ul>
-            </GlassCard>
+            </div>
           </ScrollZoom>
           <ScrollZoom className="h-full">
-            <GlassCard className="h-full p-8 transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.16]">
-              <p className="text-lg font-semibold mb-6 text-white/70">What we&apos;re not</p>
+            <div className="h-full p-8 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] border-l-[3px] border-l-red-500/40 transition-transform duration-300 hover:-translate-y-1">
+              <p className="text-lg font-semibold mb-6 text-red-400/80">What we&apos;re not</p>
               <ul className="space-y-4">
                 {IS_NOT_LIST.map((item) => (
                   <li key={item} className="flex items-start gap-3">
@@ -188,7 +196,7 @@ export default function AboutContent() {
                   </li>
                 ))}
               </ul>
-            </GlassCard>
+            </div>
           </ScrollZoom>
         </div>
       </section>
