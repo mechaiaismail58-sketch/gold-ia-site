@@ -45,6 +45,20 @@ const BANNER_DISMISS_KEY = "profile_banner_dismissed_v2";
 const PROP_FIRMS = ["FTMO", "The5ers", "Apex", "E8", "FundedNext", "Blue Guardian", "Alpha Capital"];
 const TRADING_STYLES = ["Scalper", "Day Trader", "Swing Trader"];
 
+// Leading icon per suggestion chip. Falls back to a chart glyph for any
+// dynamically-fetched suggestion not in this map.
+const SUGGESTION_ICONS: Record<string, string> = {
+  "Should I trade gold right now?": "📊",
+  "Am I revenge trading?": "🛑",
+  "Review my FTMO drawdown": "📉",
+  "What's the gold bias today?": "🧭",
+  "Is my position size too large?": "⚖️",
+  "Help me pass my prop firm challenge": "🏆",
+};
+function suggestionIcon(s: string): string {
+  return SUGGESTION_ICONS[s] ?? "📊";
+}
+
 export default function ChatPage() {
   const {
     messages,
@@ -805,15 +819,24 @@ export default function ChatPage() {
       {/* ── Compact trader profile badge — shown once a profile exists ── */}
       {summary && (
         <div className="flex-none px-6 md:px-10 pt-2">
-          <button
-            type="button"
-            onClick={() => setProfileOpen(true)}
-            title="Edit trading profile"
-            className="inline-flex items-center gap-2 text-xs font-mono text-white/30 hover:text-white/60 transition"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-[#D4A843] shrink-0" />
-            {summary}
-          </button>
+          <div className="inline-flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setProfileOpen(true)}
+              title="Edit trading profile"
+              className="inline-flex items-center gap-2 text-xs font-mono text-white/30 hover:text-white/60 transition"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-[#D4A843] shrink-0" />
+              {summary}
+            </button>
+            <button
+              type="button"
+              onClick={() => setProfileOpen(true)}
+              className="text-xs underline underline-offset-2 text-white/20 hover:text-white/40 transition"
+            >
+              Edit
+            </button>
+          </div>
         </div>
       )}
 
@@ -904,13 +927,18 @@ export default function ChatPage() {
         {/* Empty state */}
         {messages.length === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center px-6 empty-state-enter">
-            {/* Pulsing gold dot */}
-            <span className="h-2.5 w-2.5 rounded-full bg-[#D4A843] animate-pulse mb-5" />
+            {/* Pulsing gold dot inside a subtle ring */}
+            <span
+              className="mb-5 flex items-center justify-center rounded-full"
+              style={{ height: "40px", width: "40px", border: "1px solid rgba(212,168,67,0.15)" }}
+            >
+              <span className="h-2.5 w-2.5 rounded-full bg-[#D4A843] animate-pulse" />
+            </span>
 
-            <p className="text-xl font-medium text-white mb-2 text-center">
+            <p className="text-2xl font-semibold tracking-tight text-white mb-2 text-center">
               Before your next trade.
             </p>
-            <p className="text-sm text-white/40 mb-8 text-center">
+            <p className="text-sm text-white/35 mb-8 text-center">
               Let&apos;s check the full picture on XAUUSD.
             </p>
             <div className="grid grid-cols-2 gap-3 w-full max-w-lg">
@@ -922,9 +950,10 @@ export default function ChatPage() {
                   transition={{ duration: 0.3, delay: i * 0.05, ease: "easeOut" }}
                   type="button"
                   onClick={() => send(s)}
-                  className="rounded-xl px-4 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left backdrop-blur-xl transition-all duration-300 bg-[rgba(123,79,212,0.10)] border border-[rgba(123,79,212,0.30)] hover:bg-[rgba(123,79,212,0.20)] hover:border-[rgba(123,79,212,0.5)] hover:shadow-[0_0_20px_rgba(123,79,212,0.25)]"
+                  className="flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left backdrop-blur-xl transition-all duration-200 bg-[rgba(123,79,212,0.10)] border border-[rgba(123,79,212,0.30)] hover:-translate-y-px hover:bg-[rgba(123,79,212,0.20)] hover:border-[rgba(123,79,212,0.5)] hover:shadow-[0_6px_20px_rgba(123,79,212,0.25)]"
                 >
-                  {s}
+                  <span className="shrink-0 text-base leading-none" aria-hidden>{suggestionIcon(s)}</span>
+                  <span>{s}</span>
                 </motion.button>
               ))}
             </div>
@@ -1007,9 +1036,10 @@ export default function ChatPage() {
                               transition={{ duration: 0.3, delay: si * 0.05, ease: "easeOut" }}
                               type="button"
                               onClick={() => send(suggestion)}
-                              className="rounded-xl px-4 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left backdrop-blur-xl transition-all duration-300 bg-[rgba(123,79,212,0.10)] border border-[rgba(123,79,212,0.30)] hover:bg-[rgba(123,79,212,0.20)] hover:border-[rgba(123,79,212,0.5)] hover:shadow-[0_0_20px_rgba(123,79,212,0.25)]"
+                              className="flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left backdrop-blur-xl transition-all duration-200 bg-[rgba(123,79,212,0.10)] border border-[rgba(123,79,212,0.30)] hover:-translate-y-px hover:bg-[rgba(123,79,212,0.20)] hover:border-[rgba(123,79,212,0.5)] hover:shadow-[0_6px_20px_rgba(123,79,212,0.25)]"
                             >
-                              {suggestion}
+                              <span className="shrink-0 text-base leading-none" aria-hidden>{suggestionIcon(suggestion)}</span>
+                              <span>{suggestion}</span>
                             </motion.button>
                           ))}
                         </div>
@@ -1156,9 +1186,22 @@ export default function ChatPage() {
                 }}
               />
             )}
+            {/* Gradient border ring on focus (purple → gold) */}
+            {inputFocused && (
+              <div
+                className="absolute inset-0 rounded-2xl pointer-events-none z-[1]"
+                style={{
+                  padding: "1px",
+                  background: "linear-gradient(90deg, #7B4FD4, #D4A843)",
+                  WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                  WebkitMaskComposite: "xor",
+                  maskComposite: "exclude",
+                }}
+              />
+            )}
             <input
               ref={chatInputRef}
-              className="w-full min-h-[52px] bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-3.5 text-white text-sm placeholder-[#525252] backdrop-blur focus:border-[rgba(212,168,67,0.5)] focus:shadow-[0_0_0_2px_rgba(212,168,67,0.15)] focus:outline-none transition pr-24"
+              className="w-full min-h-[52px] bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-3.5 text-white text-sm placeholder-[#525252] placeholder:italic backdrop-blur focus:border-transparent focus:shadow-[0_0_0_3px_rgba(123,79,212,0.10)] focus:outline-none transition pr-24"
               placeholder="Ask your AI gold coach anything..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -1193,10 +1236,12 @@ export default function ChatPage() {
             {canSend && (
               <motion.button
                 whileTap={{ scale: 0.95 }}
+                whileHover={{ rotate: 12 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 type="button"
                 onClick={() => send()}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 transition hover:brightness-105 hover:shadow-[0_0_18px_rgba(212,168,67,0.4)]"
-                style={{ background: "#D4A843" }}
+                className="absolute right-2 top-1/2 z-10 rounded-lg p-2 transition-[filter,box-shadow] hover:brightness-105 hover:shadow-[0_0_18px_rgba(212,168,67,0.4)]"
+                style={{ background: "#D4A843", y: "-50%" }}
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-white">
                   <path d="M7 11V3M3 7L7 3L11 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>

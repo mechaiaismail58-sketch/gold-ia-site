@@ -38,10 +38,10 @@ export default function ChatNavSidebar() {
             key={item.href}
             href={item.href}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all",
+              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors duration-150",
               active
-                ? "bg-gradient-to-r from-[#7B4FD4] to-[#9B6FE8] text-white shadow-[0_0_20px_rgba(123,79,212,0.35)]"
-                : "text-white/50 hover:text-white hover:bg-white/[0.04]"
+                ? "bg-gradient-to-r from-[#7B4FD4] to-[#9B6FE8] text-white shadow-[-2px_0_8px_rgba(123,79,212,0.3),0_0_20px_rgba(123,79,212,0.25)]"
+                : "text-white/50 hover:text-white hover:bg-[rgba(255,255,255,0.05)]"
             )}
           >
             {item.icon}
