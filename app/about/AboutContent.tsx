@@ -6,6 +6,8 @@ import Eyebrow from "@/components/design-system/Eyebrow";
 import GlassCard from "@/components/design-system/GlassCard";
 import SectionReveal from "@/components/design-system/SectionReveal";
 import CTABlock from "@/components/design-system/CTABlock";
+import TextReveal from "@/components/TextReveal";
+import Parallax from "@/components/Parallax";
 
 const SPRING = "cubic-bezier(0.16,1,0.3,1)";
 
@@ -50,22 +52,25 @@ function Chapter({ chapter, index }: { chapter: typeof CHAPTERS[number]; index: 
   const isEven = index % 2 === 0;
   return (
     <section className="relative min-h-[70vh] flex items-center overflow-hidden py-20 px-6">
-      <div
-        className={`absolute top-1/2 -translate-y-1/2 select-none pointer-events-none text-[12rem] sm:text-[16rem] font-extrabold leading-none text-white/[0.04] ${
+      <Parallax
+        speed={0.2}
+        className={`absolute top-1/2 -translate-y-1/2 select-none pointer-events-none ${
           isEven ? "left-0 sm:left-4" : "right-0 sm:right-4"
         }`}
-        aria-hidden
       >
-        {chapter.num}
-      </div>
+        <div className="text-[12rem] sm:text-[16rem] font-extrabold leading-none text-white/[0.04]" aria-hidden>
+          {chapter.num}
+        </div>
+      </Parallax>
       <SectionReveal
         x={isEven ? -60 : 60}
         className={`relative z-10 max-w-2xl w-full mx-auto px-6 ${isEven ? "md:mr-auto md:ml-0 md:text-left" : "md:ml-auto md:mr-0 md:text-right"} text-center`}
       >
         <Eyebrow>{`Chapter ${chapter.num}`}</Eyebrow>
-        <h2 className="text-3xl md:text-4xl font-bold text-white mt-4 mb-6 leading-tight">
-          {chapter.title}
-        </h2>
+        <TextReveal
+          text={chapter.title}
+          className="text-3xl md:text-4xl font-bold text-white mt-4 mb-6 leading-tight"
+        />
         <p className="text-lg leading-loose" style={{ color: "#A1A1AA" }}>
           <span style={{ color: "rgba(212,168,67,0.80)" }}>{chapter.goldLine}</span>
           {chapter.body}
@@ -152,15 +157,23 @@ export default function AboutContent() {
 
       {/* ── Three chapters ── */}
       {CHAPTERS.map((chapter, i) => (
-        <Chapter key={chapter.num} chapter={chapter} index={i} />
+        <div key={chapter.num}>
+          {i > 0 && (
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-16 sm:my-24" />
+          )}
+          <Chapter chapter={chapter} index={i} />
+        </div>
       ))}
+
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-16 sm:my-24" />
 
       {/* ── IS / IS NOT ── */}
       <section className="py-24 px-6 relative z-10">
         <SectionReveal>
-          <h2 className="text-2xl font-bold text-white text-center mb-12">
-            What we are. What we&apos;re not.
-          </h2>
+          <TextReveal
+            text="What we are. What we're not."
+            className="text-2xl font-bold text-white text-center mb-12 flex flex-wrap justify-center"
+          />
         </SectionReveal>
         <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-8">
           <SectionReveal x={-40}>

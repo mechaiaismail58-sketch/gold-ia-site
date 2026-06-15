@@ -190,7 +190,7 @@ function PropFirmMarquee() {
       >
         <div className="flex items-center gap-14 w-max" style={{ animation: "prop-marquee 30s linear infinite" }}>
           {track.map((firm, i) => (
-            <div key={`${firm.name}-${i}`} className="relative h-[50px] w-[140px] shrink-0">
+            <div key={`${firm.name}-${i}`} className="relative h-[50px] w-[140px] shrink-0 transition-transform duration-300 hover:scale-105">
               <Image
                 src={firm.src}
                 alt={firm.name}
@@ -424,6 +424,9 @@ export default function WaitlistLanding() {
             </p>
           </div>
         </ScrollReveal>
+
+        {/* ── Section transition ── */}
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-16 sm:my-24" />
 
         {/* ── Track Record ── */}
         <ScrollReveal>

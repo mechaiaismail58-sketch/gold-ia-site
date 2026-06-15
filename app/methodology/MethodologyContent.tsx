@@ -5,6 +5,8 @@ import Eyebrow from "@/components/design-system/Eyebrow";
 import GlassCard from "@/components/design-system/GlassCard";
 import SectionReveal from "@/components/design-system/SectionReveal";
 import CTABlock from "@/components/design-system/CTABlock";
+import TextReveal from "@/components/TextReveal";
+import Parallax from "@/components/Parallax";
 
 const SPRING = "cubic-bezier(0.16,1,0.3,1)";
 
@@ -108,16 +110,17 @@ function FrameworkSection({ item, index }: { item: typeof FRAMEWORK[number]; ind
         style={{ background: item.glowColor }}
         aria-hidden
       />
-      {/* Watermark number */}
-      <div
+      {/* Watermark number — drifts on scroll */}
+      <Parallax
+        speed={0.2}
         className={`absolute select-none pointer-events-none ${
           item.numSide === "right" ? "right-0 md:right-8" : "left-0 md:left-8"
         } top-1/2 -translate-y-1/2`}
-        style={numStyle}
-        aria-hidden
       >
-        {item.num}
-      </div>
+        <div style={numStyle} aria-hidden>
+          {item.num}
+        </div>
+      </Parallax>
       {/* Content */}
       <SectionReveal
         delay={(index % 2) * 100}
@@ -126,9 +129,10 @@ function FrameworkSection({ item, index }: { item: typeof FRAMEWORK[number]; ind
         }`}
       >
         <Eyebrow>{item.label}</Eyebrow>
-        <h2 className="text-3xl md:text-4xl font-bold text-white mt-4 mb-6 leading-tight">
-          {item.title}
-        </h2>
+        <TextReveal
+          text={item.title}
+          className="text-3xl md:text-4xl font-bold text-white mt-4 mb-6 leading-tight"
+        />
         <p className="text-lg leading-relaxed max-w-2xl" style={{ color: "#A1A1AA" }}>
           {item.desc}
         </p>
