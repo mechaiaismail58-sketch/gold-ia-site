@@ -121,7 +121,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
       <NavShell variant="floating">
 
         {/* ── Main row ── */}
-        <div className="flex items-center justify-between gap-4">
+        <div className="relative flex items-center justify-between gap-4">
 
           {/* Logo */}
           <Link href="/" className="flex items-baseline gap-3 shrink-0">
@@ -130,8 +130,8 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
             </div>
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden lg:flex items-center gap-2">
+          {/* Desktop nav — absolutely centered in the navbar */}
+          <nav className="hidden lg:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href} className={navLinkClass(item.href)}>
                 {item.label}
