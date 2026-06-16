@@ -887,48 +887,88 @@ export default function ChatPage() {
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
             className="absolute inset-0 flex flex-col items-center justify-center px-6"
           >
-            {/* Premium gold bar icon */}
+            {/* ── Animated hero emblem ── */}
             <motion.div
-              initial={{ scale: 0.8, opacity: 0, rotateY: -30 }}
-              animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-              className="mb-8 relative orb-breathe"
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+              className="mb-10 relative flex items-center justify-center"
+              style={{ width: "140px", height: "140px" }}
             >
-              {/* Outer purple glow */}
-              <div className="absolute -inset-8 rounded-full blur-3xl" style={{ background: "radial-gradient(circle, rgba(123,79,212,0.1) 0%, transparent 70%)" }} />
-              {/* Gold glow */}
-              <div className="absolute -inset-4 rounded-full blur-2xl" style={{ background: "radial-gradient(circle, rgba(212,168,67,0.08) 0%, transparent 60%)" }} />
-              <div
-                className="relative flex items-center justify-center"
-                style={{ width: "72px", height: "72px" }}
-              >
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  {/* Gold bar — 3D isometric style */}
+              {/* Layer 1 — Large purple ambient glow */}
+              <div className="absolute inset-0 rounded-full hero-emblem-glow" style={{ background: "radial-gradient(circle, rgba(123,79,212,0.15) 0%, rgba(123,79,212,0.04) 40%, transparent 70%)" }} />
+
+              {/* Layer 2 — Rotating outer ring */}
+              <div className="absolute inset-2 hero-ring-spin">
+                <svg viewBox="0 0 120 120" className="w-full h-full">
                   <defs>
-                    <linearGradient id="gold-face" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#E8C76A" />
-                      <stop offset="50%" stopColor="#D4A843" />
-                      <stop offset="100%" stopColor="#B8912E" />
-                    </linearGradient>
-                    <linearGradient id="gold-top" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#F5DFA0" />
-                      <stop offset="100%" stopColor="#D4A843" />
-                    </linearGradient>
-                    <linearGradient id="gold-side" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#C49A3A" />
-                      <stop offset="100%" stopColor="#8B6914" />
+                    <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="rgba(123,79,212,0.4)" />
+                      <stop offset="50%" stopColor="rgba(212,168,67,0.3)" />
+                      <stop offset="100%" stopColor="rgba(123,79,212,0.05)" />
                     </linearGradient>
                   </defs>
-                  {/* Top face */}
-                  <path d="M12 10L28 10L32 14L8 14Z" fill="url(#gold-top)" />
-                  {/* Front face */}
-                  <path d="M8 14L32 14L30 30L10 30Z" fill="url(#gold-face)" />
-                  {/* Right side */}
-                  <path d="M32 14L30 30L28 28L28 10Z" fill="url(#gold-side)" opacity="0.7" />
-                  {/* Shine line */}
-                  <path d="M14 17L26 17" stroke="rgba(255,255,255,0.25)" strokeWidth="0.5" strokeLinecap="round" />
-                  <path d="M15 20L25 20" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" strokeLinecap="round" />
+                  <circle cx="60" cy="60" r="56" fill="none" stroke="url(#ring-grad)" strokeWidth="1" strokeDasharray="8 16" strokeLinecap="round" />
                 </svg>
+              </div>
+
+              {/* Layer 3 — Counter-rotating inner ring */}
+              <div className="absolute inset-6 hero-ring-spin-reverse">
+                <svg viewBox="0 0 100 100" className="w-full h-full">
+                  <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(212,168,67,0.12)" strokeWidth="0.5" strokeDasharray="4 12" />
+                </svg>
+              </div>
+
+              {/* Layer 4 — Orbiting particles */}
+              <div className="absolute inset-0">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="absolute top-1/2 left-1/2 hero-particle-orbit"
+                    style={{
+                      width: "4px",
+                      height: "4px",
+                      marginLeft: "-2px",
+                      marginTop: "-2px",
+                      animationDelay: `${i * -3}s`,
+                    }}
+                  >
+                    <span
+                      className="block rounded-full hero-particle-pulse"
+                      style={{
+                        width: i % 2 === 0 ? "3px" : "2px",
+                        height: i % 2 === 0 ? "3px" : "2px",
+                        background: i % 2 === 0 ? "#D4A843" : "#9B7DE8",
+                        boxShadow: i % 2 === 0 ? "0 0 6px rgba(212,168,67,0.6)" : "0 0 6px rgba(123,79,212,0.5)",
+                        animationDelay: `${i * -1.2}s`,
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Layer 5 — Center glass circle with gold core */}
+              <div
+                className="relative flex items-center justify-center rounded-full hero-core-breathe"
+                style={{
+                  width: "52px",
+                  height: "52px",
+                  background: "radial-gradient(circle at 35% 35%, rgba(123,79,212,0.12), rgba(212,168,67,0.06) 60%, rgba(0,0,0,0.2))",
+                  border: "1px solid rgba(212,168,67,0.15)",
+                  boxShadow: "0 0 40px rgba(123,79,212,0.1), 0 0 15px rgba(212,168,67,0.08), inset 0 1px 1px rgba(255,255,255,0.06)",
+                  backdropFilter: "blur(8px)",
+                }}
+              >
+                {/* Inner gold spark */}
+                <div
+                  className="rounded-full hero-spark"
+                  style={{
+                    width: "8px",
+                    height: "8px",
+                    background: "radial-gradient(circle, #F5DFA0, #D4A843)",
+                    boxShadow: "0 0 12px rgba(212,168,67,0.6), 0 0 30px rgba(212,168,67,0.2)",
+                  }}
+                />
               </div>
             </motion.div>
 
