@@ -78,8 +78,8 @@ export default function NavbarPrivate() {
 
         {/* Logo */}
         <Link href="/chat" className="flex items-center gap-2 shrink-0">
-          <span className="w-2 h-2 rounded-full bg-[#D4A843] animate-pulse inline-block shrink-0" />
-          <span className="text-sm font-semibold text-white">BullionDesk</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block shrink-0" />
+          <span className="text-sm font-semibold text-white/70">XAUUSD · <span className="text-emerald-400">Live</span></span>
         </Link>
 
         {/* Account dropdown — desktop */}
