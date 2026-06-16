@@ -913,7 +913,16 @@ ${userMessage || "Analyse le marché."}`.trim();
     const anthropicStream = client.messages.stream({
       model: MODEL,
       max_tokens: maxOut,
-      system: selectedPrompt + imageSilentInstruction,
+      system: selectedPrompt + imageSilentInstruction + `
+
+RESPONSE LENGTH RULES:
+- Keep responses under 400 words maximum. Be dense, not long.
+- Use the section headers (STRUCTURE, MACRO, CONDITIONS, BIAS, PROP FIRM NOTE) but keep each section to 2-3 sentences max.
+- Lead with the answer in the first line: "Don't trade this." or "There's a setup forming." or "Wait for [level]."
+- Skip obvious context the trader already knows. Don't explain what RSI or MACD are.
+- The prop firm note should be 1-2 sentences max, not a paragraph.
+- If the user asks a simple question, give a simple answer. Not everything needs a full market breakdown.
+- Think Bloomberg terminal chat, not research report.`,
       messages: [{ role: "user", content: userContent }],
     });
 
