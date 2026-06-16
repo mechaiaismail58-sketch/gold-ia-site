@@ -417,7 +417,7 @@ export default function WaitlistLanding() {
           style={{ background: "linear-gradient(to right, transparent, #7C3AED 35%, #D4A843 65%, transparent)" }}
         />
 
-        {/* ── Demo chat section — clip-path reveal ── */}
+        {/* ── Demo chat section — fade-in ── */}
         <ClipReveal>
           <div id="demo" className="mb-8">
             <div className="text-center mb-4">

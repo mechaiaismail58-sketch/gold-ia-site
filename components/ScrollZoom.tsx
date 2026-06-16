@@ -1,18 +1,17 @@
 "use client";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, ReactNode } from "react";
+import { motion } from "framer-motion";
+import { ReactNode } from "react";
 
+// Simple fade-in-up on scroll (opacity 0→1, translateY 20px→0). No scale.
 export default function ScrollZoom({ children, className }: { children: ReactNode; className?: string }) {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "center center"],
-  });
-  const scale = useTransform(scrollYProgress, [0, 1], [0.88, 1]);
-  const opacity = useTransform(scrollYProgress, [0, 0.4], [0.2, 1]);
-
   return (
-    <motion.div ref={ref} style={{ scale, opacity }} className={className}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className={className}
+    >
       {children}
     </motion.div>
   );
