@@ -887,29 +887,49 @@ export default function ChatPage() {
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
             className="absolute inset-0 flex flex-col items-center justify-center px-6"
           >
-            {/* Animated purple-gold orb */}
+            {/* Premium gold bar icon */}
             <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+              initial={{ scale: 0.8, opacity: 0, rotateY: -30 }}
+              animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
               className="mb-8 relative orb-breathe"
             >
-              {/* Outer purple glow ring */}
-              <div className="absolute -inset-6 rounded-full blur-2xl animate-pulse" style={{ background: "radial-gradient(circle, rgba(123,79,212,0.12) 0%, transparent 70%)" }} />
-              {/* Inner gold glow */}
-              <div className="absolute -inset-3 rounded-full blur-xl" style={{ background: "radial-gradient(circle, rgba(212,168,67,0.1) 0%, transparent 60%)" }} />
-              <span
-                className="relative flex items-center justify-center rounded-full"
-                style={{
-                  height: "64px",
-                  width: "64px",
-                  background: "radial-gradient(circle at 40% 40%, rgba(123,79,212,0.1), rgba(212,168,67,0.06))",
-                  border: "1px solid rgba(123,79,212,0.12)",
-                  boxShadow: "0 0 30px rgba(123,79,212,0.08), inset 0 0 20px rgba(212,168,67,0.04)",
-                }}
+              {/* Outer purple glow */}
+              <div className="absolute -inset-8 rounded-full blur-3xl" style={{ background: "radial-gradient(circle, rgba(123,79,212,0.1) 0%, transparent 70%)" }} />
+              {/* Gold glow */}
+              <div className="absolute -inset-4 rounded-full blur-2xl" style={{ background: "radial-gradient(circle, rgba(212,168,67,0.08) 0%, transparent 60%)" }} />
+              <div
+                className="relative flex items-center justify-center"
+                style={{ width: "72px", height: "72px" }}
               >
-                <span className="h-2.5 w-2.5 rounded-full bg-[#D4A843] animate-pulse" style={{ boxShadow: "0 0 12px rgba(212,168,67,0.5)" }} />
-              </span>
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Gold bar — 3D isometric style */}
+                  <defs>
+                    <linearGradient id="gold-face" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#E8C76A" />
+                      <stop offset="50%" stopColor="#D4A843" />
+                      <stop offset="100%" stopColor="#B8912E" />
+                    </linearGradient>
+                    <linearGradient id="gold-top" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#F5DFA0" />
+                      <stop offset="100%" stopColor="#D4A843" />
+                    </linearGradient>
+                    <linearGradient id="gold-side" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#C49A3A" />
+                      <stop offset="100%" stopColor="#8B6914" />
+                    </linearGradient>
+                  </defs>
+                  {/* Top face */}
+                  <path d="M12 10L28 10L32 14L8 14Z" fill="url(#gold-top)" />
+                  {/* Front face */}
+                  <path d="M8 14L32 14L30 30L10 30Z" fill="url(#gold-face)" />
+                  {/* Right side */}
+                  <path d="M32 14L30 30L28 28L28 10Z" fill="url(#gold-side)" opacity="0.7" />
+                  {/* Shine line */}
+                  <path d="M14 17L26 17" stroke="rgba(255,255,255,0.25)" strokeWidth="0.5" strokeLinecap="round" />
+                  <path d="M15 20L25 20" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" strokeLinecap="round" />
+                </svg>
+              </div>
             </motion.div>
 
             <motion.p
