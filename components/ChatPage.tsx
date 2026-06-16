@@ -38,8 +38,6 @@ interface TraderProfile {
 }
 
 const PROFILE_KEY = "bulliondesk_trader_profile";
-// Bump this key to force the onboarding card to reappear for everyone
-// (older "profile_banner_dismissed" flags no longer hide it).
 const BANNER_DISMISS_KEY = "profile_banner_dismissed_v2";
 
 const PROP_FIRMS = ["FTMO", "The5ers", "Apex", "E8", "FundedNext", "Blue Guardian", "Alpha Capital"];
@@ -199,7 +197,6 @@ export default function ChatPage() {
   }, []);
 
   useEffect(() => {
-    // 1. Hydrate instantly from localStorage (offline-first, drives the badge).
     try {
       const stored = localStorage.getItem(PROFILE_KEY);
       if (stored) {
@@ -210,15 +207,11 @@ export default function ChatPage() {
       setBannerDismissed(localStorage.getItem(BANNER_DISMISS_KEY) === "true");
     } catch { /* ignore */ }
 
-    // 2. Fetch the durable profile from Supabase (cross-device source of truth).
     fetch("/api/trader-profile")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         const p = data?.profile;
         if (!p) return;
-        // Only treat as a completed trader profile when a trader-specific field
-        // is present (prop_firm / max_drawdown) — bare onboarding account buckets
-        // ("5k_25k") should not masquerade as a finished profile.
         const hasTraderFields = p.prop_firm || p.max_drawdown != null;
         if (!hasTraderFields) return;
         const merged: TraderProfile = {
@@ -384,7 +377,6 @@ export default function ChatPage() {
 
   async function saveProfile() {
     const snapshot = { ...traderProfile };
-    // Optimistic: persist locally + reflect immediately, then sync to Supabase.
     try { localStorage.setItem(PROFILE_KEY, JSON.stringify(snapshot)); } catch { /* ignore */ }
     setSavedProfile(snapshot);
     setProfileOpen(false);
@@ -402,7 +394,6 @@ export default function ChatPage() {
     }
   }
 
-  // Compact one-line badge, e.g. "FTMO · $100K · 5% max DD · Day Trader"
   function profileSummary(): string | null {
     if (!savedProfile) return null;
     const parts: string[] = [];
@@ -415,7 +406,7 @@ export default function ChatPage() {
 
   function formatAccountSize(v: string): string {
     const n = Number(String(v).replace(/[^0-9.]/g, ""));
-    if (!Number.isFinite(n) || n <= 0) return v; // leave legacy buckets like "5k_25k" as-is
+    if (!Number.isFinite(n) || n <= 0) return v;
     if (n >= 1000) return `$${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}K`;
     return `$${n}`;
   }
@@ -614,9 +605,9 @@ export default function ChatPage() {
 
   return (
     <motion.div
-      initial={{ y: 10, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.4, ease: "easeOut", delay: 0.15 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="flex-1 flex flex-col bg-transparent overflow-hidden relative"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -635,49 +626,48 @@ export default function ChatPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.25 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ background: "rgba(0,0,0,0.7)" }}
+            style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
             onClick={() => setProfileOpen(false)}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              initial={{ scale: 0.92, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 5 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-lg rounded-2xl p-6 sm:p-7"
+              className="relative w-full max-w-lg rounded-3xl p-7 sm:p-8"
               style={{
-                background: "rgba(20,18,28,0.85)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-                border: "1px solid transparent",
-                borderImage: "linear-gradient(135deg, #7B4FD4, #D4A843) 1",
-                boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
+                background: "rgba(16,14,24,0.92)",
+                backdropFilter: "blur(40px)",
+                WebkitBackdropFilter: "blur(40px)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                boxShadow: "0 32px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.03) inset",
               }}
             >
               <button
                 type="button"
                 onClick={() => setProfileOpen(false)}
                 aria-label="Close"
-                className="absolute right-4 top-4 h-8 w-8 flex items-center justify-center rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition"
+                className="absolute right-5 top-5 h-8 w-8 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition"
               >
-                ✕
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
 
-              <h2 className="text-lg font-semibold text-white mb-1">Your Trading Profile</h2>
-              <p className="text-sm text-white/40 mb-6">
+              <h2 className="text-lg font-semibold text-white mb-1 tracking-tight">Your Trading Profile</h2>
+              <p className="text-sm text-white/35 mb-7">
                 Your AI coach adapts every analysis to these constraints.
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {/* Prop Firm */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Prop Firm</label>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[11px] uppercase tracking-[0.12em] font-medium text-white/25">Prop Firm</label>
                   <select
                     value={traderProfile.prop_firm}
                     onChange={(e) => setTraderProfile((p) => ({ ...p, prop_firm: e.target.value }))}
-                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white focus:border-[#D4A843]/50 focus:shadow-[0_0_15px_rgba(212,168,67,0.08)] focus:outline-none transition appearance-none cursor-pointer"
+                    className="bg-white/[0.03] border border-white/[0.06] rounded-xl px-3.5 py-3 text-sm text-white focus:border-[#D4A843]/40 focus:ring-1 focus:ring-[#D4A843]/20 focus:outline-none transition appearance-none cursor-pointer"
                   >
                     <option value="" className="bg-[#111]">Select firm…</option>
                     {PROP_FIRMS.map((f) => <option key={f} value={f} className="bg-[#111]">{f}</option>)}
@@ -685,24 +675,24 @@ export default function ChatPage() {
                 </div>
 
                 {/* Account Size */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Account Size</label>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[11px] uppercase tracking-[0.12em] font-medium text-white/25">Account Size</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-white/40 pointer-events-none">$</span>
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-white/25 pointer-events-none">$</span>
                     <input
                       type="number"
                       inputMode="numeric"
                       placeholder="100000"
                       value={traderProfile.account_size}
                       onChange={(e) => setTraderProfile((p) => ({ ...p, account_size: e.target.value }))}
-                      className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-7 pr-3 py-2.5 text-sm text-white placeholder-[#525252] focus:border-[#D4A843]/50 focus:shadow-[0_0_15px_rgba(212,168,67,0.08)] focus:outline-none transition"
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl pl-7 pr-3.5 py-3 text-sm text-white placeholder-white/15 focus:border-[#D4A843]/40 focus:ring-1 focus:ring-[#D4A843]/20 focus:outline-none transition"
                     />
                   </div>
                 </div>
 
                 {/* Max Drawdown */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Max Drawdown %</label>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[11px] uppercase tracking-[0.12em] font-medium text-white/25">Max Drawdown %</label>
                   <div className="relative">
                     <input
                       type="number"
@@ -710,19 +700,19 @@ export default function ChatPage() {
                       placeholder="5"
                       value={traderProfile.max_drawdown}
                       onChange={(e) => setTraderProfile((p) => ({ ...p, max_drawdown: e.target.value }))}
-                      className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white placeholder-[#525252] focus:border-[#D4A843]/50 focus:shadow-[0_0_15px_rgba(212,168,67,0.08)] focus:outline-none transition"
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-3.5 py-3 text-sm text-white placeholder-white/15 focus:border-[#D4A843]/40 focus:ring-1 focus:ring-[#D4A843]/20 focus:outline-none transition"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-white/40 pointer-events-none">%</span>
+                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-white/25 pointer-events-none">%</span>
                   </div>
                 </div>
 
                 {/* Trading Style */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs uppercase tracking-[0.15em] font-medium text-[#71717A]">Trading Style</label>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[11px] uppercase tracking-[0.12em] font-medium text-white/25">Trading Style</label>
                   <select
                     value={traderProfile.trading_style}
                     onChange={(e) => setTraderProfile((p) => ({ ...p, trading_style: e.target.value }))}
-                    className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white focus:border-[#D4A843]/50 focus:shadow-[0_0_15px_rgba(212,168,67,0.08)] focus:outline-none transition appearance-none cursor-pointer"
+                    className="bg-white/[0.03] border border-white/[0.06] rounded-xl px-3.5 py-3 text-sm text-white focus:border-[#D4A843]/40 focus:ring-1 focus:ring-[#D4A843]/20 focus:outline-none transition appearance-none cursor-pointer"
                   >
                     <option value="" className="bg-[#111]">Select style…</option>
                     {TRADING_STYLES.map((t) => <option key={t} value={t} className="bg-[#111]">{t}</option>)}
@@ -734,8 +724,8 @@ export default function ChatPage() {
                 type="button"
                 onClick={saveProfile}
                 disabled={savingProfile}
-                className="mt-6 w-full rounded-xl px-4 py-3 text-sm font-semibold text-black transition hover:brightness-105 hover:shadow-[0_0_24px_rgba(212,168,67,0.4)] disabled:opacity-60"
-                style={{ background: "#D4A843" }}
+                className="mt-7 w-full rounded-2xl px-4 py-3.5 text-sm font-semibold text-black transition-all duration-200 hover:shadow-[0_0_30px_rgba(212,168,67,0.35)] disabled:opacity-60"
+                style={{ background: "linear-gradient(135deg, #D4A843, #E8C76A)" }}
               >
                 {savingProfile ? "Saving…" : "Save Profile"}
               </button>
@@ -744,159 +734,137 @@ export default function ChatPage() {
         )}
       </AnimatePresence>
 
-      {/* ── Trading desk header ── */}
-      <header className="flex-none bg-white/[0.02] border-b border-white/[0.06] chat-header-enter">
-        <div className="max-w-5xl mx-auto px-6 md:px-10 py-3">
-          <div className="flex items-center justify-end gap-3">
-
-            {/* Controls */}
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowHistory(true)}
-                className="flex items-center gap-1.5 text-xs uppercase tracking-[0.15em] font-medium text-[#71717A] hover:text-white border border-white/[0.08] rounded-lg px-3 py-1.5 hover:border-white/20 transition-all"
-                title="Conversation history"
-              >
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                  <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.1"/>
-                  <path d="M6 3.5V6l2 1.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                History
-              </button>
-              <button
-                type="button"
-                onClick={startNewChat}
-                className="flex items-center gap-1.5 text-xs uppercase tracking-[0.15em] font-medium text-[#71717A] hover:text-white border border-white/[0.08] rounded-lg px-3 py-1.5 hover:border-white/20 transition-all"
-                title="Start new analysis"
-              >
-                <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
-                  <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-                </svg>
-                New
-              </button>
-              <span className="text-[9px] uppercase bg-[#D4A843]/20 text-[#D4A843] px-2 py-0.5 rounded-full font-medium tracking-wide shadow-[0_0_12px_rgba(212,168,67,0.15)]">
-                Beta
+      {/* ── Minimal top controls ── */}
+      <motion.header
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+        className="flex-none px-6 md:px-10 py-3"
+      >
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          {/* Status pill */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-xs text-white/30">
+              <span className="relative flex h-1.5 w-1.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
               </span>
+              <span className="text-white/40 font-medium tracking-wide">XAUUSD</span>
+              <span className="text-white/10">·</span>
+              <span className="text-white/25">22 sources</span>
             </div>
           </div>
+
+          {/* Controls */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setShowHistory(true)}
+              className="flex items-center gap-1.5 text-[11px] font-medium text-white/25 hover:text-white/60 rounded-lg px-2.5 py-1.5 hover:bg-white/[0.04] transition-all"
+              title="Conversation history"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.1"/>
+                <path d="M6 3.5V6l2 1.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              History
+            </button>
+            <button
+              type="button"
+              onClick={startNewChat}
+              className="flex items-center gap-1.5 text-[11px] font-medium text-white/25 hover:text-white/60 rounded-lg px-2.5 py-1.5 hover:bg-white/[0.04] transition-all"
+              title="Start new analysis"
+            >
+              <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
+                <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+              </svg>
+              New
+            </button>
+          </div>
         </div>
-      </header>
+      </motion.header>
 
-      {/* Gold gradient line below header */}
-      <div className="h-px bg-gradient-to-r from-transparent via-[#D4A843]/30 to-transparent flex-none" />
+      {/* Animated purple shimmer divider */}
+      <div className="purple-shimmer-line flex-none" />
 
-      {/* ── Quick stats bar ── */}
-      <div className="flex-none bg-white/[0.015] border-b border-white/[0.06] px-6 md:px-10 py-2 overflow-x-auto chat-stats-enter">
-        <div className="max-w-5xl mx-auto flex items-center gap-3 text-xs font-normal whitespace-nowrap">
-          <span className="text-[#D4A843] tracking-wider">XAUUSD</span>
-          <span className="w-px h-3 bg-white/10 shrink-0" />
-          <span className="flex items-center gap-1.5 text-[#71717A]">
-            <span className="relative flex h-1.5 w-1.5 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-            </span>
-            Live data connected
-          </span>
-          <span className="text-white/[0.08]">·</span>
-          <span className="text-[#71717A]">Not investment advice · No signals · Trade at your own risk</span>
-        </div>
-      </div>
-
-      {/* ── Compact trader profile badge — shown once a profile exists ── */}
+      {/* ── Compact trader profile badge ── */}
       {summary && (
-        <div className="flex-none px-6 md:px-10 pt-2">
-          <div className="inline-flex items-center gap-2.5">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+          className="flex-none px-6 md:px-10 py-2"
+        >
+          <div className="max-w-4xl mx-auto">
             <button
               type="button"
               onClick={() => setProfileOpen(true)}
               title="Edit trading profile"
-              className="inline-flex items-center gap-2 text-xs font-mono text-white/30 hover:text-white/60 transition"
+              className="inline-flex items-center gap-2 text-[11px] font-mono text-white/20 hover:text-white/45 transition group"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-[#D4A843] shrink-0" />
+              <span className="h-1 w-1 rounded-full bg-[#D4A843]/50 group-hover:bg-[#D4A843] transition shrink-0" />
               {summary}
-            </button>
-            <button
-              type="button"
-              onClick={() => setProfileOpen(true)}
-              className="text-xs underline underline-offset-2 text-white/20 hover:text-white/40 transition"
-            >
-              Edit
+              <span className="text-white/10 group-hover:text-white/25 transition">Edit</span>
             </button>
           </div>
-        </div>
+        </motion.div>
       )}
 
-      {/* ── Trader profile banner — unmissable onboarding nudge ── */}
+      {/* ── Trader profile banner ── */}
       <AnimatePresence>
         {bannerDismissed !== true && !summary && !profileOpen && (
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="flex-none mx-4 md:mx-6 mt-3 shrink-0"
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.98 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="flex-none mx-6 md:mx-10 mt-2 shrink-0"
           >
-            <div
-              className="px-5 py-4 sm:px-6 sm:py-5 flex items-start justify-between gap-4 rounded-2xl"
-              style={{
-                background: "rgba(255,255,255,0.03)",
-                backdropFilter: "blur(16px)",
-                WebkitBackdropFilter: "blur(16px)",
-                border: "1px solid transparent",
-                borderImage: "linear-gradient(to right, #7B4FD4, #D4A843) 1",
-              }}
-            >
-              <div className="flex items-start gap-4">
-                {/* Gold shield icon */}
-                <div
-                  className="shrink-0 h-11 w-11 flex items-center justify-center rounded-xl"
-                  style={{
-                    background: "rgba(212,168,67,0.10)",
-                    border: "1px solid rgba(212,168,67,0.30)",
-                    boxShadow: "0 0 20px rgba(212,168,67,0.12)",
-                  }}
-                >
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 2.5l7 2.8v5.2c0 4.4-3 8.2-7 9.5-4-1.3-7-5.1-7-9.5V5.3l7-2.8z"
-                      stroke="#D4A843"
-                      strokeWidth="1.6"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M9 12l2 2 4-4.5"
-                      stroke="#D4A843"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+            <div className="max-w-4xl mx-auto">
+              <div
+                className="px-5 py-4 flex items-center justify-between gap-4 rounded-2xl"
+                style={{
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.05)",
+                }}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className="shrink-0 h-10 w-10 flex items-center justify-center rounded-xl"
+                    style={{
+                      background: "rgba(212,168,67,0.08)",
+                      border: "1px solid rgba(212,168,67,0.15)",
+                    }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 2.5l7 2.8v5.2c0 4.4-3 8.2-7 9.5-4-1.3-7-5.1-7-9.5V5.3l7-2.8z" stroke="#D4A843" strokeWidth="1.4" strokeLinejoin="round"/>
+                      <path d="M9 12l2 2 4-4.5" stroke="#D4A843" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white/80 mb-0.5">Set up your trader profile</p>
+                    <p className="text-xs text-white/30">Your AI coach adapts to your prop firm, account size, and style.</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-base sm:text-lg font-semibold text-white mb-1">
-                    Complete your trader profile
-                  </p>
-                  <p className="text-sm text-white/50 max-w-md mb-3">
-                    Tell BullionDesk your prop firm, account size, and trading style. Your AI coach adapts to you.
-                  </p>
+                <div className="flex items-center gap-2 shrink-0">
                   <button
                     type="button"
                     onClick={() => setProfileOpen(true)}
-                    className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold text-black transition hover:shadow-[0_0_24px_rgba(212,168,67,0.4)] hover:brightness-105"
-                    style={{ background: "#D4A843" }}
+                    className="rounded-xl px-4 py-2 text-xs font-semibold text-black/90 transition-all hover:shadow-[0_0_20px_rgba(212,168,67,0.3)]"
+                    style={{ background: "linear-gradient(135deg, #D4A843, #E8C76A)" }}
                   >
-                    Set up now →
+                    Set up
+                  </button>
+                  <button
+                    type="button"
+                    onClick={dismissProfileBanner}
+                    aria-label="Dismiss"
+                    className="h-8 w-8 flex items-center justify-center rounded-lg text-white/20 hover:text-white/50 hover:bg-white/[0.04] transition"
+                  >
+                    <svg width="10" height="10" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
                   </button>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={dismissProfileBanner}
-                aria-label="Dismiss"
-                className="shrink-0 h-8 w-8 flex items-center justify-center rounded-lg text-white/40 hover:text-white/70 hover:bg-white/10 transition"
-              >
-                ✕
-              </button>
             </div>
           </motion.div>
         )}
@@ -908,70 +876,110 @@ export default function ChatPage() {
         data-lenis-prevent
         className="flex-1 overflow-y-auto relative"
       >
-        {/* Fade gradient at top — messages scroll under this */}
-        <div className="sticky top-0 left-0 right-0 h-10 bg-gradient-to-b from-[#0A0A0A] to-transparent pointer-events-none z-10" />
+        {/* Top fade */}
+        <div className="sticky top-0 left-0 right-0 h-12 bg-gradient-to-b from-[#07060D] to-transparent pointer-events-none z-10" />
 
         {/* Empty state */}
         {messages.length === 0 && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 empty-state-enter">
-            {/* Pulsing gold dot inside a subtle ring */}
-            <span
-              className="mb-5 flex items-center justify-center rounded-full"
-              style={{ height: "40px", width: "40px", border: "1px solid rgba(212,168,67,0.15)" }}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+            className="absolute inset-0 flex flex-col items-center justify-center px-6"
+          >
+            {/* Animated purple-gold orb */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+              className="mb-8 relative orb-breathe"
             >
-              <span className="h-2.5 w-2.5 rounded-full bg-[#D4A843] animate-pulse" />
-            </span>
+              {/* Outer purple glow ring */}
+              <div className="absolute -inset-6 rounded-full blur-2xl animate-pulse" style={{ background: "radial-gradient(circle, rgba(123,79,212,0.12) 0%, transparent 70%)" }} />
+              {/* Inner gold glow */}
+              <div className="absolute -inset-3 rounded-full blur-xl" style={{ background: "radial-gradient(circle, rgba(212,168,67,0.1) 0%, transparent 60%)" }} />
+              <span
+                className="relative flex items-center justify-center rounded-full"
+                style={{
+                  height: "64px",
+                  width: "64px",
+                  background: "radial-gradient(circle at 40% 40%, rgba(123,79,212,0.1), rgba(212,168,67,0.06))",
+                  border: "1px solid rgba(123,79,212,0.12)",
+                  boxShadow: "0 0 30px rgba(123,79,212,0.08), inset 0 0 20px rgba(212,168,67,0.04)",
+                }}
+              >
+                <span className="h-2.5 w-2.5 rounded-full bg-[#D4A843] animate-pulse" style={{ boxShadow: "0 0 12px rgba(212,168,67,0.5)" }} />
+              </span>
+            </motion.div>
 
-            <p className="text-2xl font-semibold tracking-tight text-white mb-2 text-center">
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+              className="text-[28px] sm:text-[32px] font-semibold tracking-tight text-white mb-2 text-center"
+            >
               Before your next trade.
-            </p>
-            <p className="text-sm text-white/35 mb-8 text-center">
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
+              className="text-sm text-white/30 mb-10 text-center"
+            >
               Let&apos;s check the full picture on XAUUSD.
-            </p>
-            <div className="grid grid-cols-2 gap-3 w-full max-w-lg">
+            </motion.p>
+
+            <div className="grid grid-cols-2 gap-2.5 w-full max-w-lg">
               {suggestions.map((s, i) => (
                 <motion.button
                   key={s}
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: i * 0.05, ease: "easeOut" }}
+                  transition={{ duration: 0.4, delay: 0.55 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
                   type="button"
                   onClick={() => send(s)}
-                  className="rounded-xl px-4 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left backdrop-blur-xl transition-all duration-200 bg-[rgba(123,79,212,0.10)] border border-[rgba(123,79,212,0.30)] hover:-translate-y-px hover:bg-[rgba(123,79,212,0.20)] hover:border-[rgba(123,79,212,0.5)] hover:shadow-[0_6px_20px_rgba(123,79,212,0.25)]"
+                  className="group rounded-2xl px-4 py-3.5 text-[13px] text-white/40 hover:text-white/80 cursor-pointer text-left transition-all duration-300 bg-white/[0.02] border border-white/[0.05] hover:bg-[rgba(123,79,212,0.06)] hover:border-[rgba(123,79,212,0.15)] hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(123,79,212,0.08)]"
                 >
                   {s}
                 </motion.button>
               ))}
             </div>
-            <p className="text-xs font-mono text-white/20 mt-6 text-center">
-              Powered by institutional-grade analysis · 22 data sources
-            </p>
-          </div>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1, duration: 0.5 }}
+              className="text-[10px] font-mono text-white/15 mt-8 text-center tracking-wider"
+            >
+              Powered by institutional-grade analysis
+            </motion.p>
+          </motion.div>
         )}
 
         {/* Messages */}
         {messages.length > 0 && (
-          <div className="py-6 px-6 md:px-16 lg:px-24">
+          <div className="py-4 px-6 md:px-16 lg:px-24">
             <div className="max-w-3xl mx-auto">
               {messages.map((m, i) => (
-                <div key={i} className="mb-8">
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="mb-6"
+                >
                   {m.role === "user" ? (
-                    <motion.div
-                      initial={{ x: 20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                      className="flex justify-end"
-                    >
+                    <div className="flex justify-end">
                       <div
-                        className="max-w-[75%] px-5 py-3 text-white"
+                        className="max-w-[75%] px-5 py-3.5 text-white"
                         style={{
-                          background: "linear-gradient(135deg, #7B4FD4 20%, #5a35a8)",
-                          borderRadius: "18px 18px 4px 18px",
-                          boxShadow: "0 4px 20px rgba(123,79,212,0.3)",
+                          background: "linear-gradient(135deg, rgba(123,79,212,0.85), rgba(90,53,168,0.9))",
+                          borderRadius: "20px 20px 6px 20px",
+                          boxShadow: "0 4px 24px rgba(123,79,212,0.2)",
                         }}
                       >
                         {m.imagePreview && (
-                          <div className="mb-2">
+                          <div className="mb-2.5">
                             <img
                               src={m.imagePreview}
                               alt="Attached chart"
@@ -979,103 +987,106 @@ export default function ChatPage() {
                             />
                           </div>
                         )}
-                        <p className="font-sans text-sm font-normal break-words">
+                        <p className="font-sans text-[14px] font-normal break-words leading-relaxed">
                           {m.content}
                         </p>
                       </div>
-                    </motion.div>
+                    </div>
                   ) : (
-                    <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                    >
-                      <p className="text-xs uppercase tracking-[0.15em] font-medium text-[#D4A843]/60 mb-2">
-                        BullionDesk
-                      </p>
+                    <div>
+                      <div className="flex items-center gap-2 mb-2.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#D4A843]/50 shrink-0" />
+                        <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-[#D4A843]/40">
+                          BullionDesk
+                        </span>
+                      </div>
                       <div
-                        className="max-w-[85%] px-5 py-4"
+                        className="max-w-[90%] px-5 py-4"
                         style={{
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          borderTop: "2px solid rgba(212,168,67,0.3)",
-                          borderRadius: "18px 18px 18px 4px",
+                          background: "linear-gradient(135deg, rgba(123,79,212,0.03), rgba(255,255,255,0.02))",
+                          border: "1px solid rgba(123,79,212,0.06)",
+                          borderRadius: "20px 20px 20px 6px",
                         }}
                       >
-                        <div className="font-sans text-[15px] leading-[1.75] tracking-normal font-normal text-[#E8E8E8]">
+                        <div className="font-sans text-[15px] leading-[1.8] tracking-normal font-normal text-white/85">
                           <MarkdownMessage content={m.content} />
                           {(isStreaming || isTypewriting) && i === messages.length - 1 && m.role === "assistant" && (
                             <span className="typing-cursor" />
                           )}
                         </div>
                       </div>
-                      <div className="mt-2">
+                      <div className="mt-2 ml-1">
                         <ShareSignalButton text={m.content} />
                       </div>
                       {!loading && !isStreaming && i === messages.length - 1 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 max-w-lg">
-                          {suggestions.map((suggestion, si) => (
-                            <motion.button
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 max-w-lg"
+                        >
+                          {suggestions.map((suggestion) => (
+                            <button
                               key={suggestion}
-                              initial={{ opacity: 0, y: 8 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.3, delay: si * 0.05, ease: "easeOut" }}
                               type="button"
                               onClick={() => send(suggestion)}
-                              className="rounded-xl px-4 py-3 text-sm text-[#A1A1AA] hover:text-white cursor-pointer text-left backdrop-blur-xl transition-all duration-200 bg-[rgba(123,79,212,0.10)] border border-[rgba(123,79,212,0.30)] hover:-translate-y-px hover:bg-[rgba(123,79,212,0.20)] hover:border-[rgba(123,79,212,0.5)] hover:shadow-[0_6px_20px_rgba(123,79,212,0.25)]"
+                              className="rounded-xl px-4 py-3 text-[13px] text-white/35 hover:text-white/70 cursor-pointer text-left transition-all duration-200 bg-white/[0.02] border border-white/[0.04] hover:bg-[rgba(123,79,212,0.05)] hover:border-[rgba(123,79,212,0.12)] hover:-translate-y-px"
                             >
                               {suggestion}
-                            </motion.button>
+                            </button>
                           ))}
-                        </div>
+                        </motion.div>
                       )}
                       {m.trade_id && !respondedTradeIds.has(m.trade_id) && (
                         <div className="flex flex-wrap gap-2 mt-3">
                           {[
-                            { result: "tp1_hit",   label: "✅ TP1 Hit" },
-                            { result: "tp2_hit",   label: "🎯 TP2 Hit" },
-                            { result: "sl_hit",    label: "❌ SL Hit" },
-                            { result: "breakeven", label: "➡️ Breakeven" },
+                            { result: "tp1_hit",   label: "TP1 Hit" },
+                            { result: "tp2_hit",   label: "TP2 Hit" },
+                            { result: "sl_hit",    label: "SL Hit" },
+                            { result: "breakeven", label: "Breakeven" },
                           ].map(({ result, label }) => (
                             <button
                               key={result}
                               type="button"
                               onClick={() => submitResult(m.trade_id!, result)}
-                              className="rounded-xl border border-white/10 px-3 py-1.5 text-[11px] text-white/50 hover:border-[rgba(109,40,217,0.5)] hover:text-white/80 transition"
+                              className="rounded-xl border border-white/[0.06] px-3 py-1.5 text-[11px] text-white/35 hover:border-[#D4A843]/30 hover:text-white/60 transition"
                             >
                               {label}
                             </button>
                           ))}
                         </div>
                       )}
-                    </motion.div>
+                    </div>
                   )}
-                </div>
+                </motion.div>
               ))}
 
               {/* Loading dots */}
               {loading && !isStreaming && (
                 <motion.div
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="mb-8"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  className="mb-6"
                 >
-                  <p className="text-xs uppercase tracking-[0.15em] font-medium text-[#D4A843]/60 mb-2">
-                    BullionDesk
-                  </p>
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#D4A843]/50 shrink-0" />
+                    <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-[#D4A843]/40">
+                      BullionDesk
+                    </span>
+                  </div>
                   <div
-                    className="flex items-center gap-1.5 px-5 py-3.5 max-w-[85%]"
+                    className="inline-flex items-center gap-1.5 px-5 py-4"
                     style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      borderRadius: "18px 18px 18px 4px",
+                      background: "rgba(255,255,255,0.02)",
+                      border: "1px solid rgba(255,255,255,0.05)",
+                      borderRadius: "20px 20px 20px 6px",
                     }}
                   >
-                    {[0, 0.2, 0.4].map((delay) => (
+                    {[0, 0.15, 0.3].map((delay) => (
                       <span
                         key={delay}
-                        className="w-1.5 h-1.5 rounded-full bg-[#D4A843]"
+                        className="w-1.5 h-1.5 rounded-full bg-[#D4A843]/60"
                         style={{ animation: "dot-bounce 1.2s ease-in-out infinite", animationDelay: `${delay}s` }}
                       />
                     ))}
@@ -1088,105 +1099,128 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* Scroll-to-bottom button */}
-        {showScrollBtn && (
-          <div className="sticky bottom-4 flex justify-center pointer-events-none">
-            <button
-              type="button"
-              onClick={() => scrollToBottom(true)}
-              className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-[rgba(212,175,55,0.35)] bg-[rgba(7,6,11,0.85)] backdrop-blur-sm px-3 py-1.5 text-[11px] text-[rgba(212,175,55,0.8)] hover:border-[rgba(212,175,55,0.7)] hover:text-[rgba(212,175,55,1)] transition shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
+        {/* Scroll-to-bottom */}
+        <AnimatePresence>
+          {showScrollBtn && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.2 }}
+              className="sticky bottom-4 flex justify-center pointer-events-none"
             >
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Scroll to bottom
-            </button>
-          </div>
-        )}
+              <button
+                type="button"
+                onClick={() => scrollToBottom(true)}
+                className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] px-3.5 py-2 text-[11px] text-white/40 hover:text-white/60 hover:bg-white/[0.1] transition-all shadow-[0_8px_30px_rgba(0,0,0,0.4)]"
+              >
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Latest
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* ── Stop generating ── */}
-      {isStreaming && (
-        <div className="flex-none flex justify-center py-2 border-t border-white/[0.06] bg-[#0A0A0A]">
-          <button
-            type="button"
-            onClick={stopGeneration}
-            className="flex items-center gap-2 rounded-xl border border-white/[0.08] px-4 py-1.5 text-[11px] uppercase tracking-[0.08em] text-white/40 hover:border-red-500/30 hover:text-red-400/75 transition"
+      <AnimatePresence>
+        {isStreaming && (
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.2 }}
+            className="flex-none flex justify-center py-2"
           >
-            <span className="h-2 w-2 rounded-sm bg-current shrink-0" />
-            Stop generating
-          </button>
-        </div>
-      )}
-
-      {/* Gold gradient line above input */}
-      <div className="h-px bg-gradient-to-r from-transparent via-[#D4A843]/20 to-transparent flex-none" />
+            <button
+              type="button"
+              onClick={stopGeneration}
+              className="flex items-center gap-2 rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur px-4 py-1.5 text-[11px] text-white/30 hover:text-red-400/70 hover:border-red-400/20 transition-all"
+            >
+              <span className="h-2 w-2 rounded-sm bg-current shrink-0" />
+              Stop generating
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Input area ── */}
       <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.4, ease: "easeOut", delay: 0.3 }}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
         className={cn(
-          "flex-none bg-[#0A0A0A] px-6 md:px-16 lg:px-24 py-4 transition",
-          isDragging && "bg-[rgba(109,40,217,0.04)]"
+          "flex-none px-6 md:px-16 lg:px-24 pb-5 pt-3 transition",
+          isDragging && "bg-purple-500/[0.02]"
         )}
       >
         <div className="max-w-3xl mx-auto">
 
           {/* Image preview */}
-          {selectedImageBase64 && (
-            <div className="mb-3 flex items-center gap-3 rounded-2xl border border-[rgba(109,40,217,0.25)] bg-[rgba(109,40,217,0.05)] p-3">
-              <img
-                src={selectedImageBase64}
-                alt="Selected chart preview"
-                className="h-16 w-24 rounded-lg object-cover border border-white/10"
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-white/80 truncate">Chart attached</span>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-[rgba(109,40,217,0.8)] border border-[rgba(109,40,217,0.3)] rounded-md px-1.5 py-0.5 shrink-0">
-                    Ready
-                  </span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={clearSelectedImage}
-                className="rounded-xl border border-white/10 px-3 py-2 text-xs text-white/40 hover:border-white/20 shrink-0 transition"
+          <AnimatePresence>
+            {selectedImageBase64 && (
+              <motion.div
+                initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.25 }}
+                className="mb-3 flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3"
               >
-                ✕
-              </button>
-            </div>
-          )}
+                <img
+                  src={selectedImageBase64}
+                  alt="Selected chart preview"
+                  className="h-14 w-20 rounded-lg object-cover border border-white/[0.06]"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-white/50 truncate">Chart attached</span>
+                    <span className="text-[9px] font-mono uppercase tracking-widest text-emerald-400/60 border border-emerald-400/20 rounded-md px-1.5 py-0.5 shrink-0">
+                      Ready
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={clearSelectedImage}
+                  className="rounded-lg h-7 w-7 flex items-center justify-center text-white/25 hover:text-white/50 hover:bg-white/[0.04] shrink-0 transition"
+                >
+                  <svg width="10" height="10" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Input row */}
-          <div className="relative flex items-center">
-            {/* Radial focus glow */}
-            {inputFocused && (
-              <div
-                className="absolute inset-0 pointer-events-none -mx-6 rounded-2xl"
-                style={{
-                  background: "radial-gradient(ellipse 400px 80px at center, rgba(212,168,67,0.02) 0%, transparent 70%)",
-                }}
-              />
-            )}
-            {/* Gradient border ring on focus (purple → gold) */}
-            {inputFocused && (
-              <div
-                className="absolute inset-0 rounded-2xl pointer-events-none z-[1]"
-                style={{
-                  padding: "1px",
-                  background: "linear-gradient(90deg, #7B4FD4, #D4A843)",
-                  WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-                  WebkitMaskComposite: "xor",
-                  maskComposite: "exclude",
-                }}
-              />
-            )}
+          <div className="relative">
+            {/* Ambient purple glow behind input on focus */}
+            <div
+              className={cn(
+                "absolute -inset-4 rounded-3xl transition-opacity duration-500 pointer-events-none",
+                inputFocused ? "opacity-100" : "opacity-0"
+              )}
+              style={{ background: "radial-gradient(ellipse 60% 80% at 50% 50%, rgba(123,79,212,0.06) 0%, transparent 70%)" }}
+            />
+            {/* Gradient border ring on focus */}
+            <div
+              className={cn(
+                "absolute -inset-px rounded-2xl transition-opacity duration-300 pointer-events-none",
+                inputFocused ? "opacity-100" : "opacity-0"
+              )}
+              style={{
+                background: "linear-gradient(135deg, rgba(123,79,212,0.3), rgba(212,168,67,0.2), rgba(123,79,212,0.15))",
+                padding: "1px",
+                WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                WebkitMaskComposite: "xor",
+                maskComposite: "exclude",
+                borderRadius: "16px",
+              }}
+            />
+
             <input
               ref={chatInputRef}
-              className="w-full min-h-[52px] bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-3.5 text-white text-sm placeholder-[#525252] placeholder:italic backdrop-blur focus:border-transparent focus:shadow-[0_0_0_3px_rgba(123,79,212,0.10)] focus:outline-none transition pr-24"
+              className="w-full min-h-[52px] bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-3.5 text-white text-sm placeholder-white/20 backdrop-blur focus:border-transparent focus:outline-none transition pr-24"
               placeholder="Ask your AI gold coach anything..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -1196,15 +1230,15 @@ export default function ChatPage() {
               onBlur={() => setInputFocused(false)}
             />
 
-            {/* Attach chart button — turns gold when there's input */}
+            {/* Attach chart button */}
             <button
               type="button"
               onClick={openFilePicker}
               className={cn(
-                "absolute right-12 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center transition",
+                "absolute right-12 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center rounded-lg transition-all",
                 input.trim() || selectedImageBase64
-                  ? "text-[#D4A843]"
-                  : "text-white/25 hover:text-white/50"
+                  ? "text-[#D4A843]/70 hover:text-[#D4A843]"
+                  : "text-white/15 hover:text-white/35 hover:bg-white/[0.04]"
               )}
               title="Attach chart screenshot"
             >
@@ -1218,21 +1252,25 @@ export default function ChatPage() {
             </button>
 
             {/* Send button */}
-            {canSend && (
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                whileHover={{ rotate: 12 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                type="button"
-                onClick={() => send()}
-                className="absolute right-2 top-1/2 z-10 rounded-lg p-2 transition-[filter,box-shadow] hover:brightness-105 hover:shadow-[0_0_18px_rgba(212,168,67,0.4)]"
-                style={{ background: "#D4A843", y: "-50%" }}
-              >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-white">
-                  <path d="M7 11V3M3 7L7 3L11 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </motion.button>
-            )}
+            <AnimatePresence>
+              {canSend && (
+                <motion.button
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  type="button"
+                  onClick={() => send()}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-xl p-2.5 transition-all hover:shadow-[0_0_20px_rgba(212,168,67,0.3)]"
+                  style={{ background: "linear-gradient(135deg, #D4A843, #C49A3A)" }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-white">
+                    <path d="M7 11V3M3 7L7 3L11 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </motion.button>
+              )}
+            </AnimatePresence>
 
             <input
               ref={fileInputRef}
@@ -1242,6 +1280,11 @@ export default function ChatPage() {
               onChange={handleImageChange}
             />
           </div>
+
+          {/* Disclaimer */}
+          <p className="text-[10px] text-white/10 text-center mt-2.5 tracking-wide">
+            Not investment advice · Trade at your own risk
+          </p>
         </div>
       </motion.div>
     </motion.div>

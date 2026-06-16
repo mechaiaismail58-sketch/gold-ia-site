@@ -565,6 +565,29 @@ a:not(.no-scale):active {
   animation: chat-msg-enter 250ms ease forwards;
 }
 
+/* ===== Chat orb breathe — subtle scale + glow pulse ===== */
+@keyframes orb-breathe {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50%      { transform: scale(1.04); filter: brightness(1.15); }
+}
+
+.orb-breathe {
+  animation: orb-breathe 4s ease-in-out infinite;
+}
+
+/* ===== Purple shimmer line — decorative separator ===== */
+@keyframes purple-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.purple-shimmer-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(123,79,212,0.2), rgba(212,168,67,0.15), rgba(123,79,212,0.2), transparent);
+  background-size: 200% 100%;
+  animation: purple-shimmer 8s linear infinite;
+}
+
 /* ===== Accessible motion — respect system preference ===== */
 
 @media (prefers-reduced-motion: reduce) {

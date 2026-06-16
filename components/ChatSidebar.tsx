@@ -83,7 +83,7 @@ export function MobileChatTabs() {
   }
 
   return (
-    <nav className="md:hidden flex-none bg-[#0A0A0A] border-t border-white/[0.06] px-4 py-2 flex items-center justify-around">
+    <nav className="md:hidden flex-none bg-[#060609]/95 backdrop-blur-xl border-t border-white/[0.04] px-4 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] flex items-center justify-around">
       {NAV_ITEMS.map((item) => {
         const active = isActive(item.href);
         return (
@@ -91,12 +91,13 @@ export function MobileChatTabs() {
             key={item.href}
             href={item.href}
             className={cn(
-              "flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors",
-              active ? "text-[#D4A843]" : "text-white/30 hover:text-white/60"
+              "flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all duration-200",
+              active ? "text-white" : "text-white/25 hover:text-white/50"
             )}
           >
             {item.icon}
             <span className="text-[10px] font-medium">{item.label}</span>
+            {active && <span className="h-0.5 w-4 rounded-full bg-[#7B4FD4] mt-0.5" />}
           </Link>
         );
       })}
