@@ -11,7 +11,7 @@
   cursor: pointer;
   border-bottom-width: 1px;
   border-bottom-style: solid;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .flowing-menu-item:first-child {
@@ -22,14 +22,21 @@
 .flowing-menu-item-text {
   position: relative;
   z-index: 2;
-  padding: 1.25rem 1.5rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  padding: 2rem 2rem;
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
   transition: color 0.3s ease, opacity 0.3s ease;
   text-decoration: none;
   display: block;
   width: 100%;
+}
+
+@media (max-width: 640px) {
+  .flowing-menu-item-text {
+    padding: 1.5rem 1.25rem;
+    font-size: 1.75rem;
+  }
 }
 
 .flowing-menu-marquee {
@@ -44,7 +51,7 @@
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .flowing-menu-item:hover .flowing-menu-marquee {
@@ -58,15 +65,21 @@
 .flowing-menu-marquee-inner {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 2.5rem;
   white-space: nowrap;
   will-change: transform;
 }
 
 .flowing-menu-marquee-text {
-  font-size: 3rem;
+  font-size: 4rem;
   font-weight: 900;
   letter-spacing: -0.02em;
   padding: 0 1rem;
   text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .flowing-menu-marquee-text {
+    font-size: 2.5rem;
+  }
 }

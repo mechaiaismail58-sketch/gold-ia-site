@@ -5,9 +5,12 @@ import gsap from "gsap";
 import Link from "next/link";
 import "./FlowingMenu.css";
 
-interface MenuItem {
+export interface MenuItem {
   text: string;
   link: string;
+  marqueeBgColor?: string;
+  marqueeTextColor?: string;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 interface FlowingMenuProps {
@@ -21,20 +24,23 @@ interface FlowingMenuProps {
 
 function FlowingMenuItem({
   item,
-  marqueeBgColor,
-  marqueeTextColor,
+  defaultMarqueeBg,
+  defaultMarqueeText,
   borderColor,
   textColor,
 }: {
   item: MenuItem;
-  marqueeBgColor: string;
-  marqueeTextColor: string;
+  defaultMarqueeBg: string;
+  defaultMarqueeText: string;
   borderColor: string;
   textColor: string;
 }) {
   const itemRef = useRef<HTMLDivElement>(null);
   const marqueeInnerRef = useRef<HTMLDivElement>(null);
   const tweenRef = useRef<gsap.core.Tween | null>(null);
+
+  const bgColor = item.marqueeBgColor || defaultMarqueeBg;
+  const txtColor = item.marqueeTextColor || defaultMarqueeText;
 
   useEffect(() => {
     const el = marqueeInnerRef.current;
@@ -58,7 +64,7 @@ function FlowingMenuItem({
   function handleMouseEnter() {
     const el = itemRef.current;
     if (!el) return;
-    el.style.backgroundColor = marqueeBgColor;
+    el.style.backgroundColor = bgColor;
     tweenRef.current?.play();
   }
 
@@ -83,6 +89,12 @@ function FlowingMenuItem({
         href={item.link}
         className="flowing-menu-item-text"
         style={{ color: textColor }}
+        onClick={(e) => {
+          if (item.onClick) {
+            e.preventDefault();
+            item.onClick(e);
+          }
+        }}
       >
         {item.text}
       </Link>
@@ -92,7 +104,7 @@ function FlowingMenuItem({
             <span
               key={i}
               className="flowing-menu-marquee-text"
-              style={{ color: marqueeTextColor }}
+              style={{ color: txtColor }}
             >
               {item.text}
             </span>
@@ -115,10 +127,10 @@ export default function FlowingMenu({
     <div className="flowing-menu" style={{ backgroundColor: bgColor }}>
       {items.map((item) => (
         <FlowingMenuItem
-          key={item.link}
+          key={item.text}
           item={item}
-          marqueeBgColor={marqueeBgColor}
-          marqueeTextColor={marqueeTextColor}
+          defaultMarqueeBg={marqueeBgColor}
+          defaultMarqueeText={marqueeTextColor}
           borderColor={borderColor}
           textColor={textColor}
         />
