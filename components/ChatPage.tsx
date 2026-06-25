@@ -788,6 +788,22 @@ export default function ChatPage() {
       {/* Animated purple shimmer divider */}
       <div className="purple-shimmer-line flex-none" />
 
+      {/* ── Flowing navigation menu ── */}
+      <div className="flex-none">
+        <FlowingMenu
+          items={[
+            { text: "Chat", link: "/chat" },
+            { text: "Chart", link: "/chart" },
+            { text: "Calendar", link: "/calendar" },
+          ]}
+          bgColor="#07060b"
+          marqueeBgColor="#D4A843"
+          marqueeTextColor="#07060b"
+          borderColor="rgba(212,168,67,0.3)"
+          textColor="#ffffff"
+        />
+      </div>
+
       {/* ── Compact trader profile badge ── */}
       {summary && (
         <motion.div
@@ -880,110 +896,140 @@ export default function ChatPage() {
         {/* Top fade */}
         <div className="sticky top-0 left-0 right-0 h-12 bg-gradient-to-b from-[#07060D] to-transparent pointer-events-none z-10" />
 
-        {/* Empty state — FlowingMenu entry experience */}
+        {/* Empty state */}
         {messages.length === 0 && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-            className="absolute inset-0 flex flex-col justify-center relative"
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+            className="absolute inset-0 flex flex-col items-center justify-center px-6"
           >
-            {/* Ambient background orbs */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div
-                className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full opacity-30"
-                style={{
-                  background: "radial-gradient(circle, rgba(123,79,212,0.15), transparent 70%)",
-                  animation: "ambient-float 8s ease-in-out infinite",
-                }}
-              />
-              <div
-                className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] rounded-full opacity-20"
-                style={{
-                  background: "radial-gradient(circle, rgba(212,168,67,0.12), transparent 70%)",
-                  animation: "ambient-float 10s ease-in-out infinite reverse",
-                }}
-              />
-            </div>
+            {/* ── Animated hero emblem ── */}
+            <motion.div
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+              className="mb-10 relative flex items-center justify-center"
+              style={{ width: "140px", height: "140px" }}
+            >
+              {/* Layer 1 — Large purple ambient glow */}
+              <div className="absolute inset-0 rounded-full hero-emblem-glow" style={{ background: "radial-gradient(circle, rgba(123,79,212,0.15) 0%, rgba(123,79,212,0.04) 40%, transparent 70%)" }} />
 
-            <div className="relative z-10 w-full max-w-3xl mx-auto px-6">
-              <motion.p
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#7B4FD4]/60 text-center mb-8"
-              >
-                Where to?
-              </motion.p>
+              {/* Layer 2 — Rotating outer ring */}
+              <div className="absolute inset-2 hero-ring-spin">
+                <svg viewBox="0 0 120 120" className="w-full h-full">
+                  <defs>
+                    <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="rgba(123,79,212,0.4)" />
+                      <stop offset="50%" stopColor="rgba(212,168,67,0.3)" />
+                      <stop offset="100%" stopColor="rgba(123,79,212,0.05)" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="60" cy="60" r="56" fill="none" stroke="url(#ring-grad)" strokeWidth="1" strokeDasharray="8 16" strokeLinecap="round" />
+                </svg>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <FlowingMenu
-                  items={[
-                    {
-                      text: "Chat",
-                      link: "#",
-                      marqueeBgColor: "#7B4FD4",
-                      marqueeTextColor: "#ffffff",
-                      onClick: () => chatInputRef.current?.focus(),
-                    },
-                    {
-                      text: "Chart",
-                      link: "/chart",
-                      marqueeBgColor: "#D4A843",
-                      marqueeTextColor: "#07060b",
-                    },
-                    {
-                      text: "Calendar",
-                      link: "/calendar",
-                      marqueeBgColor: "#7B4FD4",
-                      marqueeTextColor: "#ffffff",
-                    },
-                  ]}
-                  bgColor="transparent"
-                  borderColor="rgba(123,79,212,0.15)"
-                  textColor="#ffffff"
-                />
-              </motion.div>
+              {/* Layer 3 — Counter-rotating inner ring */}
+              <div className="absolute inset-6 hero-ring-spin-reverse">
+                <svg viewBox="0 0 100 100" className="w-full h-full">
+                  <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(212,168,67,0.12)" strokeWidth="0.5" strokeDasharray="4 12" />
+                </svg>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-                className="mt-10 flex flex-wrap justify-center gap-2"
-              >
-                {suggestions.slice(0, 4).map((s, i) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => send(s)}
-                    className="rounded-full px-4 py-2 text-[11px] text-white/25 hover:text-white/60 border border-white/[0.04] hover:border-[rgba(123,79,212,0.2)] hover:bg-[rgba(123,79,212,0.06)] transition-all duration-300"
+              {/* Layer 4 — Orbiting particles */}
+              <div className="absolute inset-0">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="absolute top-1/2 left-1/2 hero-particle-orbit"
+                    style={{
+                      width: "4px",
+                      height: "4px",
+                      marginLeft: "-2px",
+                      marginTop: "-2px",
+                      animationDelay: `${i * -3}s`,
+                    }}
                   >
-                    {s}
-                  </button>
+                    <span
+                      className="block rounded-full hero-particle-pulse"
+                      style={{
+                        width: i % 2 === 0 ? "3px" : "2px",
+                        height: i % 2 === 0 ? "3px" : "2px",
+                        background: i % 2 === 0 ? "#D4A843" : "#9B7DE8",
+                        boxShadow: i % 2 === 0 ? "0 0 6px rgba(212,168,67,0.6)" : "0 0 6px rgba(123,79,212,0.5)",
+                        animationDelay: `${i * -1.2}s`,
+                      }}
+                    />
+                  </div>
                 ))}
-              </motion.div>
+              </div>
 
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.9, duration: 0.5 }}
-                className="text-[10px] font-mono text-white/10 mt-6 text-center tracking-wider"
+              {/* Layer 5 — Center glass circle with gold core */}
+              <div
+                className="relative flex items-center justify-center rounded-full hero-core-breathe"
+                style={{
+                  width: "52px",
+                  height: "52px",
+                  background: "radial-gradient(circle at 35% 35%, rgba(123,79,212,0.12), rgba(212,168,67,0.06) 60%, rgba(0,0,0,0.2))",
+                  border: "1px solid rgba(212,168,67,0.15)",
+                  boxShadow: "0 0 40px rgba(123,79,212,0.1), 0 0 15px rgba(212,168,67,0.08), inset 0 1px 1px rgba(255,255,255,0.06)",
+                  backdropFilter: "blur(8px)",
+                }}
               >
-                Powered by institutional-grade analysis
-              </motion.p>
+                {/* Inner gold spark */}
+                <div
+                  className="rounded-full hero-spark"
+                  style={{
+                    width: "8px",
+                    height: "8px",
+                    background: "radial-gradient(circle, #F5DFA0, #D4A843)",
+                    boxShadow: "0 0 12px rgba(212,168,67,0.6), 0 0 30px rgba(212,168,67,0.2)",
+                  }}
+                />
+              </div>
+            </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+              className="text-[28px] sm:text-[32px] font-semibold tracking-tight text-white mb-2 text-center"
+            >
+              Before your next trade.
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
+              className="text-sm text-white/30 mb-10 text-center"
+            >
+              Let&apos;s check the full picture on XAUUSD.
+            </motion.p>
+
+            <div className="grid grid-cols-2 gap-2.5 w-full max-w-lg">
+              {suggestions.map((s, i) => (
+                <motion.button
+                  key={s}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.55 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                  type="button"
+                  onClick={() => send(s)}
+                  className="group rounded-2xl px-4 py-3.5 text-[13px] text-white/40 hover:text-white/80 cursor-pointer text-left transition-all duration-300 bg-white/[0.02] border border-white/[0.05] hover:bg-[rgba(123,79,212,0.06)] hover:border-[rgba(123,79,212,0.15)] hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(123,79,212,0.08)]"
+                >
+                  {s}
+                </motion.button>
+              ))}
             </div>
 
-            <style>{`
-              @keyframes ambient-float {
-                0%, 100% { transform: translate(0, 0) scale(1); }
-                33% { transform: translate(30px, -20px) scale(1.05); }
-                66% { transform: translate(-20px, 15px) scale(0.95); }
-              }
-            `}</style>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1, duration: 0.5 }}
+              className="text-[10px] font-mono text-white/15 mt-8 text-center tracking-wider"
+            >
+              Powered by institutional-grade analysis
+            </motion.p>
           </motion.div>
         )}
 
