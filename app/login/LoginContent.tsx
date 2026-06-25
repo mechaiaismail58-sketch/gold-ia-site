@@ -9,9 +9,9 @@ import GlassCard from "@/components/design-system/GlassCard";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const raw = searchParams.get("redirectTo") || "/chat";
+  const raw = searchParams.get("redirectTo") || "/hub";
   // Sanitise: only allow relative paths to prevent open redirect
-  const redirectTo = raw.startsWith("/") && !raw.startsWith("//") && raw !== "/login" ? raw : "/chat";
+  const redirectTo = raw.startsWith("/") && !raw.startsWith("//") && raw !== "/login" ? raw : "/hub";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -15,7 +15,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const PUBLIC_PATHS  = ["/", "/about", "/methodology", "/terms", "/privacy"];
 const AUTH_PATHS    = ["/login", "/signup"];
-const PAID_PREFIXES = ["/chat", "/calendar", "/market", "/backtest", "/dashboard"];
+const PAID_PREFIXES = ["/hub", "/chat", "/calendar", "/market", "/backtest", "/dashboard"];
 
 async function getHasPaid(userId: string): Promise<boolean> {
   try {
@@ -132,12 +132,12 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Landing page ───────────────────────────────────────────────────────────
-  // Paid users land in /chat instead of seeing the marketing landing page.
+  // Paid users land in /hub instead of seeing the marketing landing page.
   // Unauthenticated and unpaid users see "/" normally.
   if (pathname === "/") {
     if (user) {
       const hasPaid = await getHasPaid(user.id);
-      if (hasPaid) return redirect("/chat");
+      if (hasPaid) return redirect("/hub");
     }
     return supabaseResponse;
   }
@@ -146,7 +146,7 @@ export async function middleware(request: NextRequest) {
   if (AUTH_PATHS.includes(pathname)) {
     if (user) {
       const hasPaid = await getHasPaid(user.id);
-      return redirect(hasPaid ? "/chat" : "/upgrade");
+      return redirect(hasPaid ? "/hub" : "/upgrade");
     }
     return supabaseResponse;
   }
@@ -159,7 +159,7 @@ export async function middleware(request: NextRequest) {
   // ── /upgrade ──────────────────────────────────────────────────────────────
   if (pathname === "/upgrade") {
     const hasPaid = await getHasPaid(user.id);
-    return hasPaid ? redirect("/chat") : supabaseResponse;
+    return hasPaid ? redirect("/hub") : supabaseResponse;
   }
 
   // ── Paid routes ───────────────────────────────────────────────────────────
