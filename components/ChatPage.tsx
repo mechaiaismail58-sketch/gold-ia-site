@@ -7,6 +7,7 @@ import ShareSignalButton from "@/components/ShareSignalButton";
 import HistoryPanel from "@/components/HistoryPanel";
 import MarkdownMessage from "@/components/MarkdownMessage";
 import { useChatContext } from "@/context/ChatContext";
+import FlowingMenu from "@/components/ui/FlowingMenu";
 
 function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
@@ -786,6 +787,22 @@ export default function ChatPage() {
 
       {/* Animated purple shimmer divider */}
       <div className="purple-shimmer-line flex-none" />
+
+      {/* ── Flowing navigation menu ── */}
+      <div className="flex-none">
+        <FlowingMenu
+          items={[
+            { text: "Chat", link: "/chat" },
+            { text: "Chart", link: "/chart" },
+            { text: "Calendar", link: "/calendar" },
+          ]}
+          bgColor="#07060b"
+          marqueeBgColor="#D4A843"
+          marqueeTextColor="#07060b"
+          borderColor="rgba(212,168,67,0.3)"
+          textColor="#ffffff"
+        />
+      </div>
 
       {/* ── Compact trader profile badge ── */}
       {summary && (

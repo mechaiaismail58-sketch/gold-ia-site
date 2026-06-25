@@ -7,6 +7,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import DemoChat from "@/components/DemoChat";
 import ScrollZoom from "@/components/ScrollZoom";
 import ClipReveal from "@/components/ClipReveal";
+import CurvedLoop from "@/components/ui/CurvedLoop";
 import { PRICING } from "@/lib/pricing";
 
 const HERO_HEADING_WORDS = ["Most", "traders", "blow", "their", "funded", "account", "in", "the", "first", "2", "weeks."];
@@ -450,8 +451,15 @@ export default function WaitlistLanding() {
           </div>
         </ClipReveal>
 
-        {/* ── Section transition ── */}
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-16 sm:my-24" />
+        {/* ── Curved loop section transition ── */}
+        <div className="w-full -mx-4 px-0 my-10 sm:my-16" style={{ width: "100vw", marginLeft: "calc(-50vw + 50%)" }}>
+          <CurvedLoop
+            text="AI Trading Coach ✦ Stop Overtrading ✦ Protect Your Funded Account ✦"
+            speed={3}
+            curveAmount={400}
+            direction="left"
+          />
+        </div>
 
         {/* ── Track Record ── */}
         <ScrollZoom>
