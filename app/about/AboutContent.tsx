@@ -6,6 +6,9 @@ import Eyebrow from "@/components/design-system/Eyebrow";
 import ScrollZoom from "@/components/ScrollZoom";
 import CTABlock from "@/components/design-system/CTABlock";
 import TextReveal from "@/components/TextReveal";
+import AuroraBackground from "@/components/ui/animations/AuroraBackground";
+import BlurRevealText from "@/components/ui/animations/BlurRevealText";
+import FadeInView from "@/components/ui/animations/FadeInView";
 
 const SPRING = "cubic-bezier(0.16,1,0.3,1)";
 
@@ -132,18 +135,15 @@ export default function AboutContent() {
 
       {/* ── Hero ── */}
       <section className="min-h-screen flex items-center justify-center relative z-10 overflow-hidden">
-        <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at center, rgba(212,168,67,0.04) 0%, transparent 70%)", filter: "blur(120px)" }}
-          aria-hidden
-        />
+        <AuroraBackground />
         <div className="text-center px-6 relative z-10">
           <div style={eyebrowStyle}>
             <Eyebrow>Our Story</Eyebrow>
           </div>
-          <h1 className="text-6xl md:text-7xl font-bold text-white tracking-tight mt-4" style={heroTitleStyle}>
-            About BullionDesk
-          </h1>
+          <BlurRevealText
+            text="About BullionDesk"
+            className="text-6xl md:text-7xl font-bold text-white tracking-tight mt-4"
+          />
           <div style={goldLineStyle} />
           <p className="text-base tracking-[0.25em] uppercase mt-6" style={{ ...subtitleStyle, color: "#71717A" }}>
             Built by traders who got tired of losing.
@@ -153,26 +153,29 @@ export default function AboutContent() {
 
       {/* ── Three chapters ── */}
       {CHAPTERS.map((chapter, i) => (
-        <div key={chapter.num}>
+        <FadeInView key={chapter.num} direction="up" delay={i * 0.1}>
           {i > 0 && (
             <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-16 sm:my-24" />
           )}
           <Chapter chapter={chapter} index={i} />
-        </div>
+        </FadeInView>
       ))}
 
       <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-16 sm:my-24" />
 
       {/* ── IS / IS NOT ── */}
       <section className="py-24 px-6 relative z-10">
-        <ScrollZoom>
-          <TextReveal
-            text="What we are. What we're not."
-            className="text-2xl font-bold text-white text-center mb-12 flex flex-wrap justify-center"
-          />
-        </ScrollZoom>
+        <FadeInView direction="up">
+          <ScrollZoom>
+            <BlurRevealText
+              text="What we are. What we're not."
+              as="h2"
+              className="text-2xl font-bold text-white text-center mb-12 flex flex-wrap justify-center"
+            />
+          </ScrollZoom>
+        </FadeInView>
         <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 items-stretch gap-8">
-          <ScrollZoom className="h-full">
+          <FadeInView direction="left" delay={0.1} className="h-full"><ScrollZoom className="h-full">
             <div className="h-full p-8 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] border-l-[3px] border-l-[#D4A843] transition-transform duration-300 hover:-translate-y-1">
               <p className="text-lg font-semibold mb-6 text-[#D4A843]">What we are</p>
               <ul className="space-y-4">
@@ -184,8 +187,8 @@ export default function AboutContent() {
                 ))}
               </ul>
             </div>
-          </ScrollZoom>
-          <ScrollZoom className="h-full">
+          </ScrollZoom></FadeInView>
+          <FadeInView direction="right" delay={0.2} className="h-full"><ScrollZoom className="h-full">
             <div className="h-full p-8 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] border-l-[3px] border-l-red-500/40 transition-transform duration-300 hover:-translate-y-1">
               <p className="text-lg font-semibold mb-6 text-red-400/80">What we&apos;re not</p>
               <ul className="space-y-4">
@@ -197,7 +200,7 @@ export default function AboutContent() {
                 ))}
               </ul>
             </div>
-          </ScrollZoom>
+          </ScrollZoom></FadeInView>
         </div>
       </section>
 

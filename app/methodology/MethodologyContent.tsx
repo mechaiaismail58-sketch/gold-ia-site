@@ -6,6 +6,9 @@ import GlassCard from "@/components/design-system/GlassCard";
 import ScrollZoom from "@/components/ScrollZoom";
 import CTABlock from "@/components/design-system/CTABlock";
 import TextReveal from "@/components/TextReveal";
+import AuroraBackground from "@/components/ui/animations/AuroraBackground";
+import BlurRevealText from "@/components/ui/animations/BlurRevealText";
+import FadeInView from "@/components/ui/animations/FadeInView";
 
 const SPRING = "cubic-bezier(0.16,1,0.3,1)";
 
@@ -164,18 +167,15 @@ export default function MethodologyContent() {
 
       {/* ── Hero ── */}
       <section className="min-h-screen flex items-center justify-center relative z-10 overflow-hidden">
-        <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at center, rgba(212,168,67,0.04) 0%, transparent 70%)", filter: "blur(120px)" }}
-          aria-hidden
-        />
+        <AuroraBackground />
         <div className="text-center px-6 relative z-10">
           <div style={eyebrowStyle}>
             <Eyebrow>Our Approach</Eyebrow>
           </div>
-          <h1 className="text-6xl md:text-7xl font-bold text-white tracking-tight mt-4" style={heroTitleStyle}>
-            Our Methodology
-          </h1>
+          <BlurRevealText
+            text="Our Methodology"
+            className="text-6xl md:text-7xl font-bold text-white tracking-tight mt-4"
+          />
           <div style={goldLineStyle} />
           <p className="text-base tracking-[0.25em] uppercase mt-6" style={{ ...subtitleStyle, color: "#71717A" }}>
             How we read gold.
@@ -185,28 +185,30 @@ export default function MethodologyContent() {
 
       {/* ── Framework sections ── */}
       {FRAMEWORK.map((item, i) => (
-        <div key={item.num}>
+        <FadeInView key={item.num} direction="up" delay={i * 0.1}>
           <AnimatedDivider />
           <FrameworkSection item={item} index={i} />
-        </div>
+        </FadeInView>
       ))}
 
       <AnimatedDivider />
 
       {/* ── Stats bar ── */}
       <section className="py-24 px-6 relative z-10">
-        <ScrollZoom>
-          <GlassCard className="max-w-5xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06]">
-              {STATS.map((s) => (
-                <div key={s.label} className="flex flex-col items-center text-center px-6 py-10">
-                  <p className="text-5xl font-bold" style={{ color: "#D4A843" }}>{s.value}</p>
-                  <p className="text-sm mt-2" style={{ color: "#71717A" }}>{s.label}</p>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
-        </ScrollZoom>
+        <FadeInView direction="up">
+          <ScrollZoom>
+            <GlassCard className="max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06]">
+                {STATS.map((s) => (
+                  <div key={s.label} className="flex flex-col items-center text-center px-6 py-10">
+                    <p className="text-5xl font-bold" style={{ color: "#D4A843" }}>{s.value}</p>
+                    <p className="text-sm mt-2" style={{ color: "#71717A" }}>{s.label}</p>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+          </ScrollZoom>
+        </FadeInView>
       </section>
 
       <AnimatedDivider />

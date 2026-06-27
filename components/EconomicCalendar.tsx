@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import FadeInView from "@/components/ui/animations/FadeInView";
+import CountUpNumber from "@/components/ui/animations/CountUpNumber";
 
 type CalendarEvent = {
   id: string;
@@ -102,6 +104,14 @@ const IMPACT = {
   },
 } as const;
 
+function NumericValue({ raw, className }: { raw: string; className?: string }) {
+  const cleaned = raw.replace(/[%KMB,]/g, "");
+  const num = parseFloat(cleaned);
+  const suffix = raw.replace(/[\d.\-\s]/g, "").trim();
+  if (isNaN(num)) return <span className={className}>{raw}</span>;
+  return <CountUpNumber value={num} suffix={suffix} duration={1.5} className={className} />;
+}
+
 function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: Date; index: number; reduce: boolean }) {
   const target = new Date(event.date);
   const diff = target.getTime() - now.getTime();
@@ -174,13 +184,13 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
           {event.forecast && (
             <div>
               <div className="text-[8px] font-mono uppercase tracking-[0.15em] text-white/20">Forecast</div>
-              <div className="text-[13px] font-mono text-white/60 mt-0.5">{event.forecast}</div>
+              <div className="text-[13px] font-mono text-white/60 mt-0.5"><NumericValue raw={event.forecast} /></div>
             </div>
           )}
           {event.previous && (
             <div>
               <div className="text-[8px] font-mono uppercase tracking-[0.15em] text-white/20">Previous</div>
-              <div className="text-[13px] font-mono text-white/60 mt-0.5">{event.previous}</div>
+              <div className="text-[13px] font-mono text-white/60 mt-0.5"><NumericValue raw={event.previous} /></div>
             </div>
           )}
         </div>
@@ -280,6 +290,7 @@ export default function EconomicCalendar() {
       </AnimatePresence>
 
       {/* ── Page header ── */}
+      <FadeInView direction="up">
       <section className="card relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/10 shadow-[0_18px_80px_rgba(109,40,217,0.12)] mb-6">
         {/* Decorative purple blob */}
         <div
@@ -323,6 +334,7 @@ export default function EconomicCalendar() {
           </div>
         </div>
       </section>
+      </FadeInView>
 
       {/* Divider between header and the day grid */}
       <div className="h-px bg-white/5 mb-6" />
