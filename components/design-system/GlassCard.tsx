@@ -8,7 +8,7 @@ interface GlassCardProps {
   children: ReactNode;
 }
 
-const BASE = "bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl rounded-2xl";
+const BASE = "bg-white/[0.02] border border-[rgba(255,255,255,0.04)] backdrop-blur-xl rounded-2xl transition-colors duration-300 hover:border-[rgba(124,58,237,0.12)]";
 
 /**
  * Shared glass panel. variant="purple-border" draws an animated gradient

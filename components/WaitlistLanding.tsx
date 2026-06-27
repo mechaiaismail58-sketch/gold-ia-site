@@ -143,11 +143,7 @@ function HeroStat({
   return (
     <div
       className="glass-card rounded-2xl px-5 py-3.5 text-center hero-stat-enter min-w-[104px] transition-all duration-300 hover:-translate-y-0.5"
-      style={{
-        animationDelay: `${delay}ms`,
-        border: "1px solid rgba(124, 58, 237, 0.15)",
-        boxShadow: "0 0 15px rgba(124, 58, 237, 0.05)",
-      }}
+      style={{ animationDelay: `${delay}ms` }}
     >
       <div className="text-[20px] font-extrabold tracking-[-0.02em] text-[#D4A843] tabular-nums">
         {display}
@@ -171,7 +167,7 @@ function TrackRecordCard({
   const display = useCountUp(value, inView);
   return (
     <div style={revealStyle(inView, delay)}>
-      <div className="glass-card rounded-2xl px-5 py-6 text-center transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(212,168,67,0.08)]">
+      <div className="glass-card rounded-2xl px-5 py-6 text-center transition-all duration-300 ease-out hover:-translate-y-1">
         <div className="text-[24px] sm:text-[28px] font-extrabold tracking-[-0.02em] text-[#D4A843] tabular-nums whitespace-nowrap">
           {display}
         </div>
@@ -312,13 +308,13 @@ export default function WaitlistLanding() {
         <div className="flex justify-center gap-3 mb-7">
           <a
             href="/methodology"
-            className="rounded-xl px-4 py-2.5 text-[11px] tracking-[0.10em] uppercase border border-[rgba(212,168,67,0.4)] text-[#D4A843] transition-all duration-300 hover:border-[rgba(212,168,67,0.85)] hover:bg-[rgba(212,168,67,0.07)] hover:shadow-[0_0_20px_rgba(124,58,237,0.15)]"
+            className="rounded-xl px-4 py-2.5 text-[11px] tracking-[0.10em] uppercase border border-[rgba(255,255,255,0.08)] text-[#D4A843] transition-all duration-300 hover:border-[rgba(212,168,67,0.25)] hover:text-[#F5F5F5]"
           >
             Our Methodology →
           </a>
           <a
             href="/about"
-            className="rounded-xl px-4 py-2.5 text-[11px] tracking-[0.10em] uppercase border border-[rgba(212,168,67,0.4)] text-[#D4A843] transition-all duration-300 hover:border-[rgba(212,168,67,0.85)] hover:bg-[rgba(212,168,67,0.07)] hover:shadow-[0_0_20px_rgba(124,58,237,0.15)]"
+            className="rounded-xl px-4 py-2.5 text-[11px] tracking-[0.10em] uppercase border border-[rgba(255,255,255,0.08)] text-[#D4A843] transition-all duration-300 hover:border-[rgba(212,168,67,0.25)] hover:text-[#F5F5F5]"
           >
             About Us →
           </a>
@@ -329,9 +325,8 @@ export default function WaitlistLanding() {
           <span
             className="badge-pulse inline-flex items-center gap-2 rounded-full border px-4 py-1.5"
             style={{
-              borderColor: "rgba(124, 58, 237, 0.3)",
-              background: "rgba(124, 58, 237, 0.06)",
-              boxShadow: "0 0 20px rgba(124, 58, 237, 0.1), 0 0 40px rgba(124, 58, 237, 0.05)",
+              borderColor: "rgba(212, 168, 67, 0.15)",
+              background: "rgba(212, 168, 67, 0.04)",
             }}
           >
             <span className="h-1.5 w-1.5 rounded-full bg-[#D4A843] animate-pulse shrink-0" />
@@ -414,7 +409,7 @@ export default function WaitlistLanding() {
             </Link>
             <button
               onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
-              className="w-full sm:w-auto rounded-xl px-5 py-2.5 text-[12px] tracking-[0.06em] font-medium border border-[#1A1A1A] text-[#A1A1AA] hover:border-[rgba(212,168,67,0.35)] hover:text-[#F5F5F5] transition min-h-[40px]"
+              className="w-full sm:w-auto rounded-xl px-5 py-2.5 text-[12px] tracking-[0.06em] font-medium border border-[rgba(255,255,255,0.06)] text-[#A1A1AA] hover:border-[rgba(255,255,255,0.15)] hover:text-[#F5F5F5] transition-all duration-300 min-h-[40px]"
             >
               Try the AI Coach — Free
             </button>
@@ -481,9 +476,10 @@ export default function WaitlistLanding() {
         <ScrollZoom>
           <div
             ref={trackSection.ref}
-            className="rounded-3xl border border-[#1A1A1A] bg-[#111111] overflow-hidden mb-4 py-2"
+            className="rounded-3xl overflow-hidden mb-4 py-2"
+            style={{ background: "rgba(124, 58, 237, 0.03)" }}
           >
-            <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,168,67,0.45)] to-transparent" />
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,168,67,0.15)] to-transparent" />
             <div className="p-6 sm:p-10">
               <div className="text-center mb-8">
                 <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-[#D4A843] mb-2">

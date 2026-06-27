@@ -99,16 +99,18 @@ function CrossIcon() {
 /* ── Main ── */
 export default function AboutContent() {
   return (
-    <div
-      className="text-white"
-      style={{
-        background: `
-          radial-gradient(ellipse 80% 50% at 50% 0%, rgba(124, 58, 237, 0.25) 0%, transparent 60%),
-          radial-gradient(ellipse 60% 40% at 30% 50%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
-          radial-gradient(ellipse 50% 30% at 70% 80%, rgba(212, 168, 67, 0.08) 0%, transparent 50%),
-          #07060b`,
-      }}
-    >
+    <div className="text-white relative">
+      <div
+        className="absolute inset-0 pointer-events-none -z-0"
+        style={{
+          width: "100vw",
+          marginLeft: "calc(-50vw + 50%)",
+          background: `
+            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(124, 58, 237, 0.25) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 30% 50%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
+            radial-gradient(ellipse 50% 30% at 70% 80%, rgba(212, 168, 67, 0.08) 0%, transparent 50%)`,
+        }}
+      />
 
       {/* ── Hero ── */}
       <section className="min-h-screen flex items-center justify-center relative z-10 overflow-hidden">
@@ -163,7 +165,7 @@ export default function AboutContent() {
           <AnimatedContent direction="horizontal" distance={-40} delay={0.1} className="h-full">
             <ScrollZoom className="h-full">
               <SpotlightCard spotlightColor="rgba(34,197,94,0.25)" className="h-full">
-                <div className="h-full p-8 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] border-l-[3px] border-l-[#D4A843] transition-transform duration-300 hover:-translate-y-1">
+                <div className="h-full p-8 rounded-2xl bg-white/[0.02] backdrop-blur-sm border border-[rgba(255,255,255,0.04)] border-l-[2px] border-l-[rgba(212,168,67,0.3)] transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(124,58,237,0.12)]">
                   <p className="text-lg font-semibold mb-6 text-[#D4A843]">What we are</p>
                   <ul className="space-y-4">
                     {IS_LIST.map((item) => (
@@ -180,7 +182,7 @@ export default function AboutContent() {
           <AnimatedContent direction="horizontal" distance={40} delay={0.2} className="h-full">
             <ScrollZoom className="h-full">
               <SpotlightCard spotlightColor="rgba(239,68,68,0.25)" className="h-full">
-                <div className="h-full p-8 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] border-l-[3px] border-l-red-500/40 transition-transform duration-300 hover:-translate-y-1">
+                <div className="h-full p-8 rounded-2xl bg-white/[0.02] backdrop-blur-sm border border-[rgba(255,255,255,0.04)] border-l-[2px] border-l-red-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(124,58,237,0.12)]">
                   <p className="text-lg font-semibold mb-6 text-red-400/80">What we&apos;re not</p>
                   <ul className="space-y-4">
                     {IS_NOT_LIST.map((item) => (
