@@ -18,7 +18,7 @@ export default function BlurRevealText({ text, className, as: Tag = "h1" }: Prop
           key={`${word}-${i}`}
           initial={{ opacity: 0, filter: "blur(10px)" }}
           whileInView={{ opacity: 1, filter: "blur(0px)" }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, amount: 0.3 }}
           transition={{
             duration: 0.5,
             delay: i * 0.05,
