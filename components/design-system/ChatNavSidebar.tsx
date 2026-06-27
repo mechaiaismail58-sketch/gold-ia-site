@@ -68,8 +68,9 @@ export default function ChatNavSidebar() {
                   layoutId="sidebar-active"
                   className="absolute inset-0 rounded-xl"
                   style={{
-                    background: "linear-gradient(135deg, rgba(123,79,212,0.12), rgba(123,79,212,0.04))",
-                    border: "1px solid rgba(123,79,212,0.1)",
+                    background: "linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(124, 58, 237, 0.06))",
+                    border: "1px solid rgba(124, 58, 237, 0.15)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 0 20px rgba(124, 58, 237, 0.08)",
                   }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
@@ -77,8 +78,8 @@ export default function ChatNavSidebar() {
               {active && (
                 <motion.div
                   layoutId="sidebar-indicator"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-full bg-[#7B4FD4]"
-                  style={{ boxShadow: "0 0 8px rgba(123,79,212,0.5)" }}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-[#7C3AED]"
+                  style={{ boxShadow: "0 0 12px rgba(124, 58, 237, 0.6), 0 0 24px rgba(124, 58, 237, 0.2)" }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}

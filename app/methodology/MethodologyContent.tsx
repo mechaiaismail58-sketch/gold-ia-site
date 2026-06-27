@@ -6,7 +6,7 @@ import GlassCard from "@/components/design-system/GlassCard";
 import ScrollZoom from "@/components/ScrollZoom";
 import CTABlock from "@/components/design-system/CTABlock";
 import TextReveal from "@/components/TextReveal";
-import Aurora from "@/components/ui/reactbits/Aurora";
+
 import SplitText from "@/components/ui/reactbits/SplitText";
 import GradientText from "@/components/ui/reactbits/GradientText";
 import SpotlightCard from "@/components/ui/reactbits/SpotlightCard";
@@ -103,7 +103,6 @@ function FrameworkSection({ item, index }: { item: typeof FRAMEWORK[number]; ind
   return (
     <section
       className="min-h-[80vh] flex items-center relative z-10 overflow-hidden py-20 md:py-0"
-      style={{ background: "radial-gradient(ellipse at center, rgba(124,58,237,0.06) 0%, transparent 70%)" }}
     >
       {/* Watermark number */}
       <div
@@ -139,11 +138,20 @@ function FrameworkSection({ item, index }: { item: typeof FRAMEWORK[number]; ind
 /* ── Main ── */
 export default function MethodologyContent() {
   return (
-    <main className="text-white">
+    <main
+      className="text-white"
+      style={{
+        background: `
+          radial-gradient(ellipse 80% 50% at 50% 0%, rgba(124, 58, 237, 0.25) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 40% at 30% 50%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
+          radial-gradient(ellipse 50% 30% at 70% 80%, rgba(212, 168, 67, 0.08) 0%, transparent 50%),
+          #07060b`,
+      }}
+    >
 
       {/* ── Hero ── */}
       <section className="min-h-screen flex items-center justify-center relative z-10 overflow-hidden">
-        <Aurora colorStops={["#7C3AED", "#D4A843", "#7C3AED"]} amplitude={1.5} speed={0.5} />
+
         <AnimatedContent direction="vertical" distance={80}>
           <div className="text-center px-6 relative z-10">
             <Eyebrow>Our Approach</Eyebrow>
@@ -181,7 +189,7 @@ export default function MethodologyContent() {
       <AnimatedDivider />
 
       {/* ── Stats bar ── */}
-      <section className="py-24 px-6 relative z-10" style={{ background: "radial-gradient(ellipse at center, rgba(124,58,237,0.06) 0%, transparent 70%)" }}>
+      <section className="py-24 px-6 relative z-10">
         <AnimatedContent direction="vertical" distance={40}>
           <ScrollZoom>
             <GlassCard className="max-w-5xl mx-auto">

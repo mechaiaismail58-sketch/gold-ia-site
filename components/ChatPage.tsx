@@ -610,7 +610,13 @@ export default function ChatPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="flex-1 flex flex-col bg-transparent overflow-hidden relative"
+      className="flex-1 flex flex-col overflow-hidden relative"
+      style={{
+        background: `
+          radial-gradient(ellipse 80% 50% at 50% 0%, rgba(124, 58, 237, 0.15) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 40% at 80% 100%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+          transparent`,
+      }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -786,8 +792,13 @@ export default function ChatPage() {
         </div>
       </motion.header>
 
-      {/* Animated purple shimmer divider */}
-      <div className="purple-shimmer-line flex-none" />
+      {/* Header divider */}
+      <div
+        className="flex-none h-px"
+        style={{
+          background: "linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.3), rgba(212, 168, 67, 0.2), rgba(124, 58, 237, 0.3), transparent)",
+        }}
+      />
 
       {/* ── Compact trader profile badge ── */}
       {summary && (
@@ -1002,7 +1013,22 @@ export default function ChatPage() {
                   transition={{ duration: 0.4, delay: 0.55 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
                   type="button"
                   onClick={() => send(s)}
-                  className="group rounded-2xl px-4 py-3.5 text-[13px] text-white/40 hover:text-white/80 cursor-pointer text-left transition-all duration-300 bg-[rgba(124,58,237,0.05)] border border-[rgba(212,168,67,0.2)] hover:bg-[rgba(124,58,237,0.1)] hover:border-[rgba(212,168,67,0.5)] hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(124,58,237,0.15)] hover:scale-[1.02]"
+                  className="group rounded-2xl px-4 py-3.5 text-[13px] text-white/40 hover:text-white/80 cursor-pointer text-left transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02]"
+                  style={{
+                    background: "rgba(124, 58, 237, 0.06)",
+                    border: "1px solid rgba(124, 58, 237, 0.15)",
+                    boxShadow: "0 0 20px rgba(124, 58, 237, 0.05), inset 0 1px 0 rgba(255,255,255,0.03)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(124, 58, 237, 0.12)";
+                    e.currentTarget.style.borderColor = "rgba(212, 168, 67, 0.4)";
+                    e.currentTarget.style.boxShadow = "0 0 30px rgba(124, 58, 237, 0.2), 0 0 60px rgba(124, 58, 237, 0.1), 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "rgba(124, 58, 237, 0.06)";
+                    e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.15)";
+                    e.currentTarget.style.boxShadow = "0 0 20px rgba(124, 58, 237, 0.05), inset 0 1px 0 rgba(255,255,255,0.03)";
+                  }}
                 >
                   {s}
                 </motion.button>
@@ -1027,9 +1053,9 @@ export default function ChatPage() {
               {messages.map((m, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   className="mb-6"
                 >
                   {m.role === "user" ? (
@@ -1285,7 +1311,11 @@ export default function ChatPage() {
             <input
               ref={chatInputRef}
               className="w-full min-h-[52px] bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-3.5 text-white text-sm placeholder-white/20 backdrop-blur focus:border-[rgba(212,168,67,0.4)] focus:outline-none transition-all duration-300 pr-24"
-              style={{ boxShadow: inputFocused ? "0 0 30px rgba(124,58,237,0.2)" : "0 0 20px rgba(124,58,237,0.1)" }}
+              style={{
+                boxShadow: inputFocused
+                  ? "0 0 40px rgba(124, 58, 237, 0.25), 0 0 80px rgba(124, 58, 237, 0.1), inset 0 1px 0 rgba(255,255,255,0.06)"
+                  : "0 0 20px rgba(124, 58, 237, 0.08), inset 0 1px 0 rgba(255,255,255,0.03)",
+              }}
               placeholder="Ask your AI gold coach anything..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -1327,8 +1357,11 @@ export default function ChatPage() {
                   transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                   type="button"
                   onClick={() => send()}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-xl p-2.5 transition-all hover:shadow-[0_0_20px_rgba(212,168,67,0.3)]"
-                  style={{ background: "linear-gradient(135deg, #D4A843, #C49A3A)" }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-xl p-2.5 transition-all"
+                  style={{
+                    background: "linear-gradient(135deg, #D4A843, #C49A3A)",
+                    boxShadow: "0 0 20px rgba(212, 168, 67, 0.4), 0 0 40px rgba(212, 168, 67, 0.15)",
+                  }}
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-white">
                     <path d="M7 11V3M3 7L7 3L11 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>

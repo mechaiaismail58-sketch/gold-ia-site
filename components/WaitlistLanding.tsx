@@ -142,8 +142,12 @@ function HeroStat({
   const display = useCountUp(value, start);
   return (
     <div
-      className="glass-card rounded-2xl px-5 py-3.5 text-center hero-stat-enter min-w-[104px]"
-      style={{ animationDelay: `${delay}ms` }}
+      className="glass-card rounded-2xl px-5 py-3.5 text-center hero-stat-enter min-w-[104px] transition-all duration-300 hover:-translate-y-0.5"
+      style={{
+        animationDelay: `${delay}ms`,
+        border: "1px solid rgba(124, 58, 237, 0.15)",
+        boxShadow: "0 0 15px rgba(124, 58, 237, 0.05)",
+      }}
     >
       <div className="text-[20px] font-extrabold tracking-[-0.02em] text-[#D4A843] tabular-nums">
         {display}
@@ -238,7 +242,12 @@ export default function WaitlistLanding() {
   }, []);
 
   return (
-    <div className="text-[#F5F5F5] flex flex-col items-center px-4 pt-10 animate-fade-in relative">
+    <div
+      className="text-[#F5F5F5] flex flex-col items-center px-4 pt-10 animate-fade-in relative"
+      style={{
+        background: "radial-gradient(ellipse 80% 40% at 50% 0%, rgba(124, 58, 237, 0.12) 0%, transparent 60%)",
+      }}
+    >
 
       <style>{`
         @keyframes prop-marquee {
@@ -303,13 +312,13 @@ export default function WaitlistLanding() {
         <div className="flex justify-center gap-3 mb-7">
           <a
             href="/methodology"
-            className="rounded-xl px-4 py-2.5 text-[11px] tracking-[0.10em] uppercase border border-[rgba(212,168,67,0.4)] text-[#D4A843] transition hover:border-[rgba(212,168,67,0.85)] hover:bg-[rgba(212,168,67,0.07)]"
+            className="rounded-xl px-4 py-2.5 text-[11px] tracking-[0.10em] uppercase border border-[rgba(212,168,67,0.4)] text-[#D4A843] transition-all duration-300 hover:border-[rgba(212,168,67,0.85)] hover:bg-[rgba(212,168,67,0.07)] hover:shadow-[0_0_20px_rgba(124,58,237,0.15)]"
           >
             Our Methodology →
           </a>
           <a
             href="/about"
-            className="rounded-xl px-4 py-2.5 text-[11px] tracking-[0.10em] uppercase border border-[rgba(212,168,67,0.4)] text-[#D4A843] transition hover:border-[rgba(212,168,67,0.85)] hover:bg-[rgba(212,168,67,0.07)]"
+            className="rounded-xl px-4 py-2.5 text-[11px] tracking-[0.10em] uppercase border border-[rgba(212,168,67,0.4)] text-[#D4A843] transition-all duration-300 hover:border-[rgba(212,168,67,0.85)] hover:bg-[rgba(212,168,67,0.07)] hover:shadow-[0_0_20px_rgba(124,58,237,0.15)]"
           >
             About Us →
           </a>
@@ -317,7 +326,14 @@ export default function WaitlistLanding() {
 
         {/* ── Badge ── */}
         <div className="text-center mb-7">
-          <span className="badge-pulse inline-flex items-center gap-2 rounded-full border border-[#D4A843] border-opacity-30 bg-[rgba(212,168,67,0.06)] px-4 py-1.5">
+          <span
+            className="badge-pulse inline-flex items-center gap-2 rounded-full border px-4 py-1.5"
+            style={{
+              borderColor: "rgba(124, 58, 237, 0.3)",
+              background: "rgba(124, 58, 237, 0.06)",
+              boxShadow: "0 0 20px rgba(124, 58, 237, 0.1), 0 0 40px rgba(124, 58, 237, 0.05)",
+            }}
+          >
             <span className="h-1.5 w-1.5 rounded-full bg-[#D4A843] animate-pulse shrink-0" />
             <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-[#D4A843]">
               Beta — Limited Spots
