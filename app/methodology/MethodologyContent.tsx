@@ -140,8 +140,14 @@ export default function MethodologyContent() {
   return (
     <main className="text-white relative">
       <div
-        className="fixed top-0 left-0 w-screen h-screen pointer-events-none"
+        className="pointer-events-none"
         style={{
+          position: "fixed",
+          top: 0,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "100vw",
+          height: "100vh",
           zIndex: 0,
           background: `
             radial-gradient(ellipse 120% 70% at 50% 0%, rgba(124, 58, 237, 0.20) 0%, transparent 70%),
