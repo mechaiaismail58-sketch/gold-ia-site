@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import GlassCard from "@/components/design-system/GlassCard";
+import SpotlightCard from "@/components/ui/reactbits/SpotlightCard";
+import BlurText from "@/components/ui/reactbits/BlurText";
 
 function LoginForm() {
   const router = useRouter();
@@ -107,9 +109,10 @@ function LoginForm() {
             />
           </div>
 
-          <GlassCard className="p-8 max-w-md">
+          <SpotlightCard className="!bg-transparent !border-white/[0.06] !p-0" spotlightColor="rgba(212, 168, 67, 0.15)">
+          <GlassCard className="p-8 max-w-md !border-0 !bg-transparent">
             <div className="mb-6">
-              <h1 className="text-2xl font-extrabold text-white">Welcome back</h1>
+              <BlurText text="Welcome back" className="text-2xl font-extrabold text-white" delay={80} />
               <p className="mt-1.5 text-sm text-[#A1A1AA]">Your AI trading coach is waiting.</p>
             </div>
 
@@ -200,6 +203,7 @@ function LoginForm() {
               </Link>
             </div>
           </GlassCard>
+          </SpotlightCard>
         </div>
       </div>
     </div>

@@ -5,6 +5,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { PRICING } from "@/lib/pricing";
+import SpotlightCard from "@/components/ui/reactbits/SpotlightCard";
+import SplitText from "@/components/ui/reactbits/SplitText";
+import StarBorder from "@/components/ui/reactbits/StarBorder";
+import CountUp from "@/components/ui/reactbits/CountUp";
 
 const FEATURES = [
   {
@@ -123,7 +127,7 @@ function UpgradeContent() {
             />
           </div>
 
-          <div className="upgrade-card-in rounded-2xl border border-white/5 bg-[rgba(17,17,17,0.6)] backdrop-blur-xl overflow-hidden">
+          <SpotlightCard className="!rounded-2xl !border-white/5 !bg-[rgba(17,17,17,0.6)] backdrop-blur-xl overflow-hidden !p-0" spotlightColor="rgba(212, 168, 67, 0.15)">
             {/* Top gold line */}
             <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.50)] to-transparent" />
 
@@ -148,9 +152,7 @@ function UpgradeContent() {
               )}
 
               {/* Title */}
-              <h1 className="text-[28px] sm:text-[32px] leading-[1.15] tracking-[-0.02em] mb-2 text-white">
-                Bullion Desk Beta Access
-              </h1>
+              <SplitText text="Bullion Desk Beta Access" className="text-[28px] sm:text-[32px] leading-[1.15] tracking-[-0.02em] mb-2 text-white font-semibold" />
               <p className="text-[#A1A1AA] text-[14px] leading-relaxed mb-8 max-w-[44ch]">
                 Full access to your AI Gold Trading Coach — macro-technical analysis, live data, prop firm monitoring, and institutional-grade clarity.
               </p>
@@ -168,7 +170,7 @@ function UpgradeContent() {
               {/* Pricing */}
               <div className="rounded-2xl border border-[rgba(212,175,55,0.20)] bg-[rgba(212,175,55,0.04)] p-5 mb-7">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[36px] font-semibold tracking-tight text-white">{`$${PRICING.beta}`}</span>
+                  <span className="text-[36px] font-semibold tracking-tight text-white">$<CountUp to={PRICING.beta} duration={1.5} /></span>
                   <span className="text-[#A1A1AA] text-sm">one-time · early access</span>
                 </div>
                 <p className="text-[12px] text-white/30 mt-1.5">Lock your beta price before it&apos;s gone.</p>
@@ -182,20 +184,22 @@ function UpgradeContent() {
               )}
 
               {/* CTA button */}
-              <button
-                onClick={handleCheckout}
-                disabled={loading}
-                className="w-full rounded-2xl py-4 text-[15px] font-bold tracking-[0.02em] bg-[#D4A843] text-black transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="h-3.5 w-3.5 rounded-full border-2 border-black/20 border-t-black animate-spin" />
-                    Redirecting to checkout…
-                  </span>
-                ) : (
-                  `Get Early Access — $${PRICING.beta}`
-                )}
-              </button>
+              <StarBorder as="div" color="#D4A843" speed="5s" className="w-full !rounded-2xl">
+                <button
+                  onClick={handleCheckout}
+                  disabled={loading}
+                  className="w-full !rounded-2xl py-4 text-[15px] font-bold tracking-[0.02em] bg-[#D4A843] text-black transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="h-3.5 w-3.5 rounded-full border-2 border-black/20 border-t-black animate-spin" />
+                      Redirecting to checkout…
+                    </span>
+                  ) : (
+                    `Get Early Access — $${PRICING.beta}`
+                  )}
+                </button>
+              </StarBorder>
 
               <div className="mt-3 text-center">
                 <p className="text-sm font-medium" style={{ color: "#D4A843" }}>🔒 {PRICING.betaLine}</p>
@@ -206,7 +210,7 @@ function UpgradeContent() {
                 Secure checkout via Stripe. Not investment advice.
               </p>
             </div>
-          </div>
+          </SpotlightCard>
         </div>
 
         {/* Back link */}

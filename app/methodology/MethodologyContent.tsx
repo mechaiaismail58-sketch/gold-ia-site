@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import Eyebrow from "@/components/design-system/Eyebrow";
 import GlassCard from "@/components/design-system/GlassCard";
 import ScrollZoom from "@/components/ScrollZoom";
 import CTABlock from "@/components/design-system/CTABlock";
 import TextReveal from "@/components/TextReveal";
-import AuroraBackground from "@/components/ui/animations/AuroraBackground";
-import BlurRevealText from "@/components/ui/animations/BlurRevealText";
-import FadeInView from "@/components/ui/animations/FadeInView";
+import Aurora from "@/components/ui/reactbits/Aurora";
+import SplitText from "@/components/ui/reactbits/SplitText";
+import GradientText from "@/components/ui/reactbits/GradientText";
+import SpotlightCard from "@/components/ui/reactbits/SpotlightCard";
+import AnimatedContent from "@/components/ui/reactbits/AnimatedContent";
+import ShinyText from "@/components/ui/reactbits/ShinyText";
+import CountUp from "@/components/ui/reactbits/CountUp";
 
 const SPRING = "cubic-bezier(0.16,1,0.3,1)";
 
@@ -114,14 +118,16 @@ function FrameworkSection({ item, index }: { item: typeof FRAMEWORK[number]; ind
           index % 2 === 0 ? "md:pr-40" : "md:pl-40"
         }`}
       >
-        <Eyebrow>{item.label}</Eyebrow>
-        <TextReveal
-          text={item.title}
-          className="text-3xl md:text-4xl font-bold text-white mt-4 mb-6 leading-tight"
-        />
-        <p className="text-lg leading-relaxed max-w-2xl" style={{ color: "#A1A1AA" }}>
-          {item.desc}
-        </p>
+        <SpotlightCard spotlightColor="rgba(212,168,67,0.25)" className="p-8 rounded-2xl">
+          <ShinyText text={item.label} speed={3} className="text-xs font-semibold tracking-[0.3em] uppercase text-[#D4A843]" />
+          <TextReveal
+            text={item.title}
+            className="text-3xl md:text-4xl font-bold text-white mt-4 mb-6 leading-tight"
+          />
+          <p className="text-lg leading-relaxed max-w-2xl" style={{ color: "#A1A1AA" }}>
+            {item.desc}
+          </p>
+        </SpotlightCard>
       </ScrollZoom>
     </section>
   );
@@ -129,86 +135,70 @@ function FrameworkSection({ item, index }: { item: typeof FRAMEWORK[number]; ind
 
 /* ── Main ── */
 export default function MethodologyContent() {
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setLoaded(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
-
-  const heroTitleStyle: CSSProperties = {
-    opacity: loaded ? 1 : 0,
-    transform: loaded ? "scale(1)" : "scale(0.7)",
-    filter: loaded ? "blur(0px)" : "blur(12px)",
-    transition: `opacity 1200ms ${SPRING} 0ms, transform 1200ms ${SPRING} 0ms, filter 1200ms ${SPRING} 0ms`,
-  };
-
-  const goldLineStyle: CSSProperties = {
-    width: loaded ? "64px" : "0px",
-    opacity: loaded ? 1 : 0,
-    height: "2px",
-    background: "linear-gradient(to right, transparent, #D4A843, transparent)",
-    transition: `width 300ms ${SPRING} 800ms, opacity 300ms ease 800ms`,
-    margin: "2rem auto 0",
-  };
-
-  const subtitleStyle: CSSProperties = {
-    opacity: loaded ? 1 : 0,
-    transition: "opacity 800ms ease 1000ms",
-  };
-
-  const eyebrowStyle: CSSProperties = {
-    opacity: loaded ? 1 : 0,
-    transition: "opacity 800ms ease 400ms",
-  };
-
   return (
     <main className="text-white">
 
       {/* ── Hero ── */}
       <section className="min-h-screen flex items-center justify-center relative z-10 overflow-hidden">
-        <AuroraBackground />
-        <div className="text-center px-6 relative z-10">
-          <div style={eyebrowStyle}>
+        <Aurora colorStops={["#7C3AED", "#D4A843", "#7C3AED"]} amplitude={1.5} speed={0.5} />
+        <AnimatedContent direction="vertical" distance={80}>
+          <div className="text-center px-6 relative z-10">
             <Eyebrow>Our Approach</Eyebrow>
+            <SplitText
+              text="Our Methodology"
+              className="text-6xl md:text-7xl font-bold text-white tracking-tight mt-4"
+            />
+            <div
+              style={{
+                width: "64px",
+                height: "2px",
+                background: "linear-gradient(to right, transparent, #D4A843, transparent)",
+                margin: "2rem auto 0",
+              }}
+            />
+            <GradientText
+              colors={["#7C3AED", "#D4A843", "#7C3AED"]}
+              animationSpeed={3}
+              className="text-base tracking-[0.25em] uppercase mt-6 inline-block"
+            >
+              How we read gold.
+            </GradientText>
           </div>
-          <BlurRevealText
-            text="Our Methodology"
-            className="text-6xl md:text-7xl font-bold text-white tracking-tight mt-4"
-          />
-          <div style={goldLineStyle} />
-          <p className="text-base tracking-[0.25em] uppercase mt-6" style={{ ...subtitleStyle, color: "#71717A" }}>
-            How we read gold.
-          </p>
-        </div>
+        </AnimatedContent>
       </section>
 
       {/* ── Framework sections ── */}
       {FRAMEWORK.map((item, i) => (
-        <FadeInView key={item.num} direction="up" delay={i * 0.1}>
+        <AnimatedContent key={item.num} direction="vertical" distance={60} delay={i * 0.15}>
           <AnimatedDivider />
           <FrameworkSection item={item} index={i} />
-        </FadeInView>
+        </AnimatedContent>
       ))}
 
       <AnimatedDivider />
 
       {/* ── Stats bar ── */}
       <section className="py-24 px-6 relative z-10">
-        <FadeInView direction="up">
+        <AnimatedContent direction="vertical" distance={40}>
           <ScrollZoom>
             <GlassCard className="max-w-5xl mx-auto">
               <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06]">
                 {STATS.map((s) => (
                   <div key={s.label} className="flex flex-col items-center text-center px-6 py-10">
-                    <p className="text-5xl font-bold" style={{ color: "#D4A843" }}>{s.value}</p>
+                    <p className="text-5xl font-bold" style={{ color: "#D4A843" }}>
+                      {s.value === "7" ? (
+                        <CountUp to={7} className="text-5xl font-bold" />
+                      ) : (
+                        s.value
+                      )}
+                    </p>
                     <p className="text-sm mt-2" style={{ color: "#71717A" }}>{s.label}</p>
                   </div>
                 ))}
               </div>
             </GlassCard>
           </ScrollZoom>
-        </FadeInView>
+        </AnimatedContent>
       </section>
 
       <AnimatedDivider />

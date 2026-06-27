@@ -1,16 +1,14 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
-import Link from "next/link";
 import Eyebrow from "@/components/design-system/Eyebrow";
 import ScrollZoom from "@/components/ScrollZoom";
 import CTABlock from "@/components/design-system/CTABlock";
 import TextReveal from "@/components/TextReveal";
-import AuroraBackground from "@/components/ui/animations/AuroraBackground";
-import BlurRevealText from "@/components/ui/animations/BlurRevealText";
-import FadeInView from "@/components/ui/animations/FadeInView";
-
-const SPRING = "cubic-bezier(0.16,1,0.3,1)";
+import Aurora from "@/components/ui/reactbits/Aurora";
+import SplitText from "@/components/ui/reactbits/SplitText";
+import GradientText from "@/components/ui/reactbits/GradientText";
+import SpotlightCard from "@/components/ui/reactbits/SpotlightCard";
+import AnimatedContent from "@/components/ui/reactbits/AnimatedContent";
 
 /* ── Data ── */
 const CHAPTERS = [
@@ -97,110 +95,93 @@ function CrossIcon() {
 
 /* ── Main ── */
 export default function AboutContent() {
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setLoaded(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
-
-  const heroTitleStyle: CSSProperties = {
-    opacity: loaded ? 1 : 0,
-    transform: loaded ? "scale(1)" : "scale(0.7)",
-    filter: loaded ? "blur(0px)" : "blur(12px)",
-    transition: `opacity 1200ms ${SPRING} 0ms, transform 1200ms ${SPRING} 0ms, filter 1200ms ${SPRING} 0ms`,
-  };
-
-  const goldLineStyle: CSSProperties = {
-    width: loaded ? "64px" : "0px",
-    opacity: loaded ? 1 : 0,
-    height: "2px",
-    background: "linear-gradient(to right, transparent, #D4A843, transparent)",
-    transition: `width 300ms ${SPRING} 800ms, opacity 300ms ease 800ms`,
-    margin: "1.5rem auto 0",
-  };
-
-  const subtitleStyle: CSSProperties = {
-    opacity: loaded ? 1 : 0,
-    transition: "opacity 800ms ease 1000ms",
-  };
-
-  const eyebrowStyle: CSSProperties = {
-    opacity: loaded ? 1 : 0,
-    transition: "opacity 800ms ease 400ms",
-  };
-
   return (
     <div className="text-white">
 
       {/* ── Hero ── */}
       <section className="min-h-screen flex items-center justify-center relative z-10 overflow-hidden">
-        <AuroraBackground />
-        <div className="text-center px-6 relative z-10">
-          <div style={eyebrowStyle}>
+        <Aurora colorStops={["#7C3AED", "#D4A843", "#7C3AED"]} amplitude={1.5} speed={0.5} />
+        <AnimatedContent direction="vertical" distance={80}>
+          <div className="text-center px-6 relative z-10">
             <Eyebrow>Our Story</Eyebrow>
+            <SplitText
+              text="About BullionDesk"
+              className="text-6xl md:text-7xl font-bold text-white tracking-tight mt-4"
+            />
+            <div
+              className="mx-auto mt-6"
+              style={{
+                width: "64px",
+                height: "2px",
+                background: "linear-gradient(to right, transparent, #D4A843, transparent)",
+              }}
+            />
+            <p className="text-base tracking-[0.25em] uppercase mt-6" style={{ color: "#71717A" }}>
+              <GradientText colors={["#7C3AED", "#D4A843", "#7C3AED"]} animationSpeed={3}>
+                Built by traders who got tired of losing.
+              </GradientText>
+            </p>
           </div>
-          <BlurRevealText
-            text="About BullionDesk"
-            className="text-6xl md:text-7xl font-bold text-white tracking-tight mt-4"
-          />
-          <div style={goldLineStyle} />
-          <p className="text-base tracking-[0.25em] uppercase mt-6" style={{ ...subtitleStyle, color: "#71717A" }}>
-            Built by traders who got tired of losing.
-          </p>
-        </div>
+        </AnimatedContent>
       </section>
 
       {/* ── Three chapters ── */}
       {CHAPTERS.map((chapter, i) => (
-        <FadeInView key={chapter.num} direction="up" delay={i * 0.1}>
+        <AnimatedContent key={chapter.num} direction="vertical" distance={60} delay={i * 0.15}>
           {i > 0 && (
             <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-16 sm:my-24" />
           )}
           <Chapter chapter={chapter} index={i} />
-        </FadeInView>
+        </AnimatedContent>
       ))}
 
       <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-16 sm:my-24" />
 
       {/* ── IS / IS NOT ── */}
       <section className="py-24 px-6 relative z-10">
-        <FadeInView direction="up">
+        <AnimatedContent direction="vertical" distance={40}>
           <ScrollZoom>
-            <BlurRevealText
+            <SplitText
               text="What we are. What we're not."
-              as="h2"
-              className="text-2xl font-bold text-white text-center mb-12 flex flex-wrap justify-center"
+              className="text-2xl font-bold text-white text-center mb-12"
             />
           </ScrollZoom>
-        </FadeInView>
+        </AnimatedContent>
         <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 items-stretch gap-8">
-          <FadeInView direction="left" delay={0.1} className="h-full"><ScrollZoom className="h-full">
-            <div className="h-full p-8 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] border-l-[3px] border-l-[#D4A843] transition-transform duration-300 hover:-translate-y-1">
-              <p className="text-lg font-semibold mb-6 text-[#D4A843]">What we are</p>
-              <ul className="space-y-4">
-                {IS_LIST.map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <CheckIcon />
-                    <span className="text-sm leading-relaxed text-[#A1A1AA]">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </ScrollZoom></FadeInView>
-          <FadeInView direction="right" delay={0.2} className="h-full"><ScrollZoom className="h-full">
-            <div className="h-full p-8 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] border-l-[3px] border-l-red-500/40 transition-transform duration-300 hover:-translate-y-1">
-              <p className="text-lg font-semibold mb-6 text-red-400/80">What we&apos;re not</p>
-              <ul className="space-y-4">
-                {IS_NOT_LIST.map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <CrossIcon />
-                    <span className="text-sm leading-relaxed text-white/50">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </ScrollZoom></FadeInView>
+          <AnimatedContent direction="horizontal" distance={-40} delay={0.1} className="h-full">
+            <ScrollZoom className="h-full">
+              <SpotlightCard spotlightColor="rgba(34,197,94,0.25)" className="h-full">
+                <div className="h-full p-8 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] border-l-[3px] border-l-[#D4A843] transition-transform duration-300 hover:-translate-y-1">
+                  <p className="text-lg font-semibold mb-6 text-[#D4A843]">What we are</p>
+                  <ul className="space-y-4">
+                    {IS_LIST.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <CheckIcon />
+                        <span className="text-sm leading-relaxed text-[#A1A1AA]">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </SpotlightCard>
+            </ScrollZoom>
+          </AnimatedContent>
+          <AnimatedContent direction="horizontal" distance={40} delay={0.2} className="h-full">
+            <ScrollZoom className="h-full">
+              <SpotlightCard spotlightColor="rgba(239,68,68,0.25)" className="h-full">
+                <div className="h-full p-8 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] border-l-[3px] border-l-red-500/40 transition-transform duration-300 hover:-translate-y-1">
+                  <p className="text-lg font-semibold mb-6 text-red-400/80">What we&apos;re not</p>
+                  <ul className="space-y-4">
+                    {IS_NOT_LIST.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <CrossIcon />
+                        <span className="text-sm leading-relaxed text-white/50">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </SpotlightCard>
+            </ScrollZoom>
+          </AnimatedContent>
         </div>
       </section>
 

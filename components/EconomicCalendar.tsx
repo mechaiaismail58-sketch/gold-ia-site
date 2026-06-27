@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import FadeInView from "@/components/ui/animations/FadeInView";
-import CountUpNumber from "@/components/ui/animations/CountUpNumber";
+import GradientText from "@/components/ui/reactbits/GradientText";
+import AnimatedContent from "@/components/ui/reactbits/AnimatedContent";
+import CountUp from "@/components/ui/reactbits/CountUp";
 
 type CalendarEvent = {
   id: string;
@@ -109,7 +110,7 @@ function NumericValue({ raw, className }: { raw: string; className?: string }) {
   const num = parseFloat(cleaned);
   const suffix = raw.replace(/[\d.\-\s]/g, "").trim();
   if (isNaN(num)) return <span className={className}>{raw}</span>;
-  return <CountUpNumber value={num} suffix={suffix} duration={1.5} className={className} />;
+  return <span className={className}><CountUp to={num} duration={1.5} />{suffix}</span>;
 }
 
 function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: Date; index: number; reduce: boolean }) {
@@ -290,7 +291,7 @@ export default function EconomicCalendar() {
       </AnimatePresence>
 
       {/* ── Page header ── */}
-      <FadeInView direction="up">
+      <AnimatedContent direction="vertical" distance={40}>
       <section className="card relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/10 shadow-[0_18px_80px_rgba(109,40,217,0.12)] mb-6">
         {/* Decorative purple blob */}
         <div
@@ -306,8 +307,10 @@ export default function EconomicCalendar() {
         />
         <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-[32px] sm:text-[40px] font-semibold leading-[1.1] tracking-[-0.03em]">
-              Economic Calendar
+            <h1>
+              <GradientText colors={["#7C3AED", "#D4A843", "#7C3AED"]} animationSpeed={3} className="text-[32px] sm:text-[40px] font-semibold leading-[1.1] tracking-[-0.03em]">
+                Economic Calendar
+              </GradientText>
             </h1>
             <p className="text-[14px] leading-relaxed text-white/40 mt-2 max-w-[54ch]">
               Gold-relevant macro events filtered for XAUUSD impact — CPI, NFP, FOMC, GDP, PCE and key USD data.
@@ -334,7 +337,7 @@ export default function EconomicCalendar() {
           </div>
         </div>
       </section>
-      </FadeInView>
+      </AnimatedContent>
 
       {/* Divider between header and the day grid */}
       <div className="h-px bg-white/5 mb-6" />

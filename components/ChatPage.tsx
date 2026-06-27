@@ -7,6 +7,9 @@ import ShareSignalButton from "@/components/ShareSignalButton";
 import HistoryPanel from "@/components/HistoryPanel";
 import MarkdownMessage from "@/components/MarkdownMessage";
 import { useChatContext } from "@/context/ChatContext";
+import GradientText from "@/components/ui/reactbits/GradientText";
+import ShinyText from "@/components/ui/reactbits/ShinyText";
+import SplitText from "@/components/ui/reactbits/SplitText";
 
 function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
@@ -749,7 +752,7 @@ export default function ChatPage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
               </span>
-              <span className="text-white/40 font-medium tracking-wide">XAUUSD</span>
+              <GradientText colors={["#7C3AED", "#D4A843", "#7C3AED"]} animationSpeed={4} className="font-medium tracking-wide"><span>XAUUSD</span></GradientText>
               <span className="text-white/10">·</span>
               <span className="text-white/25">22 sources</span>
             </div>
@@ -976,9 +979,9 @@ export default function ChatPage() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
-              className="text-[28px] sm:text-[32px] font-semibold tracking-tight text-white mb-2 text-center"
+              className="text-center mb-2"
             >
-              Before your next trade.
+              <SplitText text="Before your next trade." className="text-[28px] sm:text-[32px] font-semibold tracking-tight text-white" />
             </motion.p>
             <motion.p
               initial={{ opacity: 0, y: 8 }}
@@ -1009,9 +1012,9 @@ export default function ChatPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1, duration: 0.5 }}
-              className="text-[10px] font-mono text-white/15 mt-8 text-center tracking-wider"
+              className="mt-8 text-center"
             >
-              Powered by institutional-grade analysis
+              <ShinyText text="Powered by institutional-grade analysis" className="text-[10px] font-mono text-white/15 tracking-wider" speed={4} />
             </motion.p>
           </motion.div>
         )}

@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PRICING } from "@/lib/pricing";
 import GlassCard from "@/components/design-system/GlassCard";
+import SpotlightCard from "@/components/ui/reactbits/SpotlightCard";
+import BlurText from "@/components/ui/reactbits/BlurText";
 
 function getPasswordStrength(pwd: string): { bars: number; label: string; color: string } {
   if (pwd.length === 0) return { bars: 0, label: "", color: "" };
@@ -125,9 +127,10 @@ export default function SignupContent() {
             />
           </div>
 
-          <GlassCard className="p-8 max-w-md">
+          <SpotlightCard className="!bg-transparent !border-white/[0.06] !p-0" spotlightColor="rgba(212, 168, 67, 0.15)">
+          <GlassCard className="p-8 max-w-md !border-0 !bg-transparent">
             <div className="mb-6">
-              <h1 className="text-2xl font-extrabold text-white">Create your account</h1>
+              <BlurText text="Create your account" className="text-2xl font-extrabold text-white" delay={80} />
               <p className="mt-1.5 text-sm text-[#A1A1AA]">{PRICING.betaLine}</p>
             </div>
 
@@ -265,6 +268,7 @@ export default function SignupContent() {
               <Link href="/login" className="text-[12px] text-[#D4A843] hover:underline transition">Log in</Link>
             </div>
           </GlassCard>
+          </SpotlightCard>
 
           <p className="mt-4 text-center text-xs" style={{ color: "#71717A" }}>
             {PRICING.urgencyLine}
