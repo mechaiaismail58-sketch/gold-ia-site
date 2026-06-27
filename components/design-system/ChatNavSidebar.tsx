@@ -60,7 +60,7 @@ export default function ChatNavSidebar() {
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200 relative",
                 active
                   ? "text-white"
-                  : "text-white/35 hover:text-white/70 hover:bg-white/[0.03]"
+                  : "text-white/35 hover:text-white/70 hover:bg-[rgba(124,58,237,0.05)]"
               )}
             >
               {active && (

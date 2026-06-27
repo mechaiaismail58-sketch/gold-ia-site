@@ -88,11 +88,11 @@ const IMPACT = {
     label: "High Impact",
   },
   medium: {
-    border: "border-[rgba(249,115,22,0.35)]",
-    borderHover: "hover:border-[rgba(249,115,22,0.65)]",
-    glow: "shadow-[0_0_16px_rgba(249,115,22,0.04)]",
-    badge: "bg-orange-500/10 text-orange-400 border border-orange-500/25",
-    dot: "bg-orange-400",
+    border: "border-[rgba(212,168,67,0.35)]",
+    borderHover: "hover:border-[rgba(212,168,67,0.65)]",
+    glow: "shadow-[0_0_16px_rgba(212,168,67,0.04)]",
+    badge: "bg-[#D4A843]/10 text-[#D4A843] border border-[#D4A843]/25",
+    dot: "bg-[#D4A843]",
     label: "Medium",
   },
   low: {

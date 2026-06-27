@@ -17,7 +17,7 @@ interface GradientTextProps {
 export default function GradientText({
   children,
   className = '',
-  colors = ['#5227FF', '#FF9FFC', '#B497CF'],
+  colors = ['#7C3AED', '#D4A843', '#7C3AED'],
   animationSpeed = 8,
   showBorder = false,
   direction = 'horizontal',
@@ -98,7 +98,7 @@ export default function GradientText({
 
   return (
     <motion.div
-      className={`relative mx-auto flex max-w-fit flex-row items-center justify-center rounded-[1.25rem] font-medium backdrop-blur transition-shadow duration-500 overflow-hidden cursor-pointer ${showBorder ? 'py-1 px-2' : ''} ${className}`}
+      className={`relative inline-flex max-w-fit flex-row items-center rounded-[1.25rem] font-medium transition-shadow duration-500 overflow-hidden ${showBorder ? 'py-1 px-2' : ''} ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

@@ -9,7 +9,6 @@ import MarkdownMessage from "@/components/MarkdownMessage";
 import { useChatContext } from "@/context/ChatContext";
 import GradientText from "@/components/ui/reactbits/GradientText";
 import ShinyText from "@/components/ui/reactbits/ShinyText";
-import SplitText from "@/components/ui/reactbits/SplitText";
 
 function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
@@ -975,22 +974,24 @@ export default function ChatPage() {
               </div>
             </motion.div>
 
-            <motion.p
+            <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
-              className="text-center mb-2"
+              className="text-center mb-2 flex justify-center"
             >
-              <SplitText text="Before your next trade." className="text-[28px] sm:text-[32px] font-semibold tracking-tight text-white" />
-            </motion.p>
-            <motion.p
+              <GradientText colors={["#7C3AED", "#D4A843", "#7C3AED"]} animationSpeed={4} className="text-[28px] sm:text-[32px] font-semibold tracking-tight">
+                <span>Before your next trade.</span>
+              </GradientText>
+            </motion.div>
+            <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
-              className="text-sm text-white/30 mb-10 text-center"
+              className="mb-10 text-center flex justify-center"
             >
-              Let&apos;s check the full picture on XAUUSD.
-            </motion.p>
+              <ShinyText text="Let's check the full picture on XAUUSD." className="text-sm text-white/30" speed={3} />
+            </motion.div>
 
             <div className="grid grid-cols-2 gap-2.5 w-full max-w-lg">
               {suggestions.map((s, i) => (
@@ -1001,7 +1002,7 @@ export default function ChatPage() {
                   transition={{ duration: 0.4, delay: 0.55 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
                   type="button"
                   onClick={() => send(s)}
-                  className="group rounded-2xl px-4 py-3.5 text-[13px] text-white/40 hover:text-white/80 cursor-pointer text-left transition-all duration-300 bg-white/[0.02] border border-white/[0.05] hover:bg-[rgba(123,79,212,0.06)] hover:border-[rgba(123,79,212,0.15)] hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(123,79,212,0.08)]"
+                  className="group rounded-2xl px-4 py-3.5 text-[13px] text-white/40 hover:text-white/80 cursor-pointer text-left transition-all duration-300 bg-[rgba(124,58,237,0.05)] border border-[rgba(212,168,67,0.2)] hover:bg-[rgba(124,58,237,0.1)] hover:border-[rgba(212,168,67,0.5)] hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(124,58,237,0.15)] hover:scale-[1.02]"
                 >
                   {s}
                 </motion.button>
@@ -1283,7 +1284,8 @@ export default function ChatPage() {
 
             <input
               ref={chatInputRef}
-              className="w-full min-h-[52px] bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-3.5 text-white text-sm placeholder-white/20 backdrop-blur focus:border-transparent focus:outline-none transition pr-24"
+              className="w-full min-h-[52px] bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-3.5 text-white text-sm placeholder-white/20 backdrop-blur focus:border-[rgba(212,168,67,0.4)] focus:outline-none transition-all duration-300 pr-24"
+              style={{ boxShadow: inputFocused ? "0 0 30px rgba(124,58,237,0.2)" : "0 0 20px rgba(124,58,237,0.1)" }}
               placeholder="Ask your AI gold coach anything..."
               value={input}
               onChange={(e) => setInput(e.target.value)}

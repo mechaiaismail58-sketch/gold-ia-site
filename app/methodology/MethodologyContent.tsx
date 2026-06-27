@@ -101,13 +101,16 @@ function AnimatedDivider() {
 /* ── Framework section — watermark number + scroll-zoom content ── */
 function FrameworkSection({ item, index }: { item: typeof FRAMEWORK[number]; index: number }) {
   return (
-    <section className="min-h-[80vh] flex items-center relative z-10 overflow-hidden py-20 md:py-0">
-      {/* Watermark number — plain white, near-invisible, no decoration */}
+    <section
+      className="min-h-[80vh] flex items-center relative z-10 overflow-hidden py-20 md:py-0"
+      style={{ background: "radial-gradient(ellipse at center, rgba(124,58,237,0.06) 0%, transparent 70%)" }}
+    >
+      {/* Watermark number */}
       <div
-        className={`absolute select-none pointer-events-none top-1/2 -translate-y-1/2 font-bold leading-none text-white/[0.03] ${
+        className={`absolute select-none pointer-events-none top-1/2 -translate-y-1/2 font-bold leading-none ${
           item.numSide === "right" ? "right-0 md:right-8" : "left-0 md:left-8"
         }`}
-        style={{ fontSize: "clamp(100px, 18vw, 180px)" }}
+        style={{ fontSize: "clamp(100px, 18vw, 180px)", color: "rgba(124,58,237,0.15)" }}
         aria-hidden
       >
         {item.num}
@@ -178,7 +181,7 @@ export default function MethodologyContent() {
       <AnimatedDivider />
 
       {/* ── Stats bar ── */}
-      <section className="py-24 px-6 relative z-10">
+      <section className="py-24 px-6 relative z-10" style={{ background: "radial-gradient(ellipse at center, rgba(124,58,237,0.06) 0%, transparent 70%)" }}>
         <AnimatedContent direction="vertical" distance={40}>
           <ScrollZoom>
             <GlassCard className="max-w-5xl mx-auto">

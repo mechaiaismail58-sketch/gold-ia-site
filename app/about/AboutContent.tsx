@@ -50,12 +50,16 @@ const IS_NOT_LIST = [
 function Chapter({ chapter, index }: { chapter: typeof CHAPTERS[number]; index: number }) {
   const isEven = index % 2 === 0;
   return (
-    <section className="relative min-h-[70vh] flex items-center overflow-hidden py-20 px-6">
-      {/* Watermark number — plain white, near-invisible, no decoration */}
+    <section
+      className="relative min-h-[70vh] flex items-center overflow-hidden py-20 px-6"
+      style={{ background: "radial-gradient(ellipse at center, rgba(124,58,237,0.06) 0%, transparent 70%)" }}
+    >
+      {/* Watermark number */}
       <div
-        className={`absolute top-1/2 -translate-y-1/2 select-none pointer-events-none text-[12rem] sm:text-[16rem] font-extrabold leading-none text-white/[0.03] ${
+        className={`absolute top-1/2 -translate-y-1/2 select-none pointer-events-none text-[12rem] sm:text-[16rem] font-extrabold leading-none ${
           isEven ? "left-0 sm:left-4" : "right-0 sm:right-4"
         }`}
+        style={{ color: "rgba(124,58,237,0.15)" }}
         aria-hidden
       >
         {chapter.num}
@@ -138,7 +142,7 @@ export default function AboutContent() {
       <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-16 sm:my-24" />
 
       {/* ── IS / IS NOT ── */}
-      <section className="py-24 px-6 relative z-10">
+      <section className="py-24 px-6 relative z-10" style={{ background: "radial-gradient(ellipse at center, rgba(124,58,237,0.06) 0%, transparent 70%)" }}>
         <AnimatedContent direction="vertical" distance={40}>
           <ScrollZoom>
             <SplitText

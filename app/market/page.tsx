@@ -46,8 +46,8 @@ function categorizeNews(title: string): "FED" | "TRUMP" | "GEO" | "DATA" | "GOLD
 const NEWS_TAG_STYLES: Record<string, string> = {
   FED:   "text-[color:var(--gold)] bg-[rgba(212,175,55,0.1)] border border-[rgba(212,175,55,0.2)]",
   TRUMP: "text-red-400 bg-red-500/10 border border-red-500/20",
-  GEO:   "text-orange-400 bg-orange-500/10 border border-orange-500/20",
-  DATA:  "text-blue-400 bg-blue-500/10 border border-blue-500/20",
+  GEO:   "text-[#D4A843] bg-[#D4A843]/10 border border-[#D4A843]/20",
+  DATA:  "text-[#8B5CF6] bg-[#8B5CF6]/10 border border-[#8B5CF6]/20",
   GOLD:  "text-[color:var(--gold)] bg-[rgba(212,175,55,0.1)] border border-[rgba(212,175,55,0.2)]",
 };
 
