@@ -11,8 +11,8 @@ interface NavShellProps {
 export function NavShell({ variant = "floating", className = "", children }: NavShellProps) {
   const variantClass =
     variant === "floating"
-      ? "rounded-2xl border border-[rgba(255,255,255,0.03)]"
-      : "border-b border-[rgba(255,255,255,0.03)]";
+      ? "border border-white/10 rounded-2xl shadow-[0_12px_50px_rgba(0,0,0,0.28)]"
+      : "border-b border-white/10";
 
   return (
     <div

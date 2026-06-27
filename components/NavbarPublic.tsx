@@ -94,8 +94,8 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
 
   const navLinkClass = (href: string) =>
     pathname === href
-      ? "px-3 py-1.5 text-xs tracking-[0.08em] uppercase text-white font-medium"
-      : "px-3 py-1.5 text-xs tracking-[0.08em] uppercase text-white/40 transition-colors duration-200 hover:text-white/80";
+      ? "rounded-xl px-3 py-1.5 text-xs tracking-[0.08em] uppercase border border-[rgba(212,175,55,0.45)] bg-[rgba(212,175,55,0.07)] text-white"
+      : "rounded-xl px-3 py-1.5 text-xs tracking-[0.08em] uppercase text-white/80 transition hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10";
 
   // CTA on the right depends on auth/paid status
   const ctaLink = !userEmail
@@ -148,7 +148,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setDropdownOpen((v) => !v)}
-                  className="flex items-center gap-2 rounded-xl px-2 py-1.5 text-xs text-white/40 hover:text-white/80 transition-colors duration-200 max-w-[220px]"
+                  className="flex items-center gap-2 rounded-xl border border-white/10 px-2 py-1.5 text-xs text-white/80 hover:border-white/20 hover:text-white transition max-w-[220px]"
                 >
                   <Avatar src={avatarUrl} size={22} />
                   <span className="truncate">{userEmail}</span>
@@ -178,7 +178,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
             {!userEmail && (
               <Link
                 href="/login"
-                className="px-3 py-1.5 text-xs tracking-[0.08em] uppercase text-white/40 transition-colors duration-200 hover:text-white/80"
+                className="rounded-xl px-3 py-1.5 text-xs tracking-[0.08em] uppercase text-white/80 transition hover:text-white hover:bg-white/5 border border-white/10"
               >
                 Log in
               </Link>
@@ -191,7 +191,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
               {ctaLink.mobileLabel}
             </Link>
             {userEmail ? (
-              <Link href="/profile" className="flex items-center justify-center rounded-full min-h-[44px] min-w-[44px]">
+              <Link href="/profile" className="flex items-center justify-center rounded-full border border-white/10 min-h-[44px] min-w-[44px]">
                 <Avatar src={avatarUrl} size={32} />
               </Link>
             ) : null}
@@ -199,7 +199,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
-              className="flex items-center justify-center h-9 w-9 rounded-xl text-white/40 hover:text-white/80 transition-colors duration-200"
+              className="flex items-center justify-center h-9 w-9 rounded-xl border border-white/10 text-white/80 hover:border-white/20 hover:text-white transition"
             >
               {menuOpen ? <CloseIcon /> : <HamburgerIcon />}
             </button>
@@ -215,15 +215,15 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
                 href={item.href}
                 className={
                   pathname === item.href
-                    ? "px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-white font-medium"
-                    : "px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-white/40 hover:text-white/80 transition-colors duration-200"
+                    ? "rounded-xl px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase border border-[rgba(212,175,55,0.45)] bg-[rgba(212,175,55,0.07)] text-white"
+                    : "rounded-xl px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-white/80 border border-white/10 hover:border-white/20 hover:text-white transition"
                 }
               >
                 {item.label}
               </Link>
             ))}
             {!userEmail && (
-              <Link href="/login" className="px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-white/40 hover:text-white/80 transition-colors duration-200">
+              <Link href="/login" className="rounded-xl px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-white/80 border border-white/10 hover:border-white/20 hover:text-white transition">
                 Log in
               </Link>
             )}
@@ -232,14 +232,14 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
                 <div className="h-px bg-white/[0.06] my-1" />
                 <Link
                   href="/profile"
-                  className="px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-white/40 hover:text-white/80 transition-colors duration-200"
+                  className="rounded-xl px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-white/70 border border-white/10 hover:border-white/20 transition"
                 >
                   Profile
                 </Link>
                 <button
                   onClick={handleSignOut}
                   disabled={signingOut}
-                  className="px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-white/40 hover:text-red-400 transition-colors duration-200 text-left disabled:opacity-40"
+                  className="rounded-xl px-4 min-h-[44px] flex items-center text-xs tracking-[0.10em] uppercase text-white/50 border border-white/10 hover:border-red-500/30 hover:text-red-400 transition text-left disabled:opacity-40"
                 >
                   {signingOut ? "Signing out…" : "Sign out"}
                 </button>

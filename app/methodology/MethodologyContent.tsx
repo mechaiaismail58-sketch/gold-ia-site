@@ -138,23 +138,13 @@ function FrameworkSection({ item, index }: { item: typeof FRAMEWORK[number]; ind
 /* ── Main ── */
 export default function MethodologyContent() {
   return (
-    <main className="text-white relative">
-      <div
-        className="pointer-events-none"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "100vw",
-          height: "100vh",
-          zIndex: 0,
-          background: `
-            radial-gradient(ellipse 120% 70% at 50% 0%, rgba(124, 58, 237, 0.20) 0%, transparent 70%),
-            radial-gradient(ellipse 80% 50% at 20% 40%, rgba(124, 58, 237, 0.08) 0%, transparent 60%),
-            radial-gradient(ellipse 70% 40% at 80% 70%, rgba(212, 168, 67, 0.06) 0%, transparent 60%)`,
-        }}
-      />
+    <main
+      className="text-white"
+      style={{
+        background: 'linear-gradient(180deg, rgba(124, 58, 237, 0.2) 0%, rgba(124, 58, 237, 0.08) 30%, rgba(124, 58, 237, 0.02) 60%, transparent 100%), #07060b',
+        minHeight: '100vh',
+      }}
+    >
 
       {/* ── Hero ── */}
       <section className="min-h-screen flex items-center justify-center relative z-10 overflow-hidden">
