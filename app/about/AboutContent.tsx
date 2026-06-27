@@ -99,7 +99,7 @@ function CrossIcon() {
 /* ── Main ── */
 export default function AboutContent() {
   return (
-    <div className="text-white page-purple-glow">
+    <div className="text-white">
 
       {/* ── Hero ── */}
       <section className="min-h-screen flex items-center justify-center relative z-10 overflow-hidden">

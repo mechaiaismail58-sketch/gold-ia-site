@@ -138,7 +138,7 @@ function FrameworkSection({ item, index }: { item: typeof FRAMEWORK[number]; ind
 /* ── Main ── */
 export default function MethodologyContent() {
   return (
-    <main className="text-white page-purple-glow">
+    <main className="text-white">
 
       {/* ── Hero ── */}
       <section className="min-h-screen flex items-center justify-center relative z-10 overflow-hidden">
