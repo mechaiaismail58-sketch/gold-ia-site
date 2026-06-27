@@ -75,6 +75,24 @@ textarea.text-xs {
   border-radius: 8px;
 }
 
+/* ===== Page purple glow (Methodology / About) ===== */
+
+.page-purple-glow {
+  position: relative;
+}
+
+.page-purple-glow::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.18) 0%, rgba(124, 58, 237, 0.06) 40%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* ===== Card Glass Effect ===== */
 
 .card {
