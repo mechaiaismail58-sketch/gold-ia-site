@@ -420,7 +420,7 @@ export default function WaitlistLanding() {
 
         {/* ── Demo chat section — fade-in ── */}
         <ClipReveal>
-          <div id="demo" className="mb-2">
+          <div id="demo" className="mb-4">
             <div className="text-center mb-4">
               <h2 className="text-[18px] font-extrabold tracking-[-0.01em] mb-2 gradient-text-gold inline-block">
                 Ask it before you take the trade
@@ -452,11 +452,11 @@ export default function WaitlistLanding() {
         </ClipReveal>
 
         {/* ── Curved loop section transition ── */}
-        <div className="w-full my-4 sm:my-6" style={{ width: "100vw", marginLeft: "calc(-50vw + 50%)" }}>
+        <div className="w-full my-6 sm:my-10" style={{ width: "100vw", marginLeft: "calc(-50vw + 50%)" }}>
           <CurvedLoop
             text="AI Trading Coach ✦ Stop Overtrading ✦ Protect Your Funded Account ✦"
             speed={3}
-            curveAmount={150}
+            curveAmount={220}
             direction="left"
           />
         </div>
