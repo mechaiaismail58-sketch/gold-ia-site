@@ -32,7 +32,7 @@ function LoginForm() {
 
     try {
       const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
       if (signInError) {
         const msg = signInError.message.toLowerCase();
@@ -46,7 +46,13 @@ function LoginForm() {
         return;
       }
 
-      router.push(redirectTo);
+      const userId = signInData.user?.id;
+      if (userId) {
+        const { data: userData } = await supabase.from("users").select("has_paid").eq("id", userId).single();
+        router.push(userData?.has_paid === true ? "/chat" : "/upgrade");
+      } else {
+        router.push("/upgrade");
+      }
       router.refresh();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Network error — please try again.";

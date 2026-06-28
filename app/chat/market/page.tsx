@@ -1,9 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
-import GoldTradingViewChart from "@/components/GoldTradingViewChart";
 
-export const dynamic = "force-dynamic";
+const GoldTradingViewChart = dynamic(
+  () => import("@/components/GoldTradingViewChart"),
+  { ssr: false, loading: () => <div className="w-full h-[500px] animate-pulse bg-white/5 rounded-xl" /> }
+);
 
 export default function ChatMarketPage() {
   return (
