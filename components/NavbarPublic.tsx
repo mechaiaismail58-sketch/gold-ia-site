@@ -49,7 +49,13 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
       syncPaidStatus(Boolean(session?.user));
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_OUT") {
+        setUserEmail(null);
+        setAvatarUrl(null);
+        setHasPaid(false);
+        return;
+      }
       setUserEmail(session?.user?.email ?? null);
       syncPaidStatus(Boolean(session?.user));
       if (session?.user) {

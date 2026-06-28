@@ -84,6 +84,23 @@ export default function DemoChat() {
 
   const limitReached = userCount >= MAX_FREE_MESSAGES;
 
+  // Check localStorage for cached demo limit on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("demo_limit_reached");
+      if (stored) {
+        const ts = parseInt(stored);
+        if (!isNaN(ts) && Date.now() - ts < 259200000) {
+          setUserCount(MAX_FREE_MESSAGES);
+          blurTimerStarted.current = true;
+          setShowBlurOverlay(true);
+        } else {
+          localStorage.removeItem("demo_limit_reached");
+        }
+      }
+    } catch { /* localStorage unavailable */ }
+  }, []);
+
   // Non-blocking auth check — only upgrades state when a real session exists.
   // Falls back gracefully on timeout or error so anonymous visitors are never blocked.
   useEffect(() => {
@@ -146,8 +163,15 @@ export default function DemoChat() {
       const res = await fetch("/api/demo-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, messageIndex: nextCount }),
+        body: JSON.stringify({ message: text }),
       });
+
+      if (res.status === 403) {
+        try { localStorage.setItem("demo_limit_reached", String(Date.now())); } catch { /* */ }
+        setUserCount(MAX_FREE_MESSAGES);
+        setShowBlurOverlay(true);
+        return;
+      }
 
       if (!res.ok) throw new Error("API error");
 
@@ -156,6 +180,10 @@ export default function DemoChat() {
         ...prev,
         { role: "assistant", content: data.reply ?? "Something went wrong. Please try again." },
       ]);
+
+      if (nextCount >= MAX_FREE_MESSAGES) {
+        try { localStorage.setItem("demo_limit_reached", String(Date.now())); } catch { /* */ }
+      }
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -246,7 +274,7 @@ export default function DemoChat() {
               >
                 {msg.role === "user" ? (
                   <div className="max-w-[75%] border-r-2 border-white/[0.08] pr-3.5 text-right">
-                    <p className="text-sm text-white/55 leading-relaxed break-words">{msg.content}</p>
+                    <p className="break-words" style={{ fontFamily: "var(--font-geist)", fontSize: "0.9375rem", lineHeight: "1.8", letterSpacing: "0.01em", fontWeight: 300, color: "rgba(229,229,229,0.55)" }}>{msg.content}</p>
                   </div>
                 ) : (
                   <div className="flex-1 pl-3.5 border-l-2 border-[rgba(212,168,67,0.35)]">
