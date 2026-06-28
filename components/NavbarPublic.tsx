@@ -95,6 +95,14 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
     const supabase = createClient();
     await supabase.auth.signOut();
 
+    if (typeof window !== 'undefined') {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+    }
+
     setUserEmail(null);
     setAvatarUrl(null);
     setHasPaid(false);

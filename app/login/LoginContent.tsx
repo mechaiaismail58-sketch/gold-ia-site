@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import GlassCard from "@/components/design-system/GlassCard";
 import SpotlightCard from "@/components/ui/reactbits/SpotlightCard";
@@ -10,10 +10,6 @@ import BlurText from "@/components/ui/reactbits/BlurText";
 
 function LoginForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const raw = searchParams.get("redirectTo") || "/chat";
-  // Sanitise: only allow relative paths to prevent open redirect
-  const redirectTo = raw.startsWith("/") && !raw.startsWith("//") && raw !== "/login" ? raw : "/chat";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,7 +28,7 @@ function LoginForm() {
 
     try {
       const supabase = createClient();
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
       if (signInError) {
         const msg = signInError.message.toLowerCase();
@@ -46,13 +42,7 @@ function LoginForm() {
         return;
       }
 
-      const userId = signInData.user?.id;
-      if (userId) {
-        const { data: userData } = await supabase.from("users").select("has_paid").eq("id", userId).single();
-        router.push(userData?.has_paid === true ? "/chat" : "/upgrade");
-      } else {
-        router.push("/upgrade");
-      }
+      router.push("/chat");
       router.refresh();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Network error — please try again.";
@@ -217,9 +207,5 @@ function LoginForm() {
 }
 
 export default function LoginContent() {
-  return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
-  );
+  return <LoginForm />;
 }
