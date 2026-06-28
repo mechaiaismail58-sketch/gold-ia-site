@@ -85,10 +85,17 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
   async function handleSignOut() {
     setSigningOut(true);
     setDropdownOpen(false);
+
+    const supabase = createClient();
+    await supabase.auth.signOut();
+
     setUserEmail(null);
     setAvatarUrl(null);
     setHasPaid(false);
-    await fetch("/api/auth/logout", { method: "POST" });
+
+    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+
+    await new Promise(r => setTimeout(r, 100));
     window.location.href = "/";
   }
 

@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { buildResearchContext } from "@/lib/research/buildResearchContext";
 import { getNewsContext } from "@/lib/research/getNewsContext";
 import { formatNarrativeContext } from "@/lib/research/buildNarrativeContext";
-import { checkRateLimit, getIP } from "@/lib/rate-limit";
+import { checkRateLimit, getIP, getRedis } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
@@ -21,13 +21,24 @@ export async function POST(req: Request) {
     return Response.json({ error: "AI not configured" }, { status: 500 });
   }
 
+  const redis = getRedis();
+  if (redis) {
+    const demoCountKey = `demo_count:${ip}`;
+    const currentCount = await redis.get(demoCountKey);
+    const count = currentCount ? parseInt(currentCount as string) : 0;
+    if (count >= 3) {
+      return Response.json(
+        { error: "Demo limit reached. Create an account for unlimited access." },
+        { status: 403 },
+      );
+    }
+  }
+
   let message: string;
-  let messageIndex: number;
 
   try {
     const body = await req.json();
     message = String(body.message ?? "").trim();
-    messageIndex = Number(body.messageIndex) || 1;
   } catch {
     return Response.json({ error: "Invalid request body" }, { status: 400 });
   }
@@ -38,12 +49,6 @@ export async function POST(req: Request) {
 
   if (message.length > 500) {
     return Response.json({ error: "Message too long" }, { status: 400 });
-  }
-
-  // messageIndex is client-supplied — clamp to valid range to avoid negative tricks
-  const clampedIndex = Math.max(1, Math.min(messageIndex, 100));
-  if (clampedIndex > 3) {
-    return Response.json({ error: "Demo limit reached" }, { status: 403 });
   }
 
   const researchPromise = Promise.all([
@@ -68,6 +73,12 @@ export async function POST(req: Request) {
 
     const reply =
       response.content[0]?.type === "text" ? response.content[0].text : "";
+
+    if (redis) {
+      const demoCountKey = `demo_count:${ip}`;
+      await redis.incr(demoCountKey);
+      await redis.expire(demoCountKey, 259200);
+    }
 
     return Response.json({ reply });
   } catch (err) {
