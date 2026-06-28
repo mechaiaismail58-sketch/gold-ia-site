@@ -897,7 +897,7 @@ ${userMessage || "Analyse le marché."}`.trim();
       userContent.push({ type: "image", source: { type: "base64", media_type: mediaType, data: b64data } });
     }
 
-    const maxOut = 32000;
+    const maxOut = 2048;
     step(`[4c] mode=${mode} analysis_mode=${analysis_mode} horizon=${tradeHorizon} system_chars=${selectedPrompt.length} user_chars=${finalUserInput.length} max_tokens=${maxOut}`);
 
     // When a chart image is attached, append a silent visual analysis instruction
