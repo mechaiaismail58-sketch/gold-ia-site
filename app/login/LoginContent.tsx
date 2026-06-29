@@ -17,33 +17,42 @@ function LoginForm() {
 
   const canSubmit = email.trim().length > 0 && password.length > 0 && !loading;
 
-  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
     setError(null);
     setLoading(true);
 
     try {
-      const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        credentials: "same-origin",
+      });
 
-      if (signInError) {
-        const msg = signInError.message.toLowerCase();
-        if (msg.includes("email not confirmed")) {
+      const data = await res.json();
+
+      if (!res.ok) {
+        const msg = data.error || "Login failed";
+        if (msg.includes("Invalid login")) {
+          setError({ message: "Incorrect email or password." });
+        } else if (msg.includes("not confirmed")) {
           setError({ message: "Email not confirmed. Check your inbox." });
-        } else if (msg.includes("invalid login credentials") || msg.includes("invalid") || msg.includes("user not found")) {
-          setError({ message: "No account found with that email or password.", noAccount: true });
+        } else if (msg.includes("rate") || msg.includes("limit") || res.status === 429) {
+          setError({ message: "Too many attempts. Please wait a moment." });
+        } else if (msg.includes("Invalid email or password")) {
+          setError({ message: msg, noAccount: true });
         } else {
-          setError({ message: signInError.message });
+          setError({ message: msg });
         }
         setLoading(false);
         return;
       }
 
-      console.log("[LOGIN DEBUG] signIn success, session cookies:", document.cookie.split(';').filter(c => c.trim().startsWith('sb-')));
       window.location.href = "/chat";
     } catch {
-      setError({ message: "Something went wrong. Please try again." });
+      setError({ message: "Connection error. Please try again." });
       setLoading(false);
     }
   }
