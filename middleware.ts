@@ -118,6 +118,13 @@ export async function middleware(request: NextRequest) {
     user = null;
   }
 
+  console.log("[MIDDLEWARE DEBUG]", {
+    pathname,
+    hasUser: !!user,
+    userId: user?.id,
+    cookies: request.cookies.getAll().map(c => c.name).filter(n => n.startsWith('sb-'))
+  });
+
   // Helper: redirect while preserving refreshed cookies
   function redirect(toPath: string, search = ""): NextResponse {
     const url = request.nextUrl.clone();

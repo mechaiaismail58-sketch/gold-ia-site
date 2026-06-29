@@ -40,6 +40,7 @@ function LoginForm() {
         return;
       }
 
+      console.log("[LOGIN DEBUG] signIn success, session cookies:", document.cookie.split(';').filter(c => c.trim().startsWith('sb-')));
       window.location.href = "/chat";
     } catch {
       setError({ message: "Something went wrong. Please try again." });
