@@ -2,15 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import GlassCard from "@/components/design-system/GlassCard";
 import SpotlightCard from "@/components/ui/reactbits/SpotlightCard";
 import BlurText from "@/components/ui/reactbits/BlurText";
 
 function LoginForm() {
-  const router = useRouter();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<{ message: string; noAccount?: boolean } | null>(null);
@@ -39,15 +36,13 @@ function LoginForm() {
         } else {
           setError({ message: signInError.message });
         }
+        setLoading(false);
         return;
       }
 
-      router.push("/chat");
-      router.refresh();
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Network error — please try again.";
-      setError({ message: msg });
-    } finally {
+      window.location.href = "/chat";
+    } catch {
+      setError({ message: "Something went wrong. Please try again." });
       setLoading(false);
     }
   }
