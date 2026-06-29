@@ -171,7 +171,7 @@ function UpgradeContent() {
               <div className="rounded-2xl border border-[rgba(212,175,55,0.20)] bg-[rgba(212,175,55,0.04)] p-5 mb-7">
                 <div className="flex items-baseline gap-2">
                   <span className="text-[36px] font-semibold tracking-tight text-white">$<CountUp to={PRICING.beta} duration={1.5} /></span>
-                  <span className="text-[#A1A1AA] text-sm">one-time · early access</span>
+                  <span className="text-[#A1A1AA] text-sm">per month · early access</span>
                 </div>
                 <p className="text-[12px] text-white/30 mt-1.5">Lock your beta price before it&apos;s gone.</p>
               </div>
