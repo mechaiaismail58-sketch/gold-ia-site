@@ -613,6 +613,8 @@ export async function POST(req: Request) {
 
     const rl = await checkRateLimit(user.id, "chat");
     if (rl.limited) return rl.response;
+    const rlDay = await checkRateLimit(user.id, "chat_day");
+    if (rlDay.limited) return rlDay.response;
 
     let userMessage = "";
     let previous_response_id: string | undefined;

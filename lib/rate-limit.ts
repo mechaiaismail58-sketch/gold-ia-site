@@ -20,7 +20,7 @@ function getLimiter(key: string, factory: () => Ratelimit): Ratelimit {
   return limiters.get(key)!;
 }
 
-export type LimitType = "chat" | "demo_minute" | "demo_day" | "login";
+export type LimitType = "chat" | "chat_day" | "demo_minute" | "demo_day" | "login";
 
 /**
  * Check a rate limit for the given identifier.
@@ -41,6 +41,11 @@ export async function checkRateLimit(
     case "chat":
       limiter = getLimiter("chat", () =>
         new Ratelimit({ redis: r, limiter: Ratelimit.slidingWindow(20, "1 m"), prefix: "rl:chat" }),
+      );
+      break;
+    case "chat_day":
+      limiter = getLimiter("chat_day", () =>
+        new Ratelimit({ redis: r, limiter: Ratelimit.slidingWindow(40, "1 d"), prefix: "rl:chat:day" }),
       );
       break;
     case "demo_minute":
@@ -66,7 +71,9 @@ export async function checkRateLimit(
     return {
       limited: true,
       response: Response.json(
-        { error: "Too many requests. Please slow down." },
+        { error: type === "chat_day"
+            ? "You've reached today's analysis limit (40). This resets in 24h — see you tomorrow."
+            : "Too many requests. Please slow down." },
         {
           status: 429,
           headers: {
