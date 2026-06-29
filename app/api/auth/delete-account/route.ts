@@ -24,6 +24,9 @@ export async function DELETE() {
     // Delete profile row first (cascade may handle it, but be explicit)
     await admin.from("users").delete().eq("id", user.id);
     await admin.from("ai_analyses").delete().eq("user_id", user.id);
+    await admin.from("conversations").delete().eq("user_id", user.id);
+    await admin.from("trades").delete().eq("user_id", user.id);
+    await admin.from("push_subscriptions").delete().eq("user_id", user.id);
 
     // Delete auth user
     const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
