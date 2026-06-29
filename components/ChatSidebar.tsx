@@ -10,7 +10,7 @@ function cn(...classes: (string | false | null | undefined)[]) {
 export const NAV_ITEMS = [
   {
     href: "/chat",
-    label: "AI Coach",
+    label: "Coach",
     icon: (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
         <path
@@ -25,7 +25,7 @@ export const NAV_ITEMS = [
   },
   {
     href: "/chat/market",
-    label: "Live Market",
+    label: "Market",
     icon: (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
         <rect x="2" y="12" width="2.5" height="4" rx="0.5" fill="currentColor" />
@@ -44,7 +44,7 @@ export const NAV_ITEMS = [
   },
   {
     href: "/chat/news",
-    label: "Gold News",
+    label: "News",
     icon: (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
         <rect x="2" y="2" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.3" />
