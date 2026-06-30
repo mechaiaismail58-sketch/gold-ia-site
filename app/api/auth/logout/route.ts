@@ -15,13 +15,7 @@ export async function POST(request: NextRequest) {
   // Explicitly expire any remaining Supabase session cookies on the response
   for (const cookie of request.cookies.getAll()) {
     if (cookie.name.startsWith("sb-")) {
-      res.cookies.set(cookie.name, "", {
-        maxAge: 0,
-        path: "/",
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-      });
+      res.cookies.set(cookie.name, "", { maxAge: 0, path: "/" });
     }
   }
 
