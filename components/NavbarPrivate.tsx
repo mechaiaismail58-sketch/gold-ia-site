@@ -84,7 +84,7 @@ export default function NavbarPrivate() {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="flex-none"
     >
-      <div className="flex items-center justify-between gap-4 px-5 py-3" style={{ borderBottom: "1px solid rgba(123,79,212,0.06)" }}>
+      <div className="flex items-center justify-between gap-4 px-5 py-3" style={{}}>
 
         {/* Status */}
         <div className="flex items-center gap-2">

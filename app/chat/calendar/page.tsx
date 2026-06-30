@@ -3,8 +3,6 @@
 import { ReactLenis } from "lenis/react";
 import EconomicCalendar from "@/components/EconomicCalendar";
 
-export const revalidate = 300;
-
 export default function ChatCalendarPage() {
   return (
     <ReactLenis
