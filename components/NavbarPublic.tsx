@@ -109,8 +109,8 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
 
     await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
 
-    await new Promise(r => setTimeout(r, 100));
-    window.location.href = "/";
+    await new Promise(r => setTimeout(r, 150));
+    window.location.replace("/?signedout=1");
   }
 
   const navLinkClass = (href: string) =>
