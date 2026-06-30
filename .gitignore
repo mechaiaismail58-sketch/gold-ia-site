@@ -54,3 +54,10 @@ __pycache__/
 aurum_quant/data/cache/
 
 .env*.local
+
+# Side projects & large media
+bulliondesk-tiktok/
+my-video/
+*.mp4
+*.mov
+**/node_modules/

@@ -887,10 +887,10 @@ export default function ChatPage() {
       <div
         ref={chatContainerRef}
         data-lenis-prevent
-        className="flex-1 overflow-y-auto relative"
+        className="flex-1 overflow-y-auto overflow-x-hidden relative"
       >
         {/* Top fade */}
-        <div className="sticky top-0 left-0 right-0 h-12 bg-gradient-to-b from-[#07060D] to-transparent pointer-events-none z-10" />
+        <div className="sticky top-0 left-0 right-0 h-12 pointer-events-none z-10" style={{ background: "linear-gradient(to bottom, #07060D, rgba(7,6,13,0))" }} />
 
         {/* Empty state */}
         {messages.length === 0 && (
@@ -898,7 +898,7 @@ export default function ChatPage() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-            className="absolute inset-0 flex flex-col items-center justify-center px-6"
+            className="relative min-h-full flex flex-col items-center justify-center px-6 py-10"
           >
             {/* ── Animated hero emblem ── */}
             <motion.div

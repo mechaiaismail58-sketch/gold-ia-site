@@ -20,20 +20,32 @@ export default function NavbarPrivate() {
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUserEmail(session?.user?.email ?? null);
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUserEmail(session?.user?.email ?? null);
+    async function loadUser(session: any) {
+      const email = session?.user?.email ?? null;
+      setUserEmail(email);
       if (session?.user) {
-        const { data } = await supabase.from("users").select("avatar_url").eq("id", session.user.id).single();
-        setAvatarUrl(data?.avatar_url ?? null);
+        try {
+          const { data } = await supabase
+            .from("users")
+            .select("avatar_url")
+            .eq("id", session.user.id)
+            .single();
+          setAvatarUrl(data?.avatar_url ?? null);
+        } catch {
+          setAvatarUrl(null);
+        }
       } else {
         setAvatarUrl(null);
       }
       setLoading(false);
+    }
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      loadUser(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      loadUser(session);
     });
 
     return () => subscription.unsubscribe();
