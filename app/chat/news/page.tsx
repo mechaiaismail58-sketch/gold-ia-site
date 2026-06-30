@@ -4,8 +4,6 @@ import Eyebrow from "@/components/design-system/Eyebrow";
 import GlassCard from "@/components/design-system/GlassCard";
 import SectionReveal from "@/components/design-system/SectionReveal";
 
-export const dynamic = "force-dynamic";
-
 const NEWS_CARDS = [
   "Fed signals rate hold — Gold surges past key resistance",
   "CFTC COT: Institutional longs increase 12% this week",
