@@ -8,7 +8,9 @@
       "Bash(curl -s \"https://www.investing.com/rss/news_14.rss\" --max-time 5 -A \"Mozilla/5.0\" -o /dev/null -w \"%{http_code}\")",
       "Bash(npm install:*)",
       "Bash(grep -E \"\\\\.ts$|\\\\.tsx$|\\\\.js$|\\\\.json$|^/c\")",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "mcp__7fe16104-69b5-4c48-89f7-6172b302eac3__list_projects",
+      "mcp__7fe16104-69b5-4c48-89f7-6172b302eac3__get_project"
     ]
   }
 }
