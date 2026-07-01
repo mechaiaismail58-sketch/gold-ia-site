@@ -57,13 +57,8 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
         return;
       }
       setUserEmail(session?.user?.email ?? null);
+      setAvatarUrl(null);
       syncPaidStatus(Boolean(session?.user));
-      if (session?.user) {
-        const { data } = await supabase.from("users").select("avatar_url").eq("id", session.user.id).single();
-        setAvatarUrl(data?.avatar_url ?? null);
-      } else {
-        setAvatarUrl(null);
-      }
     });
 
     return () => subscription.unsubscribe();

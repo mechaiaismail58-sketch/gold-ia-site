@@ -21,22 +21,8 @@ export default function NavbarPrivate() {
     const supabase = createClient();
 
     async function loadUser(session: any) {
-      const email = session?.user?.email ?? null;
-      setUserEmail(email);
-      if (session?.user) {
-        try {
-          const { data } = await supabase
-            .from("users")
-            .select("avatar_url")
-            .eq("id", session.user.id)
-            .single();
-          setAvatarUrl(data?.avatar_url ?? null);
-        } catch {
-          setAvatarUrl(null);
-        }
-      } else {
-        setAvatarUrl(null);
-      }
+      setUserEmail(session?.user?.email ?? null);
+      setAvatarUrl(null);
       setLoading(false);
     }
 
