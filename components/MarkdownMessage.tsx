@@ -592,7 +592,7 @@ const components: Components = {
   },
   p({ children }) {
     return (
-      <p className="font-sans leading-[1.8] text-[15px] font-normal text-[#E8E8E8] mb-4 last:mb-0 px-2 sm:px-0">
+      <p className="font-serif leading-[1.8] text-[15px] font-normal text-[#E5E5E5] mb-4 last:mb-0 px-2 sm:px-0">
         {processChildren(children)}
       </p>
     );
@@ -604,7 +604,7 @@ const components: Components = {
     return <ol className="mb-4 space-y-1.5 pl-4 list-decimal marker:text-white/30 last:mb-0">{children}</ol>;
   },
   li({ children }) {
-    return <li className="font-sans text-[15px] font-normal text-[#E8E8E8] leading-[1.75]">{processChildren(children)}</li>;
+    return <li className="font-serif text-[15px] font-normal text-[#E5E5E5] leading-[1.8]">{processChildren(children)}</li>;
   },
   hr() {
     return <div className="my-3 h-px w-full bg-white/[0.07]" role="separator" />;
