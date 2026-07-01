@@ -13,23 +13,26 @@ import Link from "next/link";
 import {
   motion,
   MotionConfig,
+  useAnimationFrame,
   useInView,
   useMotionValue,
   useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
+  useVelocity,
+  type MotionValue,
 } from "framer-motion";
 import DemoChat from "@/components/DemoChat";
 import CurvedLoop from "@/components/ui/CurvedLoop";
 import { PRICING } from "@/lib/pricing";
 
 /* ============================================================
-   BullionDesk — Landing v2
-   Règles motion : transform + opacity UNIQUEMENT, zéro blur/filter
-   animé, reduced-motion respecté via <MotionConfig>.
-   Le layout n'est plus contraint à max-w-lg : chaque section gère
-   sa propre largeur dans le conteneur 1200px de PathAwareWrapper.
+   BullionDesk — Landing v3 "scroll-driven"
+   Vocabulaire : sections épinglées (position:sticky) + transforms
+   scrubbed au scroll (réversibles), marquee réactif à la vélocité.
+   Règles : transform + opacity uniquement, zéro blur/filter animé,
+   reduced-motion → tout se fige proprement.
    ============================================================ */
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -42,11 +45,8 @@ const FULL_BLEED: CSSProperties = {
 const HERO_HEADING_WORDS = ["Most", "traders", "blow", "their", "funded", "account", "in", "the", "first", "2", "weeks."];
 const HERO_HEADING_GOLD_WORDS = ["Ours", "don't."];
 
-const HERO_STATS = [
-  { value: "431", label: "Research trades" },
-  { value: "7", label: "Prop firms supported" },
-  { value: "24/7", label: "Market coverage" },
-];
+const STATEMENT_WORDS = ["The", "AI", "that", "tells", "you", "not", "to", "trade."];
+const STATEMENT_GOLD = new Set([5]);
 
 const TRACK_RECORD_STATS = [
   { value: "431", label: "Research Trades" },
@@ -64,7 +64,13 @@ const PROP_FIRM_LOGOS = [
   { name: "Alpha Capital Group", src: "/logos/alphacapital.png" },
 ];
 
-/* ---------- Count-up (SSR-safe : rend la valeur finale au premier paint) ---------- */
+function wrap(min: number, max: number, v: number) {
+  const range = max - min;
+  const mod = (((v - min) % range) + range) % range;
+  return mod + min;
+}
+
+/* ---------- Count-up (SSR-safe) ---------- */
 
 function parseStat(raw: string) {
   const match = raw.match(/^(\d+(?:\.\d+)?)(.*)$/);
@@ -101,21 +107,11 @@ function useCountUp(raw: string, start: boolean, duration = 1200) {
   return display;
 }
 
-/* ---------- Mot par mot : chaque mot monte hors de son masque ---------- */
+/* ---------- Mot par mot : monte hors de son masque (entrée hero) ---------- */
 
-function RevealWord({
-  word,
-  delay,
-  gold = false,
-}: {
-  word: string;
-  delay: number;
-  gold?: boolean;
-}) {
+function RevealWord({ word, delay, gold = false }: { word: string; delay: number; gold?: boolean }) {
   return (
-    <span
-      className={`inline-block overflow-hidden align-bottom pb-[0.08em] ${gold ? "pl-[0.14em] -ml-[0.14em]" : ""}`}
-    >
+    <span className={`inline-block overflow-hidden align-bottom pb-[0.08em] ${gold ? "pl-[0.14em] -ml-[0.14em]" : ""}`}>
       <motion.span
         className={`inline-block mr-[0.26em] ${gold ? "text-[#D4A843] italic" : ""}`}
         initial={{ y: "110%", opacity: 0 }}
@@ -128,7 +124,7 @@ function RevealWord({
   );
 }
 
-/* ---------- Reveal générique au scroll ---------- */
+/* ---------- Reveal générique ---------- */
 
 function Reveal({
   children,
@@ -154,17 +150,9 @@ function Reveal({
   );
 }
 
-/* ---------- Zoom d'entrée (spring) — le "zoom Apple" au scroll ---------- */
+/* ---------- Zoom spring à l'entrée (track record) ---------- */
 
-function ZoomIn({
-  children,
-  from = 0.92,
-  className = "",
-}: {
-  children: ReactNode;
-  from?: number;
-  className?: string;
-}) {
+function ZoomIn({ children, from = 0.94, className = "" }: { children: ReactNode; from?: number; className?: string }) {
   return (
     <motion.div
       className={className}
@@ -178,17 +166,9 @@ function ZoomIn({
   );
 }
 
-/* ---------- Bouton magnétique — attire le CTA vers le curseur ---------- */
+/* ---------- Bouton magnétique ---------- */
 
-function Magnetic({
-  children,
-  strength = 0.28,
-  className = "",
-}: {
-  children: ReactNode;
-  strength?: number;
-  className?: string;
-}) {
+function Magnetic({ children, strength = 0.28, className = "" }: { children: ReactNode; strength?: number; className?: string }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -211,58 +191,31 @@ function Magnetic({
   }
 
   return (
-    <motion.div
-      ref={ref}
-      onMouseMove={onMove}
-      onMouseLeave={onLeave}
-      style={{ x: sx, y: sy }}
-      className={`inline-block ${className}`}
-    >
+    <motion.div ref={ref} onMouseMove={onMove} onMouseLeave={onLeave} style={{ x: sx, y: sy }} className={`inline-block ${className}`}>
       {children}
     </motion.div>
   );
 }
 
-/* ---------- Cartes stats ---------- */
+/* ---------- CTA principal (partagé hero / final) ---------- */
 
-function HeroStat({
-  value,
-  label,
-  start,
-  delay,
-}: {
-  value: string;
-  label: string;
-  start: boolean;
-  delay: number;
-}) {
-  const display = useCountUp(value, start);
+function PrimaryCTA() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, ease: EASE, delay }}
-      className="glass-card rounded-2xl px-6 sm:px-8 py-4 sm:py-5 text-center min-w-[128px] sm:min-w-[160px]"
-    >
-      <div className="text-[24px] sm:text-[30px] font-extrabold tracking-[-0.02em] text-[#D4A843] tabular-nums">
-        {display}
-      </div>
-      <div className="text-[10px] uppercase tracking-[0.16em] text-[#A1A1AA] mt-1">{label}</div>
-    </motion.div>
+    <Magnetic className="w-full sm:w-auto">
+      <Link
+        href="/signup"
+        className="group w-full sm:w-auto rounded-2xl py-4 px-9 text-[15px] sm:text-lg font-bold tracking-[0.02em] bg-[#D4A843] text-black inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(212,168,67,0.28)] hover:shadow-[0_0_45px_rgba(212,168,67,0.45)] hover:scale-[1.02] transition-[transform,box-shadow] duration-300"
+      >
+        Stop Blowing Funded Accounts
+        <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+      </Link>
+    </Magnetic>
   );
 }
 
-function TrackRecordCard({
-  value,
-  label,
-  inView,
-  delay,
-}: {
-  value: string;
-  label: string;
-  inView: boolean;
-  delay: number;
-}) {
+/* ---------- Cartes track record ---------- */
+
+function TrackRecordCard({ value, label, inView, delay }: { value: string; label: string; inView: boolean; delay: number }) {
   const display = useCountUp(value, inView);
   return (
     <motion.div
@@ -280,19 +233,43 @@ function TrackRecordCard({
   );
 }
 
-/* ---------- Marquee prop firms (pause au survol) ---------- */
+/* ---------- Marquee réactif à la vélocité du scroll ----------
+   Vitesse de base vers la gauche ; ton scroll l'accélère, l'incline
+   (skew) et peut l'inverser. Un seul rAF, un seul transform. ---------- */
 
-function PropFirmMarquee() {
+function VelocityMarquee() {
+  const reduce = useReducedMotion();
+  const baseX = useMotionValue(0);
+  const { scrollY } = useScroll();
+  const scrollVelocity = useVelocity(scrollY);
+  const smoothVelocity = useSpring(scrollVelocity, { damping: 50, stiffness: 400 });
+  const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 4], { clamp: false });
+  const skewX = useTransform(smoothVelocity, [-1500, 1500], [-3, 3]);
+  const directionRef = useRef(1);
+  const x = useTransform(baseX, (v) => `${wrap(-50, 0, v)}%`);
+
+  useAnimationFrame((_, delta) => {
+    if (reduce) return;
+    let moveBy = directionRef.current * -3.5 * (delta / 1000);
+    const vf = velocityFactor.get();
+    if (vf < 0) directionRef.current = -1;
+    else if (vf > 0) directionRef.current = 1;
+    moveBy += directionRef.current * moveBy * vf;
+    baseX.set(baseX.get() + moveBy);
+  });
+
   const track = [...PROP_FIRM_LOGOS, ...PROP_FIRM_LOGOS];
+
   return (
-    <div
-      className="marquee overflow-hidden w-full"
+    <motion.div
+      className="overflow-hidden w-full"
       style={{
+        skewX: reduce ? 0 : skewX,
         maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
         WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
       }}
     >
-      <div className="marquee-track flex items-center gap-14 sm:gap-16 w-max">
+      <motion.div className="flex items-center gap-14 sm:gap-16 w-max py-2" style={{ x: reduce ? "0%" : x }}>
         {track.map((firm, i) => (
           <div key={`${firm.name}-${i}`} className="relative h-[48px] sm:h-[54px] w-[140px] sm:w-[150px] shrink-0">
             <Image
@@ -304,27 +281,86 @@ function PropFirmMarquee() {
             />
           </div>
         ))}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ---------- Statement scrubbed : chaque mot s'allume au scroll ---------- */
+
+function ScrubWord({
+  word,
+  index,
+  total,
+  progress,
+  gold,
+}: {
+  word: string;
+  index: number;
+  total: number;
+  progress: MotionValue<number>;
+  gold: boolean;
+}) {
+  const reduce = useReducedMotion();
+  const start = (index / total) * 0.85;
+  const end = ((index + 1) / total) * 0.85;
+  const opacity = useTransform(progress, [start, end], [0.12, 1]);
+  return (
+    <motion.span
+      style={{ opacity: reduce ? 1 : opacity }}
+      className={gold ? "font-serif italic font-medium text-[#D4A843]" : ""}
+    >
+      {word}
+    </motion.span>
+  );
+}
+
+function StatementSection() {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+
+  return (
+    <section ref={ref} className="relative h-[160vh]">
+      <div className="sticky top-0 h-svh flex flex-col items-center justify-center text-center px-2">
+        <p className="text-[11px] font-mono uppercase tracking-[0.24em] text-[#D4A843] mb-6">
+          No signals. No BS.
+        </p>
+        <p className="max-w-[14ch] text-[34px] sm:text-[50px] md:text-[62px] lg:text-[70px] leading-[1.06] tracking-[-0.03em] font-extrabold flex flex-wrap justify-center gap-x-[0.28em] gap-y-[0.08em]">
+          {STATEMENT_WORDS.map((w, i) => (
+            <ScrubWord
+              key={i}
+              word={w}
+              index={i}
+              total={STATEMENT_WORDS.length}
+              progress={scrollYProgress}
+              gold={STATEMENT_GOLD.has(i)}
+            />
+          ))}
+        </p>
       </div>
-    </div>
+    </section>
   );
 }
 
 /* ============================================================ */
 
 export default function WaitlistLanding() {
-  const [heroReady, setHeroReady] = useState(false);
+  const reduce = useReducedMotion();
 
-  // Hero façon Apple : la section rétrécit et s'estompe quand on la quitte.
+  // HERO épinglé : pendant le scroll le titre zoome VERS toi et se dissout.
   const heroRef = useRef<HTMLDivElement | null>(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.94]);
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, -48]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.85], [1, 0.3]);
+  const { scrollYProgress: heroP } = useScroll({ target: heroRef, offset: ["start start", "end end"] });
+  const heroScale = useTransform(heroP, [0, 1], [1, 1.18]);
+  const heroOpacity = useTransform(heroP, [0.55, 0.95], [1, 0]);
 
-  // Track record : déclenche count-up + entrée des cartes.
+  // DÉMO épinglée : zoom 0.55 → 1 lié au scroll, réversible.
+  const demoRef = useRef<HTMLDivElement | null>(null);
+  const { scrollYProgress: demoP } = useScroll({ target: demoRef, offset: ["start start", "end end"] });
+  const demoScale = useTransform(demoP, [0, 0.5], [0.55, 1]);
+  const demoOpacity = useTransform(demoP, [0, 0.18], [0, 1]);
+  const demoY = useTransform(demoP, [0, 0.5], [80, 0]);
+
+  // Track record : count-up + entrée des cartes.
   const trackRef = useRef<HTMLDivElement | null>(null);
   const trackInView = useInView(trackRef, { once: true, margin: "-80px" });
 
@@ -339,8 +375,6 @@ export default function WaitlistLanding() {
       }
       window.scrollTo({ top: 0, behavior: "instant" });
     }, 0);
-    const t = setTimeout(() => setHeroReady(true), 1200);
-    return () => clearTimeout(t);
   }, []);
 
   return (
@@ -348,23 +382,11 @@ export default function WaitlistLanding() {
       <div className="w-full text-[#F5F5F5] relative">
 
         <style>{`
-          @keyframes prop-marquee {
-            from { transform: translateX(0); }
-            to   { transform: translateX(-50%); }
-          }
-          .marquee-track {
-            animation: prop-marquee 32s linear infinite;
-          }
-          .marquee:hover .marquee-track {
-            animation-play-state: paused;
-          }
           @keyframes badge-pulse {
             0%, 100% { opacity: 0.7; }
             50%      { opacity: 1; }
           }
-          .badge-pulse {
-            animation: badge-pulse 2s ease-in-out infinite;
-          }
+          .badge-pulse { animation: badge-pulse 2s ease-in-out infinite; }
           .prop-logo-ftmo {
             filter: grayscale(1) brightness(1.7) contrast(0.7);
             opacity: 0.85;
@@ -375,176 +397,152 @@ export default function WaitlistLanding() {
             opacity: 0.85;
             transition: opacity 300ms ease, transform 300ms ease;
           }
-          .prop-logo-color:hover {
-            opacity: 1;
-            transform: scale(1.05);
-          }
+          .prop-logo-color:hover { opacity: 1; transform: scale(1.05); }
         `}</style>
 
-        {/* ══════════ HERO — pleine largeur, cinématique ══════════ */}
-        <motion.section
-          ref={heroRef}
-          style={{ scale: heroScale, y: heroY, opacity: heroOpacity }}
-          className="relative text-center pt-10 sm:pt-16 pb-14 sm:pb-20"
-        >
-          {/* Halo doré statique derrière le titre — gradient sans filtre */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 h-[420px] w-[min(720px,92vw)] -z-10"
-            style={{ background: "radial-gradient(ellipse at center, rgba(212,168,67,0.10) 0%, rgba(124,58,237,0.05) 45%, transparent 70%)" }}
-          />
-
-          {/* Badge */}
+        {/* ══════════ HERO ÉPINGLÉ — push-in caméra ══════════ */}
+        <section ref={heroRef} className="relative h-[175vh]">
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
-            className="mb-8 sm:mb-10"
+            style={reduce ? undefined : { scale: heroScale, opacity: heroOpacity }}
+            className="sticky top-0 h-svh flex flex-col items-center justify-center text-center will-change-transform"
           >
-            <span className="badge-pulse inline-flex items-center gap-2 rounded-full border border-[#D4A843] border-opacity-30 bg-[rgba(212,168,67,0.06)] px-4 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#D4A843] animate-pulse shrink-0" />
-              <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-[#D4A843]">
-                Beta — Limited Spots
-              </span>
-            </span>
-          </motion.div>
+            {/* Halo statique — gradient, aucun filtre */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[440px] w-[min(760px,92vw)] -z-10"
+              style={{ background: "radial-gradient(ellipse at center, rgba(212,168,67,0.10) 0%, rgba(124,58,237,0.05) 45%, transparent 70%)" }}
+            />
 
-          {/* Titre — chaque mot monte hors de son masque */}
-          <h1
-            className="mx-auto max-w-[1050px] text-[38px] sm:text-[54px] md:text-[66px] lg:text-[76px] leading-[1.04] tracking-[-0.035em] font-extrabold mb-6 sm:mb-8"
-            aria-label="Most traders blow their funded account in the first 2 weeks. Ours don't."
-          >
-            <span aria-hidden="true">
-              {HERO_HEADING_WORDS.map((w, i) => (
-                <RevealWord key={`h-${i}`} word={w} delay={0.15 + i * 0.06} />
-              ))}
-              {HERO_HEADING_GOLD_WORDS.map((w, i) => (
-                <RevealWord
-                  key={`g-${i}`}
-                  word={w}
-                  delay={0.4 + (HERO_HEADING_WORDS.length + i) * 0.06}
-                  gold
-                />
-              ))}
-            </span>
-          </h1>
-
-          {/* Sous-texte */}
-          <motion.p
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: EASE, delay: 1.15 }}
-            className="text-[16px] sm:text-[18px] text-[#A1A1AA] leading-[1.7] max-w-[52ch] mx-auto"
-          >
-            You know the pattern. One bad session turns into revenge trades, your stop losses get
-            wider, and by Friday your funded account is gone. BullionDesk watches your trading in
-            real time and tells you when you&rsquo;re about to do it again — before the drawdown hits.
-          </motion.p>
-
-          {/* CTAs — remontés dans le hero, au-dessus de la ligne de flottaison */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: EASE, delay: 1.3 }}
-            className="mt-9 sm:mt-11 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5"
-          >
-            <Magnetic className="w-full sm:w-auto">
-              <Link
-                href="/signup"
-                className="group w-full sm:w-auto rounded-2xl py-4 px-9 text-[15px] sm:text-lg font-bold tracking-[0.02em] bg-[#D4A843] text-black inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(212,168,67,0.28)] hover:shadow-[0_0_45px_rgba(212,168,67,0.45)] hover:scale-[1.02] transition-[transform,box-shadow] duration-300"
-              >
-                Stop Blowing Funded Accounts
-                <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
-              </Link>
-            </Magnetic>
-            <button
-              onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
-              className="w-full sm:w-auto rounded-xl px-5 py-3 text-[12px] tracking-[0.06em] font-medium border border-[#1A1A1A] text-[#A1A1AA] hover:border-[rgba(212,168,67,0.35)] hover:text-[#F5F5F5] transition min-h-[44px]"
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
+              className="mb-8"
             >
-              Try the AI Coach — Free
-            </button>
+              <span className="badge-pulse inline-flex items-center gap-2 rounded-full border border-[#D4A843] border-opacity-30 bg-[rgba(212,168,67,0.06)] px-4 py-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#D4A843] animate-pulse shrink-0" />
+                <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-[#D4A843]">
+                  Beta — Limited Spots
+                </span>
+              </span>
+            </motion.div>
+
+            <h1
+              className="mx-auto max-w-[1000px] text-[36px] sm:text-[50px] md:text-[60px] lg:text-[70px] leading-[1.05] tracking-[-0.035em] font-extrabold mb-6 sm:mb-7 px-1"
+              aria-label="Most traders blow their funded account in the first 2 weeks. Ours don't."
+            >
+              <span aria-hidden="true">
+                {HERO_HEADING_WORDS.map((w, i) => (
+                  <RevealWord key={`h-${i}`} word={w} delay={0.15 + i * 0.06} />
+                ))}
+                {HERO_HEADING_GOLD_WORDS.map((w, i) => (
+                  <RevealWord key={`g-${i}`} word={w} delay={0.4 + (HERO_HEADING_WORDS.length + i) * 0.06} gold />
+                ))}
+              </span>
+            </h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: EASE, delay: 1.15 }}
+              className="text-[15px] sm:text-[17px] text-[#A1A1AA] leading-[1.7] max-w-[50ch] mx-auto px-2"
+            >
+              You know the pattern. One bad session turns into revenge trades, your stop losses get
+              wider, and by Friday your funded account is gone. BullionDesk watches your trading in
+              real time and tells you when you&rsquo;re about to do it again — before the drawdown hits.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: EASE, delay: 1.3 }}
+              className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 w-full px-4 sm:px-0 sm:w-auto"
+            >
+              <PrimaryCTA />
+              <button
+                onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
+                className="w-full sm:w-auto rounded-xl px-5 py-3 text-[12px] tracking-[0.06em] font-medium border border-[#1A1A1A] text-[#A1A1AA] hover:border-[rgba(212,168,67,0.35)] hover:text-[#F5F5F5] transition min-h-[44px]"
+              >
+                Try the AI Coach — Free
+              </button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, ease: EASE, delay: 1.45 }}
+            >
+              <p className="text-[11px] text-[#A1A1AA]/70 mt-5">No signals · No BS · Just clarity</p>
+              <p className="text-sm font-medium mt-3" style={{ color: "#D4A843" }}>{PRICING.betaLine}</p>
+              <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>{PRICING.urgencyLine}</p>
+            </motion.div>
           </motion.div>
+        </section>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, ease: EASE, delay: 1.45 }}
-          >
-            <p className="text-[11px] text-[#A1A1AA]/70 mt-5">No signals · No BS · Just clarity</p>
-            <p className="text-sm font-medium mt-3" style={{ color: "#D4A843" }}>{PRICING.betaLine}</p>
-            <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>{PRICING.urgencyLine}</p>
-          </motion.div>
-
-          {/* Stats — count-up */}
-          <div className="mt-10 sm:mt-12 flex flex-row flex-wrap items-center justify-center gap-3 sm:gap-5">
-            {HERO_STATS.map((s, i) => (
-              <HeroStat key={s.label} value={s.value} label={s.label} start={heroReady} delay={1.5 + i * 0.12} />
-            ))}
-          </div>
-        </motion.section>
-
-        {/* ══════════ MARQUEE prop firms — pleine largeur écran ══════════ */}
+        {/* ══════════ MARQUEE — réactif à la vélocité de ton scroll ══════════ */}
         <Reveal>
-          <div style={FULL_BLEED} className="mb-6">
+          <div style={FULL_BLEED} className="mt-2 mb-6">
             <p className="text-center text-[12px] text-white/60 tracking-[0.06em] mb-6">
               Compatible with 7 major prop firms
             </p>
-            <PropFirmMarquee />
+            <VelocityMarquee />
           </div>
         </Reveal>
 
-        {/* ── Séparateur ── */}
-        <div
-          className="h-[1.5px] w-full max-w-[280px] mx-auto my-16 sm:my-24 rounded-full"
-          style={{ background: "linear-gradient(to right, transparent, #7C3AED 35%, #D4A843 65%, transparent)" }}
-        />
+        {/* ══════════ STATEMENT — les mots s'allument au scroll ══════════ */}
+        <StatementSection />
 
-        {/* ══════════ DÉMO — la pièce maîtresse, zoom spring à l'entrée ══════════ */}
-        <section id="demo" className="mx-auto w-full max-w-[760px] mb-6">
-          <Reveal className="text-center mb-6">
-            <p className="text-[11px] font-mono uppercase tracking-[0.24em] text-[#D4A843] mb-3">
-              Live demo
-            </p>
-            <h2 className="text-[24px] sm:text-[32px] font-extrabold tracking-[-0.02em] mb-3">
-              Ask it <span className="font-serif italic font-medium text-[#D4A843]">before</span> you take the trade
-            </h2>
-            <span className="flex items-center justify-center gap-1.5 mb-1.5">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 pulse-dot-green" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-              </span>
-              <span className="text-[10px] uppercase tracking-[0.16em] text-[#A1A1AA]">
-                AI Coach — Online
-              </span>
-            </span>
-            <p className="text-[12px] text-[#A1A1AA] tracking-[0.04em]">
-              3 free messages. Find out what your last blown account would&rsquo;ve heard.
-            </p>
-          </Reveal>
-
-          <ZoomIn from={0.9}>
-            <div className="rounded-2xl chat-border-glow">
-              <div
-                className="rounded-2xl"
-                style={{
-                  boxShadow:
-                    "0 0 0 1px rgba(212,168,67,0.28), 0 0 60px rgba(124,58,237,0.18), 0 0 110px rgba(212,168,67,0.09)",
-                }}
-              >
-                <DemoChat />
+        {/* ══════════ DÉMO ÉPINGLÉE — zoom scrubbed 0.55 → 1 ══════════ */}
+        <section id="demo" ref={demoRef} className="relative h-[220vh]">
+          <div className="sticky top-0 h-svh flex items-center justify-center">
+            <motion.div
+              style={reduce ? undefined : { scale: demoScale, opacity: demoOpacity, y: demoY }}
+              className="w-full max-w-[760px] px-1 will-change-transform"
+            >
+              <div className="text-center mb-6">
+                <p className="text-[11px] font-mono uppercase tracking-[0.24em] text-[#D4A843] mb-3">
+                  Live demo
+                </p>
+                <h2 className="text-[24px] sm:text-[30px] font-extrabold tracking-[-0.02em] mb-3">
+                  Ask it <span className="font-serif italic font-medium text-[#D4A843]">before</span> you take the trade
+                </h2>
+                <span className="flex items-center justify-center gap-1.5 mb-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 pulse-dot-green" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                  </span>
+                  <span className="text-[10px] uppercase tracking-[0.16em] text-[#A1A1AA]">
+                    AI Coach — Online
+                  </span>
+                </span>
+                <p className="text-[12px] text-[#A1A1AA] tracking-[0.04em]">
+                  3 free messages. Find out what your last blown account would&rsquo;ve heard.
+                </p>
               </div>
-            </div>
-          </ZoomIn>
 
-          <p className="text-center mt-4">
-            <Link href="/signup" className="text-[12px] text-[#D4A843] hover:text-[#F5F5F5] transition">
-              Want unlimited access? →
-            </Link>
-          </p>
+              <div className="rounded-2xl chat-border-glow">
+                <div
+                  className="rounded-2xl"
+                  style={{
+                    boxShadow:
+                      "0 0 0 1px rgba(212,168,67,0.28), 0 0 60px rgba(124,58,237,0.18), 0 0 110px rgba(212,168,67,0.09)",
+                  }}
+                >
+                  <DemoChat />
+                </div>
+              </div>
+
+              <p className="text-center mt-4">
+                <Link href="/signup" className="text-[12px] text-[#D4A843] hover:text-[#F5F5F5] transition">
+                  Want unlimited access? →
+                </Link>
+              </p>
+            </motion.div>
+          </div>
         </section>
 
-        {/* ══════════ Ticker courbe — pleine largeur ══════════ */}
-        <div className="my-10 sm:my-14" style={FULL_BLEED}>
+        {/* ══════════ Ticker courbe ══════════ */}
+        <div className="my-8 sm:my-12" style={FULL_BLEED}>
           <CurvedLoop
             text="AI Trading Coach ✦ Stop Overtrading ✦ Protect Your Funded Account ✦"
             speed={3}
@@ -555,7 +553,7 @@ export default function WaitlistLanding() {
 
         {/* ══════════ TRACK RECORD ══════════ */}
         <section ref={trackRef} className="mx-auto w-full max-w-[900px] mb-10">
-          <ZoomIn from={0.96}>
+          <ZoomIn>
             <div className="rounded-3xl border border-[#1A1A1A] bg-[#111111] overflow-hidden py-2">
               <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(212,168,67,0.45)] to-transparent" />
               <div className="p-7 sm:p-12">
@@ -573,13 +571,7 @@ export default function WaitlistLanding() {
                 </div>
                 <div className="grid grid-cols-3 gap-3 sm:gap-5 mb-7">
                   {TRACK_RECORD_STATS.map((s, i) => (
-                    <TrackRecordCard
-                      key={s.label}
-                      value={s.value}
-                      label={s.label}
-                      inView={trackInView}
-                      delay={i * 0.15}
-                    />
+                    <TrackRecordCard key={s.label} value={s.value} label={s.label} inView={trackInView} delay={i * 0.15} />
                   ))}
                 </div>
                 <p className="text-center text-[11px] text-[#A1A1AA]/60 leading-relaxed">
@@ -590,24 +582,16 @@ export default function WaitlistLanding() {
           </ZoomIn>
         </section>
 
-        {/* ══════════ CTA FINAL — la page ne meurt plus en silence ══════════ */}
+        {/* ══════════ CTA FINAL ══════════ */}
         <section className="text-center pt-10 sm:pt-16 pb-6">
           <div className="purple-shimmer-line max-w-[420px] mx-auto mb-14 sm:mb-16" />
           <Reveal>
-            <h2 className="mx-auto max-w-[16ch] text-[30px] sm:text-[44px] md:text-[52px] leading-[1.08] tracking-[-0.03em] font-extrabold mb-8">
+            <h2 className="mx-auto max-w-[16ch] text-[30px] sm:text-[42px] md:text-[50px] leading-[1.08] tracking-[-0.03em] font-extrabold mb-8">
               The next drawdown is <span className="font-serif italic font-medium text-[#D4A843]">optional.</span>
             </h2>
           </Reveal>
           <Reveal delay={0.15}>
-            <Magnetic>
-              <Link
-                href="/signup"
-                className="group rounded-2xl py-4 px-9 text-[15px] sm:text-lg font-bold tracking-[0.02em] bg-[#D4A843] text-black inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(212,168,67,0.28)] hover:shadow-[0_0_45px_rgba(212,168,67,0.45)] hover:scale-[1.02] transition-[transform,box-shadow] duration-300"
-              >
-                Stop Blowing Funded Accounts
-                <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
-              </Link>
-            </Magnetic>
+            <PrimaryCTA />
             <p className="text-sm font-medium mt-6" style={{ color: "#D4A843" }}>{PRICING.betaLine}</p>
             <p className="text-xs font-normal mt-1" style={{ color: "#71717A" }}>{PRICING.urgencyLine}</p>
           </Reveal>
