@@ -44,7 +44,9 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  /* clip (pas hidden) : overflow hidden sur html/body casse
+     position:sticky dans Safari — clip coupe sans créer de scroll box */
+  overflow-x: clip;
 }
 
 /* Prevent iOS zoom on input focus (font-size must be >= 16px or use this) */

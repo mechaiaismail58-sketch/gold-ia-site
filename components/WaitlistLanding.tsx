@@ -28,11 +28,11 @@ import CurvedLoop from "@/components/ui/CurvedLoop";
 import { PRICING } from "@/lib/pricing";
 
 /* ============================================================
-   BullionDesk — Landing v3 "scroll-driven"
-   Vocabulaire : sections épinglées (position:sticky) + transforms
-   scrubbed au scroll (réversibles), marquee réactif à la vélocité.
-   Règles : transform + opacity uniquement, zéro blur/filter animé,
-   reduced-motion → tout se fige proprement.
+   BullionDesk — Landing v3.1 "scroll-driven"
+   PRÉREQUIS : dans globals.css, le bloc `html, body` doit utiliser
+   `overflow-x: clip;` (PAS `hidden`) — `hidden` sur html/body tue
+   position:sticky dans Safari, donc aucune section ne s'épingle.
+   Règles : transform + opacity uniquement, zéro blur/filter animé.
    ============================================================ */
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -234,11 +234,12 @@ function TrackRecordCard({ value, label, inView, delay }: { value: string; label
 }
 
 /* ---------- Marquee réactif à la vélocité du scroll ----------
-   Vitesse de base vers la gauche ; ton scroll l'accélère, l'incline
-   (skew) et peut l'inverser. Un seul rAF, un seul transform. ---------- */
+   Suspendu automatiquement hors écran (pas de rAF inutile). ---------- */
 
 function VelocityMarquee() {
   const reduce = useReducedMotion();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const onScreen = useInView(containerRef, { margin: "200px" });
   const baseX = useMotionValue(0);
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
@@ -249,7 +250,7 @@ function VelocityMarquee() {
   const x = useTransform(baseX, (v) => `${wrap(-50, 0, v)}%`);
 
   useAnimationFrame((_, delta) => {
-    if (reduce) return;
+    if (reduce || !onScreen) return;
     let moveBy = directionRef.current * -3.5 * (delta / 1000);
     const vf = velocityFactor.get();
     if (vf < 0) directionRef.current = -1;
@@ -262,6 +263,7 @@ function VelocityMarquee() {
 
   return (
     <motion.div
+      ref={containerRef}
       className="overflow-hidden w-full"
       style={{
         skewX: reduce ? 0 : skewX,
@@ -302,8 +304,10 @@ function ScrubWord({
   gold: boolean;
 }) {
   const reduce = useReducedMotion();
-  const start = (index / total) * 0.85;
-  const end = ((index + 1) / total) * 0.85;
+  // Tous les mots sont allumés à 75% du pin → le message reste lisible
+  // en pleine lumière pendant le dernier quart, au lieu de rester gris.
+  const start = 0.05 + (index / total) * 0.7;
+  const end = 0.05 + ((index + 1) / total) * 0.7;
   const opacity = useTransform(progress, [start, end], [0.12, 1]);
   return (
     <motion.span
@@ -347,18 +351,20 @@ function StatementSection() {
 export default function WaitlistLanding() {
   const reduce = useReducedMotion();
 
-  // HERO épinglé : pendant le scroll le titre zoome VERS toi et se dissout.
+  // HERO épinglé : push-in caméra. Le fondu ne démarre qu'à 70% du pin
+  // pour que le texte reste à pleine luminosité tant qu'il est lisible.
   const heroRef = useRef<HTMLDivElement | null>(null);
   const { scrollYProgress: heroP } = useScroll({ target: heroRef, offset: ["start start", "end end"] });
-  const heroScale = useTransform(heroP, [0, 1], [1, 1.18]);
-  const heroOpacity = useTransform(heroP, [0.55, 0.95], [1, 0]);
+  const heroScale = useTransform(heroP, [0, 1], [1, 1.12]);
+  const heroOpacity = useTransform(heroP, [0.7, 0.98], [1, 0]);
 
-  // DÉMO épinglée : zoom 0.55 → 1 lié au scroll, réversible.
+  // DÉMO épinglée : zoom rapide (fini à 35% du pin) puis elle RESTE
+  // à taille pleine, nette et cliquable, pendant le reste du pin.
   const demoRef = useRef<HTMLDivElement | null>(null);
   const { scrollYProgress: demoP } = useScroll({ target: demoRef, offset: ["start start", "end end"] });
-  const demoScale = useTransform(demoP, [0, 0.5], [0.55, 1]);
-  const demoOpacity = useTransform(demoP, [0, 0.18], [0, 1]);
-  const demoY = useTransform(demoP, [0, 0.5], [80, 0]);
+  const demoScale = useTransform(demoP, [0, 0.35], [0.55, 1]);
+  const demoOpacity = useTransform(demoP, [0, 0.12], [0, 1]);
+  const demoY = useTransform(demoP, [0, 0.35], [60, 0]);
 
   // Track record : count-up + entrée des cartes.
   const trackRef = useRef<HTMLDivElement | null>(null);
@@ -376,6 +382,15 @@ export default function WaitlistLanding() {
       window.scrollTo({ top: 0, behavior: "instant" });
     }, 0);
   }, []);
+
+  function scrollToDemo() {
+    const el = demoRef.current;
+    if (!el) return;
+    // Atterrit à ~90% d'un écran DANS la section épinglée : la démo est
+    // déjà zoomée à pleine taille au lieu d'un écran vide (opacité 0).
+    const top = window.scrollY + el.getBoundingClientRect().top + window.innerHeight * 0.9;
+    window.scrollTo({ top, behavior: "smooth" });
+  }
 
   return (
     <MotionConfig reducedMotion="user">
@@ -401,7 +416,7 @@ export default function WaitlistLanding() {
         `}</style>
 
         {/* ══════════ HERO ÉPINGLÉ — push-in caméra ══════════ */}
-        <section ref={heroRef} className="relative h-[175vh]">
+        <section ref={heroRef} className="relative h-[165vh]">
           <motion.div
             style={reduce ? undefined : { scale: heroScale, opacity: heroOpacity }}
             className="sticky top-0 h-svh flex flex-col items-center justify-center text-center will-change-transform"
@@ -460,7 +475,7 @@ export default function WaitlistLanding() {
             >
               <PrimaryCTA />
               <button
-                onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
+                onClick={scrollToDemo}
                 className="w-full sm:w-auto rounded-xl px-5 py-3 text-[12px] tracking-[0.06em] font-medium border border-[#1A1A1A] text-[#A1A1AA] hover:border-[rgba(212,168,67,0.35)] hover:text-[#F5F5F5] transition min-h-[44px]"
               >
                 Try the AI Coach — Free
@@ -493,7 +508,7 @@ export default function WaitlistLanding() {
         <StatementSection />
 
         {/* ══════════ DÉMO ÉPINGLÉE — zoom scrubbed 0.55 → 1 ══════════ */}
-        <section id="demo" ref={demoRef} className="relative h-[220vh]">
+        <section id="demo" ref={demoRef} className="relative h-[200vh]">
           <div className="sticky top-0 h-svh flex items-center justify-center">
             <motion.div
               style={reduce ? undefined : { scale: demoScale, opacity: demoOpacity, y: demoY }}
