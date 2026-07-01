@@ -78,7 +78,6 @@ function ScenarioCard({ data }: { data: ScenarioData }) {
         background: "rgba(212,175,55,0.08)",
         borderBottom: "1px solid rgba(212,175,55,0.15)",
       }}>
-        <span style={{ fontSize: "13px" }}>🔒</span>
         <span style={{ fontSize: "11px", fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.1em", color: "#D4AF37", fontWeight: 700 }}>
           Trigger Required — Conditional Scenario
         </span>
@@ -110,7 +109,7 @@ function ScenarioCard({ data }: { data: ScenarioData }) {
         background: "rgba(251,146,60,0.04)",
       }}>
         <span style={{ fontSize: "11px", color: "rgba(251,146,60,0.85)", fontWeight: 600 }}>
-          ⚠ Do not enter before all conditions are met — front-running invalidates the setup
+          Do not enter before all conditions are met — front-running invalidates the setup
         </span>
       </div>
 

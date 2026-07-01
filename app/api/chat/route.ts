@@ -924,7 +924,9 @@ RESPONSE LENGTH RULES:
 - Skip obvious context the trader already knows. Don't explain what RSI or MACD are.
 - The prop firm note should be 1-2 sentences max, not a paragraph.
 - If the user asks a simple question, give a simple answer. Not everything needs a full market breakdown.
-- Think Bloomberg terminal chat, not research report.`,
+- Think Bloomberg terminal chat, not research report.
+- Never use emojis, ever. No emojis in any response, including headers, lists, or emphasis. This is an institutional-grade tool — emojis break the professional tone.
+- Write like a Bloomberg terminal or an institutional desk analyst: precise, sober, zero decoration.`,
       messages: [{ role: "user", content: userContent }],
     });
 
