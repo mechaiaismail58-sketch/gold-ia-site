@@ -572,7 +572,7 @@ const components: Components = {
             margin: "20px 0",
           }} />
         )}
-        <h2 className="text-[13px] font-semibold text-white/90 tracking-[0.06em] uppercase mt-5 mb-1.5 first:mt-0">
+        <h2 className="text-[13px] font-semibold text-white/90 tracking-[0.06em] uppercase mt-7 mb-3 first:mt-0">
           {children}
         </h2>
       </>
@@ -580,7 +580,7 @@ const components: Components = {
   },
   h3({ children }) {
     return (
-      <h3 className="text-[12px] font-semibold text-white/75 tracking-[0.04em] uppercase mt-3.5 mb-1 first:mt-0">
+      <h3 className="text-[12px] font-semibold text-white/75 tracking-[0.04em] uppercase mt-5 mb-2 first:mt-0">
         {children}
       </h3>
     );
@@ -593,16 +593,16 @@ const components: Components = {
   },
   p({ children }) {
     return (
-      <p className="font-sans leading-[1.75] text-[15px] font-normal text-[#E8E8E8] mb-2 last:mb-0 px-2 sm:px-0">
+      <p className="font-sans leading-[1.8] text-[15px] font-normal text-[#E8E8E8] mb-4 last:mb-0 px-2 sm:px-0">
         {processChildren(children)}
       </p>
     );
   },
   ul({ children }) {
-    return <ul className="mb-2 space-y-0.5 pl-4 list-disc marker:text-white/25 last:mb-0">{children}</ul>;
+    return <ul className="mb-4 space-y-1.5 pl-4 list-disc marker:text-white/25 last:mb-0">{children}</ul>;
   },
   ol({ children }) {
-    return <ol className="mb-2 space-y-0.5 pl-4 list-decimal marker:text-white/30 last:mb-0">{children}</ol>;
+    return <ol className="mb-4 space-y-1.5 pl-4 list-decimal marker:text-white/30 last:mb-0">{children}</ol>;
   },
   li({ children }) {
     return <li className="font-sans text-[15px] font-normal text-[#E8E8E8] leading-[1.75]">{processChildren(children)}</li>;
@@ -619,14 +619,14 @@ const components: Components = {
   },
   pre({ children }) {
     return (
-      <pre className="rounded-xl bg-white/[0.04] border border-white/[0.06] p-3 text-[12px] text-white/70 font-mono overflow-x-auto mb-2 leading-relaxed">
+      <pre className="rounded-xl bg-white/[0.04] border border-white/[0.06] p-3 text-[12px] text-white/70 font-mono overflow-x-auto mb-4 leading-relaxed">
         {children}
       </pre>
     );
   },
   blockquote({ children }) {
     return (
-      <blockquote className="border-l-2 border-white/20 pl-3 my-2 text-white/60 italic">
+      <blockquote className="border-l-2 border-white/20 pl-3 my-4 text-white/60 italic">
         {children}
       </blockquote>
     );
