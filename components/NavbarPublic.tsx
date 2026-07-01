@@ -130,7 +130,7 @@ export default function NavbarPublic({ initialEmail, initialAvatarUrl }: NavbarP
     <header className="pt-6">
       {/* Mobile menu backdrop */}
       <div
-        className={`fixed inset-0 z-30 lg:hidden transition-opacity duration-300 ${menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        className={`fixed inset-0 z-30 lg:hidden transition-[opacity,visibility] duration-300 ${menuOpen ? "opacity-100 visible pointer-events-auto" : "opacity-0 invisible pointer-events-none"}`}
         style={{ background: "rgba(7,6,11,0.75)", backdropFilter: "blur(4px)" }}
         onClick={() => setMenuOpen(false)}
       />

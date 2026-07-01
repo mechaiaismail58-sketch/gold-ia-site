@@ -3,10 +3,9 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Shared animated background — purple/gold radial blobs with scroll
- * parallax. Mounted once in the root layout so every route (including
- * /chat/*) gets the identical background. Extracted verbatim from the
- * landing page (components/WaitlistLanding.tsx).
+ * Shared animated background — purple/gold radial glows with scroll
+ * parallax. Soft falloff baked into the gradients themselves: no CSS
+ * blur() filter (3 huge filtered layers re-composited every frame).
  */
 export default function GradientBlobs() {
   const purpleBlobARef = useRef<HTMLDivElement | null>(null);
@@ -37,17 +36,17 @@ export default function GradientBlobs() {
     <div className="pointer-events-none fixed inset-0 -z-30">
       <div
         ref={purpleBlobARef}
-        className="absolute -top-28 right-[-180px] h-[560px] w-[560px] rounded-full blur-[120px]"
-        style={{ background: "radial-gradient(circle, rgba(124,58,237,0.26) 0%, transparent 70%)" }}
+        className="absolute -top-40 right-[-260px] h-[720px] w-[720px] rounded-full will-change-transform"
+        style={{ background: "radial-gradient(circle, rgba(124,58,237,0.22) 0%, rgba(124,58,237,0.10) 35%, transparent 68%)" }}
       />
       <div
         ref={purpleBlobBRef}
-        className="absolute top-[80px] left-[-200px] h-[480px] w-[480px] rounded-full blur-[120px]"
-        style={{ background: "radial-gradient(circle, rgba(109,40,217,0.20) 0%, transparent 70%)" }}
+        className="absolute top-[20px] left-[-280px] h-[620px] w-[620px] rounded-full will-change-transform"
+        style={{ background: "radial-gradient(circle, rgba(109,40,217,0.17) 0%, rgba(109,40,217,0.08) 35%, transparent 68%)" }}
       />
       <div
-        className="absolute bottom-[-240px] left-[18%] h-[560px] w-[560px] rounded-full blur-[130px]"
-        style={{ background: "radial-gradient(circle, rgba(212,168,67,0.09) 0%, transparent 70%)" }}
+        className="absolute bottom-[-320px] left-[16%] h-[720px] w-[720px] rounded-full"
+        style={{ background: "radial-gradient(circle, rgba(212,168,67,0.08) 0%, rgba(212,168,67,0.035) 35%, transparent 68%)" }}
       />
     </div>
   );
