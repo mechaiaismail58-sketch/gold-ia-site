@@ -231,7 +231,7 @@ export default function EconomicCalendar() {
 
   // Tick every second for live countdowns
   useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
+    const t = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(t);
   }, []);
 
