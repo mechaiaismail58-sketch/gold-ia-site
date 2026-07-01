@@ -45,6 +45,8 @@ export default function ChatNavSidebar() {
       <div className="h-px mx-2 mb-3" style={{ background: "linear-gradient(90deg, rgba(123,79,212,0.15), rgba(123,79,212,0.04), transparent)" }} />
 
       {/* Nav items */}
+      <div className="flex-1" />
+
       <div className="flex flex-col gap-0.5">
         {NAV_ITEMS.map((item, index) => {
           const active = isActive(item.href);
@@ -91,7 +93,9 @@ export default function ChatNavSidebar() {
         })}
       </div>
 
-      <div className="mt-auto px-3 pb-4">
+      <div className="flex-1" />
+
+      <div className="px-3 pb-4">
         <div className="h-px bg-white/[0.06] mx-1 mb-3" />
         <div className="flex items-center gap-2 px-2 py-1.5 text-white/30 text-xs">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
