@@ -45,9 +45,7 @@ export default function ChatNavSidebar() {
       <div className="h-px mx-2 mb-3" style={{ background: "linear-gradient(90deg, rgba(123,79,212,0.15), rgba(123,79,212,0.04), transparent)" }} />
 
       {/* Nav items */}
-      <div className="flex-1" />
-
-      <div className="flex flex-col gap-0.5">
+      <div className="flex flex-col gap-2 mt-6 p-2 rounded-2xl" style={{ background: "rgba(255,255,255,0.02)", border: "0.5px solid rgba(255,255,255,0.05)" }}>
         {NAV_ITEMS.map((item, index) => {
           const active = isActive(item.href);
           return (
@@ -60,7 +58,7 @@ export default function ChatNavSidebar() {
               <Link
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200 relative",
+                  "flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] font-medium transition-all duration-200 relative",
                   active
                     ? "text-white"
                     : "text-white/35 hover:text-white/70 hover:bg-[rgba(124,58,237,0.05)]"
@@ -93,9 +91,7 @@ export default function ChatNavSidebar() {
         })}
       </div>
 
-      <div className="flex-1" />
-
-      <div className="px-3 pb-4">
+      <div className="mt-auto px-3 pb-4">
         <div className="h-px bg-white/[0.06] mx-1 mb-3" />
         <div className="flex items-center gap-2 px-2 py-1.5 text-white/30 text-xs">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
