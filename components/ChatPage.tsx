@@ -100,21 +100,9 @@ export default function ChatPage() {
         }
         return;
       }
-      const wordsPerTick = queue.length > 500 ? 4 : queue.length > 200 ? 2 : 1;
-      let chunk = "";
-      let remaining = queue;
-      for (let i = 0; i < wordsPerTick && remaining.length > 0; i++) {
-        const space   = remaining.indexOf(" ");
-        const newline = remaining.indexOf("\n");
-        let end: number;
-        if (space === -1 && newline === -1) end = remaining.length;
-        else if (space === -1)              end = newline + 1;
-        else if (newline === -1)            end = space + 1;
-        else                                end = Math.min(space, newline) + 1;
-        chunk    += remaining.slice(0, end);
-        remaining = remaining.slice(end);
-      }
-      typewriterQueueRef.current     = remaining;
+      const charsPerTick = queue.length > 400 ? 6 : queue.length > 150 ? 3 : 2;
+      const chunk = queue.slice(0, charsPerTick);
+      typewriterQueueRef.current = queue.slice(charsPerTick);
       typewriterDisplayedRef.current += chunk;
       const text = typewriterDisplayedRef.current;
       setMessages((m) => {
@@ -123,7 +111,7 @@ export default function ChatPage() {
         return updated;
       });
       scrollToBottom();
-    }, 25);
+    }, 16);
   }
 
   function flushTypewriterQueue() {
