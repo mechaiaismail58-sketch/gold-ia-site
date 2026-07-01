@@ -2,6 +2,9 @@ module.exports = {
   content: ["./app/**/*.{js,ts,jsx,tsx,mdx}", "./components/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        serif: ["var(--font-newsreader)", "Georgia", "serif"],
+      },
       colors: {
         bg: "#080810",
         "accent-purple": "#7B4FD4",
