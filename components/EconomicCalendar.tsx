@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import AnimatedContent from "@/components/ui/reactbits/AnimatedContent";
 import CountUp from "@/components/ui/reactbits/CountUp";
+import GradientText from "@/components/ui/reactbits/GradientText";
+import ShinyText from "@/components/ui/reactbits/ShinyText";
 
 type CalendarEvent = {
   id: string;
@@ -77,6 +79,16 @@ function formatCountdown(target: Date, now: Date): string {
   return `${s}s`;
 }
 
+// HH:MM:SS — reserved for the single next high-impact event (live, updates every 1s)
+function formatCountdownHMS(target: Date, now: Date): string {
+  const diff = Math.max(0, target.getTime() - now.getTime());
+  const totalSeconds = Math.floor(diff / 1000);
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
 const IMPACT = {
   high: {
     border: "border-[rgba(212,175,55,0.40)]",
@@ -112,13 +124,22 @@ function NumericValue({ raw, className }: { raw: string; className?: string }) {
   return <span className={className}><CountUp to={num} duration={1.5} />{suffix}</span>;
 }
 
-function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: Date; index: number; reduce: boolean }) {
+function EventCard({
+  event, now, index, reduce, isNextHighImpact,
+}: {
+  event: CalendarEvent; now: Date; index: number; reduce: boolean; isNextHighImpact: boolean;
+}) {
   const target = new Date(event.date);
   const diff = target.getTime() - now.getTime();
   const isPast = diff < 0;
   const isIncoming = diff > 0 && diff < 7_200_000; // < 2 h
   const style = IMPACT[event.impact];
   const countdown = formatCountdown(target, now);
+
+  // Impact tiers only apply to live (non-past) events — passed events stay
+  // uniformly muted with zero effects regardless of impact level.
+  const isHigh = !isPast && event.impact === "high";
+  const isMedium = !isPast && event.impact === "medium";
 
   return (
     <motion.div
@@ -127,15 +148,24 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
       transition={{ duration: 0.4, ease: "easeOut", delay: reduce ? 0 : index * 0.06 }}
       whileHover={reduce ? undefined : { scale: 1.015 }}
       className={cn(
-        "group border transition-all duration-300 ease-out bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.06)]",
+        "group relative overflow-hidden border transition-all duration-300 ease-out bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.06)]",
         style.border,
-        style.borderHover
+        style.borderHover,
+        !isPast && isNextHighImpact && "chat-border-glow"
       )}
       style={{
         borderRadius: "16px",
         padding: "20px",
       }}
     >
+      {/* HIGH — static red→gold accent bar (never on the next-event, which gets the glow border instead) */}
+      {isHigh && !isNextHighImpact && (
+        <div
+          className="absolute left-0 top-0 bottom-0 w-[2px]"
+          style={{ background: "linear-gradient(180deg, #F87171, #D4A843)" }}
+        />
+      )}
+
       {/* INCOMING */}
       {isIncoming && (
         <div className="mb-2.5">
@@ -156,7 +186,7 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
         {event.title}
       </div>
 
-      {/* Impact badge */}
+      {/* Impact badge — color carries the hierarchy, animation is a bonus on top */}
       <div className="flex items-center gap-2 mt-2.5">
         <span
           className={cn(
@@ -165,7 +195,23 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
           )}
         >
           <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", style.dot)} />
-          {style.label}
+          {isHigh ? (
+            reduce ? (
+              <span className="text-[#F87171]">{style.label}</span>
+            ) : (
+              <GradientText colors={["#F87171", "#D4A843", "#F87171"]} animationSpeed={7} className="font-mono">
+                <span>{style.label}</span>
+              </GradientText>
+            )
+          ) : isMedium ? (
+            reduce ? (
+              <span className="text-[#D4A843]">{style.label}</span>
+            ) : (
+              <ShinyText text={style.label} color="#D4A843" shineColor="#F5DFA0" speed={5} className="font-mono" />
+            )
+          ) : (
+            style.label
+          )}
         </span>
       </div>
 
@@ -197,6 +243,8 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
       <div className="mt-3 text-[11px] font-mono">
         {isPast ? (
           <span className="text-white/18">Passed</span>
+        ) : isNextHighImpact ? (
+          <span className="text-[#D4A843]">{formatCountdownHMS(target, now)}</span>
         ) : isIncoming ? (
           <span className="text-red-400">{countdown} remaining</span>
         ) : (
@@ -227,7 +275,7 @@ export default function EconomicCalendar() {
 
   // Tick every second for live countdowns
   useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 30000);
+    const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
 
@@ -305,8 +353,16 @@ export default function EconomicCalendar() {
         />
         <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-[32px] sm:text-[40px] font-semibold leading-[1.1] tracking-[-0.03em] text-white">
-              Economic Calendar
+            <h1>
+              {reduce ? (
+                <span className="text-[32px] sm:text-[40px] font-semibold leading-[1.1] tracking-[-0.03em] text-white">
+                  Economic Calendar
+                </span>
+              ) : (
+                <GradientText colors={["#7C3AED", "#D4A843", "#7C3AED"]} animationSpeed={4} className="text-[32px] sm:text-[40px] font-semibold leading-[1.1] tracking-[-0.03em]">
+                  <span>Economic Calendar</span>
+                </GradientText>
+              )}
             </h1>
             <p className="text-[14px] leading-relaxed text-white/40 mt-2 max-w-[54ch]">
               Gold-relevant macro events filtered for XAUUSD impact — CPI, NFP, FOMC, GDP, PCE and key USD data.
@@ -405,7 +461,7 @@ export default function EconomicCalendar() {
                       {grouped[day].map((ev, ci) => (
                         <div key={ev.id}>
                           {ci > 0 && <div className="h-px bg-white/[0.04] mx-4 mb-3" />}
-                          <EventCard event={ev} now={now} index={orderIndex.get(ev.id) ?? 0} reduce={reduce} />
+                          <EventCard event={ev} now={now} index={orderIndex.get(ev.id) ?? 0} reduce={reduce} isNextHighImpact={ev.id === nextHigh?.id} />
                         </div>
                       ))}
                     </div>
@@ -442,7 +498,7 @@ export default function EconomicCalendar() {
                     {grouped[day].map((ev, ci) => (
                       <div key={ev.id}>
                         {ci > 0 && <div className="h-px bg-white/[0.04] mx-4 mb-3" />}
-                        <EventCard event={ev} now={now} index={orderIndex.get(ev.id) ?? 0} reduce={reduce} />
+                        <EventCard event={ev} now={now} index={orderIndex.get(ev.id) ?? 0} reduce={reduce} isNextHighImpact={ev.id === nextHigh?.id} />
                       </div>
                     ))}
                   </div>
