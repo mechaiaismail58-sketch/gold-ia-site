@@ -749,7 +749,7 @@ export default function ChatPage() {
                 className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400"
                 style={{ boxShadow: "0 0 0 3px rgba(52,211,153,0.15)" }}
               />
-              <GradientText colors={["#7C3AED", "#D4A843", "#7C3AED"]} animationSpeed={4} className="font-medium tracking-wide"><span>XAUUSD</span></GradientText>
+              <span className="font-mono text-[#D4A843]/70 tracking-wide">XAUUSD</span>
               <span className="text-white/10">·</span>
               <span className="text-white/25">22 sources</span>
             </div>

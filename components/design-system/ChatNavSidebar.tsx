@@ -45,7 +45,7 @@ export default function ChatNavSidebar() {
       <div className="h-px mx-2 mb-3" style={{ background: "linear-gradient(90deg, rgba(123,79,212,0.15), rgba(123,79,212,0.04), transparent)" }} />
 
       {/* Nav items */}
-      <div className="flex flex-col gap-2 mt-6 p-2 rounded-2xl" style={{ background: "rgba(255,255,255,0.02)", border: "0.5px solid rgba(255,255,255,0.05)" }}>
+      <div className="flex flex-col gap-2.5 mt-8 p-2 rounded-2xl" style={{ background: "rgba(255,255,255,0.02)", border: "0.5px solid rgba(255,255,255,0.05)" }}>
         {NAV_ITEMS.map((item, index) => {
           const active = isActive(item.href);
           return (
@@ -69,7 +69,7 @@ export default function ChatNavSidebar() {
                     layoutId="sidebar-active"
                     className="absolute inset-0 rounded-xl"
                     style={{
-                      background: "rgba(124, 58, 237, 0.08)",
+                      background: "rgba(255,255,255,0.04)",
                       border: "none",
                     }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
@@ -79,11 +79,11 @@ export default function ChatNavSidebar() {
                   <motion.div
                     layoutId="sidebar-indicator"
                     className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-full"
-                    style={{ background: "rgba(124, 58, 237, 0.5)" }}
+                    style={{ background: "rgba(212,168,67,0.6)" }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
-                <span className={cn("relative z-10 transition", active ? "text-[#9B7DE8]" : "text-white/25")}>{item.icon}</span>
+                <span className={cn("relative z-10 transition", active ? "text-[#D4A843]" : "text-white/25")}>{item.icon}</span>
                 <span className="relative z-10">{item.label}</span>
               </Link>
             </motion.div>
@@ -91,13 +91,13 @@ export default function ChatNavSidebar() {
         })}
       </div>
 
-      <div className="mt-auto px-3 pb-4">
+      <div className="mt-auto px-3 pb-5">
         <div className="h-px bg-white/[0.06] mx-1 mb-3" />
-        <div className="flex items-center gap-2 px-2 py-1.5 text-white/30 text-xs">
+        <div className="flex items-center gap-2 px-2 py-1.5 text-white/30 text-[10px] font-mono uppercase tracking-[0.15em]">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           <span>AI Coach Online</span>
         </div>
-        <div className="text-[10px] text-white/15 px-2 mt-1 tracking-wider uppercase">
+        <div className="text-[10px] font-mono text-white/15 px-2 mt-1 tracking-[0.15em] uppercase">
           Beta v1.0
         </div>
       </div>

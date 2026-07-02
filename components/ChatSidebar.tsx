@@ -97,7 +97,7 @@ export function MobileChatTabs() {
           >
             {item.icon}
             <span className="text-[10px] font-medium">{item.label}</span>
-            {active && <span className="h-0.5 w-4 rounded-full bg-[#7B4FD4] mt-0.5" />}
+            {active && <span className="h-0.5 w-4 rounded-full bg-[#D4A843] mt-0.5" />}
           </Link>
         );
       })}

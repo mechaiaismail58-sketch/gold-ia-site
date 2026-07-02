@@ -70,7 +70,7 @@ export default function NavbarPrivate() {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="flex-none"
     >
-      <div className="flex items-center justify-between gap-4 px-5 py-3" style={{}}>
+      <div className="flex items-center justify-between gap-4 px-5 py-2.5" style={{}}>
 
         {/* Status */}
         <div className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export default function NavbarPrivate() {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
           </span>
-          <span className="text-[12px] font-medium text-white/40 tracking-wide">XAUUSD <span className="text-emerald-400/70">Live</span></span>
+          <span className="text-[12px] font-mono text-white/40 tracking-wide">XAUUSD <span className="text-emerald-400/70">Live</span></span>
         </div>
 
         {/* Account dropdown — desktop */}
@@ -115,9 +115,7 @@ export default function NavbarPrivate() {
                 transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 className="absolute right-0 top-full mt-2 w-44 rounded-xl overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.5)] z-50"
                 style={{
-                  background: "rgba(16,14,24,0.95)",
-                  backdropFilter: "blur(20px)",
-                  WebkitBackdropFilter: "blur(20px)",
+                  background: "rgba(16,14,24,0.98)",
                   border: "1px solid rgba(255,255,255,0.06)",
                 }}
               >
