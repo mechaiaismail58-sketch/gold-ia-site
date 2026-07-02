@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import GradientText from "@/components/ui/reactbits/GradientText";
 import AnimatedContent from "@/components/ui/reactbits/AnimatedContent";
 import CountUp from "@/components/ui/reactbits/CountUp";
 
@@ -126,16 +125,13 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
       initial={reduce ? false : { y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut", delay: reduce ? 0 : index * 0.06 }}
-      whileHover={reduce ? undefined : { scale: 1.015, boxShadow: "0 8px 32px rgba(0,0,0,0.2)" }}
+      whileHover={reduce ? undefined : { scale: 1.015 }}
       className={cn(
         "group border transition-all duration-300 ease-out bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.06)]",
         style.border,
-        style.borderHover,
-        isPast && "opacity-35"
+        style.borderHover
       )}
       style={{
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
         borderRadius: "16px",
         padding: "20px",
       }}
@@ -143,8 +139,8 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
       {/* INCOMING */}
       {isIncoming && (
         <div className="mb-2.5">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 border border-red-500/30 px-2.5 py-0.5 text-[10px] font-mono text-red-400 animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.2)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-red-400 shrink-0 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 border border-red-500/30 px-2.5 py-0.5 text-[10px] font-mono text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.2)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-red-400 shrink-0" />
             INCOMING
           </span>
         </div>
@@ -154,7 +150,7 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
       <div
         className={cn(
           "text-[14px] font-medium leading-snug",
-          isPast ? "line-through text-white/35" : "text-white/85"
+          isPast ? "line-through text-white/25" : "text-white/85"
         )}
       >
         {event.title}
@@ -175,8 +171,8 @@ function EventCard({ event, now, index, reduce }: { event: CalendarEvent; now: D
 
       {/* Time */}
       <div className="mt-3 space-y-0.5">
-        <div className="text-[11px] font-mono text-white/55">{formatLocalTime(event.date)}</div>
-        <div className="text-[10px] font-mono text-white/22">{formatUtcTime(event.date)}</div>
+        <div className="text-[11px] font-mono text-[#D4A843]/70">{formatUtcTime(event.date)}</div>
+        <div className="text-[10px] font-mono text-white/25">{formatLocalTime(event.date)}</div>
       </div>
 
       {/* Forecast / Previous */}
@@ -274,9 +270,12 @@ export default function EconomicCalendar() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -24, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 26 }}
-            className="mb-5 rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(212,175,55,0.055)] backdrop-blur-sm px-5 py-3.5 flex items-start gap-3 shadow-[0_0_32px_rgba(212,175,55,0.05)]"
+            className="mb-5 rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(212,175,55,0.055)] px-5 py-3.5 flex items-start gap-3 shadow-[0_0_32px_rgba(212,175,55,0.05)]"
           >
-            <span className="h-2 w-2 rounded-full bg-[#D4AF37] animate-pulse shrink-0 mt-0.5" />
+            <span
+              className="h-2 w-2 rounded-full bg-[#D4AF37] shrink-0 mt-0.5"
+              style={{ boxShadow: "0 0 0 3px rgba(212,175,55,0.15)" }}
+            />
             <div className="text-[13px] leading-snug">
               <span className="text-[#D4AF37] font-medium">
                 High Impact Event {hoursUntilHigh! < 1 ? "Imminent" : hoursUntilHigh! < 6 ? "Soon" : "Today"} —
@@ -293,24 +292,21 @@ export default function EconomicCalendar() {
       {/* ── Page header ── */}
       <AnimatedContent direction="vertical" distance={40}>
       <section className="card relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/10 shadow-[0_18px_80px_rgba(109,40,217,0.12)] mb-6">
-        {/* Decorative purple blob */}
+        {/* Decorative purple blob — falloff baked into the gradient, no blur() */}
         <div
           className="pointer-events-none absolute"
           style={{
-            top: "-20px",
-            right: "-20px",
-            width: "200px",
-            height: "200px",
-            background: "radial-gradient(circle, rgba(123,79,212,0.08) 0%, transparent 70%)",
-            filter: "blur(40px)",
+            top: "-60px",
+            right: "-60px",
+            width: "280px",
+            height: "280px",
+            background: "radial-gradient(circle, rgba(123,79,212,0.08) 0%, rgba(123,79,212,0.04) 35%, transparent 65%)",
           }}
         />
         <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1>
-              <GradientText colors={["#7C3AED", "#D4A843", "#7C3AED"]} animationSpeed={3} className="text-[32px] sm:text-[40px] font-semibold leading-[1.1] tracking-[-0.03em]">
-                Economic Calendar
-              </GradientText>
+            <h1 className="text-[32px] sm:text-[40px] font-semibold leading-[1.1] tracking-[-0.03em] text-white">
+              Economic Calendar
             </h1>
             <p className="text-[14px] leading-relaxed text-white/40 mt-2 max-w-[54ch]">
               Gold-relevant macro events filtered for XAUUSD impact — CPI, NFP, FOMC, GDP, PCE and key USD data.
