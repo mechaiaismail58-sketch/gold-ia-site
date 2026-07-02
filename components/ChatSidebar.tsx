@@ -83,7 +83,7 @@ export function MobileChatTabs() {
   }
 
   return (
-    <nav className="md:hidden flex-none bg-[#060609]/95 backdrop-blur-xl border-t border-white/[0.04] px-4 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] flex items-center justify-around">
+    <nav className="md:hidden flex-none bg-[#060609]/95 border-t border-white/[0.04] px-4 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] flex items-center justify-around">
       {NAV_ITEMS.map((item) => {
         const active = isActive(item.href);
         return (

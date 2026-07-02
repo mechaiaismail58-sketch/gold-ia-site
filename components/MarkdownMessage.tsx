@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
 import StructureChart, { type ChartData } from "@/components/StructureChart";
+import { t } from "@/lib/i18n";
 
 // ── Trade card types ──────────────────────────────────────────────────────────
 
@@ -324,6 +325,51 @@ function NoTradeCard({ data }: { data: NoTradeData }) {
   );
 }
 
+// ── VerdictCard ───────────────────────────────────────────────────────────────
+// The coach is prompted to lead every response with a one-line verdict
+// ("Don't trade this.", "There's a setup forming.", "Wait for [level].").
+// That first line is the real "no ::: marker" signal — this card promotes it
+// into the visual centerpiece instead of letting it read as a plain sentence.
+
+type Verdict = { type: "notrade" | "trade"; phrase: string };
+
+const VERDICT_NOTRADE_RE = /^(don'?t\s+trade\s+this|no\s+trade|nothing\s+to\s+do(\s+today)?|wait\s+for\b.*|stand\s+aside|ne\s+pas\s+trader\b.*|pas\s+de\s+trade\b.*|rien\s+à\s+faire(\s+aujourd'?hui)?|attend(s|ez)\b.*)\.?$/i;
+const VERDICT_TRADE_RE = /^((there'?s|there\s+is)\s+a\s+setup\s+forming|a\s+setup\s+is\s+forming|setup\s+forming|une\s+configuration\s+se\s+forme\b.*|un\s+setup\s+se\s+forme\b.*)\.?$/i;
+
+function detectVerdict(content: string): Verdict | null {
+  const firstLine = content.trim().split("\n").find((l) => l.trim())?.trim();
+  if (!firstLine) return null;
+  const clean = firstLine.replace(/^[*_#>\s]+|[*_\s]+$/g, "");
+  if (VERDICT_NOTRADE_RE.test(clean)) return { type: "notrade", phrase: clean.replace(/\.$/, "") };
+  if (VERDICT_TRADE_RE.test(clean))   return { type: "trade",   phrase: clean.replace(/\.$/, "") };
+  return null;
+}
+
+function stripFirstLine(content: string): string {
+  const idx = content.indexOf("\n");
+  return idx === -1 ? "" : content.slice(idx + 1).replace(/^\s+/, "");
+}
+
+function VerdictCard({ type, phrase }: Verdict) {
+  const isNoTrade = type === "notrade";
+  return (
+    <div
+      className="rounded-2xl px-5 py-5 mb-5"
+      style={{
+        border: `1px solid ${isNoTrade ? "rgba(212,168,67,0.3)" : "rgba(212,168,67,0.15)"}`,
+        background: isNoTrade ? "rgba(212,168,67,0.03)" : "rgba(255,255,255,0.02)",
+      }}
+    >
+      <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#D4A843]/50 mb-2.5">
+        {isNoTrade ? t("chat-verdict-no-trade-label") : t("chat-verdict-trade-label")}
+      </div>
+      <p className="font-serif italic text-[20px] sm:text-[22px] leading-snug text-white/90">
+        {phrase}.
+      </p>
+    </div>
+  );
+}
+
 // ── Block parsers ─────────────────────────────────────────────────────────────
 
 function parseTradeBlock(block: string): TradeData {
@@ -530,7 +576,7 @@ function highlightPrices(text: string): (string | React.ReactElement)[] {
     if (INDICATOR_PREFIXES.test(before)) continue;
     if (m.index > last) parts.push(text.slice(last, m.index));
     parts.push(
-      <span key={m.index} style={{ color: "#D4AF37", fontWeight: 600 }}>
+      <span key={m.index} style={{ color: "#D4AF37", fontWeight: 600, fontFamily: "var(--font-mono, monospace)" }}>
         {m[0]}
       </span>
     );
@@ -553,9 +599,45 @@ function processChildren(children: React.ReactNode): React.ReactNode {
   });
 }
 
+// The coach writes section labels (STRUCTURE, MACRO CONTEXT, CONDITIONS,
+// RISKS TO WATCH, BIAS, PROP FIRM NOTE…) as plain standalone lines — never
+// as markdown "## " headings. Detect them by shape (short, all-caps, its
+// own paragraph) instead of relying on heading syntax that never appears.
+const SECTION_LABEL_RE = /^[A-Z][A-Z0-9 /&'-]{1,38}$/;
+
+function asSectionLabel(children: React.ReactNode): string | null {
+  let text: string | null = null;
+  if (typeof children === "string") text = children;
+  else if (Array.isArray(children) && children.length === 1 && typeof children[0] === "string") text = children[0];
+  if (!text) return null;
+  const trimmed = text.trim();
+  if (trimmed.length < 3 || trimmed.length > 40) return null;
+  return SECTION_LABEL_RE.test(trimmed) ? trimmed : null;
+}
+
 // ── Markdown components ───────────────────────────────────────────────────────
 
 let headingCount = 0;
+
+function SectionLabel({ text }: { text: string }) {
+  const isFirst = headingCount === 0;
+  headingCount++;
+  return (
+    <>
+      {!isFirst && (
+        <div style={{
+          height: "1px",
+          border: "none",
+          background: "linear-gradient(to right, transparent, rgba(212,175,55,0.15), transparent)",
+          margin: "18px 0",
+        }} />
+      )}
+      <p className="text-[10px] sm:text-[11px] font-mono font-semibold text-[#D4A843]/40 tracking-[0.15em] uppercase mt-6 mb-3 first:mt-0">
+        {text}
+      </p>
+    </>
+  );
+}
 
 const components: Components = {
   h2({ children }) {
@@ -567,11 +649,11 @@ const components: Components = {
           <div style={{
             height: "1px",
             border: "none",
-            background: "linear-gradient(to right, transparent, rgba(212,175,55,0.2), transparent)",
-            margin: "20px 0",
+            background: "linear-gradient(to right, transparent, rgba(212,175,55,0.15), transparent)",
+            margin: "18px 0",
           }} />
         )}
-        <h2 className="text-[13px] font-semibold text-white/90 tracking-[0.06em] uppercase mt-7 mb-3 first:mt-0">
+        <h2 className="text-[10px] sm:text-[11px] font-mono font-semibold text-[#D4A843]/40 tracking-[0.15em] uppercase mt-6 mb-3 first:mt-0">
           {children}
         </h2>
       </>
@@ -591,6 +673,8 @@ const components: Components = {
     return <em className="italic text-white/70">{children}</em>;
   },
   p({ children }) {
+    const label = asSectionLabel(children);
+    if (label) return <SectionLabel text={label} />;
     return (
       <p className="font-serif leading-[1.8] text-[15px] font-normal text-[#E5E5E5] mb-4 last:mb-0 px-2 sm:px-0">
         {processChildren(children)}
@@ -712,10 +796,13 @@ function MarkdownSegment({ content }: { content: string }) {
 type Props = { content: string };
 
 function MarkdownMessage({ content }: Props) {
-  const segments = splitSegments(content);
+  const verdict = detectVerdict(content);
+  const bodyContent = verdict ? stripFirstLine(content) : content;
+  const segments = splitSegments(bodyContent);
 
   return (
     <>
+      {verdict && <VerdictCard type={verdict.type} phrase={verdict.phrase} />}
       {segments.map((seg, i) => {
         if (seg.type === "thinking") return null;
         if (seg.type === "trade")    return <TradeCard key={i} data={seg.data} />;

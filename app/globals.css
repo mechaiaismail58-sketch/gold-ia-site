@@ -252,6 +252,14 @@ textarea.text-xs {
 
 /* ===== Chat page animations ===== */
 
+/* Calm the ambient blobs once a conversation starts — data-chat-conversation is set by ChatPage */
+.chat-ambient-blob {
+  transition: opacity 600ms ease;
+}
+body[data-chat-conversation="true"] .chat-ambient-blob {
+  opacity: 0.4;
+}
+
 @keyframes gold-border-pulse {
   0%, 100% { border-color: rgba(212, 168, 67, 0.2); }
   50%       { border-color: rgba(212, 168, 67, 0.45); }

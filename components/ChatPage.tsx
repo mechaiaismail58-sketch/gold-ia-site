@@ -187,6 +187,11 @@ export default function ChatPage() {
   }, []);
 
   useEffect(() => {
+    document.body.dataset.chatConversation = messages.length > 0 ? "true" : "false";
+    return () => { delete document.body.dataset.chatConversation; };
+  }, [messages.length]);
+
+  useEffect(() => {
     try {
       const stored = localStorage.getItem(PROFILE_KEY);
       if (stored) {
@@ -740,10 +745,10 @@ export default function ChatPage() {
           {/* Status pill */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-xs text-white/30">
-              <span className="relative flex h-1.5 w-1.5 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
-              </span>
+              <span
+                className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400"
+                style={{ boxShadow: "0 0 0 3px rgba(52,211,153,0.15)" }}
+              />
               <GradientText colors={["#7C3AED", "#D4A843", "#7C3AED"]} animationSpeed={4} className="font-medium tracking-wide"><span>XAUUSD</span></GradientText>
               <span className="text-white/10">·</span>
               <span className="text-white/25">22 sources</span>
@@ -885,15 +890,14 @@ export default function ChatPage() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-            className="relative min-h-full flex flex-col items-center justify-center px-6 py-10"
+            className="relative min-h-[calc(100%-3rem)] flex flex-col items-center justify-center px-6 py-4 sm:py-10"
           >
             {/* ── Animated hero emblem ── */}
             <motion.div
               initial={{ scale: 0.6, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-              className="mb-10 relative flex items-center justify-center"
-              style={{ width: "140px", height: "140px" }}
+              className="mb-4 sm:mb-10 relative flex items-center justify-center w-[100px] h-[100px] sm:w-[140px] sm:h-[140px]"
             >
               {/* Layer 1 — Large purple ambient glow */}
               <div className="absolute inset-0 rounded-full hero-emblem-glow" style={{ background: "radial-gradient(circle, rgba(123,79,212,0.15) 0%, rgba(123,79,212,0.04) 40%, transparent 70%)" }} />
@@ -985,12 +989,12 @@ export default function ChatPage() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
-              className="mb-10 text-center flex justify-center"
+              className="mb-4 sm:mb-10 text-center flex justify-center"
             >
               <ShinyText text="Let's check the full picture on XAUUSD." className="text-sm text-white/30" speed={3} />
             </motion.div>
 
-            <div className="grid grid-cols-2 gap-2.5 w-full max-w-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 w-full max-w-lg">
               {suggestions.map((s, i) => (
                 <motion.button
                   key={s}
@@ -999,10 +1003,13 @@ export default function ChatPage() {
                   transition={{ duration: 0.4, delay: 0.55 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
                   type="button"
                   onClick={() => send(s)}
-                  className="group relative rounded-2xl px-4 py-3.5 text-[13px] text-white/40 hover:text-white/80 cursor-pointer text-left transition-transform duration-300 hover:-translate-y-1 hover:scale-[1.02]"
+                  className={cn(
+                    "group relative rounded-2xl px-4 py-2.5 sm:py-3.5 text-[13px] text-white/55 hover:text-white/80 cursor-pointer text-left transition-transform duration-300 hover:-translate-y-1 hover:scale-[1.02]",
+                    i >= 4 && "hidden sm:block"
+                  )}
                   style={{
-                    background: "rgba(124, 58, 237, 0.06)",
-                    border: "1px solid rgba(124, 58, 237, 0.15)",
+                    background: "rgba(124, 58, 237, 0.10)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
                     boxShadow: "0 0 20px rgba(124, 58, 237, 0.05), inset 0 1px 0 rgba(255,255,255,0.03)",
                   }}
                 >
@@ -1024,7 +1031,7 @@ export default function ChatPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1, duration: 0.5 }}
-              className="mt-8 text-center"
+              className="mt-2 sm:mt-8 text-center"
             >
               <ShinyText text="Powered by institutional-grade analysis" className="text-[10px] font-mono text-white/15 tracking-wider" speed={4} />
             </motion.p>
@@ -1048,9 +1055,8 @@ export default function ChatPage() {
                       <div
                         className="max-w-[75%] px-5 py-3.5 text-white"
                         style={{
-                          background: "linear-gradient(135deg, rgba(123,79,212,0.85), rgba(90,53,168,0.9))",
+                          background: "rgba(123,79,212,0.32)",
                           borderRadius: "20px 20px 6px 20px",
-                          boxShadow: "0 4px 24px rgba(123,79,212,0.2)",
                         }}
                       >
                         {m.imagePreview && (
@@ -1083,7 +1089,7 @@ export default function ChatPage() {
                           borderRadius: "20px 20px 20px 6px",
                         }}
                       >
-                        <div className="font-sans text-[15px] leading-[1.8] tracking-normal font-normal text-white/85">
+                        <div className="font-sans text-[15px] leading-[1.75] tracking-normal font-normal text-white/80">
                           <MarkdownMessage content={m.content} />
                           {(isStreaming || isTypewriting) && i === messages.length - 1 && m.role === "assistant" && (
                             <span className="typing-cursor" />
@@ -1095,17 +1101,17 @@ export default function ChatPage() {
                       </div>
                       {!loading && !isStreaming && i === messages.length - 1 && (
                         <motion.div
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                          className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 max-w-lg"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.15 }}
+                          className="flex flex-wrap gap-2 mt-4"
                         >
-                          {suggestions.map((suggestion) => (
+                          {suggestions.slice(0, 3).map((suggestion) => (
                             <button
                               key={suggestion}
                               type="button"
                               onClick={() => send(suggestion)}
-                              className="rounded-xl px-4 py-3 text-[13px] text-white/35 hover:text-white/70 cursor-pointer text-left transition-all duration-200 bg-white/[0.02] border border-white/[0.04] hover:bg-[rgba(123,79,212,0.05)] hover:border-[rgba(123,79,212,0.12)] hover:-translate-y-px"
+                              className="rounded-full px-3.5 py-1.5 text-[12px] text-white/35 hover:text-white/60 cursor-pointer transition-colors bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12]"
                             >
                               {suggestion}
                             </button>

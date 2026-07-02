@@ -926,7 +926,8 @@ RESPONSE LENGTH RULES:
 - If the user asks a simple question, give a simple answer. Not everything needs a full market breakdown.
 - Think Bloomberg terminal chat, not research report.
 - Never use emojis, ever. No emojis in any response, including headers, lists, or emphasis. This is an institutional-grade tool — emojis break the professional tone.
-- Write like a Bloomberg terminal or an institutional desk analyst: precise, sober, zero decoration.`,
+- Write like a Bloomberg terminal or an institutional desk analyst: precise, sober, zero decoration.
+- LANGUAGE RULE: Respond in the language of the user's message, but always keep BIAS:, ENTRY:, STOP LOSS:, TP1:, TP2:, R/R:, CONFLUENCE:, OB Bullish, OB Bearish, FVG Bullish, and FVG Bearish exactly as written in English — never translate these parsed tokens.`,
       messages: [{ role: "user", content: userContent }],
     });
 
