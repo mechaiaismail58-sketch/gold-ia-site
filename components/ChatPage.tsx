@@ -9,6 +9,7 @@ import MarkdownMessage from "@/components/MarkdownMessage";
 import { useChatContext } from "@/context/ChatContext";
 import GradientText from "@/components/ui/reactbits/GradientText";
 import ShinyText from "@/components/ui/reactbits/ShinyText";
+import { t } from "@/lib/i18n";
 
 function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
@@ -464,6 +465,20 @@ export default function ChatPage() {
 
       if (!r.ok) {
         const text = await r.text();
+        // Rate limits are expected, user-facing states — show clean copy instead
+        // of routing them through the generic "System error: ..." bubble below.
+        if (r.status === 429) {
+          let isDaily = true;
+          try {
+            const data = JSON.parse(text);
+            isDaily = /today's analysis limit/i.test(data?.error || "");
+          } catch { /* not JSON */ }
+          setMessages((m) => [
+            ...m,
+            { role: "assistant", content: isDaily ? t("chat-daily-limit-reached") : t("chat-rate-limited-burst") },
+          ]);
+          return;
+        }
         let errorMsg = `Request failed (${r.status})`;
         try {
           const data = JSON.parse(text);
