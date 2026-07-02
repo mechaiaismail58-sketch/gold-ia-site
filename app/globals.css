@@ -49,6 +49,12 @@ html, body {
   overflow-x: clip;
 }
 
+/* Geist Mono digits render at inconsistent widths across OSes without this —
+   tabular-nums locks digit width so tickers/track record/prices don't jitter/misalign */
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
 /* Prevent iOS zoom on input focus (font-size must be >= 16px or use this) */
 input, textarea, select {
   font-size: max(16px, 1em);

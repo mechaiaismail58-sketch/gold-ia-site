@@ -4,6 +4,7 @@ module.exports = {
     extend: {
       fontFamily: {
         serif: ["var(--font-newsreader)", "Georgia", "serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"],
       },
       colors: {
         bg: "#080810",

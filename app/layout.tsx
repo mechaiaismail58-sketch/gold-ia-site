@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
-import { Geist, Newsreader } from "next/font/google";
+import { Geist, Geist_Mono, Newsreader } from "next/font/google";
 import PushManager from "../components/PushManager";
 import NavigationProgress from "../components/NavigationProgress";
 import { ChatProvider } from "@/context/ChatContext";
@@ -12,6 +12,13 @@ const geist = Geist({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
   variable: "--font-geist",
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-geist-mono",
   display: "swap",
 });
 
@@ -56,7 +63,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`min-h-screen bg-[#07060b] text-white grain-overlay ${geist.variable} ${newsreader.variable}`}>
+      <body className={`min-h-screen bg-[#07060b] text-white grain-overlay ${geist.variable} ${geistMono.variable} ${newsreader.variable}`}>
         {/* Shared background — animated purple/gold blobs, all routes */}
         <GradientBlobs />
 

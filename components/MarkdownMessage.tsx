@@ -267,7 +267,7 @@ function TradeCard({ data }: { data: TradeData }) {
 
       <div style={{ marginTop: "12px" }}>
         {logState === "done" ? (
-          <span style={{ color: "rgba(34,197,94,0.7)", fontSize: "11px", fontFamily: "var(--font-mono, monospace)" }}>Trade logged ✓</span>
+          <span style={{ color: "rgba(34,197,94,0.7)", fontSize: "11px", fontFamily: "var(--font-geist-mono, monospace)" }}>Trade logged ✓</span>
         ) : (
           <button
             onClick={logTrade}
@@ -576,7 +576,7 @@ function highlightPrices(text: string): (string | React.ReactElement)[] {
     if (INDICATOR_PREFIXES.test(before)) continue;
     if (m.index > last) parts.push(text.slice(last, m.index));
     parts.push(
-      <span key={m.index} style={{ color: "#D4AF37", fontWeight: 600, fontFamily: "var(--font-mono, monospace)" }}>
+      <span key={m.index} style={{ color: "#D4AF37", fontWeight: 600, fontFamily: "var(--font-geist-mono, monospace)" }}>
         {m[0]}
       </span>
     );

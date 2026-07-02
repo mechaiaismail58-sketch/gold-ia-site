@@ -60,7 +60,7 @@ export default function ThinkingBlock({ lines, isComplete }: ThinkingBlockProps)
           textTransform: "uppercase",
           letterSpacing: "0.2em",
           color: "rgba(212,175,55,0.5)",
-          fontFamily: "var(--font-mono, monospace)",
+          fontFamily: "var(--font-geist-mono, monospace)",
         }}>
           THINKING
         </span>
@@ -79,7 +79,7 @@ export default function ThinkingBlock({ lines, isComplete }: ThinkingBlockProps)
               style={{
                 fontSize: "12px",
                 color: "rgba(255,255,255,0.4)",
-                fontFamily: "var(--font-mono, monospace)",
+                fontFamily: "var(--font-geist-mono, monospace)",
                 lineHeight: "1.6",
                 animationDelay: `${i * 150}ms`,
               }}
