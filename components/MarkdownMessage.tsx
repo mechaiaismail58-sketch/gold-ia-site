@@ -711,7 +711,7 @@ function MarkdownSegment({ content }: { content: string }) {
 
 type Props = { content: string };
 
-export default function MarkdownMessage({ content }: Props) {
+function MarkdownMessage({ content }: Props) {
   const segments = splitSegments(content);
 
   return (
@@ -727,3 +727,5 @@ export default function MarkdownMessage({ content }: Props) {
     </>
   );
 }
+
+export default React.memo(MarkdownMessage);

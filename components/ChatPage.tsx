@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import OnboardingModal from "@/components/OnboardingModal";
 import ShareSignalButton from "@/components/ShareSignalButton";
 import HistoryPanel from "@/components/HistoryPanel";
@@ -100,7 +100,7 @@ export default function ChatPage() {
         }
         return;
       }
-      const charsPerTick = queue.length > 400 ? 6 : queue.length > 150 ? 3 : 2;
+      const charsPerTick = queue.length > 400 ? 12 : queue.length > 150 ? 6 : 4;
       const chunk = queue.slice(0, charsPerTick);
       typewriterQueueRef.current = queue.slice(charsPerTick);
       typewriterDisplayedRef.current += chunk;
@@ -111,7 +111,7 @@ export default function ChatPage() {
         return updated;
       });
       scrollToBottom();
-    }, 16);
+    }, 32);
   }
 
   function flushTypewriterQueue() {
@@ -594,6 +594,7 @@ export default function ChatPage() {
   const summary = profileSummary();
 
   return (
+    <MotionConfig reducedMotion="user">
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -624,7 +625,7 @@ export default function ChatPage() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+            style={{ background: "rgba(0,0,0,0.8)" }}
             onClick={() => setProfileOpen(false)}
           >
             <motion.div
@@ -635,9 +636,7 @@ export default function ChatPage() {
               onClick={(e) => e.stopPropagation()}
               className="relative w-full max-w-lg rounded-3xl p-7 sm:p-8"
               style={{
-                background: "rgba(16,14,24,0.92)",
-                backdropFilter: "blur(40px)",
-                WebkitBackdropFilter: "blur(40px)",
+                background: "rgba(16,14,24,0.98)",
                 border: "1px solid rgba(255,255,255,0.06)",
                 boxShadow: "0 32px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.03) inset",
               }}
@@ -720,7 +719,7 @@ export default function ChatPage() {
                 type="button"
                 onClick={saveProfile}
                 disabled={savingProfile}
-                className="mt-7 w-full rounded-2xl px-4 py-3.5 text-sm font-semibold text-black transition-all duration-200 hover:shadow-[0_0_30px_rgba(212,168,67,0.35)] disabled:opacity-60"
+                className="mt-7 w-full rounded-2xl px-4 py-3.5 text-sm font-semibold text-black transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
                 style={{ background: "linear-gradient(135deg, #D4A843, #E8C76A)" }}
               >
                 {savingProfile ? "Saving…" : "Save Profile"}
@@ -851,7 +850,7 @@ export default function ChatPage() {
                   <button
                     type="button"
                     onClick={() => setProfileOpen(true)}
-                    className="rounded-xl px-4 py-2 text-xs font-semibold text-black/90 transition-all hover:shadow-[0_0_20px_rgba(212,168,67,0.3)]"
+                    className="rounded-xl px-4 py-2 text-xs font-semibold text-black/90 transition-transform hover:scale-[1.02] active:scale-[0.98]"
                     style={{ background: "linear-gradient(135deg, #D4A843, #E8C76A)" }}
                   >
                     Set up
@@ -957,7 +956,6 @@ export default function ChatPage() {
                   background: "radial-gradient(circle at 35% 35%, rgba(123,79,212,0.12), rgba(212,168,67,0.06) 60%, rgba(0,0,0,0.2))",
                   border: "1px solid rgba(212,168,67,0.15)",
                   boxShadow: "0 0 40px rgba(123,79,212,0.1), 0 0 15px rgba(212,168,67,0.08), inset 0 1px 1px rgba(255,255,255,0.06)",
-                  backdropFilter: "blur(8px)",
                 }}
               >
                 {/* Inner gold spark */}
@@ -1001,24 +999,23 @@ export default function ChatPage() {
                   transition={{ duration: 0.4, delay: 0.55 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
                   type="button"
                   onClick={() => send(s)}
-                  className="group rounded-2xl px-4 py-3.5 text-[13px] text-white/40 hover:text-white/80 cursor-pointer text-left transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02]"
+                  className="group relative rounded-2xl px-4 py-3.5 text-[13px] text-white/40 hover:text-white/80 cursor-pointer text-left transition-transform duration-300 hover:-translate-y-1 hover:scale-[1.02]"
                   style={{
                     background: "rgba(124, 58, 237, 0.06)",
                     border: "1px solid rgba(124, 58, 237, 0.15)",
                     boxShadow: "0 0 20px rgba(124, 58, 237, 0.05), inset 0 1px 0 rgba(255,255,255,0.03)",
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(124, 58, 237, 0.12)";
-                    e.currentTarget.style.borderColor = "rgba(212, 168, 67, 0.4)";
-                    e.currentTarget.style.boxShadow = "0 0 30px rgba(124, 58, 237, 0.2), 0 0 60px rgba(124, 58, 237, 0.1), 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "rgba(124, 58, 237, 0.06)";
-                    e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.15)";
-                    e.currentTarget.style.boxShadow = "0 0 20px rgba(124, 58, 237, 0.05), inset 0 1px 0 rgba(255,255,255,0.03)";
-                  }}
                 >
-                  {s}
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    style={{
+                      background: "rgba(124, 58, 237, 0.12)",
+                      border: "1px solid rgba(212, 168, 67, 0.4)",
+                      boxShadow: "0 0 30px rgba(124, 58, 237, 0.2), 0 0 60px rgba(124, 58, 237, 0.1), 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)",
+                    }}
+                  />
+                  <span className="relative">{s}</span>
                 </motion.button>
               ))}
             </div>
@@ -1041,8 +1038,8 @@ export default function ChatPage() {
               {messages.map((m, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   className="mb-6"
                 >
@@ -1190,7 +1187,7 @@ export default function ChatPage() {
               <button
                 type="button"
                 onClick={() => scrollToBottom(true)}
-                className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] px-3.5 py-2 text-[11px] text-white/40 hover:text-white/60 hover:bg-white/[0.1] transition-all shadow-[0_8px_30px_rgba(0,0,0,0.4)]"
+                className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-[rgba(18,16,28,0.92)] border border-white/[0.08] px-3.5 py-2 text-[11px] text-white/40 hover:text-white/60 hover:bg-[rgba(28,25,42,0.95)] transition-colors shadow-[0_8px_30px_rgba(0,0,0,0.4)]"
               >
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                   <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1215,7 +1212,7 @@ export default function ChatPage() {
             <button
               type="button"
               onClick={stopGeneration}
-              className="flex items-center gap-2 rounded-full border border-white/[0.06] bg-white/[0.03] backdrop-blur px-4 py-1.5 text-[11px] text-white/30 hover:text-red-400/70 hover:border-red-400/20 transition-all"
+              className="flex items-center gap-2 rounded-full border border-white/[0.06] bg-[rgba(18,16,28,0.92)] px-4 py-1.5 text-[11px] text-white/30 hover:text-red-400/70 hover:border-red-400/20 transition-colors"
             >
               <span className="h-2 w-2 rounded-sm bg-current shrink-0" />
               Stop generating
@@ -1298,11 +1295,9 @@ export default function ChatPage() {
 
             <input
               ref={chatInputRef}
-              className="w-full min-h-[52px] bg-white/[0.03] border border-white/[0.06] rounded-2xl px-5 py-3.5 text-white text-sm placeholder-white/20 backdrop-blur focus:border-[rgba(212,168,67,0.4)] focus:outline-none transition-all duration-300 pr-24"
+              className="w-full min-h-[52px] bg-[rgba(18,16,28,0.92)] border border-white/[0.06] rounded-2xl px-5 py-3.5 text-white text-sm placeholder-white/20 focus:border-[rgba(212,168,67,0.4)] focus:outline-none transition-colors duration-300 pr-24"
               style={{
-                boxShadow: inputFocused
-                  ? "0 0 40px rgba(124, 58, 237, 0.25), 0 0 80px rgba(124, 58, 237, 0.1), inset 0 1px 0 rgba(255,255,255,0.06)"
-                  : "0 0 20px rgba(124, 58, 237, 0.08), inset 0 1px 0 rgba(255,255,255,0.03)",
+                boxShadow: "0 0 20px rgba(124, 58, 237, 0.08), inset 0 1px 0 rgba(255,255,255,0.03)",
               }}
               placeholder="Ask your AI gold coach anything..."
               value={input}
@@ -1335,28 +1330,30 @@ export default function ChatPage() {
             </button>
 
             {/* Send button */}
-            <AnimatePresence>
-              {canSend && (
-                <motion.button
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  whileTap={{ scale: 0.9 }}
-                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                  type="button"
-                  onClick={() => send()}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-xl p-2.5 transition-all"
-                  style={{
-                    background: "linear-gradient(135deg, #D4A843, #C49A3A)",
-                    boxShadow: "0 0 20px rgba(212, 168, 67, 0.4), 0 0 40px rgba(212, 168, 67, 0.15)",
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-white">
-                    <path d="M7 11V3M3 7L7 3L11 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </motion.button>
-              )}
-            </AnimatePresence>
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10">
+              <AnimatePresence>
+                {canSend && (
+                  <motion.button
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    whileTap={{ scale: 0.9 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    type="button"
+                    onClick={() => send()}
+                    className="rounded-xl p-2.5 transition-all"
+                    style={{
+                      background: "linear-gradient(135deg, #D4A843, #C49A3A)",
+                      boxShadow: "0 0 20px rgba(212, 168, 67, 0.4), 0 0 40px rgba(212, 168, 67, 0.15)",
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-white">
+                      <path d="M7 11V3M3 7L7 3L11 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </div>
 
             <input
               ref={fileInputRef}
@@ -1374,5 +1371,6 @@ export default function ChatPage() {
         </div>
       </motion.div>
     </motion.div>
+    </MotionConfig>
   );
 }

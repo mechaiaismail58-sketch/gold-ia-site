@@ -612,8 +612,8 @@ a:not(.no-scale):active {
 
 /* Center glass circle breathe */
 @keyframes hero-core-breathe {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(123,79,212,0.1), 0 0 15px rgba(212,168,67,0.08); }
-  50%      { transform: scale(1.05); box-shadow: 0 0 50px rgba(123,79,212,0.18), 0 0 25px rgba(212,168,67,0.12); }
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
 }
 .hero-core-breathe {
   animation: hero-core-breathe 4s ease-in-out infinite;
